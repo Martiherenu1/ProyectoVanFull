@@ -1,0 +1,14 @@
+# No copiar a la imagen lo que no hace falta en runtime
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+env/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.env
+*.env
+!.env.example
+tests/
+.git/

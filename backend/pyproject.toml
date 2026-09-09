@@ -1,0 +1,25 @@
+[project]
+name = "vanfull-backend"
+version = "0.1.0"
+description = "Backend FastAPI de Vanfull — API, servicios de dominio e integraciones."
+requires-python = ">=3.12"
+
+# --- Herramientas de calidad de código ---
+
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+extend-exclude = ["migrations"]  # el código autogenerado por Alembic no se lintea
+
+[tool.ruff.lint]
+# E/F: pyflakes+pycodestyle · I: imports ordenados · UP: modernizar sintaxis
+# B: bugbear · C4: comprehensions · SIM: simplificaciones
+select = ["E", "F", "I", "UP", "B", "C4", "SIM"]
+ignore = ["E501"]  # el largo de línea lo maneja el formateador
+
+[tool.ruff.format]
+quote-style = "double"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+asyncio_mode = "auto"

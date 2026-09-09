@@ -1,0 +1,44 @@
+# === Secretos / entorno ===
+.env
+*.env
+!*.env.example
+backend/.env
+
+# === Python ===
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+env/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# === Flutter / Dart ===
+frontend/.dart_tool/
+frontend/.flutter-plugins
+frontend/.flutter-plugins-dependencies
+frontend/build/
+frontend/.pub-cache/
+frontend/.pub/
+frontend/ios/Pods/
+frontend/android/.gradle/
+frontend/**/GeneratedPluginRegistrant.*
+*.iml
+
+# === Docker ===
+# (los volúmenes viven fuera del repo)
+
+# === IDE / SO ===
+.idea/
+.vscode/
+.DS_Store
+Thumbs.db
+
+# === Documentación fuente pesada ===
+# Los .docx originales (fuentes oficiales) viven en el Drive del equipo; no se duplican en Git.
+# En GitHub versionamos código + artefactos versionables (.md, .puml, .yaml, .sql).
+*.docx
+*.doc
+*.xlsx

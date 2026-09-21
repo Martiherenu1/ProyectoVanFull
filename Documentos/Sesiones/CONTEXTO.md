@@ -163,9 +163,48 @@ Estudiante de 4º año de Ing. en Informática. Equipo de 3.
   `.gitignore` ahora ignora `.docx/.doc/.xlsx` (viven en Drive). **ORM decidido: SQLAlchemy 2.0 async + Alembic** (no Prisma/SQLModel).
 - **Diferido al 1er PR de modelos:** Alembic env, los 35 modelos ORM/schemas/servicios (por dominio: personas/servicios/viajes/economia/operacion),
   integraciones y auth.
-- **✅ `git init` + primer commit HECHO (2026-09-08):** rama `main`, 36 archivos, commit `chore: scaffold inicial...`.
-  Falta: crear repo en GitHub y `git push` (lo hace Martiniano con su cuenta; `gh` CLI no está instalado → vía web + remote).
-  Luego arranca el 1er PR: modelos ORM del DER oficial (35 tablas).
+- **✅ Repo en GitHub (2026-09-08):** `git init` + primer commit (36 archivos, `main`) **pusheado** a
+  **https://github.com/Martiherenu1/ProyectoVanFull** (usuario GitHub: Martiherenu1). `origin/main` trackeando.
+  De acá en más: rama por tarea → PR → merge (nada directo a `main`). Falta invitar al compañero como colaborador.
+  **Próximo:** 1er PR = modelos ORM del DER oficial (35 tablas) + Alembic + seeds, por dominio. Antes: leer `DER General.puml` para atributos/tipos.
+
+## Novedades del Drive — 2026-09-21 (revisado para NO duplicar)
+
+- **C4 y arquitectura YA los hizo Int2** (subidos 21/09) en `05_Arquitectura_API_Datos/`: `05_C4_Contexto_VanFull_v1.0`
+  (.puml/.png/.docx), `05_C4_Contenedores_VanFull_v1.0` (.puml/.png/.docx), `05_Arquitectura_General_VanFull_v1.0.docx`,
+  `Modelo Relacional Version Consolidada.puml`. También `00_Definicion_Problema_y_Planificacion_Inicial` en `00_Control/`.
+  → C4 decodificados y verificados: correctos (FastAPI autoridad, IA no toca BD). **NO producir C4/arquitectura — ya está.**
+  El ítem 14/09 "arquitectura y datos" queda **CUBIERTO** (DER + C4 Contexto + C4 Contenedores + Arquitectura General).
+- **Entrega docente:** vence **22/09 12hs** (Actividad Semana 6). Sube **una sola persona**; se aceptan enlaces (Drive + GitHub).
+  Doc del grupo prácticamente completa (etapas 00–05). Acción = **entregar links**, no producir nada nuevo. Verificar permisos
+  del Drive ("cualquiera con el enlace"); el repo GitHub es privado → pasarlo público o invitar a los profes.
+- **OpenAPI (contratos) queda para DESPUÉS de la entrega** — es de Int1 (nuestro), de cara al PC1 (28/09), sin apuro. No para el 22/09.
+- **06_IA_y_Agentes y 07_PC1 vacías** en Drive; la doc de IA/agentes vive en el documento consolidado del PC1.
+
+## Consigna oficial del PC1 (leída 2026-09-21 — `Presentacion.pdf`)
+
+PC1 = **Análisis, Diseño y Planificación** (9 sem). **Entrega: "Documento con el MVC".** Evaluación: innovación,
+uso de IA/agentes, calidad técnica, documentación, presentación. **Checklist requerido:**
+- Definición del problema ✅ · Alcances y Límites ✅ · Modelo Conceptual (Frontend/Backend/BD) ✅ · UML/C4 ✅ (todo Int2)
+- **Modelo de datos SQL (DDL)** → 🟡 falta (el MR dejó el SQL físico diferido) — **NUESTRO (Int1)**
+- **Comunicación V-C: OpenAPI (JSON)** → ⬜ pendiente — **NUESTRO (Int1)**
+- **Selección de modelos IA + agentes + Prompts** → 🟡 consolidar en `06_` — **NUESTRO (Int3)** (existe en el consolidado)
+- Diagramas flujo **mermaid.js** → ⚠️ verificar (hay PlantUML/drawio, no mermaid) — Int2
+- **Modelo de Desarrollo + interfaces gráficas** → Git/GitHub ✅; **wireframes** a verificar (frontend ahora es nuestro)
+- Presentación/consolidación de la documentación (`07_PC1` vacía) → equipo
+- Doc obligatoria PC1 (pág. 3): modelos de IA + justificación, agentes IA, modelo de datos y relaciones, modelo de desarrollo con interfaces, presentación.
+
+**Nuestras piezas priorizadas para el PC1 (28/09):** 1) Modelo de datos SQL (DDL, desde el MR — sirve también p/ ORM);
+2) OpenAPI/JSON (desde los 37 CU); 3) consolidar IA/agentes. Verificar con el equipo: wireframes, mermaid, y el "Documento con el MVC".
+
+## ✅ TACHADO — Modelo de datos SQL (DDL) — 2026-09-21
+
+- **`backend/db/schema.sql`** creado en rama `feat/modelo-datos-sql`: 35 tablas (5 bloques) + FKs (incl. compuestas)
+  + CHECK (enums documentados + XOR reserva) + seed de roles. Derivado del MR consolidado (leí el PUML del Drive).
+  Decisiones físicas: PK BIGINT IDENTITY, NUMERIC importes/coords, TIMESTAMPTZ, derivados no persistidos.
+- **Sintaxis validada con sqlglot** (92 sentencias OK, 35 CREATE TABLE). **Validación end-to-end contra Postgres
+  PENDIENTE** (Docker Desktop no estaba corriendo). + `backend/db/README.md`.
+- **Falta:** correr contra Postgres (docker compose), pushear la rama y abrir PR. Luego: OpenAPI, y modelos ORM desde este DDL.
 
 ## Estado actual (actualizar al cerrar cada sesión)
 

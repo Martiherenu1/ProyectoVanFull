@@ -1,0 +1,872 @@
+openapi: 3.0.3
+
+# =============================================================================
+# VanFull — Contrato de API REST (OpenAPI 3.0)
+# =============================================================================
+# Comunicación Vista-Controlador (Flutter/Agente <-> FastAPI). Cubre el requisito
+# "Comunicación V-C: OpenAPI (JSON)" del PC1. Derivado de los 37 casos de uso
+# (CU-001..CU-037) y del Modelo Relacional aprobado.
+#
+# Convenciones:
+#  - Cada operación referencia su CU/RF/RN en la descripción y en x-cu.
+#  - Las reglas de negocio (RN) se validan en el backend, no en el cliente.
+#  - Autorización por rol (rol_acceso). Los agentes IA consumen estos mismos endpoints.
+#  - Fechas ISO-8601; importes decimales; ids enteros.
+# =============================================================================
+
+info:
+  title: VanFull API
+  version: 0.1.0
+  description: |
+    API de gestión de viajes en micro de VanFull. Sirve a la app Flutter (Web/Mobile)
+    y al agente conversacional AG-01 (vía tools). El backend es la autoridad de reglas
+    de negocio, cupos, permisos y pagos.
+
+servers:
+  - url: http://localhost:8000/api
+    description: Desarrollo local (docker-compose)
+
+tags:
+  - name: auth
+    description: Autenticación y sesión (CU-012, RF-045)
+  - name: pasajero
+    description: Autoservicio del pasajero (CU-001, CU-006, CU-010)
+  - name: servicios
+    description: Consulta de servicios, disponibilidad, recorridos y tarifas (CU-002)
+  - name: reservas
+    description: Reservas, cancelaciones y cambios de parada (CU-003/004/005)
+  - name: abordaje
+    description: Abordaje por QR y ausencias (CU-007, CU-008)
+  - name: gps
+    description: Ubicación y estimaciones del vehículo (CU-009)
+  - name: pagos
+    description: Registro y confirmación de pagos (CU-014, CU-016)
+  - name: viajes
+    description: Gestión operativa de viajes (CU-018) — administración
+  - name: chatbot
+    description: Agente conversacional AG-01 (CU-011)
+  - name: integraciones
+    description: Webhooks de sistemas externos (CU-036)
+
+security:
+  - bearerAuth: []
+
+paths:
+
+  # ---------------------------------------------------------------------------
+  # AUTH
+  # ---------------------------------------------------------------------------
+  /auth/login:
+    post:
+      tags: [auth]
+      summary: Iniciar sesión
+      description: Autentica un usuario y devuelve un token de acceso. (CU-012, RF-045)
+      x-cu: CU-012
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginRequest'
+      responses:
+        '200':
+          description: Autenticación correcta
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TokenResponse'
+        '401':
+          $ref: '#/components/responses/NoAutenticado'
+
+  /auth/logout:
+    post:
+      tags: [auth]
+      summary: Cerrar sesión
+      description: Finaliza la sesión activa del usuario. (CU-012)
+      x-cu: CU-012
+      responses:
+        '204':
+          description: Sesión finalizada
+        '401':
+          $ref: '#/components/responses/NoAutenticado'
+
+  # ---------------------------------------------------------------------------
+  # PASAJERO (autoservicio)
+  # ---------------------------------------------------------------------------
+  /pasajeros/me:
+    get:
+      tags: [pasajero]
+      summary: Consultar perfil propio
+      description: Datos del pasajero autenticado y su estado de habilitación. (CU-001, RF-001/003)
+      x-cu: CU-001
+      responses:
+        '200':
+          description: Perfil del pasajero
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PerfilPasajero'
+        '401':
+          $ref: '#/components/responses/NoAutenticado'
+    patch:
+      tags: [pasajero]
+      summary: Modificar datos permitidos del perfil
+      description: |
+        Actualiza datos habilitados para autoservicio. El DNI NO es modificable por
+        el pasajero (RN-026): debe hacerlo un administrador. (CU-001)
+      x-cu: CU-001
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PerfilPasajeroUpdate'
+      responses:
+        '200':
+          description: Perfil actualizado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PerfilPasajero'
+        '403':
+          description: Intento de modificar un dato no habilitado (p. ej. DNI, RN-026)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /pasajeros/me/deuda:
+    get:
+      tags: [pasajero]
+      summary: Consultar deuda propia
+      description: Situación de deuda del pasajero autenticado (derivada). (CU-006, RF-010)
+      x-cu: CU-006
+      responses:
+        '200':
+          description: Estado de deuda
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Deuda'
+        '401':
+          $ref: '#/components/responses/NoAutenticado'
+
+  /pasajeros/me/reservas:
+    get:
+      tags: [pasajero]
+      summary: Consultar reservas propias
+      description: Lista de reservas del pasajero autenticado con su estado. (CU-010, RF-043)
+      x-cu: CU-010
+      responses:
+        '200':
+          description: Lista de reservas
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Reserva'
+
+  # ---------------------------------------------------------------------------
+  # SERVICIOS / DISPONIBILIDAD / TARIFAS
+  # ---------------------------------------------------------------------------
+  /servicios/disponibilidad:
+    get:
+      tags: [servicios]
+      summary: Consultar disponibilidad de cupos
+      description: |
+        Disponibilidad de cupos para una fecha, destino y sentido. El cupo es derivado
+        (capacidad - reservas consolidadas), evaluado por el backend (RN-001). (CU-002, RF-004)
+      x-cu: CU-002
+      security: []
+      parameters:
+        - name: fecha
+          in: query
+          required: true
+          schema: { type: string, format: date }
+          description: Fecha del viaje (resuelta por el backend si viene de "hoy/mañana").
+        - name: sentido
+          in: query
+          required: true
+          schema: { type: string, enum: [IDA, VUELTA] }
+        - name: destino
+          in: query
+          required: false
+          schema: { type: string }
+        - name: id_recorrido
+          in: query
+          required: false
+          schema: { type: integer }
+      responses:
+        '200':
+          description: Viajes disponibles con su cupo
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Disponibilidad'
+
+  /servicios:
+    get:
+      tags: [servicios]
+      summary: Listar servicios
+      description: Servicios ofrecidos (universitario, laboral, corporativo, especial). (CU-002)
+      x-cu: CU-002
+      security: []
+      responses:
+        '200':
+          description: Lista de servicios
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Servicio'
+
+  /recorridos/{id_recorrido}/paradas:
+    get:
+      tags: [servicios]
+      summary: Consultar paradas de un recorrido
+      description: Paradas del recorrido en orden. (CU-002, RF-019)
+      x-cu: CU-002
+      security: []
+      parameters:
+        - $ref: '#/components/parameters/IdRecorrido'
+      responses:
+        '200':
+          description: Paradas del recorrido
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Parada'
+        '404':
+          $ref: '#/components/responses/NoEncontrado'
+
+  /tarifas:
+    get:
+      tags: [servicios]
+      summary: Consultar tarifa aplicable
+      description: |
+        Determina la tarifa según tipo de cliente, modalidad, días y medio de pago
+        (incluye descuento 15% efectivo, RN-011). (CU-003 sec., RF-028)
+      x-cu: RF-028
+      parameters:
+        - name: tipo_cliente
+          in: query
+          required: true
+          schema: { type: string }
+        - name: modalidad
+          in: query
+          required: true
+          schema: { type: string, enum: [IDA, VUELTA, IDA_VUELTA] }
+        - name: dias
+          in: query
+          required: false
+          schema: { type: integer }
+        - name: medio_pago
+          in: query
+          required: false
+          schema: { type: string, enum: [EFECTIVO, TRANSFERENCIA, BILLETERA, CUENTA_CORRIENTE, MERCADO_PAGO] }
+      responses:
+        '200':
+          description: Tarifa aplicable
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Tarifa'
+
+  # ---------------------------------------------------------------------------
+  # RESERVAS
+  # ---------------------------------------------------------------------------
+  /reservas:
+    post:
+      tags: [reservas]
+      summary: Crear reserva
+      description: |
+        Crea una reserva si hay cupo (RN-001) y se cumplen las reglas (RN-031: no dos idas
+        ni dos vueltas el mismo día). Distingue provisional vs consolidada (RN-002). (CU-003, RF-005)
+      x-cu: CU-003
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ReservaCreate'
+      responses:
+        '201':
+          description: Reserva creada
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Reserva'
+        '409':
+          description: Sin cupo (ofrece lista de espera) o reserva duplicada de sentido (RN-031)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /reservas/{id_reserva}:
+    get:
+      tags: [reservas]
+      summary: Consultar una reserva
+      description: Detalle y estado de una reserva propia/autorizada. (CU-010, RF-043)
+      x-cu: CU-010
+      parameters:
+        - $ref: '#/components/parameters/IdReserva'
+      responses:
+        '200':
+          description: Reserva
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Reserva'
+        '404':
+          $ref: '#/components/responses/NoEncontrado'
+
+  /reservas/{id_reserva}/cancelacion:
+    post:
+      tags: [reservas]
+      summary: Cancelar reserva
+      description: |
+        Cancela la reserva y aplica la consecuencia económica según el tipo de servicio
+        (RN-017/018/019). Libera el cupo cuando corresponde. (CU-004, RF-006)
+      x-cu: CU-004
+      parameters:
+        - $ref: '#/components/parameters/IdReserva'
+      responses:
+        '200':
+          description: Reserva cancelada (incluye consecuencia económica aplicada)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Reserva'
+        '404':
+          $ref: '#/components/responses/NoEncontrado'
+        '409':
+          description: La reserva no está en un estado cancelable
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /reservas/{id_reserva}/cambio-parada:
+    post:
+      tags: [reservas]
+      summary: Solicitar cambio de parada
+      description: Cambia la parada sujeto a disponibilidad compatible (RN-020). (CU-005, RF-008)
+      x-cu: CU-005
+      parameters:
+        - $ref: '#/components/parameters/IdReserva'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [orden_parada]
+              properties:
+                orden_parada:
+                  type: integer
+                  description: Orden de la nueva parada dentro del recorrido.
+      responses:
+        '200':
+          description: Cambio de parada confirmado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Reserva'
+        '409':
+          description: Sin disponibilidad compatible
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  # ---------------------------------------------------------------------------
+  # ABORDAJE Y AUSENCIAS
+  # ---------------------------------------------------------------------------
+  /abordajes:
+    post:
+      tags: [abordaje]
+      summary: Registrar abordaje por QR
+      description: |
+        Registra el abordaje al escanear el QR del vehículo. Valida servicio, parada,
+        horario y habilitación (RN-023). Admite registro offline con sincronización
+        posterior sin duplicados (RNF-011/012). (CU-007, RF-014/015)
+      x-cu: CU-007
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AbordajeCreate'
+      responses:
+        '201':
+          description: Abordaje registrado (o encolado para sincronizar si vino offline)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Abordaje'
+        '409':
+          description: Abordaje no válido (habilitación / servicio / parada / horario) o duplicado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /ausencias:
+    post:
+      tags: [abordaje]
+      summary: Informar ausencia
+      description: |
+        El pasajero avisa que no usará un viaje; puede liberar temporalmente el cupo
+        (RN-024/025). El aviso no es obligatorio. (CU-008, RF-016)
+      x-cu: CU-008
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [id_viaje]
+              properties:
+                id_viaje: { type: integer }
+      responses:
+        '201':
+          description: Ausencia registrada
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Ausencia'
+
+  # ---------------------------------------------------------------------------
+  # GPS
+  # ---------------------------------------------------------------------------
+  /viajes/{id_viaje}/ubicacion:
+    get:
+      tags: [gps]
+      summary: Consultar ubicación y estimaciones del vehículo
+      description: |
+        Última ubicación del vehículo del servicio (solo usuarios vinculados, RN-030).
+        Marca "desactualizada" si supera 30 s (RNF-008). Incluye ETA cuando está disponible.
+        Consumidores hacen polling (~10 s, RNF-007). (CU-009, RF-022)
+      x-cu: CU-009
+      parameters:
+        - $ref: '#/components/parameters/IdViaje'
+      responses:
+        '200':
+          description: Ubicación del vehículo
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Ubicacion'
+        '403':
+          $ref: '#/components/responses/SinPermiso'
+        '404':
+          $ref: '#/components/responses/NoEncontrado'
+
+  # ---------------------------------------------------------------------------
+  # PAGOS (administración)
+  # ---------------------------------------------------------------------------
+  /pagos:
+    post:
+      tags: [pagos]
+      summary: Registrar un pago
+      description: |
+        Registra un pago total/parcial/seña asociado a un cliente o pasajero. Puede pagar
+        un tercero (RN-016). El registro NO confirma el pago (ver /confirmacion). (CU-014, RF-009)
+      x-cu: CU-014
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PagoCreate'
+      responses:
+        '201':
+          description: Pago registrado (estado PENDIENTE)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Pago'
+        '403':
+          $ref: '#/components/responses/SinPermiso'
+
+  /pagos/{id_pago}/confirmacion:
+    post:
+      tags: [pagos]
+      summary: Confirmar o rechazar un pago
+      description: |
+        Confirmación administrativa final por una persona autorizada (RN-015). El agente
+        IA nunca confirma pagos. Un pago CONFIRMADO genera un comprobante RECIBO. (CU-016, RF-011)
+      x-cu: CU-016
+      parameters:
+        - $ref: '#/components/parameters/IdPago'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [decision]
+              properties:
+                decision: { type: string, enum: [CONFIRMADO, RECHAZADO] }
+      responses:
+        '200':
+          description: Estado del pago actualizado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Pago'
+        '403':
+          $ref: '#/components/responses/SinPermiso'
+        '404':
+          $ref: '#/components/responses/NoEncontrado'
+
+  # ---------------------------------------------------------------------------
+  # VIAJES (administración)
+  # ---------------------------------------------------------------------------
+  /viajes:
+    post:
+      tags: [viajes]
+      summary: Crear un viaje
+      description: |
+        Crea un viaje con fecha, horario, recorrido, vehículo, chofer y capacidad.
+        Verifica capacidad vs pasajeros (RN-001). (CU-018, RF-017/018)
+      x-cu: CU-018
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ViajeCreate'
+      responses:
+        '201':
+          description: Viaje creado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Viaje'
+        '403':
+          $ref: '#/components/responses/SinPermiso'
+
+  # ---------------------------------------------------------------------------
+  # CHATBOT (AG-01)
+  # ---------------------------------------------------------------------------
+  /chat:
+    post:
+      tags: [chatbot]
+      summary: Conversar con el agente AG-01
+      description: |
+        Punto de entrada del agente conversacional. El backend inyecta la fecha/hora y el
+        contexto del usuario, orquesta las tools (que llaman a estos mismos endpoints) y
+        deriva a humano cuando corresponde (RF-032). El agente NO inventa datos ni modifica
+        pagos. (CU-011, RF-029/030/031/032)
+      x-cu: CU-011
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ChatRequest'
+      responses:
+        '200':
+          description: Respuesta del agente
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ChatResponse'
+
+  # ---------------------------------------------------------------------------
+  # INTEGRACIONES
+  # ---------------------------------------------------------------------------
+  /webhooks/mercadopago:
+    post:
+      tags: [integraciones]
+      summary: Webhook de Mercado Pago (pruebas)
+      description: |
+        Recibe notificaciones de Mercado Pago (entorno de pruebas) y actualiza el estado
+        interno. No reemplaza la confirmación humana del pago (RN-015). (CU-036, RF-012)
+      x-cu: CU-036
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: true
+      responses:
+        '200':
+          description: Notificación recibida
+
+# =============================================================================
+components:
+
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  parameters:
+    IdReserva:
+      name: id_reserva
+      in: path
+      required: true
+      schema: { type: integer }
+    IdRecorrido:
+      name: id_recorrido
+      in: path
+      required: true
+      schema: { type: integer }
+    IdViaje:
+      name: id_viaje
+      in: path
+      required: true
+      schema: { type: integer }
+    IdPago:
+      name: id_pago
+      in: path
+      required: true
+      schema: { type: integer }
+
+  responses:
+    NoAutenticado:
+      description: Falta autenticación o el token es inválido
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    SinPermiso:
+      description: El usuario no tiene permisos para esta operación
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    NoEncontrado:
+      description: Recurso no encontrado
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+
+  schemas:
+
+    Error:
+      type: object
+      required: [error]
+      properties:
+        error:
+          type: object
+          required: [codigo, mensaje]
+          properties:
+            codigo: { type: string, example: CUPO_NO_DISPONIBLE }
+            mensaje: { type: string, example: No hay cupo disponible para el viaje solicitado. }
+            detalles: { type: object, additionalProperties: true }
+
+    LoginRequest:
+      type: object
+      required: [identificador_acceso, password]
+      properties:
+        identificador_acceso: { type: string, example: pasajero@example.com }
+        password: { type: string, format: password }
+
+    TokenResponse:
+      type: object
+      required: [access_token, token_type, roles]
+      properties:
+        access_token: { type: string }
+        token_type: { type: string, example: bearer }
+        roles:
+          type: array
+          items: { type: string, example: pasajero }
+
+    PerfilPasajero:
+      type: object
+      properties:
+        id_persona: { type: integer }
+        nombre: { type: string }
+        apellido: { type: string }
+        dni: { type: string, readOnly: true }
+        email: { type: string }
+        telefono: { type: string }
+        direccion: { type: string }
+        categoria: { type: string }
+        estado_habilitacion: { type: string, enum: [habilitado, suspendido, baja] }
+        fotografia: { type: string }
+
+    PerfilPasajeroUpdate:
+      type: object
+      description: Solo datos habilitados para autoservicio (el DNI queda excluido, RN-026).
+      properties:
+        email: { type: string }
+        telefono: { type: string }
+        direccion: { type: string }
+
+    Deuda:
+      type: object
+      properties:
+        saldo: { type: number, format: double, description: Saldo deudor derivado. }
+        estado: { type: string, example: al_dia }
+
+    Servicio:
+      type: object
+      properties:
+        id_servicio: { type: integer }
+        tipo_servicio: { type: string, enum: [UNIVERSITARIO, LABORAL, CORPORATIVO, ESPECIAL] }
+
+    Parada:
+      type: object
+      properties:
+        id_parada: { type: integer }
+        orden: { type: integer }
+        nombre_descripcion: { type: string }
+        direccion: { type: string }
+        latitud: { type: number, format: double }
+        longitud: { type: number, format: double }
+        comprometida: { type: boolean }
+
+    Tarifa:
+      type: object
+      properties:
+        id_tarifa: { type: integer }
+        nombre: { type: string }
+        importe: { type: number, format: double }
+        tipo: { type: string }
+
+    Disponibilidad:
+      type: object
+      properties:
+        id_viaje: { type: integer }
+        id_servicio: { type: integer }
+        id_recorrido: { type: integer }
+        fecha: { type: string, format: date }
+        horario: { type: string, example: "07:30" }
+        sentido: { type: string, enum: [IDA, VUELTA] }
+        cupo_disponible: { type: integer, description: Derivado (capacidad - reservas). }
+
+    ReservaCreate:
+      type: object
+      required: [id_viaje, orden_parada]
+      properties:
+        id_viaje: { type: integer }
+        orden_parada: { type: integer, description: Parada de ascenso dentro del recorrido del viaje. }
+
+    Reserva:
+      type: object
+      properties:
+        id_reserva: { type: integer }
+        id_pasajero: { type: integer }
+        id_viaje: { type: integer }
+        orden_parada: { type: integer }
+        estado: { type: string, enum: [provisional, consolidada, cancelada] }
+
+    AbordajeCreate:
+      type: object
+      required: [id_viaje, id_vehiculo]
+      properties:
+        id_viaje: { type: integer }
+        id_vehiculo: { type: integer, description: Unidad identificada por el QR. }
+        orden_parada: { type: integer }
+        registrado_offline:
+          type: boolean
+          default: false
+          description: true si se generó sin conexión y se sincroniza posteriormente (RNF-011/012).
+        timestamp_local:
+          type: string
+          format: date-time
+          description: Marca temporal local del escaneo (para sincronización offline).
+
+    Abordaje:
+      type: object
+      properties:
+        id_abordaje: { type: integer }
+        id_pasajero: { type: integer }
+        id_viaje: { type: integer }
+        id_vehiculo: { type: integer }
+        orden_parada: { type: integer }
+        estado: { type: string, enum: [registrado, pendiente_sync, validado] }
+
+    Ausencia:
+      type: object
+      properties:
+        id_ausencia: { type: integer }
+        id_pasajero: { type: integer }
+        id_viaje: { type: integer }
+
+    Ubicacion:
+      type: object
+      properties:
+        id_viaje: { type: integer }
+        latitud: { type: number, format: double }
+        longitud: { type: number, format: double }
+        fecha_hora_posicion: { type: string, format: date-time }
+        desactualizada: { type: boolean, description: true si supera 30 s de antigüedad (RNF-008). }
+        eta_minutos: { type: integer, nullable: true, description: "Estimación de llegada, si disponible." }
+
+    PagoCreate:
+      type: object
+      required: [id_cliente, importe, medio_pago]
+      properties:
+        id_cliente: { type: integer }
+        importe: { type: number, format: double }
+        medio_pago: { type: string, enum: [EFECTIVO, TRANSFERENCIA, BILLETERA, CUENTA_CORRIENTE, MERCADO_PAGO] }
+        tipo: { type: string, enum: [total, parcial, senia], description: Tipo de pago cuando corresponda. }
+        comprobante: { type: string, description: Referencia/URL del comprobante si existe. }
+
+    Pago:
+      type: object
+      properties:
+        id_pago: { type: integer }
+        id_cliente: { type: integer }
+        importe: { type: number, format: double }
+        medio_pago: { type: string }
+        estado: { type: string, enum: [PENDIENTE, CONFIRMADO, RECHAZADO] }
+        fecha_hora: { type: string, format: date-time }
+
+    ViajeCreate:
+      type: object
+      required: [id_servicio, id_recorrido, fecha, sentido]
+      properties:
+        id_servicio: { type: integer }
+        id_recorrido: { type: integer }
+        id_vehiculo: { type: integer, nullable: true }
+        id_chofer: { type: integer, nullable: true }
+        fecha: { type: string, format: date }
+        horario: { type: string, example: "07:30" }
+        sentido: { type: string, enum: [IDA, VUELTA] }
+        capacidad_planificada: { type: integer }
+
+    Viaje:
+      type: object
+      properties:
+        id_viaje: { type: integer }
+        id_servicio: { type: integer }
+        id_recorrido: { type: integer }
+        id_vehiculo: { type: integer, nullable: true }
+        id_chofer: { type: integer, nullable: true }
+        fecha: { type: string, format: date }
+        horario: { type: string }
+        sentido: { type: string, enum: [IDA, VUELTA] }
+        estado: { type: string, enum: [programado, en_curso, finalizado, cancelado] }
+
+    ChatRequest:
+      type: object
+      required: [mensaje]
+      properties:
+        mensaje: { type: string, example: "¿Hay lugar para mañana a la mañana a CABA?" }
+        conversacion_id: { type: string, nullable: true, description: Para continuar una conversación. }
+
+    ChatResponse:
+      type: object
+      properties:
+        respuesta: { type: string }
+        conversacion_id: { type: string }
+        derivar_humano: { type: boolean, description: true si el agente escaló a una persona (RF-032). }
+        tool_usada: { type: string, nullable: true, description: "Tool invocada por el agente, si hubo." }

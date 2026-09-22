@@ -232,3 +232,46 @@ uso de IA/agentes, calidad técnica, documentación, presentación. **Checklist 
 - **Roadmap completo Int1+3** en `Documentos/Documentacion/05-Roadmap-Tareas-Int1-3.md` — 92 tareas (T-001..T-092)
   en orden de ejecución, agrupadas en Epics A-O, con responsable/dependencias/RF-RN. Es el backlog para pasarle
   al compañero y cargar como issues. EPIC B (PoC agente + convenciones + diseño integraciones) es lo que se hace YA.
+
+---
+
+# CIERRE PC1 — Estado final al 2026-09-22
+
+> Esta sección resume el estado real y **supersede** lo anterior en caso de contradicción.
+
+## Nuestra parte (Int1 + Int3) — TERMINADA
+
+| Entregable | Estado | Dónde |
+|---|---|---|
+| **Modelo de datos SQL (DDL)** | ✅ Escrito, **validado contra PostgreSQL real** (35 tablas, 54 FKs, 5 roles) y mergeado | `backend/db/schema.sql` |
+| **Contrato OpenAPI** | ✅ Escrito (21 paths / 22 operaciones / 22 schemas), validado y mergeado | `backend/openapi/openapi.yaml` |
+| **Doc IA y Agentes consolidada** | ✅ Escrita y mergeada | `Documentos/Documentacion/07-IA-y-Agentes-Consolidado.md` |
+| **Modelo de desarrollo** | ✅ Repo GitHub + ramas/PR + ruff/pytest + CONTRIBUTING | raíz del repo |
+
+Repo: **https://github.com/Martiherenu1/ProyectoVanFull** (`main` al día, 3 PRs mergeados).
+
+## Bloqueado (no depende de nosotros)
+
+- 🔴 **Subir la doc de IA a la carpeta `06_IA_y_Agentes` del Drive:** Martiniano tiene **solo lectura** en todo
+  el Drive del equipo (`canAddChildren:false`, dueño martindefez@gmail.com). Hay que **pedir permiso de editor**
+  o que el compañero suba el archivo.
+
+## Falta para el PC1 — es del equipo, no nuestro
+
+1. **Wireframes / interfaces gráficas** (la consigna las pide explícitamente).
+2. **Diagramas en mermaid.js** (la consigna lo nombra; hay PlantUML/drawio).
+3. **"Documento con el MVC"** — es *la* entrega del PC1: documento consolidado.
+4. **Consolidación final** en la carpeta `07_PC1` (vacía).
+5. **Revisión cruzada de Int2**: que valide que el SQL y el OpenAPI concuerdan con su DER y sus CU.
+6. **Logística:** compartir el repo con la cátedra, confirmar roles por escrito, y organizar la presentación del 28/09.
+
+## Herramientas de seguimiento
+
+- **Tablero Notion de los 37 casos de uso** (checkboxes Modelo/Servicio/Endpoint/Test/Implementado):
+  https://app.notion.com/p/a05f244f1ab4438982da04067e2fe018 — hoy **todo destildado** (no hay CU implementado aún).
+
+## Próxima etapa (post-PC1, desarrollo — arranca 05/10 por cronograma)
+
+Programar el backend a partir de lo diseñado, en este orden: `models/` (ORM desde `schema.sql`) → `services/`
+(reglas RN) → `routers/` (endpoints del OpenAPI) → tests. Modalidad acordada con Martiniano: **pasos chicos,
+explicando antes de hacer, y revisando el código juntos** (ver memoria `martiniano-quiere-entender-el-codigo`).

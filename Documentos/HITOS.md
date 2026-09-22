@@ -71,6 +71,38 @@
   CI-ready) desde cero es una competencia de ingeniería de software concreta y demostrable.
 - **Tecnologías:** Git, GitHub, ruff, pytest, Conventional Commits.
 
+### [2026-09-21] Modelo de datos físico en PostgreSQL (DDL de 35 tablas, validado)
+- **Qué:** Traducción del Modelo Relacional aprobado a un **DDL PostgreSQL ejecutable**: 35 tablas, 54 claves
+  foráneas (incluidas **FKs compuestas** para integridad real entre viaje/recorrido/parada), restricciones `CHECK`
+  para los dominios del negocio, una restricción **XOR** (una reserva se respalda por abono *o* por contratación,
+  nunca ambas) y catálogo de roles. Decisiones del modelo físico documentadas (tipos, identidades, qué NO se
+  persiste por ser derivado: saldo, deuda y cupo disponible).
+- **Rol de Martiniano:** responsable del diseño físico y la persistencia (Integrante 1).
+- **Por qué importa (CV):** pasar de un modelo lógico a un **esquema físico correcto y verificado** —con
+  integridad referencial compuesta y reglas embebidas— es diseño de bases de datos real, no un CRUD genérico.
+  Además se **validó contra un PostgreSQL real** (Docker), comprobando que las restricciones rechazan datos inválidos.
+- **Tecnologías:** PostgreSQL 16, SQL DDL, Docker Compose.
+
+### [2026-09-21] Contrato de API REST con OpenAPI 3.0 derivado de casos de uso
+- **Qué:** Diseño del **contrato de la API antes de implementarla**: 22 operaciones y 22 schemas en OpenAPI 3.0.3,
+  con autenticación JWT, autorización por rol, formato de error uniforme y códigos HTTP coherentes con las reglas
+  de negocio (p. ej. `409` por falta de cupo o reserva duplicada). Cada endpoint es trazable a su caso de uso y a
+  los requisitos/reglas que lo justifican.
+- **Rol de Martiniano:** autor del contrato (Integrante 1), acordado como interfaz común para frontend y agente IA.
+- **Por qué importa (CV):** **contract-first design** — definir el contrato antes de programar permite que
+  frontend, backend e IA avancen en paralelo sin romperse. Es una práctica de ingeniería valorada en equipos reales.
+- **Tecnologías:** OpenAPI 3.0, REST, JWT, JSON Schema.
+
+### [2026-09-22] Trazabilidad end-to-end: caso de uso → endpoint → tool del agente
+- **Qué:** Consolidación de la documentación de IA y agentes con una **matriz de trazabilidad** que conecta cada
+  una de las 11 tools del agente AG-01 con su caso de uso y su endpoint de la API, más la justificación empírica
+  de los modelos (PoC con matriz ponderada) y las restricciones de seguridad del agente.
+- **Rol de Martiniano:** responsable de IA/agentes (Integrante 3).
+- **Por qué importa (CV):** demuestra capacidad de **mantener trazabilidad entre negocio, API e IA** —que el
+  agente no haga nada que no esté respaldado por un caso de uso y validado por el backend—, que es justamente
+  el problema difícil de integrar LLMs en sistemas reales.
+- **Tecnologías:** OpenRouter, function calling, OpenAPI, documentación técnica.
+
 <!-- Próximos hitos a documentar a medida que se implementen:
      - Esquema de datos PostgreSQL y migraciones
      - Contrato OpenAPI de las tools de AG-01

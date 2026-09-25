@@ -124,7 +124,7 @@ Disponibilidad 99 % mensual · 95 % de operaciones ≤ 2 s · operaciones pesada
 **PC1 = 28/09/2026** · PC2 = 26/10 · PC3 = 09/11 · Cierre = 16/11.
 El desarrollo del backend arranca el **05/10** (sem 10); frontend 12/10; integración 19/10; pruebas y documentación 02/11.
 
-## 10. Estado del PC1 (al 2026-09-23)
+## 10. Estado del PC1 (al 2026-09-25)
 
 **La consigna pide** (de `Presentacion.pdf`): definición del problema, alcance y límites, modelo conceptual
 (Front/Back/BD), UML/C4, **Modelo de datos SQL**, **Comunicación V-C: OpenAPI (JSON)**, selección de modelos IA +
@@ -138,16 +138,27 @@ agentes + prompts, mermaid.js, y modelo de desarrollo + interfaces gráficas. **
 | **Contrato OpenAPI** | `backend/openapi/openapi.yaml` — 22 operaciones, 22 schemas, validado |
 | **Doc IA y Agentes** | `07-IA-y-Agentes-Consolidado.md` — también subida al Drive `06_` |
 | **Modelo de desarrollo** | Repo + ramas/PR + ruff/pytest + `CONTRIBUTING.md` |
+| **Interfaces gráficas** | **10 pantallas** con los 3 actores, recorribles en modo Play (ver abajo) |
+
+### Los artefactos de diseño viven en claude.ai (⚠️ los links solo están acá)
+
+| Qué | Link |
+|---|---|
+| **Pantallas VanFull** — las 10 pantallas del PC1, navegables | https://claude.ai/artifact/6M3yj4nmLnqaCoM6BqY4Ui |
+| **Sistema de diseño VanFull** — tokens, 4 componentes, marca | https://claude.ai/artifact/6ptGhgioyJSHZeCBv1eRaG |
+
+Las reglas y el porqué de todo eso están versionados en `Documentos/Documentacion/08-Brief-de-Diseno-UI.md`.
+Las 10 pantallas: Login · Buscar servicio · Confirmar reserva · Mis reservas y deuda · Pago ·
+Seguimiento en vivo · Asistente AG-01 · Chofer (lista) · Chofer (escaneo QR) · Admin (viajes del día).
 
 ### Falta — es del equipo, no nuestro
 
-1. **Wireframes / interfaces gráficas** (verificar si Int2 ya los tiene).
-2. **Diagramas en mermaid.js** (hay PlantUML/drawio; confirmar si se acepta).
-3. **"Documento con el MVC"** — *el* entregable: consolidar todo el diseño mostrando Modelo (BD + reglas) /
+1. **Diagramas en mermaid.js** (hay PlantUML/drawio; confirmar si se acepta).
+2. **"Documento con el MVC"** — *el* entregable: consolidar todo el diseño mostrando Modelo (BD + reglas) /
    Vista (Flutter) / Controlador (FastAPI). **Crítico.**
-4. **Consolidar en la carpeta `07_PC1`** del Drive (está vacía).
-5. **Revisión cruzada de Int2:** que valide que el SQL y el OpenAPI concuerdan con su DER y sus CU.
-6. **Logística:** compartir el repo con la cátedra (hoy es privado), roles por escrito, y organizar la presentación.
+3. **Consolidar en la carpeta `07_PC1`** del Drive (está vacía).
+4. **Revisión cruzada de Int2:** que valide que el SQL y el OpenAPI concuerdan con su DER y sus CU.
+5. **Logística:** compartir el repo con la cátedra (hoy es privado), roles por escrito, y organizar la presentación.
 
 ## 11. Estado del código
 

@@ -103,6 +103,46 @@
   el problema difícil de integrar LLMs en sistemas reales.
 - **Tecnologías:** OpenRouter, function calling, OpenAPI, documentación técnica.
 
+### [2026-09-25] Sistema de diseño derivado de la marca real, con accesibilidad verificada
+- **Qué:** Construcción de un **design system** para la plataforma en vez de elegir estilos pantalla por pantalla.
+  La paleta no se eligió por gusto: se **muestrearon los píxeles** del logo y de la foto de la combi de la empresa
+  para obtener los valores exactos (dorado `#D9A521`, grafito `#5F5F61`, franja `#414143`, chapa `#EAEBED`), y
+  después **cada par de colores se validó con contraste WCAG**. Esa validación encontró tres límites reales que
+  quedaron escritos como reglas: blanco sobre dorado falla (2.24:1), el dorado de marca **no sirve como texto en
+  tema claro** (2.07:1) y hace falta una variante oscurecida, y los cuatro colores de estado necesitan **dos valores
+  cada uno** —uno por tema— para llegar a 4.6:1. El sistema incluye tokens (color en 2 temas, tipografía,
+  espaciado, radios y una familia propia de **densidad**), 4 componentes con preview vivo y guía de uso, y los
+  activos de marca con sus reglas.
+- **Rol de Martiniano:** responsable de la capa de Vista (Integrante 3). Aportó los activos de marca, definió el
+  alcance y tomó las decisiones de diseño, incluida la de **descartar una vectorización del logo** que empeoraba
+  el original y la de **no duplicar las pantallas en tema claro** por contradecir el criterio de contexto de uso.
+- **Por qué importa (CV):** demuestra **accesibilidad tratada como ingeniería y no como opinión** —contraste
+  medido, casos que fallan documentados en vez de escondidos— y criterio para construir un **sistema reutilizable**
+  antes que pantallas sueltas. Además, derivar la identidad de la marca existente del cliente en lugar de inventar
+  una paleta es exactamente lo que se espera en un proyecto real.
+- **Tecnologías:** design tokens, WCAG 2.1 (ratios de contraste), sistemas de diseño multi-tema, Pillow (muestreo
+  de color), Google Fonts, Material Symbols.
+
+### [2026-09-25] Diseño de 10 interfaces trazables a casos de uso, contrato y reglas de negocio
+- **Qué:** Diseño de las **10 pantallas** del PC1 para los **3 actores** (pasajero, chofer, administrador), navegables
+  como prototipo. La decisión estructural fue derivar la interfaz del **contexto físico de uso** y no de una plantilla:
+  el chofer opera parado en la puerta de la combi, con una mano y posiblemente con guantes, por eso sus objetivos
+  táctiles son de 64 px y su pantalla funciona **sin conexión**; el administrador está sentado y necesita ver seis
+  viajes a la vez, por eso su fila es de 36 px y su tema es claro. Cada pantalla es **trazable a su caso de uso, a su
+  endpoint del contrato OpenAPI y a la regla de negocio que debe mostrar**, y usa los campos y enums reales del
+  esquema SQL. Las pantallas exponen los estados que normalmente se omiten en un mockup: el `409` por falta de cupo
+  al confirmar, la posición de GPS desactualizada (>30 s, RNF-008), el modo sin señal con abordajes pendientes de
+  sincronizar, y el intento de escanear un QR de alguien **que ya abordó** —que es la restricción de unicidad
+  `(id_pasajero, id_viaje)` del modelo relacional hecha visible en pantalla.
+- **Rol de Martiniano:** responsable de la Vista (Integrante 3) y autor del brief de diseño que fija los criterios;
+  definió el alcance (10 pantallas y no las 37) y el recorte de lo que queda fuera.
+- **Por qué importa (CV):** la mayoría de los mockups muestran el camino feliz. Diseñar **los estados de error y de
+  degradación**, y poder señalar qué regla de negocio o qué restricción de la base sostiene cada uno, es lo que
+  separa un diseño decorativo de un diseño de producto. La trazabilidad pantalla → CU → endpoint → regla también
+  demuestra que las tres capas del MVC fueron pensadas como un sistema y no por separado.
+- **Tecnologías:** diseño de interfaces multiplataforma, prototipado navegable, OpenAPI, PostgreSQL (enums y
+  restricciones del esquema), accesibilidad (objetivos táctiles, estado como texto además de color).
+
 <!-- Próximos hitos a documentar a medida que se implementen:
      - Esquema de datos PostgreSQL y migraciones
      - Contrato OpenAPI de las tools de AG-01

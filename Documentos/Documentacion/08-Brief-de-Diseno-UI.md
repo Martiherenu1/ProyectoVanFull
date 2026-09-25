@@ -10,6 +10,10 @@
 
 ---
 
+> **Los artefactos que salieron de este brief** (⚠️ los links solo están acá y en `CONTEXTO.md`):
+> **Pantallas** → https://claude.ai/artifact/6M3yj4nmLnqaCoM6BqY4Ui ·
+> **Sistema de diseño** → https://claude.ai/artifact/6ptGhgioyJSHZeCBv1eRaG
+
 ## 1. Cómo usar este documento
 
 | Momento | Qué se usa |
@@ -191,17 +195,18 @@ Los bordes rectos del estilo Sharp acompañan el radio de 2 px, y el relleno evi
 
 ### 5.5 Activos de marca
 
-En `Documentos/Recursos/marca/`. El original que pasó la empresa es un PNG de 484×70 px; se **vectorizó**
-(trazado de contornos sobre el bitmap) para que escale sin pixelarse, y se le fijaron los colores exactos
-de §5.1.
+En `Documentos/Recursos/marca/`. El logo que pasó la empresa es un PNG de **484×70 px con fondo
+transparente**, y se usa **tal cual**.
 
 | Archivo | Uso |
 |---|---|
-| `vanfull-logo.svg` | Logo sobre fondo claro (dorado + contorno grafito). **Formato preferido.** |
-| `vanfull-logo-sobre-oscuro.svg` | Logo sobre fondo oscuro — el contorno pasa a `--ink-100`, porque el grafito desaparece contra el fondo |
-| `vanfull-logo*.png` | Mismos dos, rasterizados a 1936×280 con fondo transparente |
+| `vanfull-logo.png` | El original de la empresa, sin retocar. Para fondo claro. |
+| `vanfull-logo-sobre-oscuro.png` | El mismo original con **el contorno recoloreado a `--ink-100`**, píxel a píxel. Es el único cambio: el dibujo queda intacto. Para fondo oscuro. |
 | `vanfull-combi.png` | Foto de la combi rotulada — referencia, y material para la presentación |
-| `vanfull-logo-original.avif` | El archivo tal como lo pasó la empresa (484×70). Se conserva como fuente. |
+| `vanfull-logo-original.avif` | El mismo logo en AVIF, como lo mandó la empresa. Se conserva como fuente. |
+
+**Tamaño de uso:** 176 px de ancho en móvil, 132 px en el panel del administrador. A esos tamaños el
+original se está **achicando** (484 → 176), así que se ve nítido. El techo real es 484 px de ancho.
 
 **Reglas de uso del logo:**
 - Sobre fondo oscuro va **siempre** la variante `-sobre-oscuro`. La normal pierde el contorno.

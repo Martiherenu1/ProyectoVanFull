@@ -1,9 +1,23 @@
 # Contrato de API (OpenAPI) — Vanfull
 
-`openapi.yaml` es el **contrato REST** entre el frontend Flutter / el agente AG-01 y el backend FastAPI.
+El **contrato REST** entre el frontend Flutter / el agente AG-01 y el backend FastAPI.
 Cubre el requisito del PC1 **"Comunicación Vista-Controlador: OpenAPI (JSON)"**. Es el contrato de **diseño**
 (escrito a mano, previo a la implementación); cuando el backend esté programado, FastAPI expondrá además
 su propio `/openapi.json` generado, que deberá coincidir con este contrato.
+
+## Los dos formatos
+
+| Archivo | Para qué |
+|---|---|
+| **`openapi.yaml`** | **La fuente.** Es la que se edita: admite comentarios y se compara bien en un diff. |
+| **`openapi.json`** | Generado a partir del YAML. La consigna del PC1 pide el contrato en **formato JSON**. |
+
+Son **el mismo contrato**: el JSON se produce parseando el YAML y volviéndolo a serializar, no reescribiéndolo.
+Si se toca el YAML hay que regenerar el JSON:
+
+```bash
+python -c "import yaml,json,io; io.open('backend/openapi/openapi.json','w',encoding='utf-8',newline='\n').write(json.dumps(yaml.safe_load(io.open('backend/openapi/openapi.yaml',encoding='utf-8')),ensure_ascii=False,indent=2)+'\n')"
+```
 
 ## Cómo verlo
 

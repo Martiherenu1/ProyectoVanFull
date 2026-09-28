@@ -252,8 +252,8 @@ paths:
       summary: Consultar tarifa aplicable
       description: |
         Determina la tarifa según tipo de cliente, modalidad, días y medio de pago
-        (incluye descuento 15% efectivo, RN-011). (CU-003 sec., RF-028)
-      x-cu: RF-028
+        (incluye descuento 15% efectivo, RN-011). (RF-028; se usa como paso previo de CU-003)
+      x-rf: RF-028
       parameters:
         - name: tipo_cliente
           in: query
@@ -304,7 +304,10 @@ paths:
               schema:
                 $ref: '#/components/schemas/Reserva'
         '409':
-          description: Sin cupo (ofrece lista de espera) o reserva duplicada de sentido (RN-031)
+          description: >-
+            Sin cupo o reserva duplicada (RN-031). Cuando no hay cupo, la respuesta informa que
+            existe lista de espera; la incorporación y la gestión de esa lista NO tienen operación
+            en esta versión (cobertura parcial de CU-003, se completa en v0.2).
           content:
             application/json:
               schema:
@@ -340,11 +343,11 @@ paths:
         - $ref: '#/components/parameters/IdReserva'
       responses:
         '200':
-          description: Reserva cancelada (incluye consecuencia económica aplicada)
+          description: Reserva cancelada, con la consecuencia económica aplicada
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Reserva'
+                $ref: '#/components/schemas/ResultadoCancelacion'
         '404':
           $ref: '#/components/responses/NoEncontrado'
         '409':
@@ -538,7 +541,11 @@ paths:
       description: |
         Crea un viaje con fecha, horario, recorrido, vehículo, chofer y capacidad.
         Verifica capacidad vs pasajeros (RN-001). (CU-018, RF-017/018)
+
+        COBERTURA PARCIAL de CU-018: esta versión del contrato cubre únicamente la creación.
+        La modificación, la cancelación y la reasignación de vehículo o chofer quedan para v0.2.
       x-cu: CU-018
+      x-cobertura: parcial
       requestBody:
         required: true
         content:
@@ -767,6 +774,19 @@ components:
         orden_parada: { type: integer }
         estado: { type: string, enum: [provisional, consolidada, cancelada] }
 
+    ResultadoCancelacion:
+      type: object
+      description: >-
+        Resultado de cancelar una reserva. Devuelve la reserva ya cancelada y la consecuencia
+        económica que se aplicó según la ventana de cancelación (RN-017/018/019).
+      properties:
+        reserva:
+          $ref: '#/components/schemas/Reserva'
+        cupo_liberado: { type: boolean, description: "true si la cancelación devolvió el lugar al viaje." }
+        penalidad_aplicada: { type: boolean, description: "true si se cobró cargo por cancelar fuera de término." }
+        importe_penalidad: { type: number, format: double, description: "Importe del cargo. 0 si no hubo." }
+        motivo: { type: string, description: "Por qué se aplicó o no la penalidad (la regla que decidió)." }
+
     AbordajeCreate:
       type: object
       required: [id_viaje, id_vehiculo]
@@ -818,7 +838,12 @@ components:
         importe: { type: number, format: double }
         medio_pago: { type: string, enum: [EFECTIVO, TRANSFERENCIA, BILLETERA, CUENTA_CORRIENTE, MERCADO_PAGO] }
         tipo: { type: string, enum: [total, parcial, senia], description: Tipo de pago cuando corresponda. }
-        comprobante: { type: string, description: Referencia/URL del comprobante si existe. }
+        evidencia_pago:
+          type: string
+          description: >-
+            Referencia o URL del respaldo que sube el pasajero (captura de la transferencia, por
+            ejemplo). NO es la entidad COMPROBANTE del modelo relacional: esa la emite la empresa
+            (recibo, factura, nota de crédito o de débito) y se genera recién al confirmar el pago.
 
     Pago:
       type: object

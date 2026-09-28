@@ -42,8 +42,14 @@ docker compose exec -T db psql -U vanfull -d vanfull -v ON_ERROR_STOP=1 -f - < b
 docker compose exec -T db psql -U vanfull -d vanfull -c "\dt"
 ```
 
+## Validación
+
 Sintaxis validada con `sqlglot` (dialecto postgres): 35 `CREATE TABLE` + 54 FKs + seed de roles.
-La validación end-to-end contra PostgreSQL queda pendiente de una corrida con Docker levantado.
+
+**El esquema fue ejecutado correctamente contra PostgreSQL 16** mediante Docker Compose, verificando la
+creación completa de las 35 tablas y sus 54 claves foráneas, y el seed de los 5 roles. Además se comprobó
+que las restricciones **rechazan datos inválidos**: un `tipo_servicio` fuera del dominio permitido es
+rechazado por la base, no por la aplicación.
 
 ## Próximo paso
 

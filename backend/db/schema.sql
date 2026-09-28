@@ -309,7 +309,16 @@ CREATE TABLE comprobante (
         CHECK (tipo IN ('RECIBO', 'FACTURA', 'NOTA_DE_CREDITO', 'NOTA_DE_DEBITO')),
     id_pago              BIGINT UNIQUE,                   -- FK -> pago (RECIBO)
     id_contratacion      BIGINT,                          -- FK -> contratacion (FACTURA)
-    id_movimiento_cuenta BIGINT UNIQUE                    -- FK -> movimiento_cuenta (NC/ND)
+    id_movimiento_cuenta BIGINT UNIQUE,                   -- FK -> movimiento_cuenta (NC/ND)
+    -- Origen único y compatible con el tipo: cada tipo admite exactamente un origen (MR-R28)
+    CONSTRAINT ck_comprobante_origen_tipo CHECK (
+        (tipo = 'RECIBO'
+            AND id_pago IS NOT NULL AND id_contratacion IS NULL AND id_movimiento_cuenta IS NULL)
+        OR (tipo = 'FACTURA'
+            AND id_pago IS NULL AND id_contratacion IS NOT NULL AND id_movimiento_cuenta IS NULL)
+        OR (tipo IN ('NOTA_DE_CREDITO', 'NOTA_DE_DEBITO')
+            AND id_pago IS NULL AND id_contratacion IS NULL AND id_movimiento_cuenta IS NOT NULL)
+    )
 );
 
 -- =============================================================================

@@ -25,7 +25,21 @@ python -c "import yaml,json,io; io.open('backend/openapi/openapi.json','w',encod
 - `redocly preview-docs backend/openapi/openapi.yaml`, o
 - al implementar el backend: `http://localhost:8000/docs` (Swagger UI de FastAPI).
 
-Validado con `openapi-spec-validator`: **OpenAPI 3.0.3 · 21 paths · 22 operaciones · 22 schemas**.
+Validado con `openapi-spec-validator`: **OpenAPI 3.0.3 · 21 paths · 22 operaciones · 23 schemas**.
+
+## Cobertura de esta versión (v0.1)
+
+> **v0.1 cubre 16 de los 37 casos de uso, más RF-028.** Las 22 operaciones **no** cubren la totalidad
+> del sistema: los 21 CU restantes están declarados para la próxima iteración y se listan al final.
+
+Además, **dos de esos 16 están cubiertos parcialmente**:
+
+| CU | Qué cubre v0.1 | Qué falta |
+|---|---|---|
+| **CU-003** Crear reserva | La creación y el rechazo por falta de cupo | La incorporación y gestión de la **lista de espera** que anuncia el `409` |
+| **CU-018** Gestionar viajes | Únicamente la **creación** del viaje | Modificar, cancelar y reasignar vehículo o chofer |
+
+Ambos quedan marcados con `x-cobertura: parcial` o aclarados en la descripción del endpoint.
 
 ## Convenciones
 
@@ -41,8 +55,8 @@ Validado con `openapi-spec-validator`: **OpenAPI 3.0.3 · 21 paths · 22 operaci
 |---|---|---|
 | CU-001 Perfil pasajero | `GET/PATCH /pasajeros/me` | RF-001/003, RN-026 |
 | CU-002 Servicios y disponibilidad | `GET /servicios/disponibilidad`, `GET /servicios`, `GET /recorridos/{id}/paradas` | RF-004, RN-001 |
-| RF-028 Tarifa aplicable | `GET /tarifas` | RN-010..014 |
-| CU-003 Crear reserva | `POST /reservas` | RF-005, RN-001/002/031 |
+| RF-028 Tarifa aplicable *(requisito, no CU: se marca `x-rf`)* | `GET /tarifas` | RN-010..014 |
+| CU-003 Crear reserva ⚠️ *parcial* | `POST /reservas` | RF-005, RN-001/002/031 |
 | CU-004 Cancelar reserva | `POST /reservas/{id}/cancelacion` | RF-006, RN-017/018/019 |
 | CU-005 Cambio de parada | `POST /reservas/{id}/cambio-parada` | RF-008, RN-020 |
 | CU-006 Consultar deuda | `GET /pasajeros/me/deuda` | RF-010 |
@@ -54,7 +68,7 @@ Validado con `openapi-spec-validator`: **OpenAPI 3.0.3 · 21 paths · 22 operaci
 | CU-012 Sesión | `POST /auth/login`, `POST /auth/logout` | RF-045 |
 | CU-014 Registrar pago | `POST /pagos` | RF-009, RN-016 |
 | CU-016 Confirmar/rechazar pago | `POST /pagos/{id}/confirmacion` | RF-011, RN-015 |
-| CU-018 Gestionar viajes | `POST /viajes` | RF-017/018, RN-001 |
+| CU-018 Gestionar viajes ⚠️ *parcial* | `POST /viajes` | RF-017/018, RN-001 |
 | CU-036 Webhook Mercado Pago | `POST /webhooks/mercadopago` | RF-012, RN-015 |
 
 ## CU pendientes de contrato (próxima iteración)

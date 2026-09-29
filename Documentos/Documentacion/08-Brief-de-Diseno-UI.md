@@ -324,32 +324,49 @@ Español de Argentina, **voseo**, tono operativo. Frases cortas, con el dato ade
 | Ventana de cancelación (RN-017) | **Podés cancelar hasta las 22:15 de hoy** | Política de cancelación |
 | ETA (CU-009) | **Llega a Plaza Belgrano en 8 min** | Tiempo estimado de arribo |
 | GPS viejo (RNF-008) | **Última posición hace 47 s** | Datos no disponibles |
-| Abordaje (CU-007) | **Escaneá el QR del pasajero** | Iniciar proceso de validación |
+| Abordaje (CU-007) | **Apuntá al QR que está en la puerta de la combi** | Iniciar proceso de validación |
 | Ausencia (CU-008) | **Avisar que no viajo** | Reportar ausencia |
 | Deuda al día | **Al día** | Sin deudas pendientes |
 | Offline (chofer) | **Sin señal — 3 abordajes se suben al recuperar conexión** | Modo offline activado |
 
 ---
 
-## 11. Las 8 pantallas del PC1
+## 11. Las 10 pantallas del PC1
 
-**Alcance de diseño del PC1: estas 8.** Cubren los 3 actores y las dos funcionalidades diferenciales
-(seguimiento en vivo y agente conversacional). Los 29 CU restantes quedan explícitamente fuera del alcance
-de diseño del PC1: reutilizan los patrones que estas 8 dejan definidos.
+**Alcance de diseño del PC1: estas 10.** Cubren los 3 actores. Los 27 CU restantes quedan explícitamente
+fuera del alcance de diseño del PC1: reutilizan los patrones que estas 10 dejan definidos.
 
-| # | Pantalla | CU | Endpoint | Campos reales | Estado / regla que se ve |
-|---|---|---|---|---|---|
-| 1 | **Login** | CU-012 | `POST /auth/login` | email, contraseña | `401` credenciales inválidas |
-| 2 | **Buscar servicio** | CU-002 | `GET /servicios/disponibilidad`, `GET /recorridos/{id}/paradas` | `fecha`, `horario`, `sentido`, **`cupo_disponible`**, `orden`, `nombre_descripcion` | Vacío (sin viajes ese día) · cupo 0 |
-| 3 | **Confirmar reserva** | CU-003 | `POST /reservas` + `GET /tarifas` | `id_viaje`, `orden_parada`, `importe`, `nombre` (tarifa) | **`409` sin cupo** · **`409` ya reservado (RN-031)** |
-| 4 | **Mis reservas y deuda** | CU-010 / CU-006 | `GET /pasajeros/me/reservas`, `GET /pasajeros/me/deuda` | `estado` (provisional/consolidada/cancelada), `saldo`, `estado` (al_dia) | Vacío · **ventana de cancelación RN-017** |
-| 5 | **Seguimiento en vivo** ⭐ | CU-009 | `GET /viajes/{id}/ubicacion` (polling 10 s, RNF-007) | `latitud`, `longitud`, `eta_minutos`, **`desactualizada`**, `fecha_hora_posicion` | **`desactualizada: true` → `--status-stale`** · `eta_minutos: null` |
-| 6 | **Chat con AG-01** ⭐ | CU-011 | `POST /chat` | mensaje, respuesta, **tool invocada** | El agente **no confirma pagos** — deriva. Fecha relativa resuelta por el backend. |
-| 7 | **Chofer: lista + QR** ⭐ | CU-007 / CU-008 | `POST /abordajes`, `POST /ausencias` | `id_pasajero`, `id_viaje`, `id_vehiculo`, `orden_parada` | **Offline (RNF-011/012)** · abordaje duplicado (MR-R24) · targets 64 px |
-| 8 | **Admin: viaje del día** | CU-018 | `POST /viajes`, `GET /viajes` | `estado` (programado/en_curso/finalizado/cancelado), `capacidad_planificada`, `patente`, chofer | Viaje sin vehículo ni chofer asignado (ambos son 0..1 en planificación) |
+| # | Pantalla | CU | Endpoint | Estado / regla que se ve |
+|---|---|---|---|---|
+| 1 | **Login** | CU-012 | `POST /auth/login` | `401` credenciales inválidas |
+| 2 | **Buscar servicio** | CU-002 | `GET /servicios/disponibilidad`, `GET /recorridos/{id}/paradas` | Vacío (sin viajes ese día) · cupo 0 |
+| 3 | **Confirmar reserva** | CU-003 | `POST /reservas` + `GET /tarifas` | **`409` sin cupo** · **`409` ya reservado (RN-031)** |
+| 4 | **Mis reservas y deuda** | CU-010 / CU-006 | `GET /pasajeros/me/reservas`, `GET /pasajeros/me/deuda` | Vacío · **ventana de cancelación RN-017** |
+| 5 | **Pago** | CU-014 | `POST /pagos` | Mercado Pago confirma solo; transferencia y efectivo quedan `PENDIENTE` (RN-015) |
+| 6 | **Seguimiento en vivo** ⭐ | CU-009 | `GET /viajes/{id}/ubicacion` (cada 10 s, RNF-007) | **`desactualizada: true`** · `eta_minutos: null` |
+| 7 | **Abordar con QR** ⭐ | CU-007 | `POST /abordajes` | **Offline (RNF-011/012)** · sin reserva · otra unidad · duplicado (MR-R24) |
+| 8 | **Chat con AG-01** ⭐ | CU-011 | `POST /chat` | El agente **no confirma pagos** — deriva. Fecha relativa resuelta por el backend. |
+| 9 | **Chofer: lista del viaje** | CU-008 | `POST /ausencias` (lectura de la nómina) | Sin señal: la lista puede estar desactualizada · targets 64 px |
+| 10 | **Admin: viaje del día** | CU-018 | `POST /viajes` | Viaje sin vehículo ni chofer asignado (ambos son 0..1 en planificación) |
 
-*Novena, si alcanza el tiempo:* **Pago** (CU-014, `POST /pagos`) — `medio_pago` con el enum real
-(EFECTIVO · TRANSFERENCIA · BILLETERA · CUENTA_CORRIENTE · MERCADO_PAGO) y `estado` PENDIENTE/CONFIRMADO/RECHAZADO.
+### ⚠️ Quién escanea el QR (CU-007)
+
+**El QR está pegado en la combi y lo escanea el PASAJERO.** El código identifica a la **unidad**, no a la
+persona: el sistema sabe quién es el pasajero porque tiene la sesión iniciada, y el backend valida viaje,
+reserva, parada y habilitación antes de registrar el abordaje (RN-023).
+
+**El chofer no escanea nada y no registra abordajes a mano.** Su pantalla es de **consulta**: ve quién
+abordó y quién avisó ausencia, y la lista se actualiza sola a medida que los pasajeros escanean.
+
+Esto coincide con el contrato: `POST /abordajes` pide `id_vehiculo` —*"unidad identificada por el QR"*— y
+**no** pide `id_pasajero`, porque el pasajero es quien está autenticado.
+
+### Endpoints que la UI supone y el contrato v0.1 todavía no tiene
+
+| Pantalla | Qué necesita | Estado |
+|---|---|---|
+| 10 · Admin | `GET /viajes` para listar los viajes del día | **Pendiente de v0.2.** El contrato v0.1 solo tiene `POST /viajes`. |
+| 3 · Confirmar reserva | Operación para anotarse en lista de espera | **Pendiente de v0.2.** El `409` la anuncia pero no existe la operación. |
 
 ---
 

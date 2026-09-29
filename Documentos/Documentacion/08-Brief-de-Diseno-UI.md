@@ -49,9 +49,9 @@ lo que justifica que las tres interfaces se vean distintas entre sí.
 | **Cuándo** | 6:00 AM, oscuro y con frío | 6:05 AM, la van llenándose | Todo el día |
 | **Cómo sostiene el teléfono** | Una mano, apurado | Una mano, la otra ocupada, **puede tener guantes** | Mouse y teclado, pantalla grande |
 | **Luz** | Oscuridad o sol directo | Sol directo | Interior |
-| **Conexión** | Puede ser mala | **Puede no haber** (RNF-011/012: offline con sync ≤60 s) | Estable |
+| **Conexión** | Puede ser mala | Puede perder conectividad; no se definió funcionamiento offline específico para la consulta del chofer. Ante pérdida de conexión, la contingencia confirmada por VanFull es WhatsApp o llamada. | Estable |
 | **Qué necesita en 2 segundos** | *"¿Ya viene? ¿Cuánto falta?"* | *"¿Este sube o no?"* | *"¿Qué se rompió hoy?"* |
-| **Consecuencia de diseño** | Fondo oscuro, **un dato gigante**, cero navegación profunda | **Targets de 64 px**, contraste máximo, funciona sin señal | **Densidad máxima**, tabla, todo a la vista |
+| **Consecuencia de diseño** | Fondo oscuro, **un dato gigante**, cero navegación profunda | **Targets de 64 px**, contraste máximo y consulta simple; no se asume funcionamiento offline para la pantalla del chofer | **Densidad máxima**, tabla, todo a la vista |
 
 **Regla derivada:** si la pantalla del pasajero y la del admin se parecen, el diseño está mal.
 La asimetría entre las tres **es** la prueba de que se entendió el negocio.
@@ -271,7 +271,7 @@ del CU son los que generan estos estados** — de ahí se sacan, no se inventan.
 | **Vacío** | lista sin datos | Qué falta y **la acción** para resolverlo. Sin ilustración. |
 | **Error de negocio** | `409` | El motivo **concreto**: *"Sin cupo en el 6:15"*, no *"Error al crear la reserva"* |
 | **Sin permiso** | `403` | Qué rol hace falta |
-| **Sin conexión** | chofer, siempre | Qué sigue funcionando y qué queda pendiente de sincronizar (RNF-011/012) |
+| **Sin conexión** | pasajero durante abordaje QR | El abordaje queda pendiente de sincronización; al recuperarse la conexión se intenta sincronizar en ≤60 s sin generar duplicados (RNF-011/012). |
 | **Dato desactualizado** | GPS >30 s (RNF-008) | `--status-stale` + la antigüedad exacta en segundos |
 | **Límite de negocio alcanzado** | RN-017/018/019, RN-031 | La regla **antes** de que el usuario intente la acción |
 
@@ -327,14 +327,14 @@ Español de Argentina, **voseo**, tono operativo. Frases cortas, con el dato ade
 | Abordaje (CU-007) | **Apuntá al QR que está en la puerta de la combi** | Iniciar proceso de validación |
 | Ausencia (CU-008) | **Avisar que no viajo** | Reportar ausencia |
 | Deuda al día | **Al día** | Sin deudas pendientes |
-| Offline (chofer) | **Sin señal — 3 abordajes se suben al recuperar conexión** | Modo offline activado |
+| Sin conexión (chofer) | **Sin conexión — la consulta no puede actualizarse. Comunicate con VanFull por WhatsApp o llamada.** | Modo offline activado |
 
 ---
 
 ## 11. Las 10 pantallas del PC1
 
-**Alcance de diseño del PC1: estas 10.** Cubren los 3 actores. Los 27 CU restantes quedan explícitamente
-fuera del alcance de diseño del PC1: reutilizan los patrones que estas 10 dejan definidos.
+**Alcance de diseño del PC1: estas 10.** Cubren los 3 actores. Los demás casos de uso quedan fuera del
+alcance de diseño gráfico de esta entrega y reutilizan los patrones definidos por estas diez pantallas.
 
 | # | Pantalla | CU | Endpoint | Estado / regla que se ve |
 |---|---|---|---|---|
@@ -346,7 +346,7 @@ fuera del alcance de diseño del PC1: reutilizan los patrones que estas 10 dejan
 | 6 | **Seguimiento en vivo** ⭐ | CU-009 | `GET /viajes/{id}/ubicacion` (cada 10 s, RNF-007) | **`desactualizada: true`** · `eta_minutos: null` |
 | 7 | **Abordar con QR** ⭐ | CU-007 | `POST /abordajes` | **Offline (RNF-011/012)** · sin reserva · otra unidad · duplicado (MR-R24) |
 | 8 | **Chat con AG-01** ⭐ | CU-011 | `POST /chat` | El agente **no confirma pagos** — deriva. Fecha relativa resuelta por el backend. |
-| 9 | **Chofer: lista del viaje** | CU-008 | `POST /ausencias` (lectura de la nómina) | Sin señal: la lista puede estar desactualizada · targets 64 px |
+| 9 | **Chofer: lista del viaje** | CU-029 | Pendiente v0.2 — consulta de operación asignada | Solo consulta: viaje, recorrido, paradas y pasajeros. El chofer no registra abordajes |
 | 10 | **Admin: viaje del día** | CU-018 | `POST /viajes` | Viaje sin vehículo ni chofer asignado (ambos son 0..1 en planificación) |
 
 ### ⚠️ Quién escanea el QR (CU-007)
@@ -367,6 +367,7 @@ Esto coincide con el contrato: `POST /abordajes` pide `id_vehiculo` —*"unidad 
 |---|---|---|
 | 10 · Admin | `GET /viajes` para listar los viajes del día | **Pendiente de v0.2.** El contrato v0.1 solo tiene `POST /viajes`. |
 | 3 · Confirmar reserva | Operación para anotarse en lista de espera | **Pendiente de v0.2.** El `409` la anuncia pero no existe la operación. |
+| 9 · Chofer | Operación de consulta de la operación asignada (CU-029) | **Pendiente de v0.2.** No se define un endpoint nuevo en v0.1. |
 
 ---
 

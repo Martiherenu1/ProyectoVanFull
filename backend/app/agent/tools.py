@@ -1,6 +1,6 @@
 """Definición de las herramientas (tools) de AG-01, en formato function-calling (OpenAI/OpenRouter).
 
-Estas son las 11 tools acordadas. Cada una se MAPEA a un servicio de FastAPI que aplica las reglas de
+Estas son las 13 tools acordadas. Cada una se MAPEA a un servicio de FastAPI que aplica las reglas de
 negocio: el LLM sólo elige la tool y arma argumentos; NUNCA accede a la base de datos ni decide reglas.
 Referencia: Documentos/Recursos/Stack-y-Referencias.md y RF-029..032.
 """

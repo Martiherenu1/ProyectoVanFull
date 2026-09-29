@@ -90,7 +90,7 @@ Fecha actual del sistema: <provista por backend>.
 
 ## 6. Tools / Function Calling — trazabilidad `tool → CU → endpoint`
 
-Las 11 tools (formato function-calling en `backend/app/agent/tools.py`). Cada una se mapea a un caso de uso y a un
+Las 13 tools (formato function-calling en `backend/app/agent/tools.py`). Cada una se mapea a un caso de uso y a un
 endpoint del contrato OpenAPI. Estado del endpoint: ✅ ya definido en `openapi.yaml` v0.1 · ⏳ en la próxima iteración del contrato.
 
 | Tool | CU | Endpoint | Estado |

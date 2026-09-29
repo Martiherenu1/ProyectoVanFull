@@ -220,7 +220,7 @@ El modelo de datos tiene **35 tablas**, agrupadas en cinco bloques:
 - **Servicios y contratación:** los servicios que ofrece la empresa, las tarifas, los abonos mensuales.
 - **Viajes, recorridos y operación:** recorridos, paradas, vehículos, viajes, reservas, abordajes y ausencias.
 - **Cuenta corriente y pagos:** la cuenta de cada cliente, los pagos y los comprobantes.
-- **Operación y auditoría:** el registro de lo que va pasando y las nóminas de pasajeros.
+- **Trazabilidad operativa y nóminas:** eventos operativos vinculados a reservas, pagos o viajes, y las nóminas de pasajeros cuando corresponda. Este registro brinda trazabilidad operativa y no constituye una auditoría general del sistema.
 
 ## 3.2 Diagrama Entidad-Relación
 
@@ -324,7 +324,7 @@ estos mismos patrones y no se dibujaron para esta entrega.
 | 6 | Seguir la combi en vivo | CU-009 | Pasajero |
 | 7 | Abordar escaneando el QR de la combi | CU-007 | Pasajero |
 | 8 | Asistente conversacional | CU-011 | Pasajero |
-| 9 | Lista de pasajeros del viaje (solo consulta) | CU-008 | Chofer |
+| 9 | Lista de pasajeros del viaje (solo consulta) | CU-029 | Chofer |
 | 10 | Viajes del día | CU-018 | Administrador |
 
 > FALTA — Integrante 3. Pegar las diez capturas, agrupadas por tipo de usuario, cada una con un epígrafe que diga qué pantalla es.
@@ -490,7 +490,7 @@ Sus características principales:
 Dejamos declarado un segundo agente, **AG-02**, para asistir a los administradores, **fuera del alcance de
 esta primera versión**.
 
-**Las once herramientas que puede usar.** Cada herramienta corresponde a un caso de uso, así que el asistente
+**Las trece herramientas que puede usar.** Cada herramienta corresponde a un caso de uso, así que el asistente
 no puede hacer nada que no esté previsto:
 
 | Herramienta | Para qué |
@@ -505,6 +505,7 @@ no puede hacer nada que no esté previsto:
 | Consultar reserva | Ver una reserva |
 | Crear reserva | Reservar un lugar |
 | Cancelar reserva | Cancelar una reserva |
+| Consultar estado del viaje | Ver el estado operativo de un viaje |
 | Consultar ubicación | Ver dónde está la combi |
 | Derivar a un humano | Pasar la conversación a una persona |
 

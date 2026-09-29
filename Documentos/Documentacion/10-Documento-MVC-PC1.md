@@ -25,11 +25,10 @@ documento**, y es esto:
 | Pegar la imagen del diagrama de arquitectura | 2.4 | Integrante 3 |
 | Pegar los diagramas C4 y de casos de uso | 2.5 | Integrante 2 |
 | Pegar el diagrama Entidad-Relación | 3.2 | Integrante 2 |
-| Pegar la lámina de colores y tipografía | 4.2 | Integrante 3 |
 | Pegar las diez capturas de pantalla | 4.3 | Integrante 3 |
 | Pegar el cronograma de las 16 semanas | 7.5 | Equipo |
 
-Son **siete cosas**, y seis de las siete son pegar algo que ya existe.
+Son **seis cosas**, y cinco de las seis son pegar algo que ya existe.
 
 ---
 
@@ -308,7 +307,7 @@ estándar de accesibilidad. La verificación encontró tres combinaciones que **
 prohibidas o corregidas: texto blanco sobre dorado, el dorado como texto sobre fondo claro, y los colores de
 estado, que necesitaron un valor distinto según el fondo sea claro u oscuro.
 
-> FALTA — Integrante 3. Pegar acá la lámina con la paleta de colores y la escala de tipografías.
+El sistema de diseño completo —paleta con sus contrastes medidos, tipografías y componentes— está en el **Anexo F**.
 
 ## 4.3 Las diez pantallas
 

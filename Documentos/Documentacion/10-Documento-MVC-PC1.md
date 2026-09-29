@@ -407,10 +407,10 @@ es lo que le permite a la aplicación mostrar *"Se ocupó el último lugar"* en 
 | CU-009 · Ver dónde está la combi | Consultar ubicación y tiempo estimado |
 | CU-010 · Ver mis reservas | Consultar reservas propias |
 | CU-011 · Hablar con el asistente | Enviar mensaje al asistente |
-| CU-014 · Registrar un pago | Registrar pago |
-| CU-016 · Confirmar o rechazar un pago | Confirmar pago (administración) |
-| CU-018 · Programar y ver viajes | Crear y consultar viajes |
-| CU-036 · Aviso automático de Mercado Pago | Recibir el aviso de pago acreditado |
+| CU-014 · Registrar un pago | Registrar el pago y determinar el mecanismo de acreditación |
+| CU-016 · Confirmar o rechazar un pago | Confirmación administrativa de pagos que no tienen acreditación automática válida |
+| CU-018 · Programar viajes | Crear el viaje. Listarlos queda para la próxima versión del acuerdo |
+| CU-036 · Procesar notificación de Mercado Pago | Recibir el resultado del proveedor y confirmar automáticamente el pago cuando la operación fue aprobada o acreditada |
 
 Esta versión cubre **16 de los 37 casos de uso**, más el requisito de tarifas. Los restantes siguen el mismo
 patrón y se agregarán en la próxima.
@@ -420,7 +420,15 @@ cancelar y reasignar quedan para la próxima versión—, y de CU-003 falta la o
 lista de espera que el propio mensaje de error anuncia. La pantalla del administrador, además, supone una
 operación para **listar** los viajes del día que todavía no está en el acuerdo.
 
-## 5.4 Dónde viven las reglas de negocio
+## 5.4 Cómo se confirma un pago
+
+VanFull contempla **dos mecanismos de confirmación**. Los pagos que requieren comprobación manual, como
+transferencias o efectivo, permanecen pendientes hasta que una persona autorizada los confirme o rechace. En
+cambio, cuando Mercado Pago informa válidamente que una operación fue aprobada o acreditada, **el backend
+confirma automáticamente el pago**. Esta automatización pertenece a la integración con el proveedor de pagos
+y **no al agente de inteligencia artificial**, que no confirma pagos en ningún caso.
+
+## 5.5 Dónde viven las reglas de negocio
 
 **Las 31 reglas viven en el servidor.** No en la aplicación y no en el asistente de IA.
 
@@ -535,8 +543,9 @@ Fecha actual del sistema: la provee el servidor.
 
 - **No le mandamos al modelo datos personales** como documentos o fotos. Usa identificadores internos.
 - **El servidor revisa los permisos** antes de devolver cualquier dato de una persona.
-- **Confirmar un pago lo hace una persona, no el asistente.** Cuando un usuario le pide que dé un pago por
-  confirmado, el asistente le explica que no puede y le indica cómo hacerlo.
+- **El asistente no confirma pagos, nunca.** Según el medio, la confirmación la produce automáticamente la
+  integración con Mercado Pago o la hace una persona autorizada. Cuando un usuario le pide al asistente que
+  dé un pago por confirmado, le explica que no puede y le indica cómo hacerlo.
 - La prueba incluyó casos pensados para engañarlo: pedirle que altere un pago, pedirle datos de otra
   persona, y preguntarle cosas ajenas a VanFull. Los rechazó.
 - Si falla un modelo o una herramienta, se registra el error y se deriva. **Nunca se inventa una respuesta.**

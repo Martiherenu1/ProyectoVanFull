@@ -342,7 +342,7 @@ fuera del alcance de diseño del PC1: reutilizan los patrones que estas 10 dejan
 | 2 | **Buscar servicio** | CU-002 | `GET /servicios/disponibilidad`, `GET /recorridos/{id}/paradas` | Vacío (sin viajes ese día) · cupo 0 |
 | 3 | **Confirmar reserva** | CU-003 | `POST /reservas` + `GET /tarifas` | **`409` sin cupo** · **`409` ya reservado (RN-031)** |
 | 4 | **Mis reservas y deuda** | CU-010 / CU-006 | `GET /pasajeros/me/reservas`, `GET /pasajeros/me/deuda` | Vacío · **ventana de cancelación RN-017** |
-| 5 | **Pago** | CU-014 | `POST /pagos` | Mercado Pago confirma solo; transferencia y efectivo quedan `PENDIENTE` (RN-015) |
+| 5 | **Pago** | CU-014 | `POST /pagos` | Mercado Pago: confirmación automática cuando el proveedor informa la operación aprobada. Transferencia, efectivo u otros medios sin acreditación automática: `PENDIENTE` hasta confirmación administrativa (RN-015) |
 | 6 | **Seguimiento en vivo** ⭐ | CU-009 | `GET /viajes/{id}/ubicacion` (cada 10 s, RNF-007) | **`desactualizada: true`** · `eta_minutos: null` |
 | 7 | **Abordar con QR** ⭐ | CU-007 | `POST /abordajes` | **Offline (RNF-011/012)** · sin reserva · otra unidad · duplicado (MR-R24) |
 | 8 | **Chat con AG-01** ⭐ | CU-011 | `POST /chat` | El agente **no confirma pagos** — deriva. Fecha relativa resuelta por el backend. |

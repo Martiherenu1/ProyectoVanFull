@@ -67,9 +67,9 @@ Ambos quedan marcados con `x-cobertura: parcial` o aclarados en la descripción 
 | CU-011 Chatbot | `POST /chat` | RF-029/032 |
 | CU-012 Sesión | `POST /auth/login`, `POST /auth/logout` | RF-045 |
 | CU-014 Registrar pago | `POST /pagos` | RF-009, RN-016 |
-| CU-016 Confirmar/rechazar pago | `POST /pagos/{id}/confirmacion` | RF-011, RN-015 |
+| CU-016 Confirmar/rechazar pago | `POST /pagos/{id}/confirmacion` | RF-011, RN-015 — validación administrativa cuando el medio no acredita automáticamente |
 | CU-018 Gestionar viajes ⚠️ *parcial* | `POST /viajes` | RF-017/018, RN-001 |
-| CU-036 Webhook Mercado Pago | `POST /webhooks/mercadopago` | RF-012, RN-015 |
+| CU-036 Webhook Mercado Pago | `POST /webhooks/mercadopago` | RF-012, RN-015 — confirmación automática de operaciones aprobadas/acreditadas |
 
 ## CU pendientes de contrato (próxima iteración)
 

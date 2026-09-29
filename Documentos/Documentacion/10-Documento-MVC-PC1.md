@@ -22,13 +22,12 @@ documento**, y es esto:
 | Qué falta | Dónde | Quién |
 |---|---|---|
 | Escribir la sección completa | 1 · Presentación general | Integrante 2 |
-| Pegar la imagen del diagrama de arquitectura | 2.4 | Integrante 3 |
 | Pegar los diagramas C4 y de casos de uso | 2.5 | Integrante 2 |
 | Pegar el diagrama Entidad-Relación | 3.2 | Integrante 2 |
 | Pegar las diez capturas de pantalla | 4.3 | Integrante 3 |
 | Pegar el cronograma de las 16 semanas | 7.5 | Equipo |
 
-Son **seis cosas**, y cinco de las seis son pegar algo que ya existe.
+Son **cinco cosas**, y cuatro de las cinco son pegar algo que ya existe.
 
 ---
 
@@ -281,7 +280,7 @@ persona cuando usa el sistema**.
 | A qué hora | 6 de la mañana | 6:05, con la combi llenándose | Todo el día |
 | Manos libres | Una, apurado | Una, la otra ocupada, quizá con guantes | Las dos, con mouse y teclado |
 | Luz | Oscuro o sol directo | Sol directo | Interior |
-| Señal | Puede ser mala | **Puede no haber** | Buena |
+| Señal | Puede ser mala | Puede perderla | Buena |
 | Qué necesita saber ya | ¿Cuánto falta para que llegue? | ¿Ya subieron todos? | ¿Qué problema hay hoy? |
 | Fondo de pantalla | Oscuro | Oscuro | Claro |
 | Alto de cada fila | 48 puntos | **64 puntos** | 36 puntos |
@@ -289,6 +288,11 @@ persona cuando usa el sistema**.
 De acá salen las decisiones concretas: **los botones del chofer son más grandes** porque los toca parado y
 con una sola mano; **la pantalla del pasajero funciona sin señal** al momento de abordar, porque en la ruta
 a veces no hay; y **el panel del administrador es más compacto** porque necesita ver seis viajes juntos.
+
+Para la pantalla del chofer, en cambio, **no se diseñó funcionamiento sin conexión.** Si el chofer pierde
+señal la consulta no se actualiza, y la contingencia que confirmó la empresa es comunicarse por WhatsApp o
+por teléfono. Lo aclaramos porque es una decisión, no un olvido: el abordaje sin señal lo resuelve el
+teléfono del pasajero, no el del chofer.
 
 **Si las tres pantallas se parecieran entre sí, el diseño estaría mal.** Que sean distintas es el resultado
 de haber mirado el problema.
@@ -414,10 +418,14 @@ es lo que le permite a la aplicación mostrar *"Se ocupó el último lugar"* en 
 Esta versión cubre **16 de los 37 casos de uso**, más el requisito de tarifas. Los restantes siguen el mismo
 patrón y se agregarán en la próxima.
 
-**Dos están cubiertos en parte, y conviene decirlo:** de CU-018 solo está la creación del viaje —modificar,
-cancelar y reasignar quedan para la próxima versión—, y de CU-003 falta la operación para anotarse en la
-lista de espera que el propio mensaje de error anuncia. La pantalla del administrador, además, supone una
-operación para **listar** los viajes del día que todavía no está en el acuerdo.
+**Tres cosas están cubiertas en parte, y conviene decirlo:** de CU-018 solo está la creación del viaje
+—modificar, cancelar y reasignar quedan para la próxima versión—, y de CU-003 falta la operación para
+anotarse en la lista de espera que el propio mensaje de error anuncia. La pantalla del administrador,
+además, supone una operación para **listar** los viajes del día que todavía no está en el acuerdo.
+
+**Y la pantalla del chofer (CU-029) tampoco tiene operación en este acuerdo.** La diseñamos porque el caso
+de uso está especificado y aprobado, pero la consulta de la operación asignada queda para la próxima
+versión del contrato. Es la misma decisión de alcance que las otras dos, y preferimos escribirla.
 
 ## 5.4 Cómo se confirma un pago
 
@@ -619,7 +627,7 @@ Repositorio: https://github.com/Martiherenu1/ProyectoVanFull
 
 # 9. Guía para la presentación
 
-Esta sección es **para nosotros**, no para entregar. Es el guion de qué mostrar el 28 de septiembre.
+Esta sección es **para nosotros**, no para entregar. Es el guion de qué mostrar el viernes 2 de octubre.
 
 ## Las cuatro cosas que hay que decir sí o sí
 

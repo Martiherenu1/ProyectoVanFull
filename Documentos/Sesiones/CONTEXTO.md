@@ -3,7 +3,7 @@
 > **Para qué sirve:** documento de arranque. Leyendo esto se recupera todo el contexto crítico del proyecto sin
 > releer la documentación completa. **Mantenerlo actualizado al cerrar cada sesión.**
 >
-> **Última actualización: 2026-09-23** · Reemplaza y consolida todas las versiones anteriores.
+> **Última actualización: 2026-09-29** · Reemplaza y consolida todas las versiones anteriores.
 
 ---
 
@@ -124,7 +124,7 @@ Disponibilidad 99 % mensual · 95 % de operaciones ≤ 2 s · operaciones pesada
 **PC1 = 28/09/2026** · PC2 = 26/10 · PC3 = 09/11 · Cierre = 16/11.
 El desarrollo del backend arranca el **05/10** (sem 10); frontend 12/10; integración 19/10; pruebas y documentación 02/11.
 
-## 10. Estado del PC1 (al 2026-09-25)
+## 10. Estado del PC1 (al 2026-09-29 · **se presenta el viernes 02/10**)
 
 **La consigna pide** (de `Presentacion.pdf`): definición del problema, alcance y límites, modelo conceptual
 (Front/Back/BD), UML/C4, **Modelo de datos SQL**, **Comunicación V-C: OpenAPI (JSON)**, selección de modelos IA +
@@ -135,10 +135,11 @@ agentes + prompts, mermaid.js, y modelo de desarrollo + interfaces gráficas. **
 | Entregable | Estado |
 |---|---|
 | **Modelo de datos SQL** | `backend/db/schema.sql` — 35 tablas, 54 FKs, **validado contra PostgreSQL real** |
-| **Contrato OpenAPI** | `backend/openapi/openapi.yaml` — 22 operaciones, 22 schemas, validado |
-| **Doc IA y Agentes** | `07-IA-y-Agentes-Consolidado.md` — también subida al Drive `06_` |
+| **Contrato OpenAPI** | `backend/openapi/openapi.yaml` + `.json` — 21 rutas, 22 operaciones, **23 schemas**, validado |
+| **Doc IA y Agentes** | `07-IA-y-Agentes-Consolidado.md` — también en el Drive `06_` y `07_` |
 | **Modelo de desarrollo** | Repo + ramas/PR + ruff/pytest + `CONTRIBUTING.md` |
 | **Interfaces gráficas** | **10 pantallas** con los 3 actores, recorribles en modo Play (ver abajo) |
+| **Documento con el MVC** | `10-Documento-MVC-PC1.md` → `.docx` en la carpeta `07_` del Drive |
 
 ### Los artefactos de diseño viven en claude.ai (⚠️ los links solo están acá)
 
@@ -149,16 +150,22 @@ agentes + prompts, mermaid.js, y modelo de desarrollo + interfaces gráficas. **
 
 Las reglas y el porqué de todo eso están versionados en `Documentos/Documentacion/08-Brief-de-Diseno-UI.md`.
 Las 10 pantallas: Login · Buscar servicio · Confirmar reserva · Mis reservas y deuda · Pago ·
-Seguimiento en vivo · Asistente AG-01 · Chofer (lista) · Chofer (escaneo QR) · Admin (viajes del día).
+Seguimiento en vivo · **Abordar con QR (pasajero)** · Asistente AG-01 · **Chofer: lista del viaje (solo
+consulta)** · Admin (viajes del día).
 
-### Falta — es del equipo, no nuestro
+⚠️ **El QR lo escanea el pasajero, no el chofer** (CU-007): el código identifica a la unidad. El chofer solo
+consulta (CU-029) y **no registra abordajes**. Int2 detectó el 28/09 que las pantallas lo tenían invertido;
+está corregido en las pantallas, en el brief y en el documento del MVC.
 
-1. **Diagramas en mermaid.js** (hay PlantUML/drawio; confirmar si se acepta).
-2. **"Documento con el MVC"** — *el* entregable: consolidar todo el diseño mostrando Modelo (BD + reglas) /
-   Vista (Flutter) / Controlador (FastAPI). **Crítico.**
-3. **Consolidar en la carpeta `07_PC1`** del Drive (está vacía).
-4. **Revisión cruzada de Int2:** que valide que el SQL y el OpenAPI concuerdan con su DER y sus CU.
-5. **Logística:** compartir el repo con la cátedra (hoy es privado), roles por escrito, y organizar la presentación.
+### Falta para el PC1 — todo es pegar cosas en el Word de la carpeta `07_`
+
+1. **Int2:** escribir la **§ 1 (Presentación general)** y pegar los **C4 + DCU (§ 2.5)** y el **DER (§ 3.2)**.
+2. **Nosotros:** pegar las **diez capturas (§ 4.3)**. El mermaid (§ 2.4) y la paleta (§ 4.2) ya están pegados.
+3. **Equipo:** el **cronograma de 16 semanas (§ 7.5)**, los roles por escrito y un ensayo.
+
+**Ya está hecho** todo lo que antes figuraba acá como pendiente: el mermaid, el documento del MVC, la carpeta
+`07_` del Drive (8 archivos), la **revisión cruzada de Int2** (4 rondas, todo aplicado) y el repo **público**
+con el estado congelado en el tag `pc1`.
 
 ## 11. Estado del código
 
@@ -191,7 +198,7 @@ prioridad de la lista de espera · criterio de liberación de cupo por ausencia 
 
 ## 14. Recursos
 
-- **Repo:** https://github.com/Martiherenu1/ProyectoVanFull (privado)
+- **Repo:** https://github.com/Martiherenu1/ProyectoVanFull (**público**) · entrega congelada en el tag `pc1`
 - **Tablero de los 37 CU (Notion):** https://app.notion.com/p/a05f244f1ab4438982da04067e2fe018
 - **Drive del equipo:** documentación oficial (ver memoria `drive-del-companero` para el mapa de carpetas e IDs)
 - **En este repo:** `Documentos/Documentacion/01..07`, `Documentos/HITOS.md`,

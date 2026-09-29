@@ -1,16 +1,35 @@
 # VanFull — Documento con el MVC
 
 **Trabajo de Campo · Proyecto Integrador con IA y Agentes**
+
 Licenciatura en Sistemas | Ingeniería en Informática
 
 **Primer Punto de Control — Análisis, Diseño y Planificación**
-Entrega: 28/09/2026 · Versión 1.0
+
+Entrega: 28 de septiembre de 2026 · Versión 1.0
 
 **Equipo:** Integrante 1 · Integrante 2 · Integrante 3
 
-**Repositorio del proyecto:** https://github.com/Martiherenu1/ProyectoVanFull
+Repositorio del proyecto: https://github.com/Martiherenu1/ProyectoVanFull
 
-**Estado congelado de esta entrega (tag `pc1`):** https://github.com/Martiherenu1/ProyectoVanFull/tree/pc1
+---
+
+## Estado de este documento
+
+Este borrador tiene las secciones de fondo escritas. **Lo que falta está marcado en amarillo a lo largo del
+documento**, y es esto:
+
+| Qué falta | Dónde | Quién |
+|---|---|---|
+| Escribir la sección completa | 1 · Presentación general | Integrante 2 |
+| Pegar la imagen del diagrama de arquitectura | 2.4 | Integrante 3 |
+| Pegar los diagramas C4 y de casos de uso | 2.5 | Integrante 2 |
+| Pegar el diagrama Entidad-Relación | 3.2 | Integrante 2 |
+| Pegar la lámina de colores y tipografía | 4.2 | Integrante 3 |
+| Pegar las diez capturas de pantalla | 4.3 | Integrante 3 |
+| Pegar el cronograma de las 16 semanas | 7.5 | Equipo |
+
+Son **siete cosas**, y seis de las siete son pegar algo que ya existe.
 
 ---
 
@@ -20,53 +39,53 @@ Entrega: 28/09/2026 · Versión 1.0
 2. Arquitectura de la solución
 3. Modelo — Datos y relaciones
 4. Vista — Interfaces gráficas
-5. Controlador — Comunicación Vista-Controlador y reglas de negocio
+5. Controlador — La comunicación entre la pantalla y el servidor
 6. Modelos de IA y agentes
 7. Modelo de desarrollo
 8. Anexos
+9. Guía para la presentación
 
 ---
 
-## Trazabilidad con la consigna
+## Dónde está cada cosa que pide la consigna
 
-Esta tabla indica dónde encontrar cada uno de los puntos solicitados para el Primer Punto de Control.
-
-| Solicitado en la consigna | Sección |
+| Lo que pide la consigna | Sección |
 |---|---|
-| Presentación general del Proyecto (Objetivos, antecedentes, justificación, alcances y límites) | 1 |
+| Presentación general del Proyecto | 1 |
 | Alcances y Límites | 1.4 |
 | Arquitectura de la solución | 2 |
-| Modelo Conceptual: Frontend, Backend (Negocios), Base de Datos | 2.2 |
-| Modelo flujo - Gráficos: UML, C4 Model | 2.3 |
-| Modelo: mermaid.js | 2.4 |
+| Modelo Conceptual: Frontend, Backend, Base de Datos | 2.2 |
+| Gráficos: UML y C4 Model | 2.5 |
+| Modelo en mermaid.js | 2.4 |
 | Modelo de Datos y relaciones | 3 |
 | Modelo de datos SQL | 3.4 y Anexo A |
-| Modelo de Desarrollo utilizado con interfaces gráficas — interfaces | 4 |
-| Comunicación V-C: Open API (Formato Json) | 5 y Anexo B |
+| Interfaces gráficas | 4 |
+| Comunicación V-C: Open API en formato JSON | 5 y Anexo B |
 | Modelos de IA utilizados y justificación | 6.1 |
 | Agentes IA implementados | 6.2 |
-| Selección de modelos (chat) y agentes IA - Prompts | 6.1 y 6.3 |
-| Modelo de Desarrollo utilizado con interfaces gráficas — modelo | 7 |
+| Prompts | 6.3 |
+| Modelo de Desarrollo | 7 |
 
 ---
 
 # 1. Presentación general del Proyecto
 
-> **PENDIENTE — Integrante 2.** Esta sección se redacta a partir del material ya producido en las carpetas
-> `00_Control_y_Decisiones`, `01_Relevamiento_y_AS-IS` y `02_Alcance_RF_RNF_Reglas` del Drive. Se sugiere
-> cubrir los cuatro puntos que nombra la consigna, en este orden:
->
-> **1.1 Objetivos** — qué se propone lograr el sistema.
->
-> **1.2 Antecedentes** — VanFull es una empresa real de transporte de pasajeros en combi (charters) que hoy
-> opera con WhatsApp, Excel y teléfono: el pasajero avisa por mensaje que no viaja, el administrador anota a
-> mano quién pagó, y el chofer lleva la lista impresa. Conviene desarrollar este punto con detalle, porque es
-> lo que distingue al proyecto de un ejercicio académico. Material: entrevista y AS-IS consolidado, carpeta `01`.
->
-> **1.3 Justificación** — qué problemas concretos resuelve la centralización y qué costos evita.
->
-> **1.4 Alcances y límites** — resumen de los 45 requisitos funcionales, 14 requisitos no funcionales con sus
-> métricas y 31 reglas de negocio, y de manera explícita **qué queda fuera del MVP**. Material: carpeta `02`.
+> FALTA — Integrante 2. Esta sección se escribe con el material que ya está en las carpetas 00, 01 y 02 del Drive. Hay que cubrir los cuatro puntos que nombra la consigna: 1.1 Objetivos, 1.2 Antecedentes, 1.3 Justificación y 1.4 Alcances y límites.
+
+Guía de qué va en cada punto:
+
+**1.1 Objetivos.** Qué se propone lograr el sistema.
+
+**1.2 Antecedentes.** VanFull es una empresa real de transporte de pasajeros en combi. Hoy trabaja con
+**WhatsApp, Excel y teléfono**: el pasajero avisa por mensaje que no viaja, el administrador anota a mano
+quién pagó, y el chofer sube a la combi con la lista impresa. Conviene contar esto con detalle, porque es lo
+que hace que el proyecto no parezca un ejercicio inventado. El material está en la entrevista y el
+relevamiento de la carpeta 01.
+
+**1.3 Justificación.** Qué problemas concretos resuelve centralizar todo esto en un sistema.
+
+**1.4 Alcances y límites.** Resumen de los **45 requisitos funcionales, 14 requisitos no funcionales y 31
+reglas de negocio**, y sobre todo **qué queda afuera** de esta primera versión.
 
 ---
 
@@ -74,66 +93,71 @@ Esta tabla indica dónde encontrar cada uno de los puntos solicitados para el Pr
 
 ## 2.1 Visión general
 
-VanFull es una aplicación **Web y Mobile** construida sobre una arquitectura **cliente-servidor por capas**.
-El cliente es una única base de código Flutter que se despliega en las dos plataformas; el servidor es una API
-REST en Python con FastAPI; la persistencia es PostgreSQL.
+VanFull es una aplicación **Web y Mobile**. El usuario usa una aplicación en su celular o en la computadora,
+esa aplicación le pide los datos a un servidor, y el servidor los guarda en una base de datos. Es la
+arquitectura **cliente-servidor**, organizada en capas.
 
-| Componente | Tecnología | Responsabilidad |
+| Parte | Con qué está hecha | De qué se encarga |
 |---|---|---|
-| Cliente Web y Mobile | Flutter | Presentación e interacción |
-| API y lógica de negocio | Python · FastAPI | Autenticación, permisos, reglas de negocio, orquestación |
-| Persistencia | PostgreSQL | Datos e integridad referencial |
-| Agente conversacional | OpenRouter (MiniMax M3 / Nemotron 3 Super) | Interpretación de lenguaje natural |
-| Cartografía y rutas | Google Maps Routes API | Recorridos, distancias y estimaciones |
-| Pagos | Mercado Pago (sandbox) | Cobro y confirmación automática |
+| La aplicación (Web y Mobile) | Flutter | Mostrar la información y recibir lo que el usuario hace |
+| El servidor | Python con FastAPI | Verificar permisos, aplicar las reglas del negocio y coordinar todo |
+| La base de datos | PostgreSQL | Guardar los datos sin que se corrompan |
+| El asistente conversacional | OpenRouter (MiniMax M3 y Nemotron) | Entender lo que el usuario escribe en lenguaje común |
+| Mapas y recorridos | Google Maps | Calcular distancias y tiempos de llegada |
+| Cobros | Mercado Pago | Cobrar y avisar cuando el pago se acreditó |
 | Mensajería | WhatsApp | Canal alternativo de atención |
+
+Flutter permite escribir **una sola vez** la aplicación y que funcione tanto en el navegador como en el
+celular, que era un requisito del proyecto.
 
 ## 2.2 Modelo conceptual: Frontend, Backend y Base de Datos
 
-**Frontend.** Flutter, con una sola base de código para Web y Mobile. No contiene reglas de negocio críticas:
-valida formatos y mejora la experiencia, pero **ninguna decisión de negocio se toma en el cliente**. Un cupo,
-un permiso o un pago nunca se resuelven en el dispositivo.
+**Frontend (lo que el usuario ve).** La aplicación hecha en Flutter. **No toma decisiones importantes.**
+Valida que un campo no esté vacío y muestra las cosas ordenadas, pero si hay lugar en una combi o si un
+pasajero puede cancelar una reserva **no se decide en el celular**, se decide en el servidor.
 
-**Backend (Negocios).** FastAPI, organizado en cuatro capas con responsabilidades separadas:
+**Backend (el negocio).** El servidor hecho con FastAPI. Está dividido en cuatro capas, cada una con un
+trabajo distinto:
 
-| Capa | Responsabilidad |
-|---|---|
-| `routers/` | Reciben la petición HTTP y delegan. No contienen lógica de negocio. |
-| `schemas/` | Contrato de entrada y salida (Pydantic). Validan forma, no reglas. |
-| `services/` | **Las 31 reglas de negocio.** Es el corazón del sistema. |
-| `models/` | Mapeo objeto-relacional. La única capa que toca PostgreSQL. |
+- **Routers:** reciben el pedido que llega de la aplicación y lo derivan. No tienen lógica propia.
+- **Schemas:** definen qué datos entran y qué datos salen, y verifican que tengan la forma correcta.
+- **Services:** acá viven **las 31 reglas de negocio**. Es el corazón del sistema.
+- **Models:** la única capa que le habla a la base de datos.
 
-**Base de Datos.** PostgreSQL con un esquema de 35 tablas. Las restricciones que pueden expresarse en el motor
-se expresan allí (claves foráneas, `CHECK`, unicidad), de modo que la integridad no dependa exclusivamente de
-la aplicación. El detalle está en la sección 3.
+La ventaja de separarlo así es que si mañana cambia una regla, se cambia en un solo lugar.
+
+**Base de datos.** PostgreSQL, con 35 tablas. Todo lo que se puede prohibir desde la base misma se prohíbe
+ahí, de modo que **un dato incorrecto no pueda guardarse aunque el programa tenga un error**. El detalle está
+en la sección 3.
 
 ## 2.3 El mapeo MVC
 
-El patrón Modelo-Vista-Controlador se materializa así en esta solución:
+El patrón **Modelo-Vista-Controlador** organiza un sistema separando los datos, lo que se ve y lo que
+coordina. En VanFull queda así:
 
-| Capa del patrón | En VanFull | Dónde |
-|---|---|---|
-| **Modelo** | El esquema de PostgreSQL y las reglas de negocio que lo gobiernan | `backend/db/schema.sql` · `services/` · sección 3 |
-| **Vista** | La aplicación Flutter para Web y Mobile, en sus tres interfaces por actor | Sección 4 |
-| **Controlador** | La API REST de FastAPI: los routers y el contrato OpenAPI que los describe | `backend/openapi/openapi.yaml` · sección 5 |
+| Capa | Qué es en VanFull |
+|---|---|
+| **Modelo** | La base de datos PostgreSQL y las reglas de negocio que la gobiernan |
+| **Vista** | La aplicación Flutter, en sus tres versiones según quién la use |
+| **Controlador** | El servidor FastAPI, que recibe los pedidos y decide qué responder |
 
-El agente conversacional **no constituye una cuarta capa paralela**: se apoya sobre el Controlador, consumiendo
-exactamente los mismos endpoints que consume la Vista.
+El asistente de inteligencia artificial **no es una cuarta capa**: se apoya sobre el Controlador y usa
+exactamente los mismos caminos que usa la aplicación.
 
-## 2.4 Principio de arquitectura: la IA no accede a los datos
+## 2.4 La decisión más importante: la IA no toca la base de datos
 
-La decisión de diseño más importante del sistema es la separación entre el componente de IA y las reglas de
-negocio:
+**El asistente de IA no puede acceder a la base de datos.** Interpreta lo que el usuario pide y elige una
+herramienta; después **el servidor verifica y ejecuta**.
 
-> El modelo de lenguaje **interpreta la intención** del usuario y **elige una herramienta**.
-> **FastAPI valida y ejecuta.** El agente **no** accede directamente a PostgreSQL.
+La razón es que un modelo de inteligencia artificial **no es predecible**: ante la misma pregunta puede
+contestar distinto cada vez, y alguien podría intentar engañarlo escribiéndole instrucciones disfrazadas
+dentro de un mensaje. Si el modelo tuviera acceso directo a los datos, un mensaje bien armado podría
+conseguir un lugar en una combi llena o dar un pago por cobrado.
 
-El fundamento es que un modelo de lenguaje es un componente **no determinístico**: ante la misma entrada puede
-producir salidas distintas, y puede ser inducido a comportamientos no previstos mediante *prompt injection*.
-Aislarlo detrás de una capa de validación determinística garantiza que ninguna respuesta del modelo pueda
-otorgar un cupo inexistente, saltear un permiso o confirmar un pago.
+Poniéndolo detrás del servidor, **el modelo puede equivocarse todo lo que quiera y el sistema sigue siendo
+correcto**, porque quien decide es el servidor.
 
-**Diagrama de la solución (mermaid.js):**
+**Diagrama de la arquitectura (hecho en mermaid.js):**
 
 ```
 flowchart TB
@@ -142,22 +166,22 @@ flowchart TB
         W[WhatsApp]
     end
     subgraph Controlador
-        R[FastAPI · routers]
+        R[FastAPI - routers]
         S[services<br/>31 reglas de negocio]
-        CH[POST /chat<br/>orquestador de tools]
+        CH[POST /chat<br/>orquestador]
     end
     subgraph Modelo
         DB[(PostgreSQL<br/>35 tablas)]
     end
-    LLM[OpenRouter<br/>MiniMax M3 / Nemotron]
+    LLM[OpenRouter<br/>MiniMax / Nemotron]
     MP[Mercado Pago]
-    GM[Google Maps Routes]
+    GM[Google Maps]
 
     A --> R
     W --> CH
     A --> CH
-    CH -->|tool elegida| LLM
-    LLM -->|nombre + argumentos| CH
+    CH --> LLM
+    LLM --> CH
     CH --> S
     R --> S
     S --> DB
@@ -166,27 +190,24 @@ flowchart TB
     LLM -.->|sin acceso| DB
 ```
 
-> **Nota para el armado del documento:** pegar este código en https://mermaid.live, exportar la imagen y
-> reemplazar el bloque por el diagrama renderizado, dejando el código como anexo.
+> FALTA — Integrante 3. Copiar ese código en la página mermaid.live, exportar la imagen y pegarla acá. El código puede quedar debajo de la imagen.
 
-## 2.5 Diagramas C4 y UML
+## 2.5 Diagramas C4 y de casos de uso
 
-> **PENDIENTE — Integrante 2.** Insertar aquí los diagramas ya producidos en la carpeta
-> `05_Arquitectura_API_Datos` del Drive: **C4 de Contexto** y **C4 de Contenedores**, cada uno con una breve
-> lectura de qué muestra. Agregar también, desde la carpeta `04_Modelo_y_UML`, los diagramas de casos de uso
-> por actor y los diagramas de actividad de los flujos principales.
+> FALTA — Integrante 2. Pegar acá los diagramas que ya están en la carpeta 05 del Drive: el C4 de Contexto y el C4 de Contenedores, cada uno con dos o tres renglones explicando qué muestra. Y de la carpeta 04, los diagramas de casos de uso por actor y los de actividad de los flujos principales.
 
-## 2.6 Requisitos no funcionales que condicionan la arquitectura
+## 2.6 Requisitos que condicionaron la arquitectura
 
-| Requisito | Métrica | Consecuencia arquitectónica |
+Algunos requisitos no funcionales obligaron a tomar decisiones concretas:
+
+| Requisito | Medida exigida | Qué obligó a hacer |
 |---|---|---|
-| Disponibilidad | 99% | Fallback de modelo de IA; degradación controlada |
-| Tiempo de respuesta | 95% de operaciones ≤ 2 s; pesadas ≤ 5 s | Valores derivados calculados, no almacenados |
-| Concurrencia | 100 usuarios simultáneos (pico de prueba 150) | API asíncrona (SQLAlchemy 2.0 async) |
-| Escalabilidad | Soportar al menos el doble de la carga prevista | Capas desacopladas |
-| Seguimiento GPS | Actualización cada 10 s; precisión ≤ 50 m; dato obsoleto > 30 s | Polling cada 10 s en el MVP; solo se almacena la última posición |
-| Abordaje sin conexión | Sincronización ≤ 60 s sin duplicados | Registro local en el dispositivo del chofer y restricción de unicidad en la base |
-| Recuperación | RTO ≤ 1 h · RPO ≤ 15 min | Política de respaldos |
+| Disponibilidad | 99% | Tener un segundo modelo de IA de respaldo |
+| Velocidad de respuesta | 95% de las operaciones en 2 segundos o menos | Calcular ciertos valores en el momento en vez de guardarlos |
+| Usuarios simultáneos | 100 al mismo tiempo, probado con 150 | Un servidor que atiende varios pedidos a la vez sin bloquearse |
+| Seguimiento por GPS | Actualizar cada 10 segundos; avisar si el dato tiene más de 30 | La aplicación le pregunta al servidor cada 10 segundos |
+| Abordaje sin señal | Sincronizar en menos de 60 segundos y sin duplicados | Guardar en el teléfono del pasajero y que la base rechace repetidos |
+| Recuperación ante fallas | Volver a funcionar en 1 hora, perder como máximo 15 minutos de datos | Política de copias de seguridad |
 
 ---
 
@@ -194,310 +215,310 @@ flowchart TB
 
 ## 3.1 Panorama
 
-El modelo de datos consta de **35 tablas** organizadas en cinco bloques temáticos:
+El modelo de datos tiene **35 tablas**, agrupadas en cinco bloques:
 
-| Bloque | Contenido |
-|---|---|
-| 1 · Personas, clientes y acceso | `persona`, `pasajero`, `chofer`, `cliente` y sus especializaciones, `cuenta_acceso`, `rol_acceso`, `cuenta_rol` |
-| 2 · Servicios y contratación | `servicio`, `tarifa`, `contratacion`, `abono_mensual`, `periodo_abono` |
-| 3 · Viajes, recorridos y operación | `recorrido`, `parada`, `parada_recorrido`, `vehiculo`, `viaje`, `posicion_gps`, `reserva`, `abordaje`, `ausencia` |
-| 4 · Cuenta corriente, pagos y comprobantes | `cuenta_corriente`, `pago`, `movimiento_cuenta`, `comprobante` |
-| 5 · Operación y auditoría | `evento_operativo`, `nomina_pasajeros` |
+- **Personas, clientes y acceso:** personas, pasajeros, choferes, clientes y los permisos de cada cuenta.
+- **Servicios y contratación:** los servicios que ofrece la empresa, las tarifas, los abonos mensuales.
+- **Viajes, recorridos y operación:** recorridos, paradas, vehículos, viajes, reservas, abordajes y ausencias.
+- **Cuenta corriente y pagos:** la cuenta de cada cliente, los pagos y los comprobantes.
+- **Operación y auditoría:** el registro de lo que va pasando y las nóminas de pasajeros.
 
 ## 3.2 Diagrama Entidad-Relación
 
-> **PENDIENTE — Integrante 2.** Insertar el DER / Modelo Relacional oficial de la carpeta
-> `05_Arquitectura_API_Datos`, con la lectura de las relaciones principales y las cardinalidades.
+> FALTA — Integrante 2. Pegar el diagrama Entidad-Relación que ya está en la carpeta 05 del Drive, con una explicación de las relaciones principales.
 
 ## 3.3 Decisiones de diseño
 
-Más allá del inventario de tablas, el modelo toma cinco decisiones que conviene explicitar porque tienen
-consecuencias directas sobre la corrección del sistema.
+Más allá de la lista de tablas, el modelo toma cinco decisiones que vale la pena explicar, porque son las que
+evitan que se guarden datos incorrectos.
 
-**Claves foráneas compuestas.** Una reserva no referencia simplemente a un viaje y a una parada por separado:
-referencia al par `(viaje, recorrido)` y al par `(recorrido, orden de parada)`. De este modo la base **impide
-por construcción** que una reserva quede asociada a una parada que no pertenece al recorrido de su viaje. Si
-las claves fueran simples, esa coherencia dependería de que la aplicación nunca se equivoque.
+**Que una reserva no pueda apuntar a una parada equivocada.** Una reserva no guarda "el viaje" y "la parada"
+por separado, sino la combinación de las dos. Así **la base misma impide** que alguien reserve en una parada
+que no pertenece al recorrido de ese viaje. Si estuvieran separadas, esa coherencia dependería de que el
+programa nunca se equivoque.
 
-**Restricción XOR en el respaldo de la reserva (MR-R13).** Toda reserva se respalda por un período de abono
-**o** por una contratación directa, **exactamente una de las dos**. Se expresa con una restricción `CHECK` que
-hace imposible almacenar una reserva sin respaldo o con respaldo doble.
+**Que toda reserva tenga un respaldo, y uno solo.** Una reserva se respalda **o** con un abono mensual **o**
+con una contratación directa, nunca con las dos ni con ninguna. Está escrito como una condición dentro de la
+base, así que es imposible guardar una reserva sin respaldo.
 
-**Unicidad de reserva y de abordaje.** Un pasajero tiene como máximo **una reserva por viaje** (MR-R15) y
-**un abordaje por viaje** (MR-R24). La segunda restricción es la que permite que el escaneo de códigos QR
-funcione sin conexión: aunque el dispositivo del chofer envíe el mismo abordaje dos veces al recuperar la
-señal, la base lo rechaza. La sincronización sin duplicados (RNF-012) no depende de la aplicación.
+**Una reserva y un abordaje por viaje.** Un pasajero puede tener como mucho una reserva en cada viaje, y
+puede abordar una sola vez. Esta segunda regla es la que hace que **el escaneo del código QR funcione sin
+señal**: aunque el teléfono del pasajero mande el mismo abordaje dos veces cuando vuelve la conexión, la
+base lo rechaza. No hay que programar nada para evitar el duplicado.
 
-**Valores derivados que deliberadamente no se almacenan (MR-R30).** El saldo de la cuenta corriente, la deuda
-del pasajero y el cupo disponible de un viaje **no son columnas**: se calculan. Almacenarlos crearía una
-segunda fuente de verdad que puede desincronizarse de los movimientos y las reservas que los originan. El
-costo es un cálculo por consulta; el beneficio es que el dato no puede ser incorrecto.
+**Lo que a propósito no se guarda.** El saldo de la cuenta, la deuda de un pasajero y los lugares
+disponibles de un viaje **no son columnas de la base**: se calculan cuando se necesitan. Guardarlos sería
+crear una segunda versión de la verdad que tarde o temprano deja de coincidir con los pagos y las reservas
+que la originan. Cuesta un cálculo por consulta, pero **el dato nunca puede estar mal**.
 
-**Roles resueltos con tablas de la aplicación.** Los permisos se modelan con `rol_acceso` y `cuenta_rol` en una
-relación N:M, y no con roles del motor de base de datos. La razón es doble: los usuarios del sistema no son
-usuarios de PostgreSQL, y las reglas RN-027 a RN-030 son **contextuales** — un chofer accede a la nómina *del
-viaje que tiene asignado*, no a todas. Un `GRANT` no puede expresar esa condición.
+**Los permisos se manejan con tablas propias.** Los roles de usuario no son roles del motor de base de datos,
+sino tablas del sistema. Por dos razones: los pasajeros no son usuarios de PostgreSQL, y los permisos
+dependen del contexto — un chofer ve la lista **del viaje que tiene asignado**, no de todos. Eso no se puede
+expresar con los permisos del motor.
 
-## 3.4 Modelo de datos SQL y verificación
+## 3.4 El modelo de datos en SQL
 
-El modelo lógico se tradujo a un **DDL ejecutable para PostgreSQL** que implementa las 35 tablas, **54 claves
-foráneas** (incluidas las compuestas), las restricciones `CHECK` de dominio, la restricción XOR y el catálogo
-inicial de roles.
+El modelo se tradujo a un archivo SQL que crea las 35 tablas, las **54 relaciones entre tablas** y todas las
+condiciones descritas arriba.
 
-El esquema **se ejecutó contra un PostgreSQL 16 real** en un entorno Docker. La verificación confirmó la
-creación de las 35 tablas, las 54 claves foráneas y los 5 roles, y comprobó que las restricciones rechazan
-efectivamente los datos inválidos: un tipo de servicio fuera del dominio permitido es rechazado por la base,
-no por la aplicación.
+**Y se probó de verdad:** el archivo se ejecutó contra una base PostgreSQL real. Se verificó que las 35
+tablas y las 54 relaciones se crearan correctamente, y se comprobó que la base **rechaza los datos
+inválidos** — al intentar cargar un tipo de servicio que no existe, lo rechaza la base, no el programa.
 
-El archivo completo se incluye como **Anexo A**.
+El archivo completo está en el **Anexo A**.
 
 ---
 
 # 4. Vista — Interfaces gráficas
 
-## 4.1 El criterio: tres contextos de uso, tres interfaces
+## 4.1 Tres personas distintas usan el sistema en situaciones distintas
 
-Las interfaces de VanFull no derivan de una plantilla sino del **contexto físico** en que cada actor usa el
-sistema. Esa es la decisión de la que se desprenden la densidad, el tamaño de los controles, el contraste y
-hasta el tema de color.
+Las pantallas de VanFull no salieron de una plantilla. Salieron de preguntarse **dónde está parada cada
+persona cuando usa el sistema**.
 
 | | Pasajero | Chofer | Administrador |
 |---|---|---|---|
-| Dónde está | Caminando hacia la parada | Parado en la puerta de la combi | Sentado en un escritorio |
-| Cuándo | 6:00 de la mañana | 6:05, con la combi llenándose | Durante toda la jornada |
-| Manos disponibles | Una, apurado | Una, la otra ocupada, posiblemente con guantes | Mouse y teclado |
-| Condición de luz | Oscuridad o sol directo | Sol directo | Interior |
-| Conexión | Puede ser mala | **Puede no haber** | Estable |
-| Qué necesita saber en dos segundos | ¿Cuánto falta para que llegue? | ¿Este pasajero sube o no? | ¿Qué se rompió hoy? |
-| Tema de color | Oscuro | Oscuro | Claro |
-| Alto de fila | 48 px | **64 px** | 36 px |
+| Dónde está | Caminando a la parada | Parado en la puerta de la combi | Sentado en un escritorio |
+| A qué hora | 6 de la mañana | 6:05, con la combi llenándose | Todo el día |
+| Manos libres | Una, apurado | Una, la otra ocupada, quizá con guantes | Las dos, con mouse y teclado |
+| Luz | Oscuro o sol directo | Sol directo | Interior |
+| Señal | Puede ser mala | **Puede no haber** | Buena |
+| Qué necesita saber ya | ¿Cuánto falta para que llegue? | ¿Ya subieron todos? | ¿Qué problema hay hoy? |
+| Fondo de pantalla | Oscuro | Oscuro | Claro |
+| Alto de cada fila | 48 puntos | **64 puntos** | 36 puntos |
 
-De aquí se deriva que los controles del chofer midan 64 píxeles (debe poder tocarlos con guantes y una sola
-mano), que su pantalla funcione **sin conexión**, y que el panel del administrador use tema claro y alta
-densidad porque necesita ver seis viajes simultáneamente. **Si las tres interfaces se parecieran entre sí, el
-diseño estaría mal.**
+De acá salen las decisiones concretas: **los botones del chofer son más grandes** porque los toca parado y
+con una sola mano; **la pantalla del pasajero funciona sin señal** al momento de abordar, porque en la ruta
+a veces no hay; y **el panel del administrador es más compacto** porque necesita ver seis viajes juntos.
 
-## 4.2 Sistema de diseño
+**Si las tres pantallas se parecieran entre sí, el diseño estaría mal.** Que sean distintas es el resultado
+de haber mirado el problema.
 
-Se construyó un sistema de diseño previo a las pantallas, con tres características:
+## 4.2 Colores y tipografía
 
-**La paleta procede de la marca real.** Los colores se obtuvieron **muestreando los píxeles** del logotipo y de
-la fotografía de la combi rotulada de la empresa: dorado `#D9A521`, grafito `#5F5F61`, franja `#414143` y
-blanco de carrocería `#EAEBED`. No son colores elegidos por afinidad.
+Antes de dibujar las pantallas se definieron los colores y las tipografías, para que todas las pantallas
+sean consistentes entre sí.
 
-**El contraste está verificado.** Cada combinación se midió según WCAG. La verificación detectó tres límites
-que quedaron documentados como reglas: el texto blanco sobre dorado alcanza solo 2,24:1 y está prohibido; el
-dorado de marca como texto sobre fondo claro alcanza 2,07:1 y requiere una variante oscurecida; y los cuatro
-colores de estado necesitan **dos valores cada uno**, uno por tema, para superar 4,6:1.
+**Los colores salen de la marca real de la empresa.** Se tomaron del logotipo y de la foto de la combi
+rotulada: el dorado de las letras, el gris del contorno y el blanco de la carrocería. No son colores
+elegidos por gusto.
 
-**La densidad es un token.** Los altos de fila y los tamaños mínimos de área táctil de la tabla anterior están
-definidos como valores del sistema, de modo que ninguna pantalla los decida por su cuenta.
+**Se verificó que todos los textos se lean.** Se midió el contraste de cada combinación de color contra el
+estándar de accesibilidad. La verificación encontró tres combinaciones que **no se leían bien** y quedaron
+prohibidas o corregidas: texto blanco sobre dorado, el dorado como texto sobre fondo claro, y los colores de
+estado, que necesitaron un valor distinto según el fondo sea claro u oscuro.
 
-> **PENDIENTE — Integrante 3.** Insertar la lámina del sistema de diseño: paleta, escala tipográfica y
-> componentes.
+> FALTA — Integrante 3. Pegar acá la lámina con la paleta de colores y la escala de tipografías.
 
 ## 4.3 Las diez pantallas
 
-El alcance de diseño del PC1 son **diez pantallas** que cubren los tres actores. Los 27 casos de uso restantes
-reutilizan estos mismos patrones y no se diseñaron para este punto de control.
+Se diseñaron **diez pantallas**, que cubren a los tres tipos de usuario. Los demás casos de uso repiten
+estos mismos patrones y no se dibujaron para esta entrega.
 
-| # | Pantalla | Caso de uso | Actor |
+| # | Pantalla | Caso de uso | Quién la usa |
 |---|---|---|---|
-| 1 | Inicio de sesión | CU-012 | Pasajero |
-| 2 | Buscar servicio y disponibilidad | CU-002 | Pasajero |
-| 3 | Confirmar reserva | CU-003 | Pasajero |
-| 4 | Mis reservas y deuda | CU-010 · CU-006 | Pasajero |
+| 1 | Iniciar sesión | CU-012 | Pasajero |
+| 2 | Buscar servicio y ver lugares disponibles | CU-002 | Pasajero |
+| 3 | Confirmar la reserva | CU-003 | Pasajero |
+| 4 | Mis reservas y mi deuda | CU-010 y CU-006 | Pasajero |
 | 5 | Registrar un pago | CU-014 | Pasajero |
-| 6 | Seguimiento en vivo | CU-009 | Pasajero |
-| 7 | Asistente conversacional | CU-011 | Pasajero |
-| 8 | Lista de pasajeros del viaje | CU-008 | Chofer |
-| 9 | Escaneo de código QR | CU-007 | Chofer |
+| 6 | Seguir la combi en vivo | CU-009 | Pasajero |
+| 7 | Abordar escaneando el QR de la combi | CU-007 | Pasajero |
+| 8 | Asistente conversacional | CU-011 | Pasajero |
+| 9 | Lista de pasajeros del viaje (solo consulta) | CU-008 | Chofer |
 | 10 | Viajes del día | CU-018 | Administrador |
 
-> **PENDIENTE — Integrante 3.** Insertar las diez capturas, agrupadas por actor, cada una con su epígrafe.
+> FALTA — Integrante 3. Pegar las diez capturas, agrupadas por tipo de usuario, cada una con un epígrafe que diga qué pantalla es.
 
-## 4.4 Los estados que no son el camino feliz
+## 4.4 Las pantallas también muestran los errores
 
-Las pantallas no muestran únicamente el flujo exitoso. Cada una resuelve los estados de error y degradación
-que se desprenden de los flujos alternativos de su caso de uso:
+Un error común al diseñar es dibujar solamente el caso en que todo sale bien. Acá cada pantalla resuelve
+también **qué pasa cuando algo falla**:
 
-| Estado | Dónde se ve | Regla que lo origina |
+| Situación | En qué pantalla | Por qué pasa |
 |---|---|---|
-| Sin cupo al confirmar (`409`) | Pantalla 3 | RN-001 — el cupo se verifica en el backend en el instante de confirmar |
-| Reserva duplicada (`409`) | Pantalla 3 | RN-031 — una reserva por pasajero y viaje |
-| Ventana de cancelación por vencer | Pantallas 3 y 4 | RN-017 a RN-019 |
-| Posición de GPS obsoleta | Pantalla 6 | RNF-008 — más de 30 segundos de antigüedad |
-| Sin conexión, con abordajes pendientes | Pantallas 8 y 9 | RNF-011 y RNF-012 |
-| Código QR de un pasajero que ya abordó | Pantalla 9 | MR-R24 — la restricción de unicidad, visible en pantalla |
+| Se quedó sin lugar justo al confirmar | 3 | Los lugares se verifican en el servidor en el momento exacto de confirmar |
+| Ya tenía una reserva en ese viaje | 3 | Una reserva por viaje |
+| Se está por vencer el plazo para cancelar | 3 y 4 | Hay una ventana de tiempo para cancelar sin cargo |
+| La ubicación de la combi está vieja | 6 | Si el dato tiene más de 30 segundos, se avisa |
+| El pasajero escanea sin señal | 7 | El abordaje queda guardado en su teléfono y se registra después |
+| Escanea el QR de una combi que no es la suya | 7 | El sistema valida viaje, parada y horario antes de aceptar |
+| Escanea cuando ya había abordado | 7 | Un abordaje por viaje |
 
-La última fila es significativa: una restricción del modelo relacional tiene una pantalla que la explica en
-lenguaje natural al chofer. Modelo y Vista quedan así verificablemente alineados.
+La última fila vale la pena mirarla: **una regla del modelo de datos tiene una pantalla que se la explica al
+pasajero en castellano**. El Modelo y la Vista quedan conectados de forma comprobable, no solo declarada.
 
-## 4.5 Prototipo navegable
+**Una aclaración sobre el código QR**, porque es fácil suponer lo contrario: **el QR está pegado en la combi
+y lo escanea el pasajero**. El código identifica a la **unidad**, no a la persona — el sistema sabe quién es
+el pasajero porque tiene la sesión iniciada, y el servidor verifica que tenga reserva en ese viaje y en esa
+parada antes de registrar nada. El chofer **no escanea y no registra abordajes a mano**: su pantalla es de
+consulta y se actualiza sola a medida que los pasajeros suben.
 
-Las pantallas no son imágenes estáticas: nueve de las diez son **recorribles**, con los enlaces funcionando
-entre ellas y una barra de navegación inferior. El recorrido del pasajero puede transitarse completo, desde el
-inicio de sesión hasta el seguimiento del vehículo. El enlace figura en el **Anexo E**.
+## 4.5 Las pantallas se pueden recorrer
+
+Las pantallas no son dibujos sueltos: **nueve de las diez están enlazadas entre sí** y se pueden recorrer
+como si fuera la aplicación de verdad, desde iniciar sesión hasta seguir la combi. El enlace está en el
+**Anexo E**.
 
 ---
 
-# 5. Controlador — Comunicación Vista-Controlador y reglas de negocio
+# 5. Controlador — La comunicación entre la pantalla y el servidor
 
-## 5.1 Contract-first
+## 5.1 Primero el acuerdo, después el programa
 
-El contrato de la API **se definió antes de implementar el backend**. La razón es práctica: con el contrato
-acordado, el equipo de Vista, el de Controlador y el del agente de IA pueden avanzar en paralelo sin
-bloquearse mutuamente y sin romperse entre sí.
+Antes de escribir una sola línea del servidor, **se escribió el acuerdo de cómo se van a comunicar la
+aplicación y el servidor**: qué pedidos existen, qué datos lleva cada uno y qué responde.
 
-El contrato está escrito en **OpenAPI 3.0.3**: 21 rutas, **22 operaciones** y 22 esquemas, validado con
-`openapi-spec-validator`. Se entrega en formato YAML y JSON (**Anexo B**).
+La ventaja es práctica: con ese acuerdo cerrado, **quien hace las pantallas, quien hace el servidor y quien
+hace el asistente pueden trabajar al mismo tiempo** sin esperarse y sin romperse entre ellos.
 
-Cuando el backend esté implementado, FastAPI expondrá su propio `/openapi.json` generado automáticamente, que
-deberá coincidir con este contrato. Esa comparación es una verificación explícita del diseño.
+El acuerdo está escrito en **OpenAPI**, que es el formato estándar para describir este tipo de comunicación:
+**22 operaciones** y 23 esquemas. Se entrega en los dos formatos, YAML y JSON (**Anexo B**).
 
-## 5.2 Convenciones del contrato
+## 5.2 Reglas que sigue toda la comunicación
 
-**Autenticación.** JWT mediante `bearerAuth`. Son públicos `/auth/login`, las consultas de servicios y los
-webhooks; el resto requiere token.
+**Quién sos.** Al iniciar sesión el servidor entrega una credencial que la aplicación manda en cada pedido
+siguiente. Sin esa credencial, casi nada se puede consultar.
 
-**Autorización por rol.** El backend valida los permisos endpoint por endpoint según `rol_acceso`
-(RN-026 a RN-030).
+**Qué podés hacer.** El servidor revisa el rol de cada usuario antes de responder. Un pasajero ve sus
+reservas, no las de otro.
 
-**Errores uniformes.** Todas las respuestas de error comparten la forma `{ error: { codigo, mensaje, detalles } }`.
+**Los errores se avisan todos igual**, con un código y un mensaje, así la aplicación los puede mostrar de
+forma consistente.
 
-**Códigos HTTP coherentes con el negocio.** `400` para validación de forma, `401` sin autenticación, `403` sin
-permiso, `404` inexistente y **`409` para conflictos de negocio**. La distinción importa: que no haya cupo no
-es una petición mal formada, es un conflicto con el estado del sistema, y por eso no es un `400`.
+**Cada tipo de problema tiene su código.** Y hay una distinción que conviene explicar: cuando **no hay lugar
+en la combi**, el pedido estaba perfectamente bien escrito — el problema es que la situación cambió. Por eso
+no se responde "pedido mal formado" sino **"conflicto"**, que es un código distinto. Parece un detalle, pero
+es lo que le permite a la aplicación mostrar *"Se ocupó el último lugar"* en vez de *"Error"*.
 
-## 5.3 Operaciones
+## 5.3 Las operaciones
 
-| Caso de uso | Endpoint | Requisitos y reglas |
-|---|---|---|
-| CU-012 · Sesión | `POST /auth/login` · `POST /auth/logout` | RF-045 |
-| CU-001 · Perfil del pasajero | `GET` y `PATCH /pasajeros/me` | RF-001 · RF-003 · RN-026 |
-| CU-002 · Servicios y disponibilidad | `GET /servicios/disponibilidad` · `GET /servicios` · `GET /recorridos/{id}/paradas` | RF-004 · RN-001 |
-| RF-028 · Tarifa aplicable | `GET /tarifas` | RN-010 a RN-014 |
-| CU-003 · Crear reserva | `POST /reservas` | RF-005 · RN-001 · RN-002 · RN-031 |
-| CU-004 · Cancelar reserva | `POST /reservas/{id}/cancelacion` | RF-006 · RN-017 a RN-019 |
-| CU-005 · Cambio de parada | `POST /reservas/{id}/cambio-parada` | RF-008 · RN-020 |
-| CU-006 · Consultar deuda | `GET /pasajeros/me/deuda` | RF-010 |
-| CU-007 · Abordaje por QR | `POST /abordajes` | RF-014 · RF-015 · RN-023 · RNF-011 · RNF-012 |
-| CU-008 · Informar ausencia | `POST /ausencias` | RF-016 · RN-024 · RN-025 |
-| CU-009 · Ubicación y estimación | `GET /viajes/{id}/ubicacion` | RF-022 · RN-030 · RNF-007 · RNF-008 |
-| CU-010 · Reservas propias | `GET /pasajeros/me/reservas` · `GET /reservas/{id}` | RF-043 |
-| CU-011 · Agente conversacional | `POST /chat` | RF-029 · RF-032 |
-| CU-014 · Registrar pago | `POST /pagos` | RF-009 · RN-016 |
-| CU-016 · Confirmar o rechazar pago | `POST /pagos/{id}/confirmacion` | RF-011 · RN-015 |
-| CU-018 · Gestionar viajes | `POST /viajes` · `GET /viajes` | RF-017 · RF-018 · RN-001 |
-| CU-036 · Webhook de Mercado Pago | `POST /webhooks/mercadopago` | RF-012 · RN-015 |
+| Caso de uso | Operación |
+|---|---|
+| CU-012 · Iniciar y cerrar sesión | Login y logout |
+| CU-001 · Ver y editar mi perfil | Consultar y modificar los datos del pasajero |
+| CU-002 · Buscar servicios y lugares disponibles | Consultar viajes, servicios y paradas del recorrido |
+| CU-003 · Reservar | Crear la reserva |
+| CU-004 · Cancelar la reserva | Cancelar |
+| CU-005 · Cambiar de parada | Cambiar la parada de la reserva |
+| CU-006 · Consultar mi deuda | Consultar deuda |
+| CU-007 · Abordar escaneando el QR de la combi | Registrar abordaje (lo llama el pasajero) |
+| CU-008 · Avisar que no viajo | Registrar ausencia |
+| CU-009 · Ver dónde está la combi | Consultar ubicación y tiempo estimado |
+| CU-010 · Ver mis reservas | Consultar reservas propias |
+| CU-011 · Hablar con el asistente | Enviar mensaje al asistente |
+| CU-014 · Registrar un pago | Registrar pago |
+| CU-016 · Confirmar o rechazar un pago | Confirmar pago (administración) |
+| CU-018 · Programar y ver viajes | Crear y consultar viajes |
+| CU-036 · Aviso automático de Mercado Pago | Recibir el aviso de pago acreditado |
 
-Los casos de uso restantes siguen el mismo patrón —recurso, roles y errores— y se incorporarán en la segunda
-versión del contrato.
+Esta versión cubre **16 de los 37 casos de uso**, más el requisito de tarifas. Los restantes siguen el mismo
+patrón y se agregarán en la próxima.
+
+**Dos están cubiertos en parte, y conviene decirlo:** de CU-018 solo está la creación del viaje —modificar,
+cancelar y reasignar quedan para la próxima versión—, y de CU-003 falta la operación para anotarse en la
+lista de espera que el propio mensaje de error anuncia. La pantalla del administrador, además, supone una
+operación para **listar** los viajes del día que todavía no está en el acuerdo.
 
 ## 5.4 Dónde viven las reglas de negocio
 
-Las 31 reglas de negocio se validan en la capa `services/` del backend. **Nunca en el cliente Flutter y nunca
-en el agente de IA.** Esta es la contrapartida directa del principio enunciado en la sección 2.4: si las reglas
-vivieran en la Vista, bastaría con consumir la API desde otro cliente para saltearlas; si vivieran en el
-agente, un *prompt* suficientemente astuto podría eludirlas.
+**Las 31 reglas viven en el servidor.** No en la aplicación y no en el asistente de IA.
+
+El motivo es concreto: si las reglas estuvieran en la aplicación, cualquiera podría saltearlas entrando al
+sistema desde otro lado. Y si estuvieran en el asistente, un mensaje bien escrito podría convencerlo de
+ignorarlas.
 
 ---
 
 # 6. Modelos de IA y agentes
 
-## 6.1 Modelos de IA utilizados y justificación
+## 6.1 Qué modelos usamos y por qué
 
-La solución usa **OpenRouter** como gateway, lo que permite rutear entre modelos con una interfaz común y
-aplicar una política de *fallback* sin modificar la arquitectura.
+El sistema usa **OpenRouter**, un servicio que permite conectarse a varios modelos de inteligencia
+artificial con una sola forma de llamarlos, y cambiar de uno a otro si uno falla.
 
-| Rol | Modelo | Identificador |
-|---|---|---|
-| Principal | MiniMax M3 Free | `minimax/minimax-m3:free` |
-| Fallback | NVIDIA Nemotron 3 Super Free | `nvidia/nemotron-3-super-120b-a12b:free` |
+- **Modelo principal:** MiniMax M3
+- **Modelo de respaldo:** NVIDIA Nemotron 3 Super
 
-**Los modelos no se eligieron por preferencia sino por evidencia.** Se construyó una prueba de concepto con una
-batería común de **diez casos de prueba (TC-01 a TC-10)** y se evaluaron los candidatos con una **matriz de
-criterios ponderada**:
+**No los elegimos porque nos gustaran, los elegimos midiendo.** Armamos una prueba con **diez casos
+distintos** y evaluamos a cada candidato con una planilla de criterios, donde cada criterio pesa según lo
+importante que sea:
 
-| Criterio | Peso |
+| Qué se midió | Cuánto pesa |
 |---|---|
-| Selección correcta de la herramienta | 25% |
-| Exactitud de los argumentos | 20% |
-| Seguridad y respeto de permisos y reglas | 15% |
-| Ausencia de alucinación de datos operativos | 15% |
-| Comprensión y respuesta en español | 10% |
-| Respuesta estructurada y utilizable | 5% |
-| Latencia | 5% |
-| Disponibilidad y ausencia de errores | 5% |
+| Que elija la herramienta correcta | 25% |
+| Que le pase los datos correctos a esa herramienta | 20% |
+| Que respete los permisos y las reglas | 15% |
+| Que no invente datos | 15% |
+| Que entienda y conteste bien en español | 10% |
+| Que la respuesta sea clara y usable | 5% |
+| Cuánto tarda | 5% |
+| Que no se caiga | 5% |
 
-**Resultado:** MiniMax M3 obtuvo **95,5 / 100** y Nemotron 3 Super **94,5 / 100**. Ambos alcanzaron 10 de 10
-peticiones con respuesta correcta, 90% de acierto en la selección de herramienta y 90% en los argumentos, con
-latencias de aproximadamente 2,5 y 2,8 segundos. Se descartaron GLM 5.2, Gemma y GPT-OSS por indisponibilidad
-durante la ventana de prueba.
+**Resultado:** MiniMax sacó **95,5 sobre 100** y Nemotron **94,5**. Los dos respondieron correctamente las
+diez veces, acertaron la herramienta en el 90% de los casos y tardaron alrededor de 2,5 segundos. Se
+descartaron otros tres modelos porque no estaban disponibles durante la prueba.
 
-**Un hallazgo de la prueba cambió el diseño:** las **fechas relativas** —cuando el usuario dice «mañana»— **no
-deben delegarse al modelo**. El backend inyecta la fecha y hora de forma determinística antes de ejecutar
-cualquier herramienta. Delegar esa resolución al modelo introducía errores que ninguna validación posterior
-podría detectar, porque la petición resultante es sintácticamente válida.
+**La prueba cambió una decisión del diseño.** Descubrimos que **cuando el usuario dice "mañana", no hay que
+dejar que el modelo interprete qué día es**. El servidor le pasa la fecha ya calculada. Si lo resuelve el
+modelo, a veces se equivoca de día — y el error es invisible, porque el pedido que genera está perfectamente
+bien formado. Eso no lo podríamos haber sabido sin probar.
 
-Se deja constancia, además, de la distinción entre la **IA usada para desarrollar el proyecto** (asistentes de
-análisis, diseño y programación, siempre con revisión humana obligatoria) y la **IA que forma parte del
-producto**, que es la que documenta esta sección.
+Aclaramos además que **hay dos usos distintos de IA en este trabajo**: la que usamos nosotros para analizar,
+diseñar y programar, que siempre pasa por revisión nuestra; y la que forma parte del producto, que es la que
+describe esta sección.
 
-## 6.2 Agentes IA implementados
+## 6.2 El agente que implementamos
 
-**AG-01 — Agente Conversacional VanFull**
+**AG-01 es el asistente conversacional de VanFull.** Atiende al pasajero en lenguaje común, desde la
+aplicación y desde WhatsApp, y puede resolverle consultas y acciones.
 
-| Atributo | Definición |
+Sus características principales:
+
+- **No accede a la base de datos.** Todo lo hace a través del servidor.
+- **No puede saltear ninguna regla.** Los lugares, los permisos y los pagos los verifica el servidor.
+- **Si un modelo falla, prueba con el otro.** Y si ninguno responde, avisa e ingresa a la persona a
+  atención humana.
+
+Dejamos declarado un segundo agente, **AG-02**, para asistir a los administradores, **fuera del alcance de
+esta primera versión**.
+
+**Las once herramientas que puede usar.** Cada herramienta corresponde a un caso de uso, así que el asistente
+no puede hacer nada que no esté previsto:
+
+| Herramienta | Para qué |
 |---|---|
-| Objetivo | Atender consultas en lenguaje natural y ejecutar acciones habilitadas mediante herramientas controladas del backend |
-| Usuarios | Pasajeros y clientes autorizados, desde la aplicación y desde WhatsApp — el mismo agente en ambos canales |
-| Acceso a datos | Indirecto, solo a través de servicios de FastAPI. Sin acceso a PostgreSQL |
-| Acciones críticas | Las valida el backend: no ignora cupos, permisos, reglas de pago ni privacidad |
-| Ante error del proveedor | Reintenta con el modelo de respaldo; si no hay respuesta válida, informa la indisponibilidad y deriva a un humano |
-| Canal de entrada | `POST /chat`, donde el backend orquesta el ciclo de herramientas |
+| Consultar disponibilidad | Ver cuántos lugares quedan |
+| Consultar horarios | Ver las salidas del día |
+| Consultar recorridos | Ver los recorridos que hay |
+| Consultar paradas | Ver las paradas de un recorrido |
+| Consultar tarifa | Ver cuánto sale |
+| Consultar deuda | Ver cuánto debe el pasajero |
+| Consultar estado de pago | Ver si un pago se acreditó |
+| Consultar reserva | Ver una reserva |
+| Crear reserva | Reservar un lugar |
+| Cancelar reserva | Cancelar una reserva |
+| Consultar ubicación | Ver dónde está la combi |
+| Derivar a un humano | Pasar la conversación a una persona |
 
-**AG-02**, un asistente de operación para administradores, queda declarado como **extensión futura fuera del
-alcance del MVP**.
+Reservar o cancelar desde el chat **pasa por las mismas verificaciones** que hacerlo desde la aplicación.
 
-**Las once herramientas y su trazabilidad.** Cada herramienta se corresponde con un caso de uso y con un
-endpoint del contrato:
+**Cómo funciona una conversación, paso a paso:**
 
-| Herramienta | Caso de uso | Endpoint |
-|---|---|---|
-| `consultar_disponibilidad()` | CU-002 | `GET /servicios/disponibilidad` |
-| `consultar_horarios()` | CU-002 | `GET /servicios` |
-| `consultar_recorridos()` | CU-002 | `GET /recorridos` |
-| `consultar_paradas()` | CU-002 | `GET /recorridos/{id}/paradas` |
-| `consultar_tarifa()` | RF-028 | `GET /tarifas` |
-| `consultar_deuda()` | CU-006 | `GET /pasajeros/me/deuda` |
-| `consultar_estado_pago()` | CU-006 | `GET /pasajeros/me/pagos` |
-| `consultar_reserva()` | CU-010 | `GET /reservas/{id}` |
-| `crear_reserva()` | CU-003 | `POST /reservas` |
-| `cancelar_reserva()` | CU-004 | `POST /reservas/{id}/cancelacion` |
-| `consultar_ubicacion_vehiculo()` | CU-009 | `GET /viajes/{id}/ubicacion` |
-| `derivar_humano()` | RF-032 | Interno de `/chat` |
+1. El usuario escribe un mensaje.
+2. El servidor le agrega la fecha y hora actuales y quién es el usuario.
+3. El modelo lee todo eso y decide qué herramienta usar.
+4. **El servidor ejecuta esa herramienta y verifica las reglas.**
+5. El resultado vuelve al modelo, que redacta la respuesta en lenguaje común.
+6. Si no puede resolverlo de forma segura, pasa la conversación a una persona.
 
-Ninguna herramienta hace algo que no esté respaldado por un caso de uso y validado por el backend. Reservar o
-cancelar por chat reutiliza CU-003 y CU-004 con exactamente las mismas validaciones que cualquier otro canal.
+## 6.3 Las instrucciones que le damos al modelo
 
-**Flujo de una interacción:**
-
-```
-Usuario -> POST /chat
-        -> Backend inyecta fecha, hora y contexto del usuario
-        -> Modelo (MiniMax; si falla, Nemotron) elige herramienta y argumentos
-        -> Backend ejecuta la herramienta = servicio FastAPI (valida reglas, permisos, cupo)
-        -> El resultado vuelve al modelo
-        -> Respuesta en lenguaje natural
-        -> Si no puede resolverse de forma segura, o el usuario lo pide: derivar_humano()
-```
-
-## 6.3 Prompt base
+Estas son las instrucciones fijas que recibe el asistente antes de cada conversación:
 
 ```
 Sos el asistente conversacional de VanFull.
-Fecha actual del sistema: <provista por backend>.
+Fecha actual del sistema: la provee el servidor.
 - Atendé únicamente consultas vinculadas con VanFull.
 - Nunca inventes cupos, horarios, tarifas, pagos ni deudas.
 - Para datos operativos usá las herramientas disponibles.
@@ -506,90 +527,125 @@ Fecha actual del sistema: <provista por backend>.
 - No permitas reservas por encima del cupo.
 - Las reglas de negocio las valida el backend.
 - Si faltan datos esenciales, pedilos antes de ejecutar una acción.
-- Si el usuario pide atención humana, usá derivar_humano().
+- Si el usuario pide atención humana, derivá la conversación.
 - Rechazá solicitudes ajenas a VanFull de manera breve.
 ```
 
-## 6.4 Seguridad del agente
+## 6.4 Cuidados de seguridad
 
-- No se envían al modelo documentos de identidad, fotografías ni datos de contacto de terceros: se usan
-  identificadores internos y el mínimo contexto necesario.
-- El backend autoriza antes de devolver reservas, ubicación, deuda o estado de pagos (RN-026 a RN-030).
-- **La confirmación de pagos es humana** (RN-015). El agente no puede modificarla, y así se lo indica al
-  usuario cuando lo intenta.
-- La prueba de concepto incluyó casos de seguridad específicos: rechazo de alteración de pagos (TC-07),
-  privacidad e inyección de *prompt* (TC-08), consultas fuera de alcance (TC-09) y derivación (TC-10).
-- Ante un fallo del proveedor o de una herramienta se registra el error y se aplica el respaldo o la
-  derivación. **Nunca se inventa una respuesta.**
+- **No le mandamos al modelo datos personales** como documentos o fotos. Usa identificadores internos.
+- **El servidor revisa los permisos** antes de devolver cualquier dato de una persona.
+- **Confirmar un pago lo hace una persona, no el asistente.** Cuando un usuario le pide que dé un pago por
+  confirmado, el asistente le explica que no puede y le indica cómo hacerlo.
+- La prueba incluyó casos pensados para engañarlo: pedirle que altere un pago, pedirle datos de otra
+  persona, y preguntarle cosas ajenas a VanFull. Los rechazó.
+- Si falla un modelo o una herramienta, se registra el error y se deriva. **Nunca se inventa una respuesta.**
 
 ---
 
 # 7. Modelo de desarrollo
 
-## 7.1 Control de versiones
+## 7.1 Cómo guardamos el código
 
-El proyecto es un **monorepo** en Git alojado en GitHub, con rama principal `main`. La raíz contiene el código
-y la configuración; toda la documentación que no es código vive en `Documentos/`.
+El código está en un repositorio de **Git alojado en GitHub**, público. Todo el proyecto vive en un solo
+repositorio: el servidor, la aplicación y la documentación técnica.
 
-El criterio de qué se guarda dónde: **Google Drive** para la documentación oficial del equipo, **Git** para el
-código y los artefactos versionables (`.md`, `.sql`, `.yaml`, `.puml`). Los archivos binarios de ofimática
-quedan fuera del repositorio porque Git no puede compararlos ni fusionarlos. Las credenciales nunca se
-versionan.
+Separamos las cosas así: **Google Drive** guarda la documentación oficial del equipo y **GitHub** guarda el
+código y los archivos que conviene versionar. Las contraseñas y claves **nunca** se suben.
 
-## 7.2 Flujo de trabajo
+## 7.2 Cómo trabajamos
 
 ```
-Issue -> Branch -> Desarrollo -> Commit -> Pull Request -> Revisión -> Merge
+Issue -> Rama -> Desarrollo -> Commit -> Pull Request -> Revisión -> Merge
 ```
 
-Un issue por cada funcionalidad, defecto o tarea técnica, atado a un caso de uso o requisito. Una rama por
-tarea; nunca se commitea directo a `main`. El Pull Request es la unidad de revisión y lo revisa un compañero.
-Los merges se hacen con `--no-ff`, de modo que el historial conserve visible cada unidad de trabajo. `main` se
-mantiene siempre en estado desplegable.
+Para cada tarea se abre un **issue** (una ficha que describe qué hay que hacer), se trabaja en una **rama
+aparte** para no romper lo que funciona, y cuando está lista se abre un **Pull Request** que **revisa un
+compañero** antes de incorporarlo. Nadie sube cambios directamente a la rama principal, y esa rama se
+mantiene siempre en un estado que funciona.
 
-Las ramas siguen `<tipo>/<descripcion-corta>` y los commits la convención **Conventional Commits**, con
-referencia al caso de uso o regla en el cuerpo del mensaje.
+Los mensajes de los commits siguen una convención fija y **mencionan el caso de uso o la regla** que
+justifica el cambio, para poder rastrear después por qué se hizo cada cosa.
 
 ## 7.3 Trazabilidad
 
-La cadena que debe poder recorrerse para cualquier funcionalidad:
+Para cualquier funcionalidad se puede seguir la cadena completa:
 
 ```
-CU -> operación -> endpoint -> servicio -> datos -> prueba
+Caso de uso -> operación -> servidor -> servicio -> datos -> prueba
 ```
 
-## 7.4 Calidad
+## 7.4 Cómo controlamos la calidad
 
-| Herramienta | Para qué |
-|---|---|
-| **ruff** | Lint y formato de Python |
-| **pytest** | Pruebas automatizadas |
-| **Docker Compose** | Entorno reproducible: PostgreSQL y API |
+- **ruff** revisa que el código Python esté bien escrito y con formato uniforme.
+- **pytest** corre las pruebas automáticas.
+- **Docker** levanta la base de datos y el servidor iguales en la computadora de cualquiera del equipo.
 
-Antes de dar una tarea por terminada se verifica que exista un requisito que justifique el cambio, que respete
-actores y permisos, que las reglas se validen en el backend, que el contrato OpenAPI esté actualizado si la API
-cambió, que existan pruebas y que `ruff` y `pytest` pasen.
+Antes de dar una tarea por terminada revisamos que exista un requisito que la justifique, que las reglas se
+verifiquen en el servidor, que el acuerdo de comunicación esté actualizado si la API cambió, que tenga
+pruebas y que las herramientas de control pasen sin errores.
 
 ## 7.5 Planificación
 
-> **PENDIENTE — Equipo.** Insertar el cronograma de las 16 semanas con el estado actual y los hitos de los
-> tres puntos de control. Material: `Cronograma_VanFull` y la carpeta `00` del Drive.
+> FALTA — Equipo. Pegar el cronograma de las 16 semanas, marcando en qué semana estamos y dónde caen los tres puntos de control.
 
 ---
 
 # 8. Anexos
 
-| Anexo | Contenido | Ubicación |
+| Anexo | Qué es | Dónde está |
 |---|---|---|
-| **A** | Modelo de datos SQL — DDL completo de 35 tablas | Repositorio, tag `pc1`: `backend/db/schema.sql` |
-| **B** | Contrato OpenAPI, en YAML y JSON | Repositorio, tag `pc1`: `backend/openapi/` |
-| **C** | IA y agentes — documento consolidado | Drive, carpeta `07_PC1_Integracion_Final` |
-| **D** | Modelo de desarrollo — documento completo | Drive, carpeta `07_PC1_Integracion_Final` |
-| **E** | Prototipo navegable de las diez pantallas | Enlace en el Anexo del Drive |
-| **F** | Sistema de diseño — tokens, componentes y marca | Enlace en el Anexo del Drive |
-| **G** | Especificaciones de los 37 casos de uso | Drive, carpeta `03_Actores_y_Casos_de_Uso` |
-| **H** | Diagramas C4, UML y DER | Drive, carpetas `04_Modelo_y_UML` y `05_Arquitectura_API_Datos` |
+| **A** | El modelo de datos en SQL, completo | En el repositorio |
+| **B** | El acuerdo de comunicación, en YAML y en JSON | En el repositorio |
+| **C** | IA y agentes, documento completo | En esta misma carpeta del Drive |
+| **D** | Modelo de desarrollo, documento completo | En esta misma carpeta del Drive |
+| **E** | Las diez pantallas, para recorrer | Enlace |
+| **F** | Colores, tipografías y componentes | Enlace |
+| **G** | Las especificaciones de los 37 casos de uso | Carpeta 03 del Drive |
+| **H** | Diagramas C4, UML y Entidad-Relación | Carpetas 04 y 05 del Drive |
 
-**Repositorio del proyecto:** https://github.com/Martiherenu1/ProyectoVanFull
+Repositorio: https://github.com/Martiherenu1/ProyectoVanFull
 
-**Estado congelado de esta entrega:** https://github.com/Martiherenu1/ProyectoVanFull/tree/pc1
+---
+
+# 9. Guía para la presentación
+
+Esta sección es **para nosotros**, no para entregar. Es el guion de qué mostrar el 28 de septiembre.
+
+## Las cuatro cosas que hay que decir sí o sí
+
+**1. Que el problema es real.** VanFull existe y hoy trabaja con WhatsApp, Excel y papel. No inventamos un
+caso.
+
+**2. Que el modelo de datos está probado, no dibujado.** El archivo SQL se ejecutó contra una base
+PostgreSQL de verdad y se verificó que rechaza los datos inválidos. Es la diferencia con un diagrama que
+nunca se corrió.
+
+**3. Que los modelos de IA los elegimos midiendo.** Diez casos de prueba y una planilla de criterios
+ponderados. Y que esa prueba nos cambió una decisión de diseño, la de las fechas relativas.
+
+**4. Que la IA no puede romper nada.** El asistente no toca la base de datos. Aunque el modelo se equivoque
+o alguien intente engañarlo, quien decide es el servidor.
+
+## Orden sugerido para mostrar
+
+1. El problema y la empresa (sección 1) — **2 minutos**
+2. La arquitectura, con el diagrama (sección 2) — **3 minutos**
+3. El modelo de datos y las decisiones (sección 3) — **4 minutos**
+4. **Las pantallas, recorriéndolas en vivo** (sección 4) — **5 minutos**
+5. El asistente y cómo elegimos los modelos (sección 6) — **4 minutos**
+6. Cómo trabajamos en equipo (sección 7) — **2 minutos**
+
+## Lo que conviene mostrar en vivo y no en diapositiva
+
+- **El recorrido de las pantallas.** Están enlazadas: se puede ir de iniciar sesión hasta seguir la combi.
+  Impacta mucho más que capturas sueltas.
+- **La pantalla del chofer al lado de la del administrador.** Se ve de una que son distintas a propósito.
+- **El error de "sin lugar" al confirmar una reserva.** Muestra que pensamos los casos en que algo falla.
+
+## Si preguntan por algo que no hicimos
+
+Decirlo directamente. **Está bien que el alcance tenga límites y esté escrito cuál es.** Diseñamos diez
+pantallas de treinta y siete casos de uso, y está explicado por qué. El acuerdo de comunicación cubre las
+operaciones principales y las demás quedan para la próxima versión. Eso es alcance definido, no trabajo
+faltante.

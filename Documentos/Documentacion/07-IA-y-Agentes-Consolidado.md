@@ -130,7 +130,10 @@ Implementación de referencia en el scaffold: `backend/app/agent/openrouter_clie
 
 - No enviar al LLM DNI/fotos/documentos completos ni datos de contacto de terceros; usar identificadores internos y mínimo contexto.
 - El backend autoriza antes de devolver reservas, ubicación, deuda o estado de pagos (RN-026..030).
-- El agente **no** modifica reglas de negocio, cupos, permisos ni estados de pago; la confirmación de pagos es **humana** (RN-015).
+- El agente **no** modifica reglas de negocio, cupos, permisos ni estados de pago. **El agente nunca confirma
+  un pago** (RN-015). Según el medio, la confirmación la produce **automáticamente la integración con Mercado
+  Pago** cuando el proveedor informa la operación como aprobada o acreditada, o la hace **una persona
+  autorizada** para los medios que no acreditan de forma automática. En ningún caso interviene la IA.
 - Casos de prueba de seguridad cubiertos en la PoC: rechazo de alterar pagos (TC-07), privacidad / prompt injection (TC-08),
   fuera de alcance (TC-09), derivación (TC-10).
 - Ante fallo de proveedor/tool: registrar el error, aplicar fallback o derivar; nunca inventar respuestas.

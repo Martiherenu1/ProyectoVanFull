@@ -505,8 +505,11 @@ paths:
       tags: [pagos]
       summary: Confirmar o rechazar un pago
       description: |
-        Confirmación administrativa final por una persona autorizada (RN-015). El agente
-        IA nunca confirma pagos. Un pago CONFIRMADO genera un comprobante RECIBO. (CU-016, RF-011)
+        Permite a una persona autorizada confirmar o rechazar un pago cuya
+        acreditación no haya sido validada automáticamente por un proveedor
+        integrado. No se utiliza para volver a validar pagos ya confirmados
+        automáticamente mediante Mercado Pago. El agente IA nunca confirma pagos.
+        Un pago CONFIRMADO genera un comprobante RECIBO. (CU-016, RF-011, RN-015)
       x-cu: CU-016
       parameters:
         - $ref: '#/components/parameters/IdPago'
@@ -597,8 +600,13 @@ paths:
       tags: [integraciones]
       summary: Webhook de Mercado Pago (pruebas)
       description: |
-        Recibe notificaciones de Mercado Pago (entorno de pruebas) y actualiza el estado
-        interno. No reemplaza la confirmación humana del pago (RN-015). (CU-036, RF-012)
+        Recibe notificaciones de Mercado Pago en entorno de pruebas.
+        Cuando Mercado Pago informa válidamente que una operación fue aprobada
+        o acreditada, el sistema actualiza automáticamente el pago correspondiente
+        a CONFIRMADO, sin requerir una segunda validación humana.
+        Los pagos cuyo medio no proporcione una acreditación automática válida
+        continúan sujetos a confirmación administrativa según RN-015.
+        (CU-036, RF-012, RN-015)
       x-cu: CU-036
       security: []
       requestBody:

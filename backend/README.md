@@ -12,7 +12,7 @@ app/
 ├── schemas/           # Pydantic (I/O de la API)
 ├── routers/           # Endpoints HTTP
 ├── services/          # Reglas de negocio (RN-001..031): cupos, deuda, pagos
-└── agent/             # AG-01: tools.py (11 tools) + openrouter_client.py (fallback)
+└── agent/             # AG-01: tools.py (13 tools) + openrouter_client.py (fallback)
 ```
 
 **Regla de oro:** los `routers` no contienen reglas de negocio; delegan en `services`. El agente AG-01

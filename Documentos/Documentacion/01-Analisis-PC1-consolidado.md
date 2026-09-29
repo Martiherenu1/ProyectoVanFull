@@ -50,7 +50,7 @@ FastAPI centraliza auth, permisos, validaciones, servicios de dominio e integrac
 ## AG-01 — Agente conversacional
 - Modelo principal: `minimax/minimax-m3:free`; fallback: `nvidia/nemotron-3-super-120b-a12b:free`; gateway OpenRouter.
 - Acceso a datos indirecto vía tools de FastAPI. Acciones críticas validadas por backend.
-- **11 tools:** consultar_disponibilidad, consultar_horarios, consultar_recorridos/paradas, consultar_tarifa,
+- **13 tools:** consultar_disponibilidad, consultar_horarios, consultar_recorridos/paradas, consultar_tarifa,
   consultar_estado_pago/deuda, consultar_reserva, crear_reserva, cancelar_reserva, consultar_estado_viaje,
   consultar_ubicacion_vehiculo, derivar_humano.
 - **Prompt base** (PoC): atender sólo temas Vanfull; nunca inventar cupos/horarios/tarifas/pagos/deudas;

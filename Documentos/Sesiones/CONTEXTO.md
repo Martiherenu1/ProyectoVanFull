@@ -90,7 +90,7 @@ Disponibilidad 99 % mensual · 95 % de operaciones ≤ 2 s · operaciones pesada
 
 - **Usuarios:** pasajeros y clientes autorizados, desde la app y (luego) WhatsApp — **el mismo agente** en ambos canales.
 - **Acceso a datos:** indirecto, sólo por tools de FastAPI. Nunca toca PostgreSQL.
-- **11 tools**, todas trazadas a un CU y a un endpoint → `Documentos/Documentacion/07-IA-y-Agentes-Consolidado.md`.
+- **13 tools**, todas trazadas a un CU y a un endpoint → `Documentos/Documentacion/07-IA-y-Agentes-Consolidado.md`.
 - **Reglas de oro:** no inventa cupos/horarios/tarifas/pagos; no modifica estados de pago; no revela datos de
   terceros; si faltan datos los pide; deriva a humano si no puede resolver con seguridad.
 - **Hallazgo de la PoC:** las fechas relativas ("mañana") **no** se delegan al modelo — el backend inyecta
@@ -163,7 +163,7 @@ Seguimiento en vivo · Asistente AG-01 · Chofer (lista) · Chofer (escaneo QR) 
 ## 11. Estado del código
 
 **Existe:** `main.py` (app + CORS + routers), `core/config.py` (variables de entorno), `core/database.py` (motor
-async + `get_db`), `routers/health.py` (**el único endpoint real**), `agent/tools.py` (11 tools + system prompt),
+async + `get_db`), `routers/health.py` (**el único endpoint real**), `agent/tools.py` (13 tools + system prompt),
 `agent/openrouter_client.py` (cliente con fallback), `tests/test_health.py`, Dockerfile y docker-compose.
 
 **No existe todavía:** `models/`, `schemas/` y `services/` están **vacíos**, y falta todo endpoint que no sea

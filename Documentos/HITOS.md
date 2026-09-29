@@ -40,7 +40,7 @@
 - **Tecnologías:** OpenRouter, MiniMax M3, NVIDIA Nemotron 3 Super, tool calling, evaluación de modelos.
 
 ### [2026-08-27] Diseño del agente conversacional AG-01 con tool calling seguro
-- **Qué:** Especificación de AG-01: agente que atiende lenguaje natural en app y WhatsApp mediante **11
+- **Qué:** Especificación de AG-01: agente que atiende lenguaje natural en app y WhatsApp mediante **13
   herramientas** controladas del backend, sin acceso directo a la base de datos. Incluye prompt base con
   restricciones de seguridad y el hallazgo de que las fechas relativas ("mañana") deben resolverse de forma
   **determinística en el backend**, no delegarse al modelo.
@@ -52,7 +52,7 @@
 ### [2026-08-31] Scaffolding del monorepo (backend FastAPI + frontend Flutter + Docker)
 - **Qué:** Estructura inicial del monorepo: backend **FastAPI por capas** (`core`/`models`/`schemas`/
   `routers`/`services`/`agent`) con SQLAlchemy 2.0 async, `config` por variables de entorno, endpoint de
-  salud con chequeo de BD, módulo **AG-01** (las 11 tools en formato function-calling + cliente OpenRouter
+  salud con chequeo de BD, módulo **AG-01** (las 13 tools en formato function-calling + cliente OpenRouter
   con fallback), tests de humo, `Dockerfile` y `docker-compose` (PostgreSQL + API con hot-reload).
 - **Rol de Martiniano:** definió el stack y las decisiones (monorepo, hosting Railway/Render); dueño del backend y frontend.
 - **Por qué importa (CV):** montar un proyecto **containerizado, por capas y multiplataforma** desde cero
@@ -95,7 +95,7 @@
 
 ### [2026-09-22] Trazabilidad end-to-end: caso de uso → endpoint → tool del agente
 - **Qué:** Consolidación de la documentación de IA y agentes con una **matriz de trazabilidad** que conecta cada
-  una de las 11 tools del agente AG-01 con su caso de uso y su endpoint de la API, más la justificación empírica
+  una de las 13 tools del agente AG-01 con su caso de uso y su endpoint de la API, más la justificación empírica
   de los modelos (PoC con matriz ponderada) y las restricciones de seguridad del agente.
 - **Rol de Martiniano:** responsable de IA/agentes (Integrante 3).
 - **Por qué importa (CV):** demuestra capacidad de **mantener trazabilidad entre negocio, API e IA** —que el

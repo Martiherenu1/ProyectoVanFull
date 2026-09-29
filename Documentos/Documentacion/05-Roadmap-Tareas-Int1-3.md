@@ -22,7 +22,7 @@
 - ✅ **T-001** `[1+3]` Stack y arquitectura definidos (Flutter, FastAPI, PostgreSQL, OpenRouter, Google Maps, MP, WhatsApp).
 - ✅ **T-002** `[1]` Scaffold del monorepo (`backend/` por capas, `frontend/`, `docker-compose`, `.gitignore`, READMEs).
 - ✅ **T-003** `[3]` Selección y justificación del LLM (PoC MiniMax M3 / Nemotron con matriz ponderada).
-- ✅ **T-004** `[3]` Definición de AG-01: 11 tools en formato function-calling + System Prompt base.
+- ✅ **T-004** `[3]` Definición de AG-01: 13 tools en formato function-calling + System Prompt base.
 - ✅ **T-005** `[3]` Cliente OpenRouter con fallback (stub) + cronograma e hitos (`HITOS.md`).
 
 ---
@@ -38,7 +38,7 @@
 ### B.2 — PoC ejecutable del agente AG-01 (tarea estrella de Int3)
 - ⬜ **T-009** `[3]` Completar el cliente OpenRouter: manejo de `tool_calls` en la respuesta, reintento con fallback, timeouts y logging de errores de proveedor.
 - ⬜ **T-010** `[3]` Implementar el **loop de Function Calling**: mensaje usuario → LLM elige tool → ejecutar tool → devolver resultado al modelo → respuesta final en lenguaje natural.
-- ⬜ **T-011** `[1+3]` **Tools mockeadas**: implementar las 11 tools devolviendo datos de prueba (sin BD), para validar el loop de punta a punta. (RF-029..032)
+- ⬜ **T-011** `[1+3]` **Tools mockeadas**: implementar las 13 tools devolviendo datos de prueba (sin BD), para validar el loop de punta a punta. (RF-029..032)
 - ⬜ **T-012** `[3]` **Inyección de fecha/contexto determinístico**: el backend resuelve "hoy/mañana" antes de ejecutar tools (hallazgo de la PoC). Nunca delegar la fecha al modelo.
 - ⬜ **T-013** `[3]` Endpoint `POST /api/chat`: recibe mensaje + contexto de usuario, corre el loop, responde. Con manejo de `derivar_humano()`.
 - ⬜ **T-014** `[3]` **Modo mock sin API key**: simular la elección de tool para poder demostrar/testear offline. Flag por variable de entorno.
@@ -126,7 +126,7 @@
 ---
 
 ## EPIC I — Agente AG-01 completo (sem 10-12)
-- ⬜ **T-067** `[1+3]` **Conectar las 11 tools a los servicios reales** (reemplazar los mocks de la PoC).
+- ⬜ **T-067** `[1+3]` **Conectar las 13 tools a los servicios reales** (reemplazar los mocks de la PoC).
 - ⬜ **T-068** `[3]` System Prompt final + inyección de contexto de usuario autenticado (permisos, identidad).
 - ⬜ **T-069** `[3]` Refuerzos de seguridad: no exceder cupo, no revelar datos de terceros, no modificar pagos, validar todo en backend.
 - ⬜ **T-070** `[1+3]` **Canal WhatsApp**: webhook entrante, envío de respuestas, plantillas, mismo AG-01 que la app. (RF-029..032, INT-001)

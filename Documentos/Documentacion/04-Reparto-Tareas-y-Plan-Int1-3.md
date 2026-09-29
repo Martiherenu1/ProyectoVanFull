@@ -33,7 +33,7 @@ alimentan nuestros endpoints y modelo de datos).*
 |---|---|---|
 | 6 | **Selección y justificación del LLM** | ✅ hecho (PoC MiniMax/Nemotron, matriz ponderada) |
 | 7 | **Arquitectura de agentes y System Prompts** | ✅ AG-01 definido (prompt base en `agent/tools.py`) |
-| 8 | **Function Calling** integrado con backend | 🟡 11 tools codificadas; falta conectarlas a `services` |
+| 8 | **Function Calling** integrado con backend | 🟡 13 tools codificadas; falta conectarlas a `services` |
 | 9 | **PoC mínima de los agentes** | ⬜ pendiente (demo ejecutable end-to-end) |
 | 10 | **Git/GitHub y tablero de trabajo** | ⬜ pendiente (`git init` + repo + board) |
 | 11 | **Cronograma e hitos** | ✅ cronograma ingerido + `HITOS.md` en marcha |
@@ -53,7 +53,7 @@ servicios → **(4)** los tres revisan de punta a punta y consolidan.
 ## 4. Orden de ataque propuesto (hacia el PC1)
 
 **Fase A — ahora, sin depender del DER/casos de uso de Int2:**
-1. **PoC de agentes ejecutable** (tarea 9): AG-01 llamando OpenRouter con las 11 tools y respuestas de
+1. **PoC de agentes ejecutable** (tarea 9): AG-01 llamando OpenRouter con las 13 tools y respuestas de
    servicios **mockeadas** (sin BD real todavía). Valida Function Calling end-to-end. *(Int1+3)*
 2. **Diseño de integración de pagos (Mercado Pago sandbox) y GPS** (tarea 4): flujo de webhooks y endpoints,
    independiente del detalle del DER. *(Int1)*

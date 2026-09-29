@@ -163,7 +163,7 @@ demuestra que se leyó la consigna.
 - Vale incluir la honestidad metodológica sobre el caso multi-paso TC-04: reconocer un límite suma.
 
 **6.2 · Agentes IA implementados**
-- **AG-01:** definición formal, las **11 herramientas** en formato function-calling, el prompt base.
+- **AG-01:** definición formal, las **13 herramientas** en formato function-calling, el prompt base.
 - **La matriz de trazabilidad** herramienta → caso de uso → endpoint.
 - **Seguridad del agente:** no accede a la base, no confirma pagos, y las **fechas relativas** («mañana») se
   resuelven de forma determinística en el backend en vez de delegarlas al modelo — que fue un hallazgo de la

@@ -542,8 +542,10 @@ paths:
       tags: [viajes]
       summary: Crear un viaje
       description: |
-        Crea un viaje con fecha, horario, recorrido, vehículo, chofer y capacidad.
-        Verifica capacidad vs pasajeros (RN-001). (CU-018, RF-017/018)
+        Crea un viaje con fecha, horario, recorrido y capacidad. Durante la planificación,
+        vehículo y/o chofer pueden quedar pendientes; ambos deben estar asignados antes de
+        iniciar la ejecución. Verifica capacidad vs pasajeros cuando exista un vehículo
+        asignado (RN-001). (CU-018, RF-017/018)
 
         COBERTURA PARCIAL de CU-018: esta versión del contrato cubre únicamente la creación.
         La modificación, la cancelación y la reasignación de vehículo o chofer quedan para v0.2.

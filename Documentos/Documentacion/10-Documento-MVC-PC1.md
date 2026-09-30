@@ -14,20 +14,6 @@ Repositorio del proyecto: https://github.com/Martiherenu1/ProyectoVanFull
 
 ---
 
-## Estado de este documento
-
-Este borrador tiene las secciones de fondo escritas. **Lo que falta está marcado en amarillo a lo largo del
-documento**, y es esto:
-
-| Qué falta | Dónde | Quién |
-|---|---|---|
-| Pegar el cronograma de las 16 semanas | 7.5 | Equipo |
-
-Queda **una sola tarea de cierre**. El DER corregido y las diez capturas ya están insertados en el
-documento del Drive.
-
----
-
 ## Índice
 
 1. Presentación general del Proyecto
@@ -671,7 +657,28 @@ pruebas y que las herramientas de control pasen sin errores.
 
 ## 7.5 Planificación
 
-> FALTA — Equipo. Pegar el cronograma de las 16 semanas, marcando en qué semana estamos y dónde caen los tres puntos de control.
+El trabajo se planificó en **16 semanas**. Las semanas arrancan el lunes y el encuentro es el viernes, así
+que cada punto de control cae el viernes de su semana.
+
+| Sem | Semana del | Actividad | Hito |
+|---|---|---|---|
+| 4 | 24/08 | Definición del problema y planificación inicial | Objetivos, alcance y límites; repositorio y tablero |
+| 5 | 31/08 | Relevamiento y análisis funcional | Actores, 45 RF, 14 RNF y 31 reglas de negocio |
+| 6 | 07/09 | Modelado funcional | Casos de uso, diagramas de actividad, C4 de Contexto y de Contenedores |
+| 7 | 14/09 | Diseño de arquitectura y datos | Modelo conceptual, DER y modelo relacional |
+| 8 | 21/09 | Diseño de IA y comunicación entre sistemas | Selección de modelos, agente y prompts, contrato OpenAPI |
+| **9** | **28/09** | **Interfaces gráficas y consolidación del documento** — *estamos acá* | **1er Punto de Control · viernes 02/10** |
+| 10 | 05/10 | Desarrollo del backend | Modelos, reglas de negocio y endpoints sobre PostgreSQL |
+| 11 | 12/10 | Desarrollo del frontend | Pantallas Flutter conectadas al backend |
+| 12 | 19/10 | Integración de funcionalidades | Frontend, backend, IA, Mercado Pago y GPS de punta a punta |
+| **13** | **26/10** | **Cierre del desarrollo** | **2do Punto de Control · viernes 30/10** |
+| 14 | 02/11 | Pruebas y documentación | Pruebas funcionales, manual de instalación y de usuario |
+| **15** | **09/11** | **Cierre de pruebas y documentación** | **3er Punto de Control · viernes 13/11** |
+| 16 | 16/11 | Cierre | Cierre y aprobación · viernes 20/11 |
+
+**Estamos en la semana 9.** Las semanas 4 a 8 están cerradas y su resultado es este documento. El desarrollo
+del backend arranca la semana 10, el 5 de octubre, en el orden modelos → reglas de negocio → endpoints →
+pruebas.
 
 ---
 

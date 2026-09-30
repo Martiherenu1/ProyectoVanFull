@@ -3,7 +3,11 @@
 > **Para qué sirve:** documento de arranque. Leyendo esto se recupera todo el contexto crítico del proyecto sin
 > releer la documentación completa. **Mantenerlo actualizado al cerrar cada sesión.**
 >
-> **Última actualización: 2026-09-29** · Reemplaza y consolida todas las versiones anteriores.
+> **Al abrir un chat nuevo:** `CLAUDE.md` (raíz del repo) se carga solo y tiene las reglas fijas y los
+> datos de esta máquina. Los prompts de arranque por tipo de tarea, y el criterio de cuándo conviene
+> abrir un chat nuevo, están en `Documentos/Sesiones/PROMPT-INICIAL.md`.
+>
+> **Última actualización: 2026-09-30** · Reemplaza y consolida todas las versiones anteriores.
 
 ---
 

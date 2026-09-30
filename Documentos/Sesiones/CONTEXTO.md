@@ -194,7 +194,9 @@ Martiniano pidió **tener el control y entender el código**, no sólo aprobar l
 Sincronización offline del QR · identificación/autenticación del chatbot para datos sensibles · política de sesiones,
 cifrado y recuperación de cuenta · auditoría (es **propuesta**, no aprobada) · privacidad y retención de datos (legal) ·
 detalle fiscal/ARCA · configuración de WhatsApp (cuenta, plantillas, costos) · campos editables del perfil ·
-prioridad de la lista de espera · criterio de liberación de cupo por ausencia · fallback de la optimización de rutas.
+criterio de liberación de cupo por ausencia · fallback de la optimización de rutas.
+
+**Ya decidido, no reabrir:** la **lista de espera es FIFO** y los ajustes ADJ-01, ADJ-02 y ADJ-03 están cerrados.
 
 ## 14. Recursos
 

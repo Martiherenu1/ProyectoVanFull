@@ -109,9 +109,11 @@ endpoint del contrato OpenAPI. Estado del endpoint: ✅ ya definido en `openapi.
 | `consultar_ubicacion_vehiculo()` | CU-009 | `GET /viajes/{id}/ubicacion` | ✅ |
 | `derivar_humano()` | RF-032 | (interno de `/chat`, sin endpoint propio) | ✅ |
 
-> El agente solo **consulta** por chat; **reservar/cancelar** por chat reusan CU-003/CU-004 con las mismas
-> validaciones que cualquier canal. Operaciones sensibles requieren identificación/autenticación del usuario
-> (mecanismo exacto para el canal WhatsApp: pendiente de definición técnica).
+> El agente interactúa mediante el chat y puede realizar **las consultas y acciones expresamente
+> habilitadas** por las tools del backend. Crear o cancelar reservas reutiliza CU-003/CU-004 y queda sujeto a
+> **las mismas validaciones que cualquier otro canal**. **AG-01 nunca confirma ni rechaza pagos.**
+> Las operaciones sensibles requieren identificación/autenticación del usuario (mecanismo exacto para el
+> canal WhatsApp: pendiente de definición técnica).
 
 ## 7. Arquitectura de la integración (flujo)
 

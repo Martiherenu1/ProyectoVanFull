@@ -21,13 +21,11 @@ documento**, y es esto:
 
 | Qué falta | Dónde | Quién |
 |---|---|---|
-| Escribir la sección completa | 1 · Presentación general | Integrante 2 |
-| Pegar los diagramas C4 y de casos de uso | 2.5 | Integrante 2 |
-| Pegar el diagrama Entidad-Relación | 3.2 | Integrante 2 |
+| Regenerar e insertar el PNG del DER corregido | 3.2 | Integrante 2 |
 | Pegar las diez capturas de pantalla | 4.3 | Integrante 3 |
 | Pegar el cronograma de las 16 semanas | 7.5 | Equipo |
 
-Son **cinco cosas**, y cuatro de las cinco son pegar algo que ya existe.
+Quedan **tres tareas de cierre**, y las tres son insertar algo que ya existe o está por regenerarse.
 
 ---
 
@@ -68,22 +66,58 @@ Son **cinco cosas**, y cuatro de las cinco son pegar algo que ya existe.
 
 # 1. Presentación general del Proyecto
 
-> FALTA — Integrante 2. Esta sección se escribe con el material que ya está en las carpetas 00, 01 y 02 del Drive. Hay que cubrir los cuatro puntos que nombra la consigna: 1.1 Objetivos, 1.2 Antecedentes, 1.3 Justificación y 1.4 Alcances y límites.
+## 1.1 Objetivos
 
-Guía de qué va en cada punto:
+El objetivo general del sistema VanFull es **centralizar y digitalizar la gestión operativa y administrativa
+del servicio de transporte**, integrando en una misma solución la información de pasajeros y empresas,
+reservas y disponibilidad, abonos y pagos, viajes, recorridos y paradas, vehículos y choferes, abordajes,
+comunicaciones y seguimiento. La solución busca reducir especialmente los problemas priorizados por VanFull:
+**control de reservas, control de pagos y notificaciones a clientes**, incorporando además mecanismos de
+autoservicio y las integraciones requeridas para el proyecto académico.
 
-**1.1 Objetivos.** Qué se propone lograr el sistema.
+## 1.2 Antecedentes
 
-**1.2 Antecedentes.** VanFull es una empresa real de transporte de pasajeros en combi. Hoy trabaja con
-**WhatsApp, Excel y teléfono**: el pasajero avisa por mensaje que no viaja, el administrador anota a mano
-quién pagó, y el chofer sube a la combi con la lista impresa. Conviene contar esto con detalle, porque es lo
-que hace que el proyecto no parezca un ejercicio inventado. El material está en la entrevista y el
-relevamiento de la carpeta 01.
+VanFull es una **empresa familiar de transporte de pasajeros con aproximadamente veinte años de actividad**.
+Presta servicios universitarios, laborales, corporativos, ocasionales, especiales y turísticos. En la
+operatoria actual, gran parte de la gestión se apoya en **WhatsApp, planillas de Excel y comunicaciones
+telefónicas**. La disponibilidad de cupos se controla con sumatorias manuales, la verificación de pagos se
+hace uno por uno, y parte de la información de clientes puede quedar distribuida entre conversaciones y
+planillas. El relevamiento también identificó al **tránsito** como una dificultad operativa para organizar
+los recorridos. Ante la consulta sobre los principales problemas a resolver, VanFull priorizó el control de
+reservas, el control de pagos y las notificaciones a clientes.
 
-**1.3 Justificación.** Qué problemas concretos resuelve centralizar todo esto en un sistema.
+## 1.3 Justificación
 
-**1.4 Alcances y límites.** Resumen de los **45 requisitos funcionales, 14 requisitos no funcionales y 31
-reglas de negocio**, y sobre todo **qué queda afuera** de esta primera versión.
+La propuesta se justifica porque los procesos actuales **dependen de controles manuales y de información
+distribuida**, lo que incrementa la carga administrativa y el riesgo de inconsistencias en operaciones
+críticas. Centralizar la información permite disponer de una **única fuente operativa** para cupos, reservas,
+pagos, viajes y comunicaciones; aplicar las reglas de negocio de forma uniforme; habilitar autoservicio para
+los usuarios autorizados; y brindar trazabilidad entre lo que pide el negocio y lo que se implementó en la
+interfaz, la API y los datos. La solución también permite incorporar seguimiento GPS, optimización de
+recorridos, notificaciones y un agente conversacional **sin trasladar las decisiones de negocio al modelo de
+IA**: las validaciones permanecen en el backend.
+
+## 1.4 Alcances y límites
+
+La frontera funcional vigente está formalizada en la Etapa 02 y mantiene **45 Requisitos Funcionales**
+(RF-001 a RF-045), **14 Requisitos No Funcionales** (RNF-001 a RNF-014) y **31 Reglas de Negocio** (RN-001 a
+RN-031). **Dentro del alcance** están la gestión de pasajeros y clientes corporativos, reservas y lista de
+espera, abonos, pagos y deuda, viajes y recorridos, choferes y vehículos, abordaje mediante QR, seguimiento
+GPS, optimización de recorridos, notificaciones, chatbot y WhatsApp, reportes, y el soporte a comprobantes y
+facturación dentro de los límites aprobados.
+
+En pagos se mantiene la línea base: cuando Mercado Pago informa válidamente una operación **aprobada o
+acreditada**, el backend puede confirmar el pago automáticamente; cuando el medio no dispone de una
+acreditación automática válida, la confirmación o el rechazo corresponde a **una persona autorizada**. El
+agente AG-01 no confirma pagos.
+
+**Entre los límites vigentes** están: no integrar tecnológicamente Uber u otros transportes externos; no
+permitir que el pasajero modifique libremente su DNI; no exponer al chofer datos privados de contacto ni
+permitirle confirmar manualmente el abordaje; no incorporar en esta primera versión un módulo completo de
+mantenimiento, combustible ni el QR de recepción y entrega de vehículos; y no comprometer una integración
+fiscal concreta ni el uso productivo obligatorio de Mercado Pago. Los aspectos legales de privacidad y
+retención, la política técnica de seguridad y otros pendientes expresamente documentados **continúan abiertos
+y no se resuelven por inferencia**.
 
 ---
 
@@ -188,11 +222,29 @@ flowchart TB
     LLM -.->|sin acceso| DB
 ```
 
-> FALTA — Integrante 3. Copiar ese código en la página mermaid.live, exportar la imagen y pegarla acá. El código puede quedar debajo de la imagen.
+La imagen renderizada de ese código está pegada en el documento del Drive, con el código debajo.
 
 ## 2.5 Diagramas C4 y de casos de uso
 
-> FALTA — Integrante 2. Pegar acá los diagramas que ya están en la carpeta 05 del Drive: el C4 de Contexto y el C4 de Contenedores, cada uno con dos o tres renglones explicando qué muestra. Y de la carpeta 04, los diagramas de casos de uso por actor y los de actividad de los flujos principales.
+Los diagramas de esta sección **conectan la visión funcional con la arquitectura**. En el documento principal
+van el C4 de Contexto, el C4 de Contenedores y el Diagrama General de Casos de Uso. Las vistas parciales por
+actor y los diagramas de actividad quedan en las carpetas `03` y `04` del Drive como evidencia detallada del
+modelado aprobado.
+
+**C4 Nivel 1 — Contexto.** Ubica al sistema dentro de su entorno: los usuarios humanos y los sistemas
+externos con los que se relaciona —Mercado Pago, WhatsApp y los servicios de mapas, geolocalización, tránsito
+y rutas—, **sin describir todavía la implementación interna**. Documenta la frontera del sistema y las
+integraciones externas aprobadas. *(Figura 1 del documento.)*
+
+**C4 Nivel 2 — Contenedores.** Descompone la solución en sus piezas principales: la aplicación Flutter
+Web/Mobile, el backend FastAPI, la base PostgreSQL y los componentes de integración. La decisión central es
+que **la lógica de negocio y las autorizaciones se concentran en el backend**; ni la interfaz ni el agente de
+IA acceden directamente a la base de datos. *(Figura 2.)*
+
+**Diagrama General de Casos de Uso.** Representa la interacción de los **9 actores** aprobados con los
+**37 casos de uso** de la línea base funcional. Muestra la cobertura del sistema y la participación de
+pasajeros, choferes, administración, clientes corporativos e integraciones externas, sin sustituir las
+especificaciones detalladas de cada CU. *(Figura 3.)*
 
 ## 2.6 Requisitos que condicionaron la arquitectura
 
@@ -223,7 +275,19 @@ El modelo de datos tiene **35 tablas**, agrupadas en cinco bloques:
 
 ## 3.2 Diagrama Entidad-Relación
 
-> FALTA — Integrante 2. Pegar el diagrama Entidad-Relación que ya está en la carpeta 05 del Drive, con una explicación de las relaciones principales.
+El DER representa la estructura conceptual de persistencia que respalda la operación de VanFull y **mantiene
+alineación con el Modelo Relacional aprobado**. Organiza personas y accesos; servicios y contratación;
+viajes, recorridos y operación; cuenta corriente, pagos y comprobantes; y trazabilidad operativa. Entre las
+relaciones relevantes están Viaje–Recorrido, Recorrido–Parada, Reserva–Viaje, PeriodoAbono–Viaje y la
+separación entre Pago, MovimientoCuenta y Comprobante.
+
+**Corrección transversal del 30/09/2026, decidida por el equipo.** La relación Pago–Comprobante para el
+RECIBO se representa como **Pago 1 ↔ 0..1 Recibo**. Todo pago en estado `CONFIRMADO` exige **exactamente un**
+recibo; los pagos `PENDIENTE` o `RECHAZADO` no requieren recibo. **Esta corrección es gráfica y documental:
+no modifica el Modelo Relacional aprobado ni `schema.sql`**, que ya eran compatibles.
+
+> FALTA — Integrante 2. Regenerar el PNG del DER desde la fuente corregida (`DER General.puml` y
+> `DER_VanFull_General.drawio`, carpeta 05 del Drive) e insertarlo acá antes de congelar el PC1.
 
 ## 3.3 Decisiones de diseño
 
@@ -412,7 +476,7 @@ es lo que le permite a la aplicación mostrar *"Se ocupó el último lugar"* en 
 | CU-011 · Hablar con el asistente | Enviar mensaje al asistente |
 | CU-014 · Registrar un pago | Registrar el pago y determinar el mecanismo de acreditación |
 | CU-016 · Confirmar o rechazar un pago | Confirmación administrativa de pagos que no tienen acreditación automática válida |
-| CU-018 · Programar viajes | Crear el viaje. Listarlos queda para la próxima versión del acuerdo |
+| CU-018 · Programar viajes | Crear el viaje. Durante la planificación el vehículo y el chofer pueden quedar sin asignar; ambos deben estarlo antes de iniciar la ejecución. Listar los viajes queda para la próxima versión del acuerdo |
 | CU-036 · Procesar notificación de Mercado Pago | Recibir el resultado del proveedor y confirmar automáticamente el pago cuando la operación fue aprobada o acreditada |
 
 Esta versión cubre **16 de los 37 casos de uso**, más el requisito de tarifas. Los restantes siguen el mismo

@@ -801,7 +801,7 @@
           "viajes"
         ],
         "summary": "Crear un viaje",
-        "description": "Crea un viaje con fecha, horario, recorrido, vehículo, chofer y capacidad.\nVerifica capacidad vs pasajeros (RN-001). (CU-018, RF-017/018)\n\nCOBERTURA PARCIAL de CU-018: esta versión del contrato cubre únicamente la creación.\nLa modificación, la cancelación y la reasignación de vehículo o chofer quedan para v0.2.\n",
+        "description": "Crea un viaje con fecha, horario, recorrido y capacidad. Durante la planificación,\nvehículo y/o chofer pueden quedar pendientes; ambos deben estar asignados antes de\niniciar la ejecución. Verifica capacidad vs pasajeros cuando exista un vehículo\nasignado (RN-001). (CU-018, RF-017/018)\n\nCOBERTURA PARCIAL de CU-018: esta versión del contrato cubre únicamente la creación.\nLa modificación, la cancelación y la reasignación de vehículo o chofer quedan para v0.2.\n",
         "x-cu": "CU-018",
         "x-cobertura": "parcial",
         "requestBody": {

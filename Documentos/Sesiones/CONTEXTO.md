@@ -161,11 +161,20 @@ consulta)** · Admin (viajes del día).
 consulta (CU-029) y **no registra abordajes**. Int2 detectó el 28/09 que las pantallas lo tenían invertido;
 está corregido en las pantallas, en el brief y en el documento del MVC.
 
-### Falta para el PC1 — todo es pegar cosas en el Word de la carpeta `07_`
+### El documento del PC1 está TERMINADO (30/09)
 
-1. **Int2:** escribir la **§ 1 (Presentación general)** y pegar los **C4 + DCU (§ 2.5)** y el **DER (§ 3.2)**.
-2. **Nosotros:** pegar las **diez capturas (§ 4.3)**. El mermaid (§ 2.4) y la paleta (§ 4.2) ya están pegados.
-3. **Equipo:** el **cronograma de 16 semanas (§ 7.5)**, los roles por escrito y un ensayo.
+`07_Documento_MVC_VanFull_v1.0.docx` en la carpeta `07_` del Drive: **cero marcadores FALTA**, 16 imágenes
+sin referencias rotas, y sin la sección "Estado de este documento". Verificado leyendo el `.docx`.
+
+**Solo falta ensayar la presentación** del viernes 02/10. El guion está en la § 9 del documento.
+
+⚠️ **Hubo dos documentos MVC** entre el 30/09 de madrugada y la tarde: Int2 trabajó sobre una copia
+`_Integracion_Int2` en vez del maestro. Se resolvió a favor de la suya, que era superconjunto. La vieja
+quedó como `..._HISTORICO_no_usar.docx`, **no borrarla ni confundirla**.
+
+⚠️ **El cronograma correcto es el de `02-Cronograma.md`**, con los puntos de control los viernes
+**02/10, 30/10 y 13/11** y cierre el **20/11**. Circulaban otras dos versiones con fechas distintas —una
+las ponía casi un mes después— y el propio archivo explica por qué vale ésta.
 
 **Ya está hecho** todo lo que antes figuraba acá como pendiente: el mermaid, el documento del MVC, la carpeta
 `07_` del Drive (8 archivos), la **revisión cruzada de Int2** (4 rondas, todo aplicado) y el repo **público**

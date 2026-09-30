@@ -21,11 +21,10 @@ documento**, y es esto:
 
 | Qué falta | Dónde | Quién |
 |---|---|---|
-| Regenerar e insertar el PNG del DER corregido | 3.2 | Integrante 2 |
-| Pegar las diez capturas de pantalla | 4.3 | Integrante 3 |
 | Pegar el cronograma de las 16 semanas | 7.5 | Equipo |
 
-Quedan **tres tareas de cierre**, y las tres son insertar algo que ya existe o está por regenerarse.
+Queda **una sola tarea de cierre**. El DER corregido y las diez capturas ya están insertados en el
+documento del Drive.
 
 ---
 
@@ -286,8 +285,10 @@ RECIBO se representa como **Pago 1 ↔ 0..1 Recibo**. Todo pago en estado `CONFI
 recibo; los pagos `PENDIENTE` o `RECHAZADO` no requieren recibo. **Esta corrección es gráfica y documental:
 no modifica el Modelo Relacional aprobado ni `schema.sql`**, que ya eran compatibles.
 
-> FALTA — Integrante 2. Regenerar el PNG del DER desde la fuente corregida (`DER General.puml` y
-> `DER_VanFull_General.drawio`, carpeta 05 del Drive) e insertarlo acá antes de congelar el PC1.
+En el documento del Drive, la **Figura 4** muestra el DER completo, en una página horizontal propia.
+Son 35 entidades en cinco bloques: a tamaño de página funciona como mapa de la estructura, no como
+lectura de detalle. La versión legible está en la carpeta `05` del Drive (Anexo H) y, sobre todo, en el
+modelo SQL del **Anexo A**, que es la fuente autoritativa.
 
 ## 3.3 Decisiones de diseño
 
@@ -395,7 +396,9 @@ estos mismos patrones y no se dibujaron para esta entrega.
 | 9 | Lista de pasajeros del viaje (solo consulta) | CU-029 | Chofer |
 | 10 | Viajes del día | CU-018 | Administrador |
 
-> FALTA — Integrante 3. Pegar las diez capturas, agrupadas por tipo de usuario, cada una con un epígrafe que diga qué pantalla es.
+En el documento del Drive, las diez capturas están agrupadas por actor en grillas de dos columnas,
+numeradas igual que la tabla de arriba. La del chofer y la del administrador van juntas, para que se
+vea de una que son distintas a propósito.
 
 ## 4.4 Las pantallas también muestran los errores
 

@@ -35,13 +35,14 @@ Cliente-servidor por capas. **La IA no accede a la base de datos**: invoca *tool
 | Entregable del PC1 | `Documentos/Documentacion/10-Documento-MVC-PC1.md` |
 | Logros para el CV | `Documentos/HITOS.md` |
 
-**Drive del equipo** (documentación oficial, dueño martindefez@gmail.com) y **artifacts de diseño**: los IDs y
+**Drive del equipo** (documentación oficial, cuyo dueño es Int2) y **artifacts de diseño**: los IDs y
 los links están en `CONTEXTO.md`. El Drive es la documentación oficial; **GitHub es código y artefactos
 versionables**. Los `.docx` no se versionan en el repo.
 
 ## Esta máquina: lo que hay y lo que no
 
-**Hay:** `node` con el paquete `docx` · `git` · `java` 19 · Docker · Drive por MCP.
+**Hay:** `node` con el paquete `docx` · `git` · `java` 19 · Drive por MCP · el **cliente** de Docker y Compose
+(el motor puede estar apagado: comprobar con `docker info` antes de asumir que levanta contenedores).
 
 **Ojo con Python.** El `python` del shell (msys2) **no tiene pip ni pyyaml**. El que tiene `pyyaml`,
 `openapi_spec_validator` y `jsonschema` es el **Python 3.13** de

@@ -471,14 +471,14 @@ es lo que le permite a la aplicación mostrar *"Se ocupó el último lugar"* en 
 Esta versión cubre **16 de los 37 casos de uso**, más el requisito de tarifas. Los restantes siguen el mismo
 patrón y se agregarán en la próxima.
 
-**Tres cosas están cubiertas en parte, y conviene decirlo:** de CU-018 solo está la creación del viaje
+**Cuatro cosas están cubiertas en parte, y conviene decirlo:** de CU-018 solo está la creación del viaje
 —modificar, cancelar y reasignar quedan para la próxima versión—, y de CU-003 falta la operación para
 anotarse en la lista de espera que el propio mensaje de error anuncia. La pantalla del administrador,
 además, supone una operación para **listar** los viajes del día que todavía no está en el acuerdo.
 
 **Y la pantalla del chofer (CU-029) tampoco tiene operación en este acuerdo.** La diseñamos porque el caso
 de uso está especificado y aprobado, pero la consulta de la operación asignada queda para la próxima
-versión del contrato. Es la misma decisión de alcance que las otras dos, y preferimos escribirla.
+versión del contrato. Es la misma decisión de alcance que las otras tres, y preferimos escribirla.
 
 ## 5.4 Cómo se confirma un pago
 
@@ -657,8 +657,9 @@ pruebas y que las herramientas de control pasen sin errores.
 
 ## 7.5 Planificación
 
-El trabajo se planificó en **16 semanas**. Las semanas arrancan el lunes y el encuentro es el viernes, así
-que cada punto de control cae el viernes de su semana.
+La planificación sigue el calendario del cuatrimestre: **el trabajo sobre VanFull ocupa de la semana 4 a la
+16**, que es cuando arranca la definición del problema. Las semanas van de lunes a viernes y el encuentro es
+el viernes, así que cada punto de control cae el viernes de su semana.
 
 | Sem | Semana del | Actividad | Hito |
 |---|---|---|---|

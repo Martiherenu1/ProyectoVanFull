@@ -36,7 +36,7 @@ grave es *no detectar* un pago, (3) notificaciones a clientes.
 | LLM principal / fallback | `minimax/minimax-m3:free` / `nvidia/nemotron-3-super-120b-a12b:free` |
 | Mensajería | **WhatsApp** (configuración exacta pendiente) |
 | Versionado | **Git + GitHub**, flujo rama → PR → merge |
-| Hosting previsto | **Railway / Render** |
+| Hosting (costo 0) | **Neon** (BD) · **Render** (backend) · **GitHub Pages** (web). Ver §7 |
 
 ## 3. Arquitectura — el principio que gobierna todo
 
@@ -115,6 +115,7 @@ Disponibilidad 99 % mensual · 95 % de operaciones ≤ 2 s · operaciones pesada
 | **Una reserva por viaje** para los abonos | Resuelto así en el MR oficial (MR-R15/16); simplifica cupo, QR y reportes |
 | **`.docx` fuera del repo** | Drive = documentación oficial · GitHub = código y artefactos versionables |
 | **Contrato OpenAPI antes de implementar** | Permite que frontend, backend e IA avancen en paralelo sin romperse |
+| **Hosting de costo 0** (decidido el 2026-10-02): BD en **Neon**, backend en **Render** (servicio web gratis), web Flutter en **GitHub Pages**. Desarrollo diario con `docker-compose.yml` | Alcance académico: sirve para la entrega; si el producto se vende se paga algo mejor. Se descartó Firebase (NoSQL, no calza con `schema.sql`), Supabase (pausa el proyecto a los 7 días sin uso) y la BD gratis de Render (vence a los 30 días y la borra). Usar la BD **solo como Postgres estándar**, sin SDK ni funciones propias del proveedor, para que mudarse sea cambiar `DATABASE_URL` + `pg_dump` |
 
 ## 8. Equipo y reparto
 
@@ -210,6 +211,16 @@ detalle fiscal/ARCA · configuración de WhatsApp (cuenta, plantillas, costos) �
 criterio de liberación de cupo por ausencia · fallback de la optimización de rutas.
 
 **Ya decidido, no reabrir:** la **lista de espera es FIFO** y los ajustes ADJ-01, ADJ-02 y ADJ-03 están cerrados.
+
+**Por verificar al provisionar el hosting (no están en la documentación oficial leída el 02/10):** si Render o
+Neon piden tarjeta al registrarse · qué pasa cuando se agotan las 100 CU-horas mensuales de Neon · tiempo de
+arranque en frío de Neon · cómo reintenta Mercado Pago un webhook que cae mientras el backend despierta.
+
+**Límites del plan gratis, ya confirmados:** Neon, 1 GB por proyecto y 100 CU-horas por mes, se duerme a los 5 min
+sin uso. Render, se duerme a los 15 min sin tráfico y despertar tarda cerca de 1 minuto; 750 horas gratis por mes
+(un servicio 24/7 gasta 744, sin margen). **No usar un pinger** para mantenerlo despierto: agota las horas y, si
+toca la BD, la mantiene despierta. En su lugar, **calentar con `/health` y una consulta real unos 5 minutos
+antes de cada demo**, y sacar un `pg_dump` local antes de cada punto de control.
 
 ## 14. Recursos
 

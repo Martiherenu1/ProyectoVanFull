@@ -15,7 +15,7 @@ conversacional de IA para una empresa real de charters.
 | Mapas | Google Maps Platform (Routes API) |
 | Pagos | Mercado Pago (entorno de pruebas) |
 | Mensajería | WhatsApp |
-| Deploy | Railway / Render |
+| Deploy (costo 0) | Neon (base) · Render (backend) · GitHub Pages (web) |
 
 **Principio de arquitectura:** la IA no accede a la base de datos; sólo llama *tools* de FastAPI, que
 gobierna auth, permisos, cupos, reglas de negocio y pagos.

@@ -164,8 +164,8 @@
 
 ---
 
-## EPIC N — Despliegue (Railway/Render) (sem 12-14)
-- ⬜ **T-085** `[1]` Provisionar **PostgreSQL gestionado** (Railway/Render).
+## EPIC N — Despliegue (Neon + Render, costo 0) (sem 12-14)
+- ⬜ **T-085** `[1]` Provisionar **PostgreSQL gestionado** en **Neon** (plan gratis). Conectar con Postgres estándar, sin SDK del proveedor.
 - ⬜ **T-086** `[1]` Deploy del **backend** desde GitHub; cargar variables/secrets; correr migraciones.
 - ⬜ **T-087** `[1]` Deploy del **frontend web** (Flutter web build).
 - ⬜ **T-088** `[1+3]` Smoke test end-to-end en el entorno desplegado.

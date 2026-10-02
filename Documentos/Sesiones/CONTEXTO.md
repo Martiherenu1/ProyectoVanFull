@@ -126,10 +126,15 @@ Disponibilidad 99 % mensual · 95 % de operaciones ≤ 2 s · operaciones pesada
 
 ## 9. Cronograma (detalle en `02-Cronograma.md`)
 
-**PC1 = 28/09/2026** · PC2 = 26/10 · PC3 = 09/11 · Cierre = 16/11.
+**PC1 = entrega 28/09, presentado y aprobado el viernes 02/10/2026** · PC2 = viernes 30/10 · PC3 = viernes 13/11 ·
+Cierre = viernes 20/11 (los encuentros son los viernes; ver `02-Cronograma.md`).
 El desarrollo del backend arranca el **05/10** (sem 10); frontend 12/10; integración 19/10; pruebas y documentación 02/11.
 
-## 10. Estado del PC1 (al 2026-09-29 · **se presenta el viernes 02/10**)
+## 10. Estado del PC1 (**presentado y APROBADO el 2026-10-02**)
+
+> **El tag `pc1` (`278b0d4`) queda congelado.** Cualquier cambio posterior a lo entregado lleva tag nuevo
+> (`pc1.1`). Lo que sigue es el desarrollo: arranca el **05/10** (§11). Lo de abajo es el registro de cómo se
+> llegó a la entrega.
 
 **La consigna pide** (de `Presentacion.pdf`): definición del problema, alcance y límites, modelo conceptual
 (Front/Back/BD), UML/C4, **Modelo de datos SQL**, **Comunicación V-C: OpenAPI (JSON)**, selección de modelos IA +
@@ -167,7 +172,7 @@ está corregido en las pantallas, en el brief y en el documento del MVC.
 `07_Documento_MVC_VanFull_v1.0.docx` en la carpeta `07_` del Drive: **cero marcadores FALTA**, 16 imágenes
 sin referencias rotas, y sin la sección "Estado de este documento". Verificado leyendo el `.docx`.
 
-**Solo falta ensayar la presentación** del viernes 02/10. El guion está en la § 9 del documento.
+La presentación se hizo el viernes 02/10 y el PC1 quedó **aprobado**. El guion está en la § 9 del documento.
 
 ⚠️ **Hubo dos documentos MVC** entre el 30/09 de madrugada y la tarde: Int2 trabajó sobre una copia
 `_Integracion_Int2` en vez del maestro. Se resolvió a favor de la suya, que era superconjunto. La vieja

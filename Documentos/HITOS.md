@@ -127,7 +127,8 @@
 - **Qué:** Diseño de las **10 pantallas** del PC1 para los **3 actores** (pasajero, chofer, administrador), navegables
   como prototipo. La decisión estructural fue derivar la interfaz del **contexto físico de uso** y no de una plantilla:
   el chofer opera parado en la puerta de la combi, con una mano y posiblemente con guantes, por eso sus objetivos
-  táctiles son de 64 px y su pantalla funciona **sin conexión**; el administrador está sentado y necesita ver seis
+  táctiles son de 64 px y su pantalla es **de solo consulta** (no registra abordajes; si pierde señal, la
+  contingencia acordada con la empresa es WhatsApp o llamada); el administrador está sentado y necesita ver seis
   viajes a la vez, por eso su fila es de 36 px y su tema es claro. Cada pantalla es **trazable a su caso de uso, a su
   endpoint del contrato OpenAPI y a la regla de negocio que debe mostrar**, y usa los campos y enums reales del
   esquema SQL. Las pantallas exponen los estados que normalmente se omiten en un mockup: el `409` por falta de cupo
@@ -142,6 +143,23 @@
   demuestra que las tres capas del MVC fueron pensadas como un sistema y no por separado.
 - **Tecnologías:** diseño de interfaces multiplataforma, prototipado navegable, OpenAPI, PostgreSQL (enums y
   restricciones del esquema), accesibilidad (objetivos táctiles, estado como texto además de color).
+
+### [2026-10-02] Primer Punto de Control aprobado: documento de arquitectura, datos, contrato y diseño
+- **Qué:** Entrega y defensa del PC1 de un sistema Web + Mobile para una empresa de transporte **real**. El
+  documento reúne la arquitectura en capas (MVC), un modelo de datos de **35 tablas y 54 claves foráneas ejecutado
+  y verificado sobre PostgreSQL**, un contrato de API **OpenAPI de 22 operaciones y 23 esquemas** (YAML y JSON,
+  validados y equivalentes), un agente conversacional con **13 herramientas** cuya selección de modelos se hizo con
+  una prueba medida, y **10 pantallas navegables** para los 3 tipos de usuario. Quedó aprobado por la cátedra.
+- **Rol de Martiniano:** Integrante 1+3 del equipo de tres: modelo de datos físico, contrato de API, diseño del
+  agente de IA y sus herramientas, interfaces y modelo de desarrollo, y la consolidación del documento final junto
+  con la revisión cruzada de Integrante 2.
+- **Por qué importa (CV):** se entregó con **contrato antes que código** y con verificación real (el SQL se
+  ejecutó, el contrato se validó con una herramienta, la equivalencia YAML/JSON se comprobó), no solo con
+  diagramas. El principio de arquitectura —la IA no accede a los datos y el servidor decide— es una decisión de
+  seguridad, no solo de diseño. El trabajo se hizo con revisión cruzada y con IA como herramienta bajo revisión
+  humana obligatoria, con trazabilidad en cada commit.
+- **Tecnologías:** Python/FastAPI, PostgreSQL 16, SQLAlchemy 2.0 async, OpenAPI 3.0, Flutter, diseño de agentes
+  con herramientas (tool calling), OpenRouter, Git/GitHub con flujo de ramas y revisión.
 
 <!-- Próximos hitos a documentar a medida que se implementen:
      - Esquema de datos PostgreSQL y migraciones

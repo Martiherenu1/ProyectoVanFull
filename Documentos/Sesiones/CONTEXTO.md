@@ -186,6 +186,19 @@ las ponía casi un mes después— y el propio archivo explica por qué vale és
 `07_` del Drive (8 archivos), la **revisión cruzada de Int2** (4 rondas, todo aplicado) y el repo **público**
 con el estado congelado en el tag `pc1`.
 
+### Documento MVC v1.1 (en curso · 08/10/2026)
+
+La cátedra publicó la lista de lo que debe contener el documento (carátula, propuestas, propuesta seleccionada,
+presentación, objetivos, alcance, límites, análisis, diseño con casos de uso general / trazo fino / interfaces /
+secuencia o actividad / componentes y despliegue, DER, e informe sobre IA para diseño). Contra la v1.0 se agregaron:
+§1.5 Propuestas evaluadas, §1.6 Propuesta seleccionada, §1.7 Análisis, §2.7 Diagramas de actividad (los 8 de la
+carpeta 04 del Drive) y §2.8 Diagramas de componentes y de despliegue (dibujos en `Documentos/Diagramas/`). Se
+numeraron al final de cada sección para no renumerar nada que ya cita el README de la carpeta 07.
+
+**Falta:** el *Informe sobre IA para diseño* (necesita el aporte de los tres integrantes: no hay registro de las
+discusiones), y aclarar con la cátedra qué es *Trazo fino* y si el documento es uno por integrante. Además, subir el
+v1.1 al Drive junto a la v1.0 (sin pisarla) y sumar una línea al README de la carpeta 07.
+
 ## 11. Estado del código
 
 **Existe:** `main.py` (app + CORS + routers), `core/config.py` (variables de entorno), `core/database.py` (motor

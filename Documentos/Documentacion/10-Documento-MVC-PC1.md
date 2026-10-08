@@ -41,6 +41,7 @@ Repositorio del proyecto: https://github.com/Martiherenu1/ProyectoVanFull
 | Modelo Conceptual: Frontend, Backend, Base de Datos | 2.2 |
 | Gráficos: UML y C4 Model | 2.5 |
 | Diagramas de actividad (UML) | 2.7 |
+| Diagramas de componentes y de despliegue | 2.8 |
 | Modelo en mermaid.js | 2.4 |
 | Modelo de Datos y relaciones | 3 |
 | Modelo de datos SQL | 3.4 y Anexo A |
@@ -428,6 +429,22 @@ Cada columna es un actor, los rombos son decisiones y las notas amarillas indica
 ### DA-CU018 · Gestionar viajes y asignaciones
 
 *(Diagrama de actividad DA-CU018: figura en el documento del Drive; original en la carpeta `04`.)*
+
+## 2.8 Diagramas de componentes y de despliegue
+
+Estos dos diagramas completan la vista de la arquitectura de la sección 2.5: el de componentes muestra las piezas del sistema y cómo se hablan, y el de despliegue muestra dónde corre cada pieza. En ambos, **la línea llena indica lo que ya existe en el repositorio y la punteada lo que está planificado y todavía no tiene código**, para no mostrar como hecho algo que no lo está.
+
+### Diagrama de componentes
+
+*(Figura en el documento del Drive: Diagrama de componentes de VanFull.)*
+
+**Qué muestra.** La aplicación Flutter (con sus cuatro tipos de usuario) y WhatsApp hablan con el backend FastAPI. Dentro del backend, los routers reciben el pedido, los services aplican las 31 reglas de negocio y los models son la única capa que habla con PostgreSQL. El asistente AG-01 usa herramientas que pasan por los services y llama a OpenRouter. La inteligencia artificial no accede a la base de datos.
+
+### Diagrama de despliegue
+
+*(Figura en el documento del Drive: Diagrama de despliegue de VanFull.)*
+
+**Qué muestra.** En desarrollo, cada integrante levanta el servidor y la base con Docker Compose. Para la entrega se planificó un alojamiento sin costo: la base en Neon, el servidor en Render y la versión web en GitHub Pages. Los planes gratuitos se duermen cuando no tienen tráfico, así que hay que despertarlos antes de cada demostración. Si el producto se vende, se pasa a un plan pago cambiando una variable de configuración.
 
 ---
 

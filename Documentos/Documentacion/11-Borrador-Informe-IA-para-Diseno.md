@@ -1,10 +1,12 @@
 # Borrador — Informe sobre IA para diseño
 
-> **Estado:** borrador para el documento v1.1. **No está en el Word.** Lo necesita completar el equipo.
-> **Qué está escrito:** solo lo que consta en documentos del proyecto (`Stack-y-Referencias.md`, `07-IA-y-Agentes`,
-> `06-Notas-Ingesta`, el brief de diseño, `CLAUDE.md`, el historial de git y el README de la carpeta 07 del Drive).
+> **Estado:** borrador para el documento v1.1. **No está en el Word.**
+> **Martiniano y Facundo (Integrantes 1+3):** parte completa. Trabajaron juntos con las mismas herramientas, así que
+> es un solo bloque. Se redactó a partir del historial del repositorio y de las sesiones de trabajo con la IA; lo
+> revisan y lo corrigen antes de entregar.
+> **Martín (Integrante 2):** parte vacía, para que la complete él.
 > **Qué no está:** las **propuestas y discusiones** entre ustedes sobre qué herramienta usar. No hay registro en
-> ningún archivo. Todo eso está marcado con `[completar: ...]` y lo tienen que escribir ustedes.
+> ningún archivo. Lo que falta está marcado con `[completar: ...]`.
 > **Cuando esté completo:** se integra al documento como sección 6.5 y se borra este archivo.
 
 ---
@@ -20,12 +22,12 @@ programar** VanFull. La IA que forma parte del producto (el asistente AG-01 y su
 
 | Herramienta | Para qué se usó | Quién | Dónde consta |
 |---|---|---|---|
-| **ChatGPT** (GPT-5.6) | Razonamiento y diseño | `[completar: quiénes y en qué momentos]` | Stack y referencias |
-| **Claude** (familia Opus) | Razonamiento y diseño | `[completar: quiénes]` | Stack y referencias |
-| **ChatGPT Work** | Agente de trabajo y documentación. En el análisis, un informe previo se usó solo para detectar contradicciones y pendientes | `[completar: confirmar quién]` | AS-IS consolidado; Stack y referencias |
-| **Codex** | Programación (Flutter y agentes) | Integrante 3, según los prompts maestros. `[completar: confirmar]` | Notas de ingesta (§0) |
-| **Claude Code** | Programación: backend, API y datos | Integrante 1, según los prompts maestros | Notas de ingesta (§0); historial de git |
-| **Claude Design** | Las 10 pantallas y el sistema de diseño | Integrantes 1 y 3 | Brief de diseño UI |
+| **Claude Code** | Programación y documentación sobre el repositorio: backend, API, datos y documento del MVC | Martiniano y Facundo | Historial de git; notas de ingesta (§0) |
+| **Claude Design** | Las 10 pantallas y el sistema de diseño | Martiniano y Facundo | Brief de diseño UI |
+| **Claude** (familia Opus), en chat | Razonamiento y diseño | `[completar: Martín, si lo usó]` | Stack y referencias |
+| **ChatGPT** (GPT-5.6) | Razonamiento y diseño | `[completar: Martín]` | Stack y referencias |
+| **ChatGPT Work** | Agente de trabajo y documentación. En el análisis, un informe previo se usó solo para detectar contradicciones y pendientes | `[completar: Martín]` | AS-IS consolidado; Stack y referencias |
+| **Codex** | Programación. Figura asignada al rol de Integrante 3 en los prompts maestros | `[completar: Martín, si alguien lo usó]` | Notas de ingesta (§0) |
 
 ### Propuestas y discusiones
 
@@ -51,6 +53,92 @@ programar** VanFull. La IA que forma parte del producto (el asistente AG-01 y su
 - **Programación.** La IA trabaja con reglas fijas escritas en el repositorio: explicar antes de hacer, pasos chicos,
   mostrar el cambio antes de incorporarlo, verificar en vez de suponer, y decir qué no se pudo verificar.
 
+---
+
+## Aportes por integrante
+
+### Martiniano y Facundo (Integrantes 1+3)
+
+> Redactado a partir del historial de git y de las sesiones de trabajo con Claude Code. Facundo trabajó junto a
+> Martiniano, con las mismas herramientas y en las mismas sesiones, así que las herramientas, las tareas y las
+> conclusiones valen para los dos. Los dos revisan este bloque.
+
+**1. Qué herramientas usaron.** Claude Code, como agente de programación y documentación sobre el repositorio, y
+Claude Design, para las pantallas y el sistema de diseño. Los commits registran los modelos usados: Claude Opus 4.8,
+Opus 5, Opus 5.5 y Sonnet 5.5. `[completar: si usaron además otras herramientas]`
+
+**2. Para qué tarea.** El historial del repositorio muestra el recorrido, con las fechas de los commits firmados:
+
+- **Repositorio y modelo de desarrollo (08/09).** Estructura del monorepo, servidor FastAPI, Docker y convenciones.
+- **Modelo de datos (21/09).** Las 35 tablas, ejecutadas y verificadas sobre PostgreSQL 16.
+- **Contrato de la API (21/09).** OpenAPI en YAML y en JSON, validado con una herramienta.
+- **Documentación de IA y agentes (21/09).** El agente AG-01 y sus herramientas.
+- **Interfaces (24 y 25/09).** El brief de diseño, las 10 pantallas y el sistema de diseño.
+- **Documento del MVC (26 al 30/09).** Redacción, consolidación y cierre del PC1.
+- **Correcciones por la revisión de Integrante 2 (28/09 al 01/10).** Del contrato, del modelo y de las pantallas.
+- **Decisión de alojamiento (02/10).** Comparación de Neon, Supabase, Render, Railway y Firebase con los límites de cada
+  plan, tomados de su documentación oficial.
+- **Documento v1.1 (08/10).** Propuestas, análisis, diagramas de actividad, de componentes y de despliegue.
+
+**3. Qué descartaron y por qué.** `[completar: herramientas de IA que probaron y no siguieron usando, y el motivo]`
+
+**4. Errores de la IA que tuvieron que corregir.** Además de los registrados arriba, en las sesiones se detectaron estos
+casos, todos al contrastar con el entregable real o con la fuente:
+
+- Claude Code afirmó que una decisión (ADJ-03) ya estaba propagada al documento del MVC; solo lo estaba en el archivo
+  `.md` y no en el Word entregado. Se había verificado contra el repositorio y no contra el entregable.
+- Afirmó que el Word del Drive "no se había modificado" desde cierta fecha, cuando ya tenía las imágenes pegadas. Se
+  vio por el tamaño del archivo.
+- Dijo que la carátula del Word no tenía los nombres del equipo, porque leyó el `.md`; el Word sí los tenía.
+- Dijo que los reportes quedaban fuera del alcance; el apartado 1.4 los incluye como parte del alcance.
+- Al regenerar el Word desde la v1.0 iba a pisar dos ediciones manuales de Martiniano. Se detectó comparando con su
+  versión vigente antes de entregarla.
+- En las pantallas, la fecha "jueves 25/09" era un viernes. Se vio al verificar el calendario.
+
+**5. Qué decidieron ellos y no la IA.** Las decisiones que constan en los documentos son de Martiniano:
+
+- El stack y la arquitectura base (Flutter, FastAPI, PostgreSQL, OpenRouter), el monorepo y que el contrato OpenAPI
+  se escribe antes de programar.
+- Las reglas de trabajo con la IA: explicar antes de hacer, pasos chicos, ver el cambio antes de incorporarlo, y que
+  cada commit y cada fusión los aprueba Martiniano.
+- El alcance de las pantallas: diez de los 37 casos de uso, con los tres tipos de usuario.
+- Las fechas válidas de los puntos de control: el cronograma preparado con IA traía las fechas de inicio de cada
+  semana, y Martiniano las corrigió a los viernes de encuentro (02/10, 30/10 y 13/11).
+- El alojamiento sin costo (Neon, Render y GitHub Pages) después de comparar las opciones.
+- Qué se incorpora al documento y qué no: por ejemplo, sacó dos fragmentos que la IA había redactado en la tabla de la
+  propuesta seleccionada (la marca de pendiente del backend y la mención a PostGIS).
+
+**Conclusiones sobre las herramientas.**
+
+- **Claude Code rinde cuando tiene reglas escritas y contexto en archivos.** Por eso se escribieron `CLAUDE.md`,
+  `CONTEXTO.md` y los prompts de arranque por tipo de tarea: un chat nuevo no arranca de cero, y se definió cuándo
+  conviene abrir uno.
+- **El riesgo principal fue darlo por hecho sin verificar el entregable real.** Se corrigió exigiendo contrastar con el
+  archivo final y decir explícitamente lo que no se pudo verificar (por ejemplo, que no se podían correr las pruebas
+  ni renderizar el Word en esa máquina).
+- **Claude Design necesita un brief.** Sin contexto de uso y sin prohibiciones explícitas produce el diseño promedio
+  que genera cualquier IA; con el brief, las tres pantallas resultaron distintas a propósito.
+- **Recomendación:** pedir siempre el cambio mostrado antes de incorporarlo, y no aceptar una afirmación de "ya está
+  hecho" sin una verificación que se pueda repetir.
+
+`[completar: agregar las decisiones propias de Facundo, y corregir lo que no refleje la experiencia de alguno de los dos]`
+
+### Martín (Integrante 2)
+
+**1. Qué herramientas usó.** `[completar: Martín]`
+
+**2. Para qué tarea.** `[completar: Martín]`
+
+**3. Qué descartó y por qué.** `[completar: Martín]`
+
+**4. Errores de la IA que tuvo que corregir.** `[completar: Martín — un ejemplo concreto por herramienta]`
+
+**5. Qué decidió él y no la IA.** `[completar: Martín]`
+
+**Conclusiones sobre las herramientas.** `[completar: Martín — qué recomendaría y qué no]`
+
+---
+
 ### Qué salió mal y se corrigió
 
 En pantallas y documentos hechos con ayuda de IA aparecieron errores y contradicciones. Se detectaron en la revisión y
@@ -68,9 +156,7 @@ están registrados:
 - **Un contrato desactualizado.** El archivo JSON conservaba una descripción vieja de `POST /viajes`; se regeneró
   desde el YAML y se verificó que los dos fueran equivalentes.
 
-`[completar: ejemplos de errores de ChatGPT o Codex que hayan tenido que corregir]`
-
-### Conclusiones
+### Conclusiones del equipo
 
 Lo que muestra el historial del proyecto:
 
@@ -83,20 +169,11 @@ Lo que muestra el historial del proyecto:
 - **Queda registro.** Al 08/10/2026, de los 30 commits propios del repositorio (sin contar las fusiones), 28 llevan la
   firma `Co-Authored-By` de Claude: se puede rastrear qué cambios se hicieron con ayuda de IA.
 
-`[completar: conclusiones de cada integrante sobre cada herramienta: qué recomendarían y qué no]`
+`[completar: conclusiones del equipo sobre cada herramienta, una vez que Martín complete la suya]`
 
 ### Gobernanza
 
 Revisión humana obligatoria antes de incorporar cualquier salida de IA. Según el modelo de desarrollo (sección 7.2),
-cada cambio entra por una rama y lo revisa un compañero antes de incorporarse. Se respeta una jerarquía de fuentes: lo que exigen los profesores, lo que confirmó VanFull, lo que
-decidió el equipo, y recién después las propuestas de IA, que solo valen una vez aprobadas.
-
----
-
-## Preguntas para completar (una respuesta por integrante)
-
-1. ¿Qué herramientas de IA usaste en el proyecto?
-2. ¿Para qué tarea usaste cada una?
-3. ¿Cuáles descartaste y por qué?
-4. ¿Qué errores de la IA tuviste que corregir? Un ejemplo concreto por herramienta.
-5. ¿Qué decisión tomaste vos y no la IA?
+cada cambio entra por una rama y lo revisa un compañero antes de incorporarse. Se respeta una jerarquía de fuentes:
+lo que exigen los profesores, lo que confirmó VanFull, lo que decidió el equipo, y recién después las propuestas de IA,
+que solo valen una vez aprobadas.

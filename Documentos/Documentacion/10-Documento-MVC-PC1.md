@@ -6,9 +6,9 @@ Licenciatura en Sistemas | Ingeniería en Informática
 
 **Primer Punto de Control — Análisis, Diseño y Planificación**
 
-Entrega: 28 de septiembre de 2026 · Versión 1.0
+Entrega: 28 de septiembre de 2026 · Versión 1.1
 
-**Equipo:** Integrante 1 · Integrante 2 · Integrante 3
+**Equipo:** Martin Defez - Martiniano Hereñú - Facundo Barrientos
 
 Repositorio del proyecto: https://github.com/Martiherenu1/ProyectoVanFull
 
@@ -33,10 +33,14 @@ Repositorio del proyecto: https://github.com/Martiherenu1/ProyectoVanFull
 | Lo que pide la consigna | Sección |
 |---|---|
 | Presentación general del Proyecto | 1 |
+| Propuestas evaluadas | 1.5 |
+| Propuesta seleccionada | 1.6 |
 | Alcances y Límites | 1.4 |
+| Análisis | 1.7 |
 | Arquitectura de la solución | 2 |
 | Modelo Conceptual: Frontend, Backend, Base de Datos | 2.2 |
 | Gráficos: UML y C4 Model | 2.5 |
+| Diagramas de actividad (UML) | 2.7 |
 | Modelo en mermaid.js | 2.4 |
 | Modelo de Datos y relaciones | 3 |
 | Modelo de datos SQL | 3.4 y Anexo A |
@@ -103,6 +107,139 @@ mantenimiento, combustible ni el QR de recepción y entrega de vehículos; y no 
 fiscal concreta ni el uso productivo obligatorio de Mercado Pago. Los aspectos legales de privacidad y
 retención, la política técnica de seguridad y otros pendientes expresamente documentados **continúan abiertos
 y no se resuelven por inferencia**.
+
+## 1.5 Propuestas evaluadas
+
+Antes de empezar, el equipo armó **tres propuestas de proyecto**. Las tres cumplen lo que pide la consigna (aplicación Web y Mobile, servidor, base de datos e inteligencia artificial con agentes) y se compararon con los mismos criterios: factibilidad técnica, alcance, disponibilidad de datos, valor para el negocio, uso real de la IA y facilidad de demostrarlo.
+
+|  | Propuesta 1 · Transporte | Propuesta 2 · Canchas de fútbol | Propuesta 3 · Carne envasada |
+|---|---|---|---|
+| **Qué es** | Gestión y reserva de viajes de pasajeros, tomando como caso a VanFull | Gestión de complejos deportivos y reserva de canchas | Venta y gestión de carne envasada al vacío |
+| **Quién la usa** | Pasajeros, conductores y administradores | Clientes y administradores | Clientes y administradores |
+| **Qué resuelve** | Consultar horarios y cupos, reservar ida y vuelta, cancelar y recibir avisos; administrar vehículos, recorridos, reservas y pagos | Buscar sedes cercanas, ver disponibilidad y reservar; administrar sedes, horarios, precios y mantenimientos | Ver catálogo y stock, armar un pedido y seguir su entrega; administrar productos, precios y pedidos |
+| **Papel de la IA** | Chatbot y agente de planificación: consulta disponibilidad real, sugiere horarios alternativos, detecta sobrecupos y analiza la demanda; puede preparar una reserva que el pasajero confirma | Chatbot que consulta sedes, horarios y precios, y prepara una reserva que el usuario confirma | Asistente que recomienda cortes y cantidades según las personas, y prepara un carrito que el cliente confirma |
+| **Pagos** | Pago simulado | Pago simulado | Pago simulado |
+
+La comparación se hizo en dos instancias. Primero, una **factibilidad de desarrollo** sobre 5:
+
+| Propuesta | Factibilidad | Lectura |
+|---|---|---|
+| Complejo deportivo | **4,5 / 5** | La más factible. Riesgo: reglas de cancelación, pagos y superposición de turnos |
+| Carne envasada | 4,1 / 5 | Alcance controlable. Riesgo: que la IA quede como un agregado |
+| Transporte (VanFull) | 3,8 / 5 | Mayor potencial de impacto e innovación. Riesgo: la geolocalización, los recorridos y la asignación pueden ampliar mucho el alcance |
+
+Después, una **comparación general** por aspecto, con estrellas de 1 a 5:
+
+| Aspecto | Transporte | Canchas | Carne |
+|---|---|---|---|
+| Problema real | 3 | 3 | 3 |
+| Web y Mobile justificadas | 3 | 3 | 3 |
+| Base de datos interesante | 4 | 4 | 3 |
+| Complejidad funcional | Alta | Media / Alta | Media |
+| IA fácil de justificar | **4** | 3 | 2 |
+| Agentes de IA | **4** | 4 | 3 |
+| Innovación posible | **4** | 3 | 3 |
+| Facilidad de desarrollo | 2 | 4 | 4 |
+| Facilidad para probar | 3 | 5 | 4 |
+| Potencial para la demostración final | 5 | 5 | 4 |
+| **Riesgo del proyecto** | **Alto** | Bajo / Medio | Bajo / Medio |
+
+**Conclusión del análisis, tal como quedó escrita entonces:** la opción más factible y controlada era el complejo deportivo; la de mayor diferencial de IA y de impacto real era VanFull, a condición de acotar el MVP a reservas, cupos, panel operativo y un agente de planificación simple.
+
+## 1.6 Propuesta seleccionada
+
+**El equipo eligió la Propuesta 1: el sistema de gestión y reserva de transporte, con VanFull como caso real.**
+
+**Por qué VanFull.** Es el proyecto con más diferencial de IA y más impacto real: la IA se justifica de forma natural en cupos, horarios, demanda y comunicación con los pasajeros, y era el aspecto en que la propuesta puntuaba más alto. Tiene un caso real: VanFull es una empresa existente, con una operación que hoy se apoya en WhatsApp, planillas y llamadas, y con un dueño al que se pudo entrevistar (el relevamiento está en la carpeta 01 del Drive). Tiene una demostración final fuerte (5 de 5, empatada con la mejor) y reúne muchas de las capas que pide el trabajo: una base de datos con relaciones complejas, agentes con herramientas, seguimiento de la combi y pagos.
+
+**Qué costó esa elección.** Se eligió sabiendo que no era la opción más fácil: tenía la menor factibilidad de desarrollo (3,8 sobre 5) y el único riesgo clasificado como alto. La comparación ya advertía que la geolocalización, los recorridos y la asignación podían ampliar mucho el alcance, y el proyecto final incluye seguimiento GPS y optimización de recorridos. Se controló cerrando la línea funcional (45 requisitos funcionales, 14 no funcionales, 31 reglas de negocio, 37 casos de uso) y dejando por escrito los límites (sección 1.4). El alcance final terminó siendo más amplio que el mínimo que recomendaba la comparación inicial, pero acotado y con cada decisión registrada.
+
+**Qué cambió entre la propuesta y el proyecto.** La propuesta era una idea inicial y algunas decisiones se precisaron al avanzar. Para que el documento sea transparente, se deja el cambio a la vista:
+
+| Aspecto | En la propuesta | En el proyecto |
+|---|---|---|
+| **Backend** | Java + Spring Boot | **Python + FastAPI**. |
+| **Base de datos** | PostgreSQL + PostGIS | **PostgreSQL 16**: el modelo (35 tablas) no usa tipos geográficos; el recorrido y el tiempo estimado los calcula Google Maps (Routes API) |
+| **Acceso a datos** | No se definía | SQLAlchemy 2.0 asíncrono y Alembic para las migraciones |
+| **Pagos** | Pago simulado | **Mercado Pago en modo de prueba**, con confirmación automática solo cuando el proveedor informa un pago aprobado o acreditado |
+| **Contrato entre capas** | OpenAPI / JSON | Igual, entregado en YAML y en JSON (22 operaciones, 23 esquemas) |
+| **IA** | Chatbot y agente de planificación, sin modelo definido | Agente AG-01 de 13 herramientas, sobre OpenRouter: MiniMax M3 (principal) y Nemotron 3 Super (respaldo), elegidos con una prueba medida |
+| **Mensajería** | No figuraba | WhatsApp como canal alternativo de atención |
+| **Diagramas** | Mermaid.js | Se mantiene (sección 2.4), junto con C4 y UML |
+
+**Tecnologías adoptadas:** Flutter (Web y Mobile), Python + FastAPI, PostgreSQL 16, SQLAlchemy 2.0 + Alembic, OpenAPI (YAML y JSON), OpenRouter (MiniMax M3 y Nemotron 3 Super), Google Maps Platform (Routes API), Mercado Pago (modo de prueba), WhatsApp, Git y GitHub, y Docker (entorno de desarrollo). Alojamiento previsto, sin costo: Neon (base), Render (servidor) y GitHub Pages (versión web).
+
+## 1.7 Análisis
+
+El análisis parte de una **entrevista directa con el dueño de VanFull (25/08/2026)** y de las aclaraciones posteriores de esa misma entrevista. Lo que sigue lo resume; el detalle completo está en las carpetas 01 y 02 del Drive.
+
+### Cómo se trabajó
+
+Cada afirmación se clasificó según su origen, con esta jerarquía de fuentes: lo que exigen los profesores, lo que confirmó VanFull, lo que definió el equipo, las propuestas de IA (que solo valen una vez aprobadas) y lo pendiente de validación. Así se evita tomar como un hecho algo que alguien solo supuso. Y cada requisito conserva su trazabilidad: **problemática → necesidad → comportamiento confirmado → requisito → regla de negocio → caso de uso → diseño técnico.**
+
+### Cómo funciona VanFull hoy
+
+| Aspecto | Situación actual |
+|---|---|
+| **Empresa** | Familiar, con unos 20 años de actividad. Presta servicios universitarios, laborales, charters, ocasionales, traslados a aeropuertos, servicios a empresas y turismo |
+| **Flota y personal** | 15 vehículos (14 de 19 o 24 pasajeros y 1 de 45), unos 11 choferes y 2 personas en administración y coordinación |
+| **Herramientas** | No tiene un sistema propio: usa WhatsApp para comunicarse y un Excel con varios libros como sistema administrativo central |
+| **Reservas** | El pasajero consulta por WhatsApp o teléfono, VanFull verifica el cupo a mano, informa la tarifa, acepta de palabra y después carga los datos en Excel |
+| **Cupos** | Se controlan con sumatorias manuales. Si la unidad está completa no se vende más y se arma una lista de espera |
+| **Pagos** | Efectivo, transferencia, billeteras virtuales y cuenta corriente, verificados uno por uno. No usa Mercado Pago por sus comisiones |
+| **Abonos mensuales** | Se paga del 1 al 10; del 11 al 13 hay advertencia y posible suspensión; pasado el 13 se puede perder el cupo |
+| **Recorridos** | Los de charter se arman con los puntos de ascenso de los pasajeros contratados y quedan relativamente fijos; hay un transbordo en Bella Vista |
+
+### Problemas detectados
+
+VanFull priorizó tres: **control de reservas, control de pagos y notificaciones a clientes.** El análisis detectó además errores de disponibilidad por el conteo manual, tiempo dedicado a la facturación, información dispersa entre mensajes, dificultad para identificar los pagos hechos por terceros (por ejemplo, padres que pagan por sus hijos), tareas repetitivas por WhatsApp, comunicación manual ante cambios y problemas de tránsito para organizar los recorridos.
+
+### Qué pidió VanFull para el sistema
+
+El control de cupos y el **código QR de abordaje** son las dos funciones que el dueño destacó para una primera versión. Además pidió: registrar el abordaje aunque se pierda la conexión, seguimiento GPS de la combi, propuestas de recorridos optimizados, un chatbot (en WhatsApp y en la aplicación), notificaciones automáticas, un control estructurado de la deuda, que las empresas clientes den de alta a sus propios pasajeros, reportes exportables a Excel y PDF, y la gestión digital de vehículos y choferes.
+
+### Actores y casos de uso
+
+Se identificaron **9 actores**: pasajero, pasajero empresarial, representante corporativo, chofer, administrador, dueño o superadministrador, y tres sistemas externos (Mercado Pago, WhatsApp y el servicio de mapas, geolocalización y tránsito). Sus necesidades se tradujeron en **37 casos de uso**, agrupados por actor principal:
+
+| Actor principal | Casos de uso | Cantidad |
+|---|---|---|
+| Pasajero y acceso | CU-001 a CU-012 | 12 |
+| Administración | CU-013 a CU-028 | 16 |
+| Chofer | CU-029 y CU-030 | 2 |
+| Dueño | CU-031 y CU-032 | 2 |
+| Clientes corporativos | CU-033 a CU-035 | 3 |
+| Integraciones y soporte | CU-036 y CU-037 | 2 |
+| **Total** |  | **37** |
+
+### Requisitos y reglas
+
+La línea funcional quedó cerrada con **45 requisitos funcionales, 14 requisitos no funcionales y 31 reglas de negocio**. Los no funcionales tienen métricas verificables:
+
+| Aspecto | Métrica aprobada |
+|---|---|
+| **Disponibilidad** (RNF-001) | 99 % mensual |
+| **Velocidad** (RNF-002 y 003) | 95 % de las operaciones habituales en 2 segundos o menos; las pesadas o con integraciones, hasta 5 segundos |
+| **Carga** (RNF-004 a 006) | 100 usuarios simultáneos, probado hasta con 150, y capacidad de duplicar la carga sin rediseñar |
+| **Seguimiento GPS** (RNF-007 a 010) | Actualización cada 10 segundos; más de 30 segundos se marca como desactualizada; precisión de hasta 50 metros; recupera la posición al volver la señal |
+| **Abordaje sin conexión** (RNF-011 y 012) | Sincroniza en 60 segundos o menos al recuperar la conexión, sin duplicados |
+| **Recuperación** (RNF-013 y 014) | Volver a funcionar en 1 hora como máximo y perder como mucho 15 minutos de datos |
+
+Algunas **reglas de negocio** son las que más condicionan el diseño: no superar el cupo de la unidad (RN-001); distinguir la reserva provisional de la consolidada (RN-002); que la deuda de un abono no supere un mes (RN-006); las condiciones de cancelación (RN-017 a RN-019); que las tarifas, los descuentos especiales y los reportes reservados sean exclusivos del dueño (RN-027); que el GPS lo vean solo quienes están vinculados al servicio y solo mientras dura (RN-030); y que un pasajero no tenga dos viajes de ida ni dos de vuelta el mismo día (RN-031).
+
+### Decisiones que se tomaron durante el análisis
+
+**El código QR lo escanea el pasajero, no el chofer.** El QR identifica a la unidad; el chofer solo consulta la lista y no registra abordajes.
+
+**Los pagos tienen dos caminos.** Cuando Mercado Pago informa un pago aprobado o acreditado, el sistema lo confirma solo; los demás medios los confirma una persona autorizada. El asistente de IA nunca confirma pagos.
+
+**La lista de espera funciona por orden de llegada (FIFO).**
+
+**Un viaje puede planificarse sin vehículo o sin chofer asignado, pero ambos deben estarlo antes de iniciarlo.**
+
+### Pendientes que no se resolvieron por inferencia
+
+Quedan abiertos, y están escritos como tales: la **validación contable y fiscal** de la facturación; la **privacidad y protección de datos** (fotos y datos del DNI, CUIL, contactos de emergencia, ubicación) y los plazos de conservación; la **política técnica de seguridad** (autenticación, sesiones, cifrado, recuperación de cuenta); la **auditoría de cambios**, que es una propuesta y no está aprobada; y la **configuración de WhatsApp** (cuenta, plantillas, costos). Mercado Pago se usa en modo de prueba, porque VanFull hoy no lo utiliza en producción.
 
 ---
 
@@ -212,9 +349,8 @@ La imagen renderizada de ese código está pegada en el documento del Drive, con
 ## 2.5 Diagramas C4 y de casos de uso
 
 Los diagramas de esta sección **conectan la visión funcional con la arquitectura**. En el documento principal
-van el C4 de Contexto, el C4 de Contenedores y el Diagrama General de Casos de Uso. Las vistas parciales por
-actor y los diagramas de actividad quedan en las carpetas `03` y `04` del Drive como evidencia detallada del
-modelado aprobado.
+van el C4 de Contexto, el C4 de Contenedores y el Diagrama General de Casos de Uso. Las vistas parciales por actor quedan en la carpeta `03` del Drive como evidencia detallada del modelado
+aprobado; los diagramas de actividad de los casos de uso prioritarios se incluyen en la sección 2.7.
 
 **C4 Nivel 1 — Contexto.** Ubica al sistema dentro de su entorno: los usuarios humanos y los sistemas
 externos con los que se relaciona —Mercado Pago, WhatsApp y los servicios de mapas, geolocalización, tránsito
@@ -243,6 +379,55 @@ Algunos requisitos no funcionales obligaron a tomar decisiones concretas:
 | Seguimiento por GPS | Actualizar cada 10 segundos; avisar si el dato tiene más de 30 | La aplicación le pregunta al servidor cada 10 segundos |
 | Abordaje sin señal | Sincronizar en menos de 60 segundos y sin duplicados | Guardar en el teléfono del pasajero y que la base rechace repetidos |
 | Recuperación ante fallas | Volver a funcionar en 1 hora, perder como máximo 15 minutos de datos | Política de copias de seguridad |
+
+## 2.7 Diagramas de actividad
+
+Los diagramas de actividad muestran, paso a paso, el flujo de los casos de uso prioritarios: qué hace cada actor, qué hace el sistema y dónde el recorrido se bifurca según las reglas de negocio. Se incluyen **ocho**, correspondientes al modelado aprobado (carpeta 04 del Drive).
+
+Cada columna es un actor, los rombos son decisiones y las notas amarillas indican reglas o requisitos relacionados. Los diagramas son extensos y se insertan a tamaño de página: para leer el detalle conviene ampliar la imagen en pantalla, que conserva su resolución original.
+
+| Diagrama | Caso de uso | Quién interviene |
+|---|---|---|
+| DA-CU003 | CU-003 · Crear reserva | Pasajero |
+| DA-CU004 | CU-004 · Cancelar reserva | Pasajero |
+| DA-CU007 | CU-007 · Registrar abordaje mediante QR | Pasajero |
+| DA-CU017 | CU-017 · Gestionar créditos, devoluciones y reintegros | Administrador / Dueño |
+| DA-CU018 | CU-018 · Gestionar viajes y asignaciones | Administrador / Dueño |
+| DA-CU020 | CU-020 · Optimizar recorrido | Administrador / Dueño; servicio de mapas, tránsito y rutas |
+| DA-CU028 | CU-028 · Gestionar abonos mensuales | Administrador / Dueño |
+| DA-CU030 | CU-030 · Ejecutar viaje | Chofer; servicio de mapas, geolocalización, tránsito y rutas |
+
+### DA-CU003 · Crear reserva
+
+*(Diagrama de actividad DA-CU003: figura en el documento del Drive; original en la carpeta `04`.)*
+
+### DA-CU020 · Optimizar recorrido
+
+*(Diagrama de actividad DA-CU020: figura en el documento del Drive; original en la carpeta `04`.)*
+
+### DA-CU028 · Gestionar abonos mensuales
+
+*(Diagrama de actividad DA-CU028: figura en el documento del Drive; original en la carpeta `04`.)*
+
+### DA-CU030 · Ejecutar viaje
+
+*(Diagrama de actividad DA-CU030: figura en el documento del Drive; original en la carpeta `04`.)*
+
+### DA-CU004 · Cancelar reserva
+
+*(Diagrama de actividad DA-CU004: figura en el documento del Drive; original en la carpeta `04`.)*
+
+### DA-CU007 · Registrar abordaje mediante QR
+
+*(Diagrama de actividad DA-CU007: figura en el documento del Drive; original en la carpeta `04`.)*
+
+### DA-CU017 · Gestionar créditos, devoluciones y reintegros
+
+*(Diagrama de actividad DA-CU017: figura en el documento del Drive; original en la carpeta `04`.)*
+
+### DA-CU018 · Gestionar viajes y asignaciones
+
+*(Diagrama de actividad DA-CU018: figura en el documento del Drive; original en la carpeta `04`.)*
 
 ---
 

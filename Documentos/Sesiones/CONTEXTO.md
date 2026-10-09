@@ -130,21 +130,14 @@ Disponibilidad 99 % mensual · 95 % de operaciones ≤ 2 s · operaciones pesada
 Cierre = viernes 20/11 (los encuentros son los viernes; ver `02-Cronograma.md`).
 El desarrollo del backend arranca el **05/10** (sem 10); frontend 12/10; integración 19/10; pruebas y documentación 02/11.
 
-## 10. Estado del PC1 (**presentado y APROBADO el 2026-10-02**)
+## 10. Estado del PC1 y del documento v1.1
 
-> **El tag `pc1` (`278b0d4`) queda congelado.** Cualquier cambio posterior a lo entregado lleva tag nuevo
-> (`pc1.1` y `pc1.2` ya existen: documento v1.1; el próximo sería `pc1.3`). Lo que sigue es el desarrollo: arranca el **05/10** (§11). Lo de abajo es el registro de cómo se
-> llegó a la entrega.
+> **Tag `pc1` (`278b0d4`) = entrega aprobada el 02/10/2026, congelado.** Todo cambio posterior lleva tag nuevo: `pc1.1` y
+> `pc1.2` ya existen (documento v1.1); el próximo sería `pc1.3`.
 
-**La consigna pedía** (de `Presentacion.pdf`): problema, alcance y límites, modelo conceptual, UML/C4, modelo de
-datos SQL, OpenAPI (JSON), modelos IA + agentes + prompts, mermaid.js, modelo de desarrollo e interfaces.
-Entrega: *Documento con el MVC*.
-
-**Nuestra parte quedó terminada:** `backend/db/schema.sql` (35 tablas, 54 FKs, validado contra PostgreSQL real) ·
-`backend/openapi/openapi.yaml` + `.json` (21 rutas, 22 operaciones, 23 schemas, validado) ·
-`07-IA-y-Agentes-Consolidado.md` (también en el Drive `06_` y `07_`) · modelo de desarrollo (repo, ramas/PR,
-ruff/pytest, `CONTRIBUTING.md`) · 10 pantallas con los 3 actores, recorribles en modo Play ·
-`10-Documento-MVC-PC1.md` → `.docx` en la carpeta `07_` del Drive.
+**Nuestra parte del PC1 quedó terminada:** `backend/db/schema.sql` (35 tablas, 54 FKs, validado contra PostgreSQL real) ·
+`backend/openapi/openapi.yaml` + `.json` (21 rutas, 22 operaciones, 23 schemas, validado) · `07-IA-y-Agentes-Consolidado.md` ·
+modelo de desarrollo (`CONTRIBUTING.md`, ruff/pytest) · 10 pantallas · `10-Documento-MVC-PC1.md` → `.docx` en la carpeta `07_` del Drive.
 
 ### Los artefactos de diseño viven en claude.ai (⚠️ los links solo están acá)
 
@@ -153,54 +146,35 @@ ruff/pytest, `CONTRIBUTING.md`) · 10 pantallas con los 3 actores, recorribles e
 | **Pantallas VanFull** — las 10 pantallas del PC1, navegables | https://claude.ai/artifact/6M3yj4nmLnqaCoM6BqY4Ui |
 | **Sistema de diseño VanFull** — tokens, 4 componentes, marca | https://claude.ai/artifact/6ptGhgioyJSHZeCBv1eRaG |
 
-Las reglas y el porqué de todo eso están versionados en `Documentos/Documentacion/08-Brief-de-Diseno-UI.md`.
-Las 10 pantallas: Login · Buscar servicio · Confirmar reserva · Mis reservas y deuda · Pago ·
-Seguimiento en vivo · **Abordar con QR (pasajero)** · Asistente AG-01 · **Chofer: lista del viaje (solo
-consulta)** · Admin (viajes del día).
+Las reglas, el porqué y la lista de las 10 pantallas están en `Documentos/Documentacion/08-Brief-de-Diseno-UI.md`.
 
-⚠️ **El QR lo escanea el pasajero, no el chofer** (CU-007): el código identifica a la unidad. El chofer solo
-consulta (CU-029) y **no registra abordajes**. Int2 detectó el 28/09 que las pantallas lo tenían invertido;
-está corregido en las pantallas, en el brief y en el documento del MVC.
+⚠️ **El QR lo escanea el pasajero, no el chofer** (CU-007): el código identifica a la unidad. El chofer solo consulta (CU-029) y
+**no registra abordajes**. Int2 lo detectó el 28/09; está corregido en las pantallas, el brief y el documento.
 
-### El documento del PC1 (30/09)
+⚠️ **Hubo dos documentos MVC** el 30/09 (Int2 trabajó sobre una copia `_Integracion_Int2`); se resolvió a favor de la suya. La
+vieja quedó como `..._HISTORICO_no_usar.docx`: **no borrarla ni confundirla**.
 
-`07_Documento_MVC_VanFull_v1.0.docx` en la carpeta `07_` del Drive: cero marcadores FALTA y 16 imágenes sin
-referencias rotas. El guion de la presentación está en la § 9 del documento. Quedaron hechos el mermaid, la
-carpeta `07_` (8 archivos), la revisión cruzada de Int2 (4 rondas, todo aplicado) y el repo público con el
-estado congelado en el tag `pc1`.
+⚠️ **El cronograma correcto es el de `02-Cronograma.md`** (puntos de control los viernes 02/10, 30/10 y 13/11; cierre 20/11).
+Circulaban otras dos versiones con fechas distintas.
 
-⚠️ **Hubo dos documentos MVC** el 30/09 (Int2 trabajó sobre una copia `_Integracion_Int2`). Se resolvió a favor de
-la suya, que era superconjunto. La vieja quedó como `..._HISTORICO_no_usar.docx`: **no borrarla ni confundirla**.
+### Documento MVC v1.1 (08/10/2026)
 
-⚠️ **El cronograma correcto es el de `02-Cronograma.md`** (puntos de control los viernes 02/10, 30/10 y 13/11;
-cierre el 20/11). Circulaban otras dos versiones con fechas distintas y el propio archivo explica por qué vale ésta.
+La cátedra publicó la lista de contenidos del documento. La v1.1 suma, sin renumerar nada de lo ya citado: §1.5 Propuestas,
+§1.6 Propuesta seleccionada, §1.7 Análisis, **§2.5.1 Trazo fino** (tabla de los 8 CU con diagrama de actividad), §2.7 Diagramas
+de actividad, §2.8 Componentes y despliegue, **§6.5 Informe sobre la IA** (uno solo para el equipo, en tercera persona, sin
+nombres) y el **Anexo G**: las 37 especificaciones copiadas sin modificar de `03_Especificaciones_Casos_de_Uso_VanFull_v1.3_Aprobado_Equipo`
+(fuente de verdad: Int2; no copiarlas al repo).
 
-### Documento MVC v1.1 (en curso · 08/10/2026)
+**Vigente:** `07_Documento_MVC_VanFull_v1.1.docx` (en `Escritorio/VanFull-PC1-v1.1-para-Drive/`, con el README unido
+`07_README_PC1.docx`), espejado en `10-Documento-MVC-PC1.md`. Los tres revisaron (Martín: 1.7, 2.5.1 y Anexo G sin correcciones).
 
-La cátedra publicó la lista de lo que debe contener el documento (carátula, propuestas, propuesta seleccionada,
-presentación, objetivos, alcance, límites, análisis, diseño con casos de uso general / trazo fino / interfaces /
-secuencia o actividad / componentes y despliegue, DER, e informe sobre IA para diseño). Contra la v1.0 se agregaron:
-§1.5 Propuestas evaluadas, §1.6 Propuesta seleccionada, §1.7 Análisis, §2.7 Diagramas de actividad (los 8 de la
-carpeta 04 del Drive) y §2.8 Diagramas de componentes y de despliegue (dibujos en `Documentos/Diagramas/`). Se
-numeraron al final de cada sección para no renumerar nada que ya cita el README de la carpeta 07.
+**Sin confirmar con la cátedra:** *Trazo fino* = especificación detallada de los CU (lo planteó Martín); y si la lista es
+re-entrega del PC1 o va para el PC2.
 
-**Estado (08/10):** el Word `07_Documento_MVC_VanFull_v1.1_completo.docx` (en el Escritorio de Martiniano; todavía no en el
-Drive) es la versión vigente y está espejado en `10-Documento-MVC-PC1.md`. Incluye el §6.5 *Informe sobre la IA*, en tercera
-persona y sin nombres (el informe es uno solo para el equipo; los tres lo aprobaron), la subsección **2.5.1 Trazo fino de los
-casos de uso** (justo después del diagrama general, con la tabla de los 8 CU que tienen diagrama de actividad) y el **Anexo G**,
-al final: las 37 especificaciones completas copiadas sin modificar de `03_Especificaciones_Casos_de_Uso_VanFull_v1.3_Aprobado_Equipo`
-(fuente de verdad: Int2; no copiarlas al repo). Martín revisó 1.7, 2.5.1 y el Anexo G contra sus fuentes: sin correcciones.
-Los otros dos `.docx` de esa carpeta (`..._v1.1.docx` y `..._con_Analisis.docx`) son versiones anteriores: no usarlos.
-Tags: `pc1` = entrega aprobada (congelado) · `pc1.1` = v1.1 sin trazo fino · **`pc1.2` = v1.1 con trazo fino** (el próximo sería `pc1.3`).
-
-**Qué se interpretó:** *Trazo fino* = especificación detallada de los casos de uso (lo plantearon Martiniano y Martín; **no se
-confirmó con la cátedra**). Tampoco se sabe si la lista de la cátedra es re-entrega del PC1 o va para el PC2.
-
-**Falta:** que Martiniano abra el Word y lo revise a ojo (no se pudo renderizar acá), y subirlo al Drive (como `..._v1.1.docx`)
-junto a la v1.0, sin pisarla, con una línea de cambios en el README de la carpeta 07. **Decisión tomada:** los diagramas de
-actividad 018, 030, 028, 017 y 007 quedan con texto chico en papel (se muestran al 26-34 % de su tamaño); se dejan así porque
-los PNG son de alta resolución y los originales están en la carpeta 04. Si Martiniano edita el Word a mano, comparar antes de
-regenerarlo.
+**Falta:** que Martiniano abra el Word a ojo (no se pudo renderizar acá), lo suba a la carpeta `07_` del Drive junto a la v1.0
+(sin pisarla) y reemplace `07_README_PC1.docx` por la versión unida. Decisión tomada: los diagramas de actividad 018, 030, 028, 017
+y 007 quedan con texto chico en papel (26-34 %); los PNG son de alta resolución y los originales están en la carpeta 04. Si
+Martiniano edita el Word a mano, comparar antes de regenerarlo.
 
 ## 11. Estado del código
 
@@ -209,7 +183,7 @@ async + `get_db`), `routers/health.py` (**el único endpoint real**), `agent/too
 `agent/openrouter_client.py` (cliente con fallback), `tests/test_health.py`, Dockerfile y docker-compose.
 
 **No existe todavía:** `models/`, `schemas/` y `services/` están **vacíos**, y falta todo endpoint que no sea
-`/health`. También falta `core/security.py` (JWT/roles) y Alembic. **Esto es esperable:** el desarrollo arranca el 05/10.
+`/health`. También falta `core/security.py` (JWT/roles) y Alembic. **Esto es esperable:** el backend se dejó para después de cerrar el documento v1.1 (decisión del 08/10; el cronograma lo preveía desde el 05/10).
 
 **Plan cuando se programe:** `models/` (desde `schema.sql`, agrupados por dominio) → `services/` (reglas RN) →
 `routers/` (endpoints del OpenAPI) → tests. Los 37 CU entran en ~10 routers, no uno por CU.

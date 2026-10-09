@@ -1,12 +1,14 @@
 # Borrador — Informe sobre IA para diseño
 
 > **Estado:** borrador para el documento v1.1. **No está en el Word.**
-> **Martiniano y Facundo (Integrantes 1+3):** parte completa. Trabajaron juntos con las mismas herramientas, así que
-> es un solo bloque. Se redactó a partir del historial del repositorio y de las sesiones de trabajo con la IA; lo
-> revisan y lo corrigen antes de entregar.
-> **Martín (Integrante 2):** parte vacía, para que la complete él.
-> **Qué no está:** las **propuestas y discusiones** entre ustedes sobre qué herramienta usar. No hay registro en
-> ningún archivo. Lo que falta está marcado con `[completar: ...]`.
+> **Martiniano (Integrante 1+3):** parte completa. Se redactó a partir del historial del repositorio y de las sesiones
+> de trabajo con Claude Code; lo revisa y lo corrige antes de entregar.
+> **Facundo (Integrante 1+3):** parte completa, con el texto que él mismo escribió (usó ChatGPT, no Claude Code).
+> **Martín (Integrante 2):** parte completa, con el texto que él mismo escribió. Su comparación entre ChatGPT y Gemini
+> fue práctica, no una evaluación formal.
+> **Qué falta:** que los tres lean el borrador completo y corrijan lo que no refleje su experiencia. Las conclusiones
+> del equipo se redactaron a partir de los tres bloques y las revisan los tres. No hay registro de una discusión
+> formal entre ustedes sobre qué herramienta usar. Lo que quede pendiente está marcado con `[completar: ...]`.
 > **Cuando esté completo:** se integra al documento como sección 6.5 y se borra este archivo.
 
 ---
@@ -22,24 +24,49 @@ programar** VanFull. La IA que forma parte del producto (el asistente AG-01 y su
 
 | Herramienta | Para qué se usó | Quién | Dónde consta |
 |---|---|---|---|
-| **Claude Code** | Programación y documentación sobre el repositorio: backend, API, datos y documento del MVC | Martiniano y Facundo | Historial de git; notas de ingesta (§0) |
-| **Claude Design** | Las 10 pantallas y el sistema de diseño | Martiniano y Facundo | Brief de diseño UI |
-| **Claude** (familia Opus), en chat | Razonamiento y diseño | `[completar: Martín, si lo usó]` | Stack y referencias |
-| **ChatGPT** (GPT-5.6) | Razonamiento y diseño | `[completar: Martín]` | Stack y referencias |
-| **ChatGPT Work** | Agente de trabajo y documentación. En el análisis, un informe previo se usó solo para detectar contradicciones y pendientes | `[completar: Martín]` | AS-IS consolidado; Stack y referencias |
-| **Codex** | Programación. Figura asignada al rol de Integrante 3 en los prompts maestros | `[completar: Martín, si alguien lo usó]` | Notas de ingesta (§0) |
+| **Claude Code** | Programación y documentación sobre el repositorio: backend, API, datos y documento del MVC | Martiniano | Historial de git; notas de ingesta (§0) |
+| **Claude Design** | Las 10 pantallas y el sistema de diseño | Martiniano | Brief de diseño UI |
+| **Prompt Cowboy** | Generar el prompt inicial de las sesiones con Claude Code, donde se explicó cómo se iba a trabajar | Martiniano | Declarado por Martiniano |
+| **Claude** (familia Opus), en chat | Razonamiento y diseño | Nadie del equipo lo usó (Martín durante el PC1; Martiniano y Facundo, según Martiniano) | Stack y referencias |
+| **ChatGPT** (GPT-5.6) | Martín: relevamiento, análisis funcional, modelado, trazabilidad y revisión documental. Facundo: apoyo conversacional para entender el proyecto, revisar la entrega contra la consigna y hacer borradores | Martín y Facundo | Stack y referencias; informes de cada uno |
+| **ChatGPT Work** | Agente de trabajo y documentación. Se usó en análisis extensos y revisión transversal; en el análisis de la entrevista se usó solo para detectar contradicciones y pendientes | Martín | AS-IS consolidado; trabajos de análisis y actualización de artefactos |
+| **Codex** | Programación. Figura asignada al rol de Integrante 3 en los prompts maestros | Nadie lo usó hasta ahora. Facundo lo va a usar para implementar durante el desarrollo | Notas de ingesta (§0) |
 
 ### Propuestas y discusiones
 
-`[completar: qué otras herramientas se consideraron (por ejemplo, otros asistentes o editores con IA)]`
+No hay registro de una discusión formal del equipo sobre qué herramienta usar. Lo que sigue es lo que cada integrante
+considera sobre su propia elección; la de Facundo está en su bloque, más abajo.
 
-`[completar: por qué se eligieron estas y no otras: costo, calidad en español, integración con el código, experiencia previa]`
+**Martín (Integrante 2).** Las alternativas consideradas de forma práctica fueron **ChatGPT** y **Gemini**. Ambas
+herramientas estaban disponibles en planes pagos. No se realizó una matriz comparativa formal ni un benchmark
+documentado: la elección se basó en la experiencia de uso durante las tareas de análisis y diseño del proyecto.
 
-`[completar: qué se discutió sobre usar IA en cada etapa (análisis, diseño, programación) y qué límites se pusieron]`
+Martín eligió **ChatGPT** para el relevamiento y análisis porque, en su experiencia, ofrecía un lenguaje más natural y
+respuestas más detalladas que Gemini. También le resultó más adecuado para el trabajo con artefactos visuales y de
+modelado utilizados en VanFull, especialmente diagramas en **PlantUML**, archivos **draw.io** y generación/revisión de
+imágenes **PNG**. Gemini quedó disponible como alternativa, pero no se adoptó como herramienta principal para esta etapa.
+
+Para tareas extensas, Martín utilizó **ChatGPT Work** en tres casos: (1) análisis de la entrevista con VanFull,
+(2) explicación del MVC aplicado a VanFull y (3) actualización de Casos de Uso y artefactos de la Etapa 04. El uso más
+relevante fue el análisis de la entrevista. En todos los casos se mantuvo el mismo límite: la IA podía organizar, comparar,
+detectar contradicciones o proponer, pero no reemplazar la entrevista, las correcciones docentes ni las decisiones del equipo.
+
+Martín no utilizó **Claude en chat** ni **Codex** durante el PC1 porque su trabajo estuvo concentrado en relevamiento,
+análisis, requisitos, UML, datos conceptuales/lógicos y revisión, no en generación de código. Considera utilizarlos en
+próximos puntos de control si sus tareas pasan a requerir programación. No se documentó una discusión formal del equipo
+sobre estas herramientas desde su rol; por eso no se presentan como alternativas descartadas por una evaluación técnica.
 
 | Herramienta evaluada | Para qué se evaluó | Qué se discutió | Decisión |
 |---|---|---|---|
-| `[completar]` | `[completar]` | `[completar]` | `[completar]` |
+| **ChatGPT** | Relevamiento, análisis funcional, requisitos, UML, modelado, revisión y documentación | Calidad de redacción en español, nivel de detalle y capacidad para asistir con PUML/draw.io/PNG | **Seleccionada por Martín como herramienta principal** |
+| **Gemini** | Alternativa para análisis y diseño | En la experiencia de Martín, respuestas menos naturales/detalladas y mayores limitaciones para el trabajo de diagramas e imágenes del proyecto | **No adoptada como herramienta principal** |
+| **ChatGPT Work** | Análisis documental extenso y actualización transversal de artefactos | Conveniencia para tareas largas con múltiples fuentes; necesidad de verificar cada resultado contra la fuente primaria | **Utilizada en tres trabajos puntuales** |
+| **Claude en chat / Codex** | Posible uso futuro en razonamiento/programación | No eran necesarios para las tareas de Martín en PC1 | **No utilizados por Martín en PC1** |
+
+**Martiniano (Integrante 1+3).** No consideró otras herramientas para programar y diseñar: eligió **Claude Code** y
+**Claude Design** porque ya había trabajado con ellas, para poder usar archivos de instrucciones reutilizables
+(`skills.md`) y por su manejo del consumo de tokens. Además, las considera de las mejores valoradas para el desarrollo
+de software. Fue una elección por experiencia previa, no el resultado de una comparación.
 
 ### Cómo se usó en el diseño
 
@@ -57,15 +84,15 @@ programar** VanFull. La IA que forma parte del producto (el asistente AG-01 y su
 
 ## Aportes por integrante
 
-### Martiniano y Facundo (Integrantes 1+3)
+### Martiniano (Integrante 1+3)
 
-> Redactado a partir del historial de git y de las sesiones de trabajo con Claude Code. Facundo trabajó junto a
-> Martiniano, con las mismas herramientas y en las mismas sesiones, así que las herramientas, las tareas y las
-> conclusiones valen para los dos. Los dos revisan este bloque.
+> Redactado a partir del historial de git y de las sesiones de trabajo con Claude Code. Martiniano revisa este bloque.
+> Facundo tiene el suyo más abajo porque usó otra herramienta.
 
-**1. Qué herramientas usaron.** Claude Code, como agente de programación y documentación sobre el repositorio, y
+**1. Qué herramientas usó.** Claude Code, como agente de programación y documentación sobre el repositorio, y
 Claude Design, para las pantallas y el sistema de diseño. Los commits registran los modelos usados: Claude Opus 4.8,
-Opus 5, Opus 5.5 y Sonnet 5.5. `[completar: si usaron además otras herramientas]`
+Opus 5, Opus 5.5 y Sonnet 5.5. La única otra herramienta que usó fue **Prompt Cowboy**, para generar el prompt inicial
+con el que se le explicó a Claude Code cómo se iba a trabajar.
 
 **2. Para qué tarea.** El historial del repositorio muestra el recorrido, con las fechas de los commits firmados:
 
@@ -80,9 +107,9 @@ Opus 5, Opus 5.5 y Sonnet 5.5. `[completar: si usaron además otras herramientas
   plan, tomados de su documentación oficial.
 - **Documento v1.1 (08/10).** Propuestas, análisis, diagramas de actividad, de componentes y de despliegue.
 
-**3. Qué descartaron y por qué.** `[completar: herramientas de IA que probaron y no siguieron usando, y el motivo]`
+**3. Qué descartó y por qué.** Nada: como no evaluó otras herramientas, no descartó ninguna.
 
-**4. Errores de la IA que tuvieron que corregir.** Además de los registrados arriba, en las sesiones se detectaron estos
+**4. Errores de la IA que tuvo que corregir.** Además de los registrados arriba, en las sesiones se detectaron estos
 casos, todos al contrastar con el entregable real o con la fuente:
 
 - Claude Code afirmó que una decisión (ADJ-03) ya estaba propagada al documento del MVC; solo lo estaba en el archivo
@@ -95,7 +122,7 @@ casos, todos al contrastar con el entregable real o con la fuente:
   versión vigente antes de entregarla.
 - En las pantallas, la fecha "jueves 25/09" era un viernes. Se vio al verificar el calendario.
 
-**5. Qué decidieron ellos y no la IA.** Las decisiones que constan en los documentos son de Martiniano:
+**5. Qué decidió él y no la IA.** Las decisiones que constan en los documentos son de Martiniano:
 
 - El stack y la arquitectura base (Flutter, FastAPI, PostgreSQL, OpenRouter), el monorepo y que el contrato OpenAPI
   se escribe antes de programar.
@@ -121,21 +148,128 @@ casos, todos al contrastar con el entregable real o con la fuente:
 - **Recomendación:** pedir siempre el cambio mostrado antes de incorporarlo, y no aceptar una afirmación de "ya está
   hecho" sin una verificación que se pueda repetir.
 
-`[completar: agregar las decisiones propias de Facundo, y corregir lo que no refleje la experiencia de alguno de los dos]`
+`[completar: corregir lo que no refleje la experiencia de Martiniano]`
+
+### Facundo (Integrante 1+3)
+
+> Texto escrito por Facundo, tal cual lo envió; solo se adaptaron los títulos al formato del documento.
+**Cómo usé la IA.** Durante el diseño de VanFull utilicé ChatGPT como herramienta de apoyo para comprender el
+proyecto, organizar la información y revisar la documentación. Me resultó especialmente útil para relacionar los
+requisitos del negocio con las interfaces, los casos de uso y la arquitectura propuesta.
+
+Mi intención fue utilizar la inteligencia artificial como un asistente con el que pudiera discutir ideas y hacer
+preguntas. A medida que avanzaba el proyecto, necesitaba entender no solo qué tecnologías habíamos elegido, sino
+también qué función cumplía cada una y cómo se conectaban entre sí.
+
+**Propuestas y elección de herramientas.** Dentro de las herramientas contempladas en el proyecto se encontraban
+ChatGPT y Claude para tareas de análisis, diseño y documentación, y Codex y Claude Code para actividades relacionadas
+con el código.
+
+En mi caso, elegí ChatGPT como apoyo principal porque podía trabajar de manera conversacional: presentar una duda,
+pedir una explicación más sencilla y profundizar hasta comprender el tema. Esto me sirvió para revisar conceptos como
+la comunicación entre frontend y backend, los endpoints de una API, el funcionamiento de FastAPI y el acceso a la base
+de datos mediante un ORM.
+
+También consideré importante que la herramienta pudiera trabajar sobre la documentación existente. Para mí, una
+respuesta útil debía estar relacionada con VanFull y con las decisiones del equipo, además de explicar conceptos
+generales.
+
+Claude aparece en el proyecto asociado a propuestas de interfaces y prototipos. Ese uso complementa el trabajo de
+análisis: permite visualizar una solución y discutir cómo se organizarían las pantallas y las acciones del usuario. No
+considero necesario elegir una única herramienta para todas las tareas; la elección depende del tipo de trabajo y de
+la posibilidad de revisar el resultado.
+
+**Uso personal durante el diseño.** Utilicé ChatGPT para consultar dudas técnicas y comprender mejor las decisiones
+del proyecto. Por ejemplo, trabajé sobre el papel de FastAPI y la diferencia entre una API, el backend y la base de
+datos. A través de preguntas sucesivas pude aclarar cómo una acción realizada desde una pantalla llega al servidor y
+cómo este consulta o modifica los datos.
+
+También lo utilicé para revisar la entrega del primer punto de control. Comparé las indicaciones de la cátedra con el
+contenido del documento y con el material disponible del proyecto. Esta revisión ayudó a identificar qué apartados ya
+estaban cubiertos y cuáles requerían una explicación adicional o la incorporación de diagramas.
+
+Otro uso fue la elaboración de borradores. La herramienta me permitió ordenar ideas y convertir información técnica en
+textos más claros. Sin embargo, esos borradores necesitaban una lectura posterior para verificar que expresaran
+correctamente el funcionamiento de VanFull.
+
+**Discusiones y dificultades.** Una de las cuestiones que considero más importantes es que una respuesta bien
+redactada puede parecer correcta aunque contenga supuestos equivocados. Por eso, no alcanza con que la IA explique algo
+con seguridad: hay que contrastarlo con los requisitos y las reglas del proyecto.
+
+En la revisión de las interfaces aparecieron condiciones que no estaban respaldadas por la documentación, como un
+bloqueo después de cuatro intentos de acceso o una regla general de cancelación con ocho horas de anticipación.
+También se detectó una restricción sobre recibir reservas sin tener un vehículo asignado, cuando el proyecto permite
+planificar un viaje y completar posteriormente la asignación de vehículo y chofer.
+
+Estos ejemplos me hicieron prestar más atención a los textos de las pantallas. Un mensaje o un botón también puede
+introducir una regla de negocio, aunque parezca un detalle de presentación.
+
+Además, comprendí que debía pedir explicaciones más concretas cuando una respuesta era demasiado técnica. Reformular
+las preguntas y solicitar ejemplos relacionados con VanFull me ayudó a entender las propuestas y a evaluarlas con
+mayor criterio.
+
+**Conclusiones personales.** Mi experiencia con la inteligencia artificial fue positiva porque me permitió resolver
+dudas, organizar información y participar en la revisión del diseño con una mejor comprensión del proyecto.
+
+La decisión que mantuve bajo mi responsabilidad fue qué información aceptar e incorporar. Una propuesta de la IA debía
+coincidir con la documentación y las decisiones del equipo antes de convertirse en parte del trabajo.
+
+Como conclusión, considero que estas herramientas son útiles cuando se utilizan con un objetivo concreto y con revisión
+humana. En VanFull, su aporte estuvo en facilitar el análisis y la elaboración de propuestas, mientras que la
+validación del diseño y las decisiones finales permanecieron a cargo de los integrantes del proyecto.
 
 ### Martín (Integrante 2)
 
-**1. Qué herramientas usó.** `[completar: Martín]`
+> Texto escrito por Martín, tal cual lo envió.
 
-**2. Para qué tarea.** `[completar: Martín]`
+**1. Qué herramientas usó.** Utilicé principalmente **ChatGPT** para el relevamiento, análisis funcional, ingeniería de
+requisitos, modelado, trazabilidad y revisión documental. También utilicé **ChatGPT Work** para tres trabajos concretos:
+el análisis de la entrevista con VanFull, la explicación del MVC aplicado al proyecto y la actualización de Casos de Uso y
+artefactos de la Etapa 04. El trabajo más importante realizado con Work fue el análisis de la entrevista. Durante el PC1 no
+utilicé Claude en chat ni Codex.
 
-**3. Qué descartó y por qué.** `[completar: Martín]`
+**2. Para qué tarea.** ChatGPT se utilizó para organizar y revisar el relevamiento; consolidar el AS-IS; elaborar y revisar
+alcance, RF, RNF y reglas de negocio; trabajar sobre actores y los 37 Casos de Uso; revisar el Modelo Conceptual y los
+Diagramas de Actividad; asistir en DER y Modelo Relacional; mantener trazabilidad; preparar controles de cambio; y realizar
+revisiones cruzadas entre requisitos, modelo, contrato API, interfaces y documentación. Work se reservó para trabajos más
+extensos que requerían comparar varias fuentes o actualizar varios artefactos relacionados.
 
-**4. Errores de la IA que tuvo que corregir.** `[completar: Martín — un ejemplo concreto por herramienta]`
+**3. Qué descartó y por qué.** Tengo disponibles en modalidad paga tanto **ChatGPT** como **Gemini**. Para esta etapa
+decidí trabajar con ChatGPT porque, en mi experiencia, el lenguaje resultó más natural y las respuestas más detalladas para
+el relevamiento y análisis. También me dio mejores resultados para el trabajo de diseño y modelado que necesitábamos en
+VanFull, especialmente PlantUML, draw.io y PNG, donde encontré más limitaciones con Gemini. Esta elección fue práctica y
+basada en mi experiencia de uso; no hicimos una evaluación formal ni una matriz comparativa entre ambas. No utilicé Claude
+en chat ni Codex porque mi responsabilidad durante PC1 no estuvo orientada a generación de código.
 
-**5. Qué decidió él y no la IA.** `[completar: Martín]`
+**4. Errores de la IA que tuvo que corregir.** Con ChatGPT, uno de los riesgos que apareció varias veces fue que una
+respuesta plausible podía conservar una regla o interpretación desactualizada si no se contrastaba con toda la línea base.
+Un caso concreto fue la semántica de pagos: en documentación previa permanecía la idea de que la confirmación final era
+siempre humana, pero el control de cambio aprobado establecía que Mercado Pago confirma automáticamente cuando informa
+válidamente una operación aprobada o acreditada. La contradicción se detectó en la revisión y se corrigió en los artefactos
+correspondientes. También detecté el 28/09 el flujo del QR invertido en una interfaz: mostraba al chofer escaneando, cuando
+según los Casos de Uso aprobados quien escanea el QR del vehículo es el pasajero; se corrigieron la pantalla, el brief y la
+documentación.
 
-**Conclusiones sobre las herramientas.** `[completar: Martín — qué recomendaría y qué no]`
+En **ChatGPT Work** no tengo documentado un error puntual atribuible exclusivamente a la herramienta que pueda separar
+con certeza del resto de las revisiones. Su principal riesgo durante el análisis de la entrevista era que una inferencia útil
+pudiera confundirse con información confirmada. Por eso el resultado de Work se utilizó como apoyo para detectar
+contradicciones y pendientes, pero cada afirmación relevante se contrastó contra la entrevista y las decisiones aprobadas.
+
+**5. Qué decidió él y no la IA.** Yo decidí qué herramienta utilizar para mi área, qué propuestas de la IA aceptar como
+insumo, cuáles rechazar y cuáles mantener como pendientes. La IA no tuvo autoridad para crear requisitos, reglas de negocio
+o decisiones de modelado. Cuando una cuestión requería decisión del equipo, mi tarea fue detectar el punto, documentar el
+impacto y llevarlo a validación. Los RF, RNF, RN, Casos de Uso y ajustes transversales aprobados son decisiones del equipo,
+no decisiones de la IA ni mías en forma individual. En mi rol también decidí exigir trazabilidad entre artefactos y revisar
+los cambios contra la fuente de mayor autoridad antes de considerarlos cerrados.
+
+**Conclusiones sobre las herramientas.** Recomendaría **ChatGPT** para análisis, modelado, revisión y generación de
+propuestas cuando se le proporciona una base documental clara y se conserva revisión humana. **ChatGPT Work** resultó
+especialmente útil para tareas largas que combinan varias fuentes, como el análisis de la entrevista y la actualización
+transversal de artefactos. No recomendaría usar ninguna IA como fuente primaria ni aceptar automáticamente un requisito,
+una regla, una relación de datos o un comportamiento solo porque la respuesta sea razonable. La mayor utilidad aparece
+cuando la IA acelera la comparación y la elaboración, mientras una persona mantiene la trazabilidad, verifica contra las
+fuentes y conserva la decisión final. Para próximas etapas, si mi responsabilidad incorpora programación, evaluaría el uso
+de Codex u otras herramientas orientadas a código en función de la tarea concreta.
 
 ---
 
@@ -169,7 +303,27 @@ Lo que muestra el historial del proyecto:
 - **Queda registro.** Al 08/10/2026, de los 30 commits propios del repositorio (sin contar las fusiones), 28 llevan la
   firma `Co-Authored-By` de Claude: se puede rastrear qué cambios se hicieron con ayuda de IA.
 
-`[completar: conclusiones del equipo sobre cada herramienta, una vez que Martín complete la suya]`
+**Qué conclusión deja cada herramienta**, según lo que cuenta quien la usó:
+
+- **ChatGPT** (Martín y Facundo). Sirvió para analizar, ordenar y explicar. Martín lo recomienda para análisis,
+  modelado y revisión cuando se le da una base documental clara; Facundo lo usó para entender cómo se conectan las
+  partes del proyecto y para revisar la entrega contra la consigna. Los dos coinciden en que una respuesta convincente
+  puede traer una regla desactualizada o un supuesto equivocado, y en que hay que contrastarla con la documentación.
+- **ChatGPT Work** (Martín). Rindió en tareas largas que combinan varias fuentes, como el análisis de la entrevista.
+  Su resultado se usó para detectar contradicciones y pendientes, y cada afirmación relevante se contrastó con la fuente.
+- **Claude Code y Claude Design** (Martiniano). Rinden cuando tienen reglas escritas, contexto en archivos y, para las
+  pantallas, un brief con prohibiciones explícitas. El riesgo principal fue darlo por hecho sin verificar contra el
+  entregable real.
+- **Codex.** Nadie lo usó hasta ahora; Facundo lo va a usar para implementar. Todavía no hay experiencia que evaluar.
+
+**Qué coincide entre los tres.** Ninguno usó la IA como fuente primaria ni aceptó una propuesta solo porque estuviera
+bien redactada. Los tres dejan la decisión final en las personas y la validación contra los requisitos, las reglas del
+proyecto y las fuentes aprobadas. Las herramientas se repartieron por tipo de trabajo: ChatGPT para el análisis y para
+entender, Claude para el repositorio y las pantallas.
+
+**Qué no se hizo y conviene decirlo.** No hubo una comparación formal de herramientas: cada integrante eligió la suya
+por experiencia previa y por cómo le resultó en la práctica. Estas conclusiones valen para el PC1. Cuando Codex entre
+en el desarrollo habrá que sumar qué se aprende con él.
 
 ### Gobernanza
 

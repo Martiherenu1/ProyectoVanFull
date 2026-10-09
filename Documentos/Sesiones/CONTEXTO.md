@@ -133,7 +133,7 @@ El desarrollo del backend arranca el **05/10** (sem 10); frontend 12/10; integra
 ## 10. Estado del PC1 (**presentado y APROBADO el 2026-10-02**)
 
 > **El tag `pc1` (`278b0d4`) queda congelado.** Cualquier cambio posterior a lo entregado lleva tag nuevo
-> (`pc1.1`). Lo que sigue es el desarrollo: arranca el **05/10** (§11). Lo de abajo es el registro de cómo se
+> (`pc1.1` ya existe: documento v1.1; el próximo sería `pc1.2`). Lo que sigue es el desarrollo: arranca el **05/10** (§11). Lo de abajo es el registro de cómo se
 > llegó a la entrega.
 
 **La consigna pedía** (de `Presentacion.pdf`): problema, alcance y límites, modelo conceptual, UML/C4, modelo de
@@ -184,18 +184,17 @@ secuencia o actividad / componentes y despliegue, DER, e informe sobre IA para d
 carpeta 04 del Drive) y §2.8 Diagramas de componentes y de despliegue (dibujos en `Documentos/Diagramas/`). Se
 numeraron al final de cada sección para no renumerar nada que ya cita el README de la carpeta 07.
 
-**Estado:** el Word `07_Documento_MVC_VanFull_v1.1_completo.docx` (en el Escritorio de Martiniano; todavía no en el
-Drive) es la versión vigente y está espejado en `10-Documento-MVC-PC1.md`. Ya incluye el §6.5 *Informe sobre la IA usada
-en el diseño y el desarrollo*, escrito en tercera persona y **sin nombrar integrantes**: el informe es uno solo para todo
-el equipo, no uno por persona (lo confirmó Martiniano el 08/10). Se armó con los aportes de los tres (Claude Code y Design,
-ChatGPT, ChatGPT Work). Martín y Facundo todavía no leyeron el §6.5 completo: tres opiniones personales quedaron como del
-equipo (ChatGPT recomendado para análisis, Claude "de las mejores valoradas", "no hace falta una única herramienta").
-`11-Borrador-Informe-IA-para-Diseno.md` conserva los textos individuales con nombres; se borra cuando los tres aprueben.
-Los otros dos `.docx` de esa carpeta (`..._v1.1.docx` y `..._con_Analisis.docx`) son versiones anteriores: no usarlos.
+**Estado (08/10):** el Word `07_Documento_MVC_VanFull_v1.1_completo.docx` (en el Escritorio de Martiniano; todavía no en el
+Drive) es la versión vigente y está espejado en `10-Documento-MVC-PC1.md`. El §6.5 *Informe sobre la IA usada en el diseño y
+el desarrollo* está escrito en tercera persona y sin nombrar integrantes (el informe es uno solo para todo el equipo) y los
+tres lo aprobaron. El borrador con los textos individuales se borró; queda en el historial de git. Los otros dos `.docx` de
+esa carpeta (`..._v1.1.docx` y `..._con_Analisis.docx`) son versiones anteriores: no usarlos. Tag `pc1.1` = esta versión.
 
-**Falta:** consultar a la cátedra qué es *Trazo fino* y si la lista es una re-entrega del PC1 o va para el PC2. Que los tres
-lean el §6.5. Subir el v1.1 al Drive (como `..._v1.1.docx`) junto a la v1.0, sin pisarla, y sumar una línea de cambios al
-README de la carpeta 07. Si Martiniano edita el Word a mano, comparar antes de regenerarlo.
+**Falta:** que Martiniano abra el Word y lo revise a ojo (no se pudo renderizar acá), y subirlo al Drive (como `..._v1.1.docx`)
+junto a la v1.0, sin pisarla, con una línea de cambios en el README de la carpeta 07. **Duda abierta:** *Trazo fino* podría ser
+la especificación de los casos de uso (lo supone Martiniano, sin confirmar con la cátedra). El documento hoy solo lista los 37
+CU y remite a la carpeta 03 del Drive (Anexo G). También sigue sin saberse si la lista es re-entrega del PC1 o va para el PC2.
+Si Martiniano edita el Word a mano, comparar antes de regenerarlo.
 
 ## 11. Estado del código
 

@@ -184,12 +184,12 @@ secuencia o actividad / componentes y despliegue, DER, e informe sobre IA para d
 carpeta 04 del Drive) y §2.8 Diagramas de componentes y de despliegue (dibujos en `Documentos/Diagramas/`). Se
 numeraron al final de cada sección para no renumerar nada que ya cita el README de la carpeta 07.
 
-**Estado:** el Word `07_Documento_MVC_VanFull_v1.1_completo.docx` está generado (en el Escritorio de Martiniano;
-todavía no en el Drive) y espejado en `10-Documento-MVC-PC1.md`. El *Informe sobre IA para diseño* está en borrador en
-`11-Borrador-Informe-IA-para-Diseno.md`: tiene los bloques de los tres (Martiniano con Claude Code y Design, Facundo con
-ChatGPT, Martín con ChatGPT y ChatGPT Work), «Propuestas y discusiones» y las conclusiones del equipo. Falta que los
-tres lo lean y corrijan, y que Martiniano pase su bloque a primera persona como los otros dos. Hecho eso, se integra
-como §6.5 en el Word y en el `.md` del MVC, y se borra el borrador.
+**Estado:** el Word `07_Documento_MVC_VanFull_v1.1_completo.docx` (en el Escritorio de Martiniano; todavía no en el
+Drive) es la versión vigente y está espejado en `10-Documento-MVC-PC1.md`. Ya incluye el §6.5 *Informe sobre la IA usada en
+el diseño y el desarrollo*, con los bloques de los tres (Martiniano con Claude Code y Design, Facundo con ChatGPT, Martín
+con ChatGPT y ChatGPT Work) y las conclusiones del equipo. Martín y Facundo todavía no leyeron el borrador completo.
+`11-Borrador-Informe-IA-para-Diseno.md` se borra cuando los tres lo aprueben. Los otros dos `.docx` de esa carpeta
+(`..._v1.1.docx` y `..._con_Analisis.docx`) son versiones anteriores: no usarlos.
 
 **Falta:** consultar a la cátedra qué es *Trazo fino*, si el documento es uno por integrante y si la lista es una
 re-entrega del PC1 o va para el PC2. Subir el v1.1 al Drive (como `..._v1.1.docx`) junto a la v1.0, sin pisarla, y

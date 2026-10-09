@@ -8,7 +8,7 @@
 > fue práctica, no una evaluación formal.
 > **Qué falta:** que los tres lean el borrador completo y corrijan lo que no refleje su experiencia. Las conclusiones
 > del equipo se redactaron a partir de los tres bloques y las revisan los tres. No hay registro de una discusión
-> formal entre ustedes sobre qué herramienta usar. Lo que quede pendiente está marcado con `[completar: ...]`.
+> formal entre ustedes sobre qué herramienta usar. Ya no quedan marcas `[completar]`.
 > **Cuando esté completo:** se integra al documento como sección 6.5 y se borra este archivo.
 
 ---
@@ -27,7 +27,7 @@ programar** VanFull. La IA que forma parte del producto (el asistente AG-01 y su
 | **Claude Code** | Programación y documentación sobre el repositorio: backend, API, datos y documento del MVC | Martiniano | Historial de git; notas de ingesta (§0) |
 | **Claude Design** | Las 10 pantallas y el sistema de diseño | Martiniano | Brief de diseño UI |
 | **Prompt Cowboy** | Generar el prompt inicial de las sesiones con Claude Code, donde se explicó cómo se iba a trabajar | Martiniano | Declarado por Martiniano |
-| **Claude** (familia Opus), en chat | Razonamiento y diseño | Nadie del equipo lo usó (Martín durante el PC1; Martiniano y Facundo, según Martiniano) | Stack y referencias |
+| **Claude** (familia Opus), en chat | Razonamiento y diseño | Nadie del equipo lo usó durante el PC1 | Stack y referencias |
 | **ChatGPT** (GPT-5.6) | Martín: relevamiento, análisis funcional, modelado, trazabilidad y revisión documental. Facundo: apoyo conversacional para entender el proyecto, revisar la entrega contra la consigna y hacer borradores | Martín y Facundo | Stack y referencias; informes de cada uno |
 | **ChatGPT Work** | Agente de trabajo y documentación. Se usó en análisis extensos y revisión transversal; en el análisis de la entrevista se usó solo para detectar contradicciones y pendientes | Martín | AS-IS consolidado; trabajos de análisis y actualización de artefactos |
 | **Codex** | Programación. Figura asignada al rol de Integrante 3 en los prompts maestros | Nadie lo usó hasta ahora. Facundo lo va a usar para implementar durante el desarrollo | Notas de ingesta (§0) |
@@ -63,9 +63,9 @@ sobre estas herramientas desde su rol; por eso no se presentan como alternativas
 | **ChatGPT Work** | Análisis documental extenso y actualización transversal de artefactos | Conveniencia para tareas largas con múltiples fuentes; necesidad de verificar cada resultado contra la fuente primaria | **Utilizada en tres trabajos puntuales** |
 | **Claude en chat / Codex** | Posible uso futuro en razonamiento/programación | No eran necesarios para las tareas de Martín en PC1 | **No utilizados por Martín en PC1** |
 
-**Martiniano (Integrante 1+3).** No consideró otras herramientas para programar y diseñar: eligió **Claude Code** y
+**Martiniano (Integrante 1+3).** No consideré otras herramientas para programar y diseñar: elegí **Claude Code** y
 **Claude Design** porque ya había trabajado con ellas, para poder usar archivos de instrucciones reutilizables
-(`skills.md`) y por su manejo del consumo de tokens. Además, las considera de las mejores valoradas para el desarrollo
+(`skills.md`) y por su manejo del consumo de tokens. Además, las considero de las mejores valoradas para el desarrollo
 de software. Fue una elección por experiencia previa, no el resultado de una comparación.
 
 ### Cómo se usó en el diseño
@@ -86,13 +86,13 @@ de software. Fue una elección por experiencia previa, no el resultado de una co
 
 ### Martiniano (Integrante 1+3)
 
-> Redactado a partir del historial de git y de las sesiones de trabajo con Claude Code. Martiniano revisa este bloque.
+> Redactado a partir del historial de git y de las sesiones de trabajo con Claude Code, y revisado por Martiniano.
 > Facundo tiene el suyo más abajo porque usó otra herramienta.
 
-**1. Qué herramientas usó.** Claude Code, como agente de programación y documentación sobre el repositorio, y
+**1. Qué herramientas usé.** Claude Code, como agente de programación y documentación sobre el repositorio, y
 Claude Design, para las pantallas y el sistema de diseño. Los commits registran los modelos usados: Claude Opus 4.8,
-Opus 5, Opus 5.5 y Sonnet 5.5. La única otra herramienta que usó fue **Prompt Cowboy**, para generar el prompt inicial
-con el que se le explicó a Claude Code cómo se iba a trabajar.
+Opus 5, Opus 5.5 y Sonnet 5.5. La única otra herramienta que usé fue **Prompt Cowboy**, para generar el prompt inicial
+con el que le expliqué a Claude Code cómo íbamos a trabajar.
 
 **2. Para qué tarea.** El historial del repositorio muestra el recorrido, con las fechas de los commits firmados:
 
@@ -107,9 +107,9 @@ con el que se le explicó a Claude Code cómo se iba a trabajar.
   plan, tomados de su documentación oficial.
 - **Documento v1.1 (08/10).** Propuestas, análisis, diagramas de actividad, de componentes y de despliegue.
 
-**3. Qué descartó y por qué.** Nada: como no evaluó otras herramientas, no descartó ninguna.
+**3. Qué descarté y por qué.** Nada: como no evalué otras herramientas, no descarté ninguna.
 
-**4. Errores de la IA que tuvo que corregir.** Además de los registrados arriba, en las sesiones se detectaron estos
+**4. Errores de la IA que tuve que corregir.** Además de los registrados arriba, en las sesiones se detectaron estos
 casos, todos al contrastar con el entregable real o con la fuente:
 
 - Claude Code afirmó que una decisión (ADJ-03) ya estaba propagada al documento del MVC; solo lo estaba en el archivo
@@ -118,21 +118,21 @@ casos, todos al contrastar con el entregable real o con la fuente:
   vio por el tamaño del archivo.
 - Dijo que la carátula del Word no tenía los nombres del equipo, porque leyó el `.md`; el Word sí los tenía.
 - Dijo que los reportes quedaban fuera del alcance; el apartado 1.4 los incluye como parte del alcance.
-- Al regenerar el Word desde la v1.0 iba a pisar dos ediciones manuales de Martiniano. Se detectó comparando con su
+- Al regenerar el Word desde la v1.0 iba a pisar dos ediciones manuales mías. Se detectó comparando con mi
   versión vigente antes de entregarla.
 - En las pantallas, la fecha "jueves 25/09" era un viernes. Se vio al verificar el calendario.
 
-**5. Qué decidió él y no la IA.** Las decisiones que constan en los documentos son de Martiniano:
+**5. Qué decidí yo y no la IA.** Estas decisiones las tomé yo y constan en los documentos:
 
 - El stack y la arquitectura base (Flutter, FastAPI, PostgreSQL, OpenRouter), el monorepo y que el contrato OpenAPI
   se escribe antes de programar.
 - Las reglas de trabajo con la IA: explicar antes de hacer, pasos chicos, ver el cambio antes de incorporarlo, y que
-  cada commit y cada fusión los aprueba Martiniano.
+  cada commit y cada fusión los apruebo yo.
 - El alcance de las pantallas: diez de los 37 casos de uso, con los tres tipos de usuario.
 - Las fechas válidas de los puntos de control: el cronograma preparado con IA traía las fechas de inicio de cada
-  semana, y Martiniano las corrigió a los viernes de encuentro (02/10, 30/10 y 13/11).
+  semana, y yo las corregí a los viernes de encuentro (02/10, 30/10 y 13/11).
 - El alojamiento sin costo (Neon, Render y GitHub Pages) después de comparar las opciones.
-- Qué se incorpora al documento y qué no: por ejemplo, sacó dos fragmentos que la IA había redactado en la tabla de la
+- Qué se incorpora al documento y qué no: por ejemplo, saqué dos fragmentos que la IA había redactado en la tabla de la
   propuesta seleccionada (la marca de pendiente del backend y la mención a PostGIS).
 
 **Conclusiones sobre las herramientas.**
@@ -148,7 +148,6 @@ casos, todos al contrastar con el entregable real o con la fuente:
 - **Recomendación:** pedir siempre el cambio mostrado antes de incorporarlo, y no aceptar una afirmación de "ya está
   hecho" sin una verificación que se pueda repetir.
 
-`[completar: corregir lo que no refleje la experiencia de Martiniano]`
 
 ### Facundo (Integrante 1+3)
 

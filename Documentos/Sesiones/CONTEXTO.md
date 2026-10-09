@@ -7,7 +7,7 @@
 > datos de esta máquina. Los prompts de arranque por tipo de tarea, y el criterio de cuándo conviene
 > abrir un chat nuevo, están en `Documentos/Sesiones/PROMPT-INICIAL.md`.
 >
-> **Última actualización: 2026-09-30** · Reemplaza y consolida todas las versiones anteriores.
+> **Última actualización: 2026-10-08** · Reemplaza y consolida todas las versiones anteriores.
 
 ---
 
@@ -136,20 +136,15 @@ El desarrollo del backend arranca el **05/10** (sem 10); frontend 12/10; integra
 > (`pc1.1`). Lo que sigue es el desarrollo: arranca el **05/10** (§11). Lo de abajo es el registro de cómo se
 > llegó a la entrega.
 
-**La consigna pide** (de `Presentacion.pdf`): definición del problema, alcance y límites, modelo conceptual
-(Front/Back/BD), UML/C4, **Modelo de datos SQL**, **Comunicación V-C: OpenAPI (JSON)**, selección de modelos IA +
-agentes + prompts, mermaid.js, y modelo de desarrollo + interfaces gráficas. **Entrega: "Documento con el MVC".**
+**La consigna pedía** (de `Presentacion.pdf`): problema, alcance y límites, modelo conceptual, UML/C4, modelo de
+datos SQL, OpenAPI (JSON), modelos IA + agentes + prompts, mermaid.js, modelo de desarrollo e interfaces.
+Entrega: *Documento con el MVC*.
 
-### Nuestra parte: TERMINADA
-
-| Entregable | Estado |
-|---|---|
-| **Modelo de datos SQL** | `backend/db/schema.sql` — 35 tablas, 54 FKs, **validado contra PostgreSQL real** |
-| **Contrato OpenAPI** | `backend/openapi/openapi.yaml` + `.json` — 21 rutas, 22 operaciones, **23 schemas**, validado |
-| **Doc IA y Agentes** | `07-IA-y-Agentes-Consolidado.md` — también en el Drive `06_` y `07_` |
-| **Modelo de desarrollo** | Repo + ramas/PR + ruff/pytest + `CONTRIBUTING.md` |
-| **Interfaces gráficas** | **10 pantallas** con los 3 actores, recorribles en modo Play (ver abajo) |
-| **Documento con el MVC** | `10-Documento-MVC-PC1.md` → `.docx` en la carpeta `07_` del Drive |
+**Nuestra parte quedó terminada:** `backend/db/schema.sql` (35 tablas, 54 FKs, validado contra PostgreSQL real) ·
+`backend/openapi/openapi.yaml` + `.json` (21 rutas, 22 operaciones, 23 schemas, validado) ·
+`07-IA-y-Agentes-Consolidado.md` (también en el Drive `06_` y `07_`) · modelo de desarrollo (repo, ramas/PR,
+ruff/pytest, `CONTRIBUTING.md`) · 10 pantallas con los 3 actores, recorribles en modo Play ·
+`10-Documento-MVC-PC1.md` → `.docx` en la carpeta `07_` del Drive.
 
 ### Los artefactos de diseño viven en claude.ai (⚠️ los links solo están acá)
 
@@ -167,24 +162,18 @@ consulta)** · Admin (viajes del día).
 consulta (CU-029) y **no registra abordajes**. Int2 detectó el 28/09 que las pantallas lo tenían invertido;
 está corregido en las pantallas, en el brief y en el documento del MVC.
 
-### El documento del PC1 está TERMINADO (30/09)
+### El documento del PC1 (30/09)
 
-`07_Documento_MVC_VanFull_v1.0.docx` en la carpeta `07_` del Drive: **cero marcadores FALTA**, 16 imágenes
-sin referencias rotas, y sin la sección "Estado de este documento". Verificado leyendo el `.docx`.
+`07_Documento_MVC_VanFull_v1.0.docx` en la carpeta `07_` del Drive: cero marcadores FALTA y 16 imágenes sin
+referencias rotas. El guion de la presentación está en la § 9 del documento. Quedaron hechos el mermaid, la
+carpeta `07_` (8 archivos), la revisión cruzada de Int2 (4 rondas, todo aplicado) y el repo público con el
+estado congelado en el tag `pc1`.
 
-La presentación se hizo el viernes 02/10 y el PC1 quedó **aprobado**. El guion está en la § 9 del documento.
+⚠️ **Hubo dos documentos MVC** el 30/09 (Int2 trabajó sobre una copia `_Integracion_Int2`). Se resolvió a favor de
+la suya, que era superconjunto. La vieja quedó como `..._HISTORICO_no_usar.docx`: **no borrarla ni confundirla**.
 
-⚠️ **Hubo dos documentos MVC** entre el 30/09 de madrugada y la tarde: Int2 trabajó sobre una copia
-`_Integracion_Int2` en vez del maestro. Se resolvió a favor de la suya, que era superconjunto. La vieja
-quedó como `..._HISTORICO_no_usar.docx`, **no borrarla ni confundirla**.
-
-⚠️ **El cronograma correcto es el de `02-Cronograma.md`**, con los puntos de control los viernes
-**02/10, 30/10 y 13/11** y cierre el **20/11**. Circulaban otras dos versiones con fechas distintas —una
-las ponía casi un mes después— y el propio archivo explica por qué vale ésta.
-
-**Ya está hecho** todo lo que antes figuraba acá como pendiente: el mermaid, el documento del MVC, la carpeta
-`07_` del Drive (8 archivos), la **revisión cruzada de Int2** (4 rondas, todo aplicado) y el repo **público**
-con el estado congelado en el tag `pc1`.
+⚠️ **El cronograma correcto es el de `02-Cronograma.md`** (puntos de control los viernes 02/10, 30/10 y 13/11;
+cierre el 20/11). Circulaban otras dos versiones con fechas distintas y el propio archivo explica por qué vale ésta.
 
 ### Documento MVC v1.1 (en curso · 08/10/2026)
 
@@ -195,9 +184,16 @@ secuencia o actividad / componentes y despliegue, DER, e informe sobre IA para d
 carpeta 04 del Drive) y §2.8 Diagramas de componentes y de despliegue (dibujos en `Documentos/Diagramas/`). Se
 numeraron al final de cada sección para no renumerar nada que ya cita el README de la carpeta 07.
 
-**Falta:** el *Informe sobre IA para diseño* (necesita el aporte de los tres integrantes: no hay registro de las
-discusiones), y aclarar con la cátedra qué es *Trazo fino* y si el documento es uno por integrante. Además, subir el
-v1.1 al Drive junto a la v1.0 (sin pisarla) y sumar una línea al README de la carpeta 07.
+**Estado:** el Word `07_Documento_MVC_VanFull_v1.1_completo.docx` está generado (en el Escritorio de Martiniano;
+todavía no en el Drive) y espejado en `10-Documento-MVC-PC1.md`. El *Informe sobre IA para diseño* está en borrador en
+`11-Borrador-Informe-IA-para-Diseno.md`: tiene los bloques de los tres (Martiniano con Claude Code y Design, Facundo con
+ChatGPT, Martín con ChatGPT y ChatGPT Work), «Propuestas y discusiones» y las conclusiones del equipo. Falta que los
+tres lo lean y corrijan, y que Martiniano pase su bloque a primera persona como los otros dos. Hecho eso, se integra
+como §6.5 en el Word y en el `.md` del MVC, y se borra el borrador.
+
+**Falta:** consultar a la cátedra qué es *Trazo fino*, si el documento es uno por integrante y si la lista es una
+re-entrega del PC1 o va para el PC2. Subir el v1.1 al Drive (como `..._v1.1.docx`) junto a la v1.0, sin pisarla, y
+sumar una línea de cambios al README de la carpeta 07. Si Martiniano edita el Word a mano, comparar antes de regenerarlo.
 
 ## 11. Estado del código
 
@@ -213,13 +209,9 @@ async + `get_db`), `routers/health.py` (**el único endpoint real**), `agent/too
 
 ## 12. Cómo trabajamos (acordado el 2026-09-22)
 
-Martiniano pidió **tener el control y entender el código**, no sólo aprobar lo que se hace. Por lo tanto:
-
-1. **Explicar antes de hacer** — qué archivo, por qué, y qué hace cada parte.
-2. **Pasos chicos y revisables**, un concepto por vez.
-3. **Mostrar el contenido o el diff antes** de commitear o mergear.
-4. **Explicar los comandos** que se corren, no sólo pegar el resultado.
-5. Invitarlo a mirar y editar en VS Code, y a escribir partes él.
+Martiniano pidió **tener el control y entender el código**, no sólo aprobar lo que se hace: explicar antes de hacer,
+pasos chicos, mostrar el diff antes de commitear o mergear, explicar los comandos, e invitarlo a mirar y editar en
+VS Code. Las reglas completas están en `CLAUDE.md`.
 
 ## 13. Pendientes abiertos (no inventar: requieren definición del equipo o externa)
 

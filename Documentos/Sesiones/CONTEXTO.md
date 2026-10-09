@@ -171,10 +171,11 @@ nombres) y el **Anexo G**: las 37 especificaciones copiadas sin modificar de `03
 **Sin confirmar con la cátedra:** *Trazo fino* = especificación detallada de los CU (lo planteó Martín); y si la lista es
 re-entrega del PC1 o va para el PC2.
 
-**Falta:** que Martiniano abra el Word a ojo (no se pudo renderizar acá), lo suba a la carpeta `07_` del Drive junto a la v1.0
-(sin pisarla) y reemplace `07_README_PC1.docx` por la versión unida. Decisión tomada: los diagramas de actividad 018, 030, 028, 017
-y 007 quedan con texto chico en papel (26-34 %); los PNG son de alta resolución y los originales están en la carpeta 04. Si
-Martiniano edita el Word a mano, comparar antes de regenerarlo.
+**Subido al Drive el 08/10** (carpeta `07_`, junto a la v1.0, que quedó intacta); Martiniano revisó el Word a ojo: OK.
+**Falta:** reemplazar `07_README_PC1.docx` por la versión unida (`Escritorio/VanFull-PC1-v1.1-para-Drive/`). Hay además un
+`07_README_PC1.md` de Martín en esa carpeta (12 KB, del 01/10): no reemplazarlo sin compararlo antes. Decisión tomada: los
+diagramas de actividad 018, 030, 028, 017 y 007 quedan con texto chico en papel (26-34 %); los PNG son de alta resolución y los
+originales están en la carpeta 04. Si Martiniano edita el Word a mano, comparar antes de regenerarlo.
 
 ## 11. Estado del código
 

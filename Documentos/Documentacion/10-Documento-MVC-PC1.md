@@ -40,6 +40,7 @@ Repositorio del proyecto: https://github.com/Martiherenu1/ProyectoVanFull
 | Arquitectura de la solución | 2 |
 | Modelo Conceptual: Frontend, Backend, Base de Datos | 2.2 |
 | Gráficos: UML y C4 Model | 2.5 |
+| Trazo fino: especificación de los casos de uso | 2.5.1 y Anexo G |
 | Diagramas de actividad (UML) | 2.7 |
 | Diagramas de componentes y de despliegue | 2.8 |
 | Modelo en mermaid.js | 2.4 |
@@ -368,6 +369,25 @@ IA acceden directamente a la base de datos. *(Figura 2.)*
 **37 casos de uso** de la línea base funcional. Muestra la cobertura del sistema y la participación de
 pasajeros, choferes, administración, clientes corporativos e integraciones externas, sin sustituir las
 especificaciones detalladas de cada CU. *(Figura 3.)*
+
+### 2.5.1 Trazo fino de los casos de uso
+
+El diagrama general muestra qué casos de uso existen; el trazo fino explica **cómo funciona cada uno**. El sistema cuenta con **37 casos de uso especificados en detalle** (CU-001 a CU-037), y los 37 tienen los mismos apartados. Cada especificación documenta, según corresponda: el actor principal y los actores secundarios, el objetivo, los requisitos funcionales y las reglas de negocio relacionados, los requisitos no funcionales específicos, las precondiciones, el disparador, el flujo principal, los flujos alternativos y excepciones, las postcondiciones y los pendientes u observaciones.
+
+Los casos de uso prioritarios tienen además un **diagrama de actividad** que muestra su flujo paso a paso (sección 2.7):
+
+| Caso de uso | Actor principal | Diagrama de actividad |
+|---|---|---|
+| CU-003 · Crear reserva | ACT-01 — Pasajero | DA-CU003 (sección 2.7) |
+| CU-004 · Cancelar reserva | ACT-01 — Pasajero | DA-CU004 (sección 2.7) |
+| CU-007 · Registrar abordaje mediante QR | ACT-01 — Pasajero | DA-CU007 (sección 2.7) |
+| CU-017 · Gestionar créditos, devoluciones y reintegros | ACT-05 — Administrador; ACT-06 — Dueño / Superadministrador | DA-CU017 (sección 2.7) |
+| CU-018 · Gestionar viajes y asignaciones | ACT-05 — Administrador; ACT-06 — Dueño / Superadministrador | DA-CU018 (sección 2.7) |
+| CU-020 · Optimizar recorrido | ACT-05 — Administrador; ACT-06 — Dueño / Superadministrador | DA-CU020 (sección 2.7) |
+| CU-028 · Gestionar abonos mensuales | ACT-05 — Administrador; ACT-06 — Dueño / Superadministrador | DA-CU028 (sección 2.7) |
+| CU-030 · Ejecutar viaje | ACT-04 — Chofer | DA-CU030 (sección 2.7) |
+
+La especificación completa de los 37 casos de uso, copiada sin modificar de la versión v1.3 aprobada por el equipo, está en el **Anexo G**, al final de este documento.
 
 ## 2.6 Requisitos que condicionaron la arquitectura
 
@@ -1035,7 +1055,7 @@ pruebas.
 | **D** | Modelo de desarrollo, documento completo | En esta misma carpeta del Drive |
 | **E** | Las diez pantallas, para recorrer | Enlace |
 | **F** | Colores, tipografías y componentes | Enlace |
-| **G** | Las especificaciones de los 37 casos de uso | Carpeta 03 del Drive |
+| **G** | Trazo fino: las especificaciones de los 37 casos de uso | En el documento del Drive, a continuación del anexo H (fuente: v1.3, carpeta 03) |
 | **H** | Diagramas C4, UML y Entidad-Relación | Carpetas 04 y 05 del Drive |
 
 Repositorio: https://github.com/Martiherenu1/ProyectoVanFull

@@ -133,7 +133,7 @@ El desarrollo del backend arranca el **05/10** (sem 10); frontend 12/10; integra
 ## 10. Estado del PC1 (**presentado y APROBADO el 2026-10-02**)
 
 > **El tag `pc1` (`278b0d4`) queda congelado.** Cualquier cambio posterior a lo entregado lleva tag nuevo
-> (`pc1.1` ya existe: documento v1.1; el próximo sería `pc1.2`). Lo que sigue es el desarrollo: arranca el **05/10** (§11). Lo de abajo es el registro de cómo se
+> (`pc1.1` y `pc1.2` ya existen: documento v1.1; el próximo sería `pc1.3`). Lo que sigue es el desarrollo: arranca el **05/10** (§11). Lo de abajo es el registro de cómo se
 > llegó a la entrega.
 
 **La consigna pedía** (de `Presentacion.pdf`): problema, alcance y límites, modelo conceptual, UML/C4, modelo de
@@ -185,16 +185,22 @@ carpeta 04 del Drive) y §2.8 Diagramas de componentes y de despliegue (dibujos 
 numeraron al final de cada sección para no renumerar nada que ya cita el README de la carpeta 07.
 
 **Estado (08/10):** el Word `07_Documento_MVC_VanFull_v1.1_completo.docx` (en el Escritorio de Martiniano; todavía no en el
-Drive) es la versión vigente y está espejado en `10-Documento-MVC-PC1.md`. El §6.5 *Informe sobre la IA usada en el diseño y
-el desarrollo* está escrito en tercera persona y sin nombrar integrantes (el informe es uno solo para todo el equipo) y los
-tres lo aprobaron. El borrador con los textos individuales se borró; queda en el historial de git. Los otros dos `.docx` de
-esa carpeta (`..._v1.1.docx` y `..._con_Analisis.docx`) son versiones anteriores: no usarlos. Tag `pc1.1` = esta versión.
+Drive) es la versión vigente y está espejado en `10-Documento-MVC-PC1.md`. Incluye el §6.5 *Informe sobre la IA*, en tercera
+persona y sin nombres (el informe es uno solo para el equipo; los tres lo aprobaron), la subsección **2.5.1 Trazo fino de los
+casos de uso** (justo después del diagrama general, con la tabla de los 8 CU que tienen diagrama de actividad) y el **Anexo G**,
+al final: las 37 especificaciones completas copiadas sin modificar de `03_Especificaciones_Casos_de_Uso_VanFull_v1.3_Aprobado_Equipo`
+(fuente de verdad: Int2; no copiarlas al repo). Martín revisó 1.7, 2.5.1 y el Anexo G contra sus fuentes: sin correcciones.
+Los otros dos `.docx` de esa carpeta (`..._v1.1.docx` y `..._con_Analisis.docx`) son versiones anteriores: no usarlos.
+Tags: `pc1` = entrega aprobada (congelado) · `pc1.1` = v1.1 sin trazo fino · **`pc1.2` = v1.1 con trazo fino** (el próximo sería `pc1.3`).
+
+**Qué se interpretó:** *Trazo fino* = especificación detallada de los casos de uso (lo plantearon Martiniano y Martín; **no se
+confirmó con la cátedra**). Tampoco se sabe si la lista de la cátedra es re-entrega del PC1 o va para el PC2.
 
 **Falta:** que Martiniano abra el Word y lo revise a ojo (no se pudo renderizar acá), y subirlo al Drive (como `..._v1.1.docx`)
-junto a la v1.0, sin pisarla, con una línea de cambios en el README de la carpeta 07. **Duda abierta:** *Trazo fino* podría ser
-la especificación de los casos de uso (lo supone Martiniano, sin confirmar con la cátedra). El documento hoy solo lista los 37
-CU y remite a la carpeta 03 del Drive (Anexo G). También sigue sin saberse si la lista es re-entrega del PC1 o va para el PC2.
-Si Martiniano edita el Word a mano, comparar antes de regenerarlo.
+junto a la v1.0, sin pisarla, con una línea de cambios en el README de la carpeta 07. **Decisión tomada:** los diagramas de
+actividad 018, 030, 028, 017 y 007 quedan con texto chico en papel (se muestran al 26-34 % de su tamaño); se dejan así porque
+los PNG son de alta resolución y los originales están en la carpeta 04. Si Martiniano edita el Word a mano, comparar antes de
+regenerarlo.
 
 ## 11. Estado del código
 

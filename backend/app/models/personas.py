@@ -130,6 +130,8 @@ class CuentaAcceso(Base):
     )
     # Email o usuario de login.
     identificador_acceso: Mapped[str] = mapped_column(String(120), unique=True)
+    # Hash de la contraseña, nunca la contraseña en claro (decisión del modelo físico, 2026-10-13).
+    hash_contrasena: Mapped[str] = mapped_column(String(255))
     estado: Mapped[str] = mapped_column(String(20), server_default="activo")
 
 

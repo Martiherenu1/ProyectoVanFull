@@ -53,9 +53,11 @@ versionables**. Los `.docx` no se versionan en el repo.
 `python -c "import yaml"`. Esto es por máquina: en otra computadora del equipo puede ser distinto.
 
 **No hay:** `zip` (usar `zipfile` de Python) · LibreOffice (`soffice`) ni `pdftoppm` → **no se puede renderizar
-un .docx ni un PDF acá** · `pytest` ni `fastapi` → **no se puede correr la suite**; las aserciones de
-`tests/test_health.py` sobre las tools se verifican importando `backend/app/agent/tools.py` directo ·
-`plantuml.jar` → no se puede regenerar el DER.
+un .docx ni un PDF acá** · `pytest` ni `fastapi` **en el Python del shell** → la suite corre **dentro de
+Docker** (`docker compose run --rm --no-deps backend pytest -q`; comandos de `ruff` y de Alembic en
+`Documentos/Sesiones/PC2/CONTEXTO-pasajero-y-base-comun.md`). Con el motor apagado no corre: ahí las
+aserciones de `tests/test_health.py` sobre las tools se verifican importando `backend/app/agent/tools.py`
+directo · `plantuml.jar` → no se puede regenerar el DER.
 
 **Drive por MCP:** `update_file` **solo cambia metadatos** (título, carpeta), no contenido. Para reemplazar un
 binario hay que generarlo local y pedirle a Martiniano que lo suba — nunca reconstruir base64 a mano.

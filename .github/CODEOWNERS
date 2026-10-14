@@ -4,5 +4,7 @@
 /backend/openapi/   @Martiherenu1
 /backend/db/        @Martiherenu1
 /backend/app/models/ @Martiherenu1
+/backend/migrations/ @Martiherenu1
+/backend/alembic.ini @Martiherenu1
 /.github/           @Martiherenu1
 /CONTRIBUTING.md    @Martiherenu1

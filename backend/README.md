@@ -15,6 +15,9 @@ app/
 └── agent/             # AG-01: tools.py (13 tools) + openrouter_client.py (fallback)
 ```
 
+Fuera de `app/`: `migrations/` y `alembic.ini` (Alembic), `db/` (`schema.sql` de referencia y su README),
+`openapi/` (el contrato) y `tests/`.
+
 **Regla de oro:** los `routers` no contienen reglas de negocio; delegan en `services`. El agente AG-01
 llama a esos mismos `services` vía tools — nunca toca la BD directamente.
 

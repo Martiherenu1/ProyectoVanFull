@@ -205,7 +205,11 @@ async + `get_db`), `routers/health.py` (**el único endpoint real**), `agent/too
 - `routers/perfil.py`, `services/perfil.py` y `schemas/perfil.py`: `GET` y `PATCH /api/pasajeros/me` (CU-001,
   Issue #24).
 
-**No existe todavía:** todo endpoint que no sea `/health`, `/auth/*` o `/pasajeros/me`. El estado de cada área y el del resto
+- `routers/servicios.py`, `services/servicios.py` y `services/disponibilidad.py`: `GET /api/servicios`,
+  `/api/servicios/disponibilidad` y `/api/recorridos/{id}/paradas` (CU-002, Issue #27). El cupo se deriva en
+  `cupo_disponible`: la definición única, que CU-003 va a reutilizar.
+
+**No existe todavía:** todo endpoint que no sea `/health`, `/auth/*`, `/pasajeros/me` o los de CU-002. El estado de cada área y el del resto
 del desarrollo está en `Documentos/Sesiones/PC2/CONTEXTO-<área>.md`.
 
 **Plan:** `services/` (reglas RN) → `routers/` (endpoints del OpenAPI) → tests. Los 37 CU entran en ~10 routers,

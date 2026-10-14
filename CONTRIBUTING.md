@@ -12,7 +12,7 @@ duda, marcar `PENDIENTE DE VALIDACIÓN` y consultar.
 ## 1. El ciclo de una tarea
 
 ```
-Issue → verificar → rama → desarrollo en pasos chicos → checks → commit → PR → revisión → merge → cierre
+Issue → verificar → rama → desarrollo en pasos chicos → checks → commit → PR → CI en verde → merge → cierre
 ```
 
 ### 1.1 Issue (antes de tocar nada)
@@ -96,15 +96,18 @@ con ayuda de IA.
 
 - **Un PR por Issue**, chico, con la plantilla completa: qué y por qué, CU/RN, si cambia el contrato o el modelo,
   cómo se probó (comandos y resultado) y capturas si es una pantalla. El cuerpo lleva `Closes #<issue>`.
-- **Revisión de otro integrante** antes del merge. Además:
-  - si cambia `openapi.yaml` → revisa Martiniano (coherencia del contrato);
-  - si cambia modelos, migraciones o `schema.sql` → revisa Martiniano y se le avisa a Martín (dueño del DER);
-  - si cambia la base de Flutter (tema, navegación, cliente de API) → revisa Facundo.
-  Esas revisiones se piden con `.github/CODEOWNERS`, que le avisa a Martiniano cuando se toca el contrato o el modelo.
-- El que revisa **lee el código y corre los checks**, no solo mira el título.
-- **El autor mergea su propio PR, después de la revisión.** Quien revisa comenta o aprueba, pero no mergea el PR
-  de otro. Mientras no haya un revisor disponible, se pide la revisión igual y el PR queda abierto el tiempo que
-  haga falta para que se pueda mirar; no se mergea sin que nadie lo haya visto.
+- **La revisión de otro integrante es opcional** (decisión de Martiniano del 2026-10-14, sin fecha de
+  vencimiento). El autor mergea su propio PR cuando la CI está en verde; no espera a nadie. En el cuerpo del PR
+  deja dicho si hubo revisión o no, para que el historial cuente lo que pasó.
+- **Lo que sí es obligatorio antes de mergear:** que la CI pase (§1.5) y que la plantilla del PR esté completa.
+  Sin revisión de otro, la CI es la red de seguridad.
+- Cuando el autor quiere que alguien mire (porque duda, o porque toca algo compartido), la pide, y conviene en estos casos:
+  - si cambia `openapi.yaml` → Martiniano (coherencia del contrato, checklist §1.9);
+  - si cambia modelos, migraciones o `schema.sql` → Martiniano, y se le avisa a Martín (dueño del DER);
+  - si cambia la base de Flutter (tema, navegación, cliente de API) → Facundo.
+  `.github/CODEOWNERS` pide esas revisiones solo; no bloquea el merge.
+- Quien revisa **lee el código y corre los checks**, no solo mira el título. Comenta o aprueba, pero no mergea el
+  PR de otro.
 - Se mergea con **"Create a merge commit"** (no squash): conserva cada commit y su CU en el historial.
 - Después del merge: borrar la rama, `git switch main && git pull`, y marcar el avance en el tablero de Notion.
 
@@ -115,7 +118,7 @@ Para no depender de nadie en lo que es de tu área, y no decidir solo lo que afe
 | Si la decisión… | La toma | Cómo queda registrada |
 |---|---|---|
 | es interna de tu área: cómo se implementa algo, qué valida un servicio, cómo se arma una pantalla | **El dueño del área**, sin pedir permiso | En el PR, en una línea |
-| cambia el contrato (`openapi.yaml`), el modelo (`schema.sql`, `models/`, migraciones) o toca a otra área | El dueño la **propone en un PR**; la revisa **Martiniano** (y avisa a Martín si toca el DER) | En la revisión del PR |
+| cambia el contrato (`openapi.yaml`), el modelo (`schema.sql`, `models/`, migraciones) o toca a otra área | El dueño la **propone en un PR** y **avisa** a Martiniano (y a Martín si toca el DER), que pueden objetar en el PR | En el PR |
 | afecta una regla de negocio (RN), un caso de uso (CU), un requisito o el DER, es decir, la línea base | **Martín**, como analista, con aviso al equipo | En un Issue de control de cambio |
 
 Si no está claro en cuál de las tres cae, se trata como la segunda. Y si un agente de IA no sabe a quién le toca,

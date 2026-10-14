@@ -1,8 +1,9 @@
 """Los modelos ORM tienen que cubrir lo mismo que `backend/db/schema.sql`.
 
 El schema es la fuente (CONTRIBUTING §2): estas pruebas lo leen a él y comparan, así que si
-alguien agrega una tabla o una FK en un lado y no en el otro, fallan. La comparación columna por
-columna contra PostgreSQL la hace la migración inicial.
+alguien agrega una tabla o una FK en un lado y no en el otro, fallan. La comparación contra
+PostgreSQL (`schema.sql` contra `alembic upgrade head`, con `pg_dump`) se hizo a mano al crear la
+migración inicial; automatizarla es parte del Issue de la CI (#3).
 """
 
 import re

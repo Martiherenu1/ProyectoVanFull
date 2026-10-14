@@ -24,3 +24,7 @@ httpx>=0.27
 pytest>=8
 pytest-asyncio>=0.23
 ruff>=0.6
+
+# Validación del contrato OpenAPI (tests/test_contrato.py)
+pyyaml>=6
+openapi-spec-validator>=0.7

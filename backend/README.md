@@ -46,10 +46,16 @@ uvicorn app.main:app --reload
 
 ## Tests
 
+Corren dentro de Docker, con la base levantada (`docker compose up -d db`), desde la raíz del repo:
+
 ```bash
-cd backend
-pytest
+docker compose run --rm backend pytest -q
+docker compose run --rm --no-deps backend ruff check .
+docker compose run --rm --no-deps backend ruff format --check .
 ```
+
+`tests/test_migracion.py` crea bases temporales en ese PostgreSQL, así que necesita la base arriba.
+La misma secuencia corre en GitHub Actions (`.github/workflows/ci.yml`) en cada PR y en cada push a `main`.
 
 ## Migraciones (Alembic)
 

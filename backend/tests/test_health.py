@@ -1,4 +1,5 @@
 """Test básico de humo: la raíz responde y las tools de AG-01 están bien definidas."""
+
 from fastapi.testclient import TestClient
 
 from app.agent.tools import TOOLS

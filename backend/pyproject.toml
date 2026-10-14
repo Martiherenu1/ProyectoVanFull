@@ -17,6 +17,17 @@ extend-exclude = ["migrations"]  # el código autogenerado por Alembic no se lin
 select = ["E", "F", "I", "UP", "B", "C4", "SIM"]
 ignore = ["E501"]  # el largo de línea lo maneja el formateador
 
+[tool.ruff.lint.flake8-bugbear]
+# El patrón de FastAPI es `db = Depends(get_db)` en el argumento por defecto; B008 lo marcaría.
+extend-immutable-calls = [
+    "fastapi.Depends",
+    "fastapi.Query",
+    "fastapi.Path",
+    "fastapi.Header",
+    "fastapi.Body",
+    "fastapi.Security",
+]
+
 [tool.ruff.format]
 quote-style = "double"
 

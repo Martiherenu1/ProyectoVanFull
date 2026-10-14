@@ -1,0 +1,66 @@
+# Integración continua del backend (CONTRIBUTING.md §1.5).
+# Corre en cada PR y en cada push a main. Flutter lo suma Facundo cuando exista el proyecto.
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+# Si se empuja de nuevo al mismo PR, cancela la corrida anterior.
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  backend:
+    name: Backend (ruff, pytest, migración y contrato)
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    # PostgreSQL 16, igual que docker-compose.yml. Lo usan las pruebas de la migración.
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: vanfull
+          POSTGRES_PASSWORD: vanfull
+          POSTGRES_DB: vanfull
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U vanfull"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+
+    env:
+      DATABASE_URL: postgresql+asyncpg://vanfull:vanfull@localhost:5432/vanfull
+
+    defaults:
+      run:
+        working-directory: backend
+
+    steps:
+      - uses: actions/checkout@v4
+
+      # Python 3.12: el mismo del Dockerfile.
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: backend/requirements.txt
+
+      - name: Instalar dependencias
+        run: pip install -r requirements.txt
+
+      - name: ruff check
+        run: ruff check .
+
+      - name: ruff format --check
+        run: ruff format --check .
+
+      # Incluye: modelos vs schema.sql, `alembic upgrade head` vs schema.sql, `alembic check`,
+      # downgrade, y la validación y equivalencia de openapi.yaml / openapi.json.
+      - name: pytest
+        run: pytest -q

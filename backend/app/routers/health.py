@@ -1,4 +1,5 @@
 """Endpoint de salud: verifica que la API y la conexión a la BD respondan."""
+
 from fastapi import APIRouter, Depends
 from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncSession

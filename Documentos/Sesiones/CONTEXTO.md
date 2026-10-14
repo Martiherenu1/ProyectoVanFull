@@ -193,8 +193,9 @@ async + `get_db`), `routers/health.py` (**el único endpoint real**), `agent/too
   `docker compose run --rm backend alembic upgrade head`.
 
 **No existe todavía:** `schemas/` y `services/` están **vacíos**, y falta todo endpoint que no sea `/health`.
-También falta `core/security.py` (JWT/roles), el helper de `evento_operativo`, el seed y la integración
-continua. Son las tareas de la base común (Issues #3 a #6); el estado de cada una y el del resto del
+También falta `core/security.py` (JWT/roles), el helper de `evento_operativo` y el seed. Son tareas de la
+base común (Issues #4 a #6). La integración continua (`.github/workflows/ci.yml`: `ruff`, `pytest`, migración
+y contrato) corre en cada PR (Issue #3); el estado de cada una y el del resto del
 desarrollo está en `Documentos/Sesiones/PC2/CONTEXTO-<área>.md`.
 
 **Plan:** `services/` (reglas RN) → `routers/` (endpoints del OpenAPI) → tests. Los 37 CU entran en ~10 routers,

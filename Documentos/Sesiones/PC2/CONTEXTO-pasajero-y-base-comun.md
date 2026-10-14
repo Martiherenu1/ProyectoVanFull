@@ -8,8 +8,8 @@
 ## Estado
 
 Base común del backend en construcción. En `main` están los modelos de las 35 tablas (PR #10) y la migración
-inicial con `hash_contrasena` (PR #11); la base se crea con `alembic upgrade head`. Todavía no hay CI, login,
-helper de eventos ni seed. Del circuito del pasajero no hay código. El único endpoint real en `main` sigue
+inicial con `hash_contrasena` (PR #11); la base se crea con `alembic upgrade head`. Todavía no hay login, helper
+de eventos ni seed. Del circuito del pasajero no hay código. El único endpoint real en `main` sigue
 siendo `/health`.
 
 ## Hecho
@@ -25,11 +25,12 @@ siendo `/health`.
 
 | Qué | Issue | PR | Estado |
 |---|---|---|---|
-| Corregir inconsistencias de docs y CODEOWNERS tras la base común | #14 | — | En esta rama |
+| Corregir inconsistencias de docs y CODEOWNERS tras la base común | #14 | #15 | Abierto, sin revisor: lo mergea el autor |
+| Integración continua en GitHub Actions: `ruff`, `pytest` (incluye migración y contrato) | #3 | en esta rama | Probado en Docker; falta ver la corrida en GitHub |
 
 ## Orden de la base común (acordado el 2026-10-13)
 
-1. #1 modelos ✅ → 2. #2 migración inicial y `hash_contrasena` ✅ → 3. **#3 CI** (sigue) → 4. #4 login
+1. #1 modelos ✅ → 2. #2 migración inicial y `hash_contrasena` ✅ → 3. **#3 CI** (en revisión del autor) → 4. #4 login
 (CU-012) → 5. #5 helper de `evento_operativo` y convención → 6. #6 seed. La CI va antes del login para que
 los PR de auth, helper y seed ya pasen por ella.
 
@@ -52,8 +53,7 @@ los PR de auth, helper y seed ya pasen por ella.
 | Parámetros de `/tarifas` no corresponden a la tabla `tarifa` | #9 | PENDIENTE DE VALIDACIÓN con Martín |
 | Lista de espera de CU-003 sin operación en el contrato | sin Issue | Se completa en el circuito de reservas (paso 2). Pasa por el checklist de CONTRIBUTING §1.9 |
 | Condiciones de rechazo del login (cuenta con `estado` distinto de activo) y algoritmo de hash | #4 | Salen de la especificación v1.3 del CU-012, que pasa Martiniano. SIN VERIFICAR |
-| `ruff check .` falla en `health.py` (B008, `Depends`) y `ruff format --check .` marca 7 archivos preexistentes | #3 | La CI fallaría sobre `main`. Decidir: configurar ruff o un commit de formato aparte |
-| La CI tiene que automatizar `alembic upgrade head`, `alembic check` y la comparación de `pg_dump` contra `schema.sql` | #3 | La migración ya se verificó a mano, también desde la imagen sola (2026-10-14). La imagen no incluye `tests/` (`.dockerignore`): `pytest` corre sobre el checkout |
+| La CI corre por primera vez en GitHub | #3 | SIN VERIFICAR: el workflow se validó como YAML y la suite pasa en Docker, pero nadie vio todavía la corrida en Actions. La imagen no incluye `tests/` (`.dockerignore`): `pytest` corre sobre el checkout |
 
 ## Entorno y trampas
 
@@ -75,6 +75,10 @@ los PR de auth, helper y seed ya pasen por ella.
   citarlos (el 2026-10-14 el PR #10 citó mal el de la CI y hubo que corregirlo).
 - CODEOWNERS asigna `/backend/app/models/` y `/backend/db/` a `@Martiherenu1`, que es el autor de estos PR:
   GitHub no le pide la revisión a sí mismo, así que el revisor se asigna a mano.
+- La suite completa son 16 pruebas, tarda unos 15 s e incluye `test_migracion.py`, que crea bases temporales
+  (`vf_test_*`) en el PostgreSQL de Docker y las borra. En la CI falla en vez de saltearse si no hay base.
+- `ruff` ya no marca `Depends` (B008): `pyproject.toml` lo declara inmutable. Los 7 archivos viejos se
+  formatearon el 2026-10-14; el cambio es solo de formato (AST idéntico).
 - `backend/.env` existe en la máquina de Martiniano y no está trackeado. La clave de OpenRouter va solo ahí.
 
 ## Para otras áreas
@@ -86,8 +90,8 @@ Quien escribe en cada tabla está en `REPARTO-PC2.md`.
 **También ya en `main`:** la migración `0001`. `docker compose run --rm backend alembic upgrade head` crea
 las 35 tablas y los 5 roles en una base limpia.
 
-**Todavía no:** autenticación y roles (#4), `registrar_evento(...)` y la guía de convención (#5), datos de
-prueba (#6) y la CI (#3).
+**Todavía no:** autenticación y roles (#4), `registrar_evento(...)` y la guía de convención (#5) y datos de
+prueba (#6).
 
 **Qué necesito de las demás áreas:**
 - Martín: confirmar `hash_contrasena` en el DER (PR #11, ya mergeado) y resolver #7, #8 y #9.

@@ -1,0 +1,8 @@
+# Pide revisión automáticamente cuando un PR toca una de estas rutas (CONTRIBUTING.md §1.7).
+# No bloquea el merge: sirve para que la revisión no se olvide.
+
+/backend/openapi/   @Martiherenu1
+/backend/db/        @Martiherenu1
+/backend/app/models/ @Martiherenu1
+/.github/           @Martiherenu1
+/CONTRIBUTING.md    @Martiherenu1

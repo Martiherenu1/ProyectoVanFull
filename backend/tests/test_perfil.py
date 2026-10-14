@@ -210,6 +210,8 @@ def test_un_dato_no_habilitado_es_403_y_no_se_modifica_nada(entorno, intento):
     assert respuesta.status_code == 403
     error = respuesta.json()["error"]
     assert error["codigo"] == "DATO_NO_MODIFICABLE"
+    # CU-001 A1: el sistema informa que el cambio debe hacerlo un administrador autorizado.
+    assert "administrador autorizado" in error["mensaje"]
     assert error["detalles"]["campos"] == sorted(intento)
     assert _en_base(base, personas["ana"]["id_persona"]) == antes
 

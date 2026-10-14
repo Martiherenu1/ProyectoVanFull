@@ -197,8 +197,8 @@ async + `get_db`), `routers/health.py` (**el único endpoint real**), `agent/too
   contrato), con `POST /api/auth/login` y `/api/auth/logout` (CU-012, Issue #4), que son los primeros
   `routers/`, `schemas/` y `services/` reales.
 
-**No existe todavía:** todo endpoint que no sea `/health` o `/auth/*`. Falta el helper de `evento_operativo` y
-el seed (Issues #5 y #6). La integración continua (`.github/workflows/ci.yml`: `ruff`, `pytest`, migración
+**No existe todavía:** todo endpoint que no sea `/health` o `/auth/*`. El helper de `evento_operativo`
+(`services/eventos.py`) y la guía `backend/CONVENCIONES.md` son del Issue #5; falta el seed (Issue #6). La integración continua (`.github/workflows/ci.yml`: `ruff`, `pytest`, migración
 y contrato) corre en cada PR (Issue #3); el estado de cada una y el del resto del
 desarrollo está en `Documentos/Sesiones/PC2/CONTEXTO-<área>.md`.
 

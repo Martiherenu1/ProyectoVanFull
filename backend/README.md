@@ -57,6 +57,11 @@ docker compose run --rm --no-deps backend ruff format --check .
 `tests/test_migracion.py` crea bases temporales en ese PostgreSQL, así que necesita la base arriba.
 La misma secuencia corre en GitHub Actions (`.github/workflows/ci.yml`) en cada PR y en cada push a `main`.
 
+## Cómo se escribe una operación
+
+La convención de capas, transacciones, errores y pruebas está en [`CONVENCIONES.md`](CONVENCIONES.md). El
+ejemplo a copiar es el login (`services/auth.py`, `routers/auth.py`).
+
 ## Autenticación y errores
 
 `POST /api/auth/login` entrega un JWT con la cuenta, la persona y los roles. En un router:

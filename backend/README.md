@@ -48,10 +48,17 @@ cd backend
 pytest
 ```
 
-## Migraciones (próximo paso, al tener modelos)
+## Migraciones (Alembic)
+
+La base se crea con migraciones, no a mano. La migración inicial (`0001`) crea las 35 tablas de
+`db/schema.sql` y carga los 5 roles. Desde la raíz del repo, con la base levantada (`docker compose up -d db`):
 
 ```bash
-alembic init migrations      # una sola vez
-alembic revision --autogenerate -m "esquema inicial"
-alembic upgrade head
+docker compose run --rm backend alembic upgrade head     # crea o actualiza la base
+docker compose run --rm backend alembic check            # los modelos y la base coinciden
+docker compose run --rm backend alembic downgrade base   # la deja vacía
 ```
+
+Para un cambio de modelo: tocar `db/schema.sql`, `app/models/` y generar la migración **en el mismo PR**
+(`alembic revision --autogenerate -m "..."`), y **leerla antes de commitear**: el autogenerate no detecta
+datos (como los roles) ni renombres. Un cambio de modelo se avisa a Martín, dueño del DER.

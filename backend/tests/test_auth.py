@@ -6,14 +6,9 @@ Las cuentas y contraseñas de acá son inventadas para la prueba y viven en una 
 import asyncio
 
 import pytest
-from fastapi.testclient import TestClient
-from sqlalchemy.ext.asyncio import async_sessionmaker, create_async_engine
-from sqlalchemy.pool import NullPool
 
-from app.core.database import get_db
 from app.core.security import decodificar_token, hash_contrasena
-from app.main import app
-from tests._bd import base_migrada, consultar, ejecutar_sql, url_sqlalchemy
+from tests._bd import base_migrada, cliente_api, consultar, ejecutar_sql
 
 CONTRASENA = "contrasena-de-prueba-123"
 LOGIN = "/api/auth/login"
@@ -65,18 +60,8 @@ def sesion():
                 base, "3", "inactiva@prueba.test", ["pasajero"], "suspendida"
             ),
         }
-        # NullPool: cada pedido abre su conexión, así no queda atada al loop de TestClient.
-        motor = create_async_engine(url_sqlalchemy(base), poolclass=NullPool)
-        fabrica = async_sessionmaker(motor, expire_on_commit=False)
-
-        async def _get_db():
-            async with fabrica() as db:
-                yield db
-
-        app.dependency_overrides[get_db] = _get_db
-        with TestClient(app) as cliente:
+        with cliente_api(base) as cliente:
             yield cliente, cuentas
-        app.dependency_overrides.pop(get_db, None)
 
 
 def _login(cliente, identificador, password=CONTRASENA):

@@ -15,9 +15,13 @@ from pathlib import Path
 
 import asyncpg
 import pytest
+from fastapi.testclient import TestClient
 from sqlalchemy.engine import URL, make_url
+from sqlalchemy.ext.asyncio import async_sessionmaker, create_async_engine
+from sqlalchemy.pool import NullPool
 
 from app.core.config import get_settings
+from app.core.database import get_db
 
 BACKEND = Path(__file__).resolve().parents[1]
 
@@ -96,3 +100,24 @@ def base_migrada():
         resultado = alembic(nombre, "upgrade", "head")
         assert resultado.returncode == 0, resultado.stderr
         yield nombre
+
+
+@contextmanager
+def cliente_api(base: str):
+    """La app real apuntando a `base`, con un TestClient. Para pruebas de punta a punta."""
+    from app.main import app  # import tardío: no hace falta para las pruebas que no usan la API
+
+    # NullPool: cada pedido abre su propia conexión, así no queda atada al loop de TestClient.
+    motor = create_async_engine(url_sqlalchemy(base), poolclass=NullPool)
+    fabrica = async_sessionmaker(motor, expire_on_commit=False)
+
+    async def _get_db():
+        async with fabrica() as db:
+            yield db
+
+    app.dependency_overrides[get_db] = _get_db
+    try:
+        with TestClient(app) as cliente:
+            yield cliente
+    finally:
+        app.dependency_overrides.pop(get_db, None)

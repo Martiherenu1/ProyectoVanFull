@@ -100,9 +100,44 @@ con ayuda de IA.
   - si cambia `openapi.yaml` → revisa Martiniano (coherencia del contrato);
   - si cambia modelos, migraciones o `schema.sql` → revisa Martiniano y se le avisa a Martín (dueño del DER);
   - si cambia la base de Flutter (tema, navegación, cliente de API) → revisa Facundo.
+  Esas revisiones se piden con `.github/CODEOWNERS`, que le avisa a Martiniano cuando se toca el contrato o el modelo.
 - El que revisa **lee el código y corre los checks**, no solo mira el título.
+- **El autor mergea su propio PR, después de la revisión.** Quien revisa comenta o aprueba, pero no mergea el PR
+  de otro. Mientras no haya un revisor disponible, se pide la revisión igual y el PR queda abierto el tiempo que
+  haga falta para que se pueda mirar; no se mergea sin que nadie lo haya visto.
 - Se mergea con **"Create a merge commit"** (no squash): conserva cada commit y su CU en el historial.
 - Después del merge: borrar la rama, `git switch main && git pull`, y marcar el avance en el tablero de Notion.
+
+### 1.8 Quién decide qué
+
+Para no depender de nadie en lo que es de tu área, y no decidir solo lo que afecta a otros:
+
+| Si la decisión… | La toma | Cómo queda registrada |
+|---|---|---|
+| es interna de tu área: cómo se implementa algo, qué valida un servicio, cómo se arma una pantalla | **El dueño del área**, sin pedir permiso | En el PR, en una línea |
+| cambia el contrato (`openapi.yaml`), el modelo (`schema.sql`, `models/`, migraciones) o toca a otra área | El dueño la **propone en un PR**; la revisa **Martiniano** (y avisa a Martín si toca el DER) | En la revisión del PR |
+| afecta una regla de negocio (RN), un caso de uso (CU), un requisito o el DER, es decir, la línea base | **Martín**, como analista, con aviso al equipo | En un Issue de control de cambio |
+
+Si no está claro en cuál de las tres cae, se trata como la segunda. Y si un agente de IA no sabe a quién le toca,
+no decide: lo pregunta.
+
+### 1.9 Cómo revisar una propuesta de contrato (checklist)
+
+Cuando una tarea agrega o cambia operaciones de `openapi.yaml`, el revisor contrasta **cuatro fuentes** y no
+confía en ninguna sola:
+
+1. **La especificación del CU (v1.3).** ¿Cada operación y cada campo salen de un paso del flujo o de una regla? ¿Se
+   inventó algo que la especificación no dice?
+2. **`schema.sql`.** ¿Cada campo existe como columna o se calcula de columnas que existen (MR-R30)? ¿Los valores
+   coinciden con los `CHECK` (estados, tipos)? ¿Hay columnas privadas que no deberían salir (RN-029: teléfono,
+   email, dirección)?
+3. **El contrato existente.** ¿Los nombres siguen el estilo (`/pasajeros/me/...`, `/reservas/{id}/cancelacion`)? ¿Se
+   reusan los schemas y los errores uniformes? ¿Choca la ruta con la de otra área?
+4. **Las reglas que no se reabren** (`REPARTO-PC2.md` §5): QR, pagos, ADJ-03, FIFO.
+
+Y después: ¿el JSON se regeneró y es equivalente al YAML? ¿Quedó marcado `x-cobertura: parcial` lo que no se cubre
+entero? ¿Quién puede llamar a cada operación (rol y "solo lo propio")? Lo que no se pueda responder con las fuentes
+es un `PENDIENTE DE VALIDACIÓN` en un Issue, no una decisión del PR.
 
 ---
 

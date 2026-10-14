@@ -116,6 +116,7 @@ Disponibilidad 99 % mensual · 95 % de operaciones ≤ 2 s · operaciones pesada
 | **`.docx` fuera del repo** | Drive = documentación oficial · GitHub = código y artefactos versionables |
 | **Contrato OpenAPI antes de implementar** | Permite que frontend, backend e IA avancen en paralelo sin romperse |
 | **`cuenta_acceso.hash_contrasena VARCHAR(255) NOT NULL`** (decidido el 2026-10-13) | El MR dejó diferida la autenticación al modelo físico y la tabla no tenía dónde guardar la contraseña, necesaria para el login (CU-012, RF-045). Entra en `schema.sql`, `models/` y la migración inicial en el mismo PR. El algoritmo de hash lo fija la tarea del login. Aviso a Martín por ser el DER |
+| **Autenticación: bcrypt y PyJWT directos** (decidido el 2026-10-14, Issue #4) | `passlib` no se mantiene y falla con `bcrypt` >= 5; `python-jose` tampoco, y la documentación de FastAPI usa PyJWT. Token HS256 con la cuenta, la persona y los roles; vence a los 60 min (`ACCESS_TOKEN_EXPIRE_MINUTES`). Fuera de desarrollo el secreto debe tener 32 bytes o más |
 | **Logout sin lista negra** (decidido el 2026-10-13) | `POST /auth/logout` devuelve 204 y el cliente descarta el token. La política de sesiones sigue siendo un pendiente (§13) |
 | **Hosting de costo 0** (decidido el 2026-10-02): BD en **Neon**, backend en **Render** (servicio web gratis), web Flutter en **GitHub Pages**. Desarrollo diario con `docker-compose.yml` | Alcance académico: sirve para la entrega; si el producto se vende se paga algo mejor. Se descartó Firebase (NoSQL, no calza con `schema.sql`), Supabase (pausa el proyecto a los 7 días sin uso) y la BD gratis de Render (vence a los 30 días y la borra). Usar la BD **solo como Postgres estándar**, sin SDK ni funciones propias del proveedor, para que mudarse sea cambiar `DATABASE_URL` + `pg_dump` |
 
@@ -192,9 +193,12 @@ async + `get_db`), `routers/health.py` (**el único endpoint real**), `agent/too
 - `migrations/` (Alembic async): migración `0001`, que crea las 35 tablas y carga los 5 roles. Se corre con
   `docker compose run --rm backend alembic upgrade head`.
 
-**No existe todavía:** `schemas/` y `services/` están **vacíos**, y falta todo endpoint que no sea `/health`.
-También falta `core/security.py` (JWT/roles), el helper de `evento_operativo` y el seed. Son tareas de la
-base común (Issues #4 a #6). La integración continua (`.github/workflows/ci.yml`: `ruff`, `pytest`, migración
+- `core/security.py` (bcrypt, JWT, `usuario_actual` y `requiere_rol`) y `core/errors.py` (error uniforme del
+  contrato), con `POST /api/auth/login` y `/api/auth/logout` (CU-012, Issue #4), que son los primeros
+  `routers/`, `schemas/` y `services/` reales.
+
+**No existe todavía:** todo endpoint que no sea `/health` o `/auth/*`. Falta el helper de `evento_operativo` y
+el seed (Issues #5 y #6). La integración continua (`.github/workflows/ci.yml`: `ruff`, `pytest`, migración
 y contrato) corre en cada PR (Issue #3); el estado de cada una y el del resto del
 desarrollo está en `Documentos/Sesiones/PC2/CONTEXTO-<área>.md`.
 

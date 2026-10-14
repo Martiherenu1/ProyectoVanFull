@@ -57,6 +57,24 @@ docker compose run --rm --no-deps backend ruff format --check .
 `tests/test_migracion.py` crea bases temporales en ese PostgreSQL, así que necesita la base arriba.
 La misma secuencia corre en GitHub Actions (`.github/workflows/ci.yml`) en cada PR y en cada push a `main`.
 
+## Autenticación y errores
+
+`POST /api/auth/login` entrega un JWT con la cuenta, la persona y los roles. En un router:
+
+```python
+from app.core.security import UsuarioActual, requiere_rol, usuario_actual
+
+@router.get("/algo")
+async def algo(usuario: UsuarioActual = Depends(usuario_actual)): ...           # cualquier rol
+
+@router.post("/otra", dependencies=[Depends(requiere_rol("administrador"))]): ...  # solo ese rol
+```
+
+`requiere_rol` solo filtra por rol. El permiso "solo lo propio" (RN-026 a 030) lo decide el servicio con
+`usuario.id_persona`. Los servicios no devuelven HTTP: levantan `ApiError(409, "CUPO_NO_DISPONIBLE", "...")`
+(`app/core/errors.py`) y el cliente recibe siempre `{"error": {"codigo", "mensaje", "detalles"}}`.
+`tests/test_rutas_contrato.py` falla si el backend implementa una ruta que `openapi.yaml` no declara.
+
 ## Migraciones (Alembic)
 
 La base se crea con migraciones, no a mano. La migración inicial (`0001`) crea las 35 tablas de

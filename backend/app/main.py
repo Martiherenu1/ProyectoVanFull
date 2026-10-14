@@ -4,7 +4,8 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.core.config import get_settings
-from app.routers import health
+from app.core.errors import registrar_manejadores
+from app.routers import auth, health
 
 settings = get_settings()
 
@@ -24,7 +25,11 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+# Todo error sale con la forma del contrato: {"error": {"codigo", "mensaje", "detalles"}}.
+registrar_manejadores(app)
+
 app.include_router(health.router, prefix=settings.api_prefix)
+app.include_router(auth.router, prefix=settings.api_prefix)
 
 
 @app.get("/")

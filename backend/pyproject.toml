@@ -26,6 +26,7 @@ extend-immutable-calls = [
     "fastapi.Header",
     "fastapi.Body",
     "fastapi.Security",
+    "app.core.security.requiere_rol",
 ]
 
 [tool.ruff.format]

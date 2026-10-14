@@ -8,9 +8,9 @@
 ## Estado
 
 Base común del backend en construcción. En `main` están los modelos de las 35 tablas (PR #10) y la migración
-inicial con `hash_contrasena` (PR #11); la base se crea con `alembic upgrade head`. Todavía no hay login, helper
-de eventos ni seed. Del circuito del pasajero no hay código. El único endpoint real en `main` sigue
-siendo `/health`.
+inicial con `hash_contrasena` (PR #11); la base se crea con `alembic upgrade head`. El login (CU-012) está
+hecho en una rama apilada, a la espera de merge. Todavía no hay helper de eventos ni seed. Del circuito del
+pasajero no hay código. En `main` el único endpoint real sigue siendo `/health`.
 
 ## Hecho
 
@@ -26,12 +26,13 @@ siendo `/health`.
 | Qué | Issue | PR | Estado |
 |---|---|---|---|
 | Corregir inconsistencias de docs y CODEOWNERS tras la base común | #14 | #15 | Abierto, sin revisor: lo mergea el autor |
-| Integración continua en GitHub Actions: `ruff`, `pytest` (incluye migración y contrato) | #3 | en esta rama | Probado en Docker; falta ver la corrida en GitHub |
+| Integración continua en GitHub Actions: `ruff`, `pytest` (incluye migración y contrato) | #3 | #16 | Abierto, Auto-fix activado. Falta ver la primera corrida en GitHub |
+| Login y logout (CU-012): `core/security.py`, `core/errors.py`, `/auth/*`, 42 pruebas en total | #4 | en esta rama | Probado en Docker. Apilado sobre #16 |
 
 ## Orden de la base común (acordado el 2026-10-13)
 
-1. #1 modelos ✅ → 2. #2 migración inicial y `hash_contrasena` ✅ → 3. **#3 CI** (en revisión del autor) → 4. #4 login
-(CU-012) → 5. #5 helper de `evento_operativo` y convención → 6. #6 seed. La CI va antes del login para que
+1. #1 modelos ✅ → 2. #2 migración inicial y `hash_contrasena` ✅ → 3. **#3 CI** (PR #16) → 4. #4 login
+(CU-012, hecho, en revisión del autor) → 5. #5 helper de `evento_operativo` y convención → 6. #6 seed. La CI va antes del login para que
 los PR de auth, helper y seed ya pasen por ella.
 
 ## Decisiones
@@ -52,7 +53,9 @@ los PR de auth, helper y seed ya pasen por ella.
 | Filtro `destino` de `/servicios/disponibilidad` sin columna en el modelo | #8 | PENDIENTE DE VALIDACIÓN con Martín |
 | Parámetros de `/tarifas` no corresponden a la tabla `tarifa` | #9 | PENDIENTE DE VALIDACIÓN con Martín |
 | Lista de espera de CU-003 sin operación en el contrato | sin Issue | Se completa en el circuito de reservas (paso 2). Pasa por el checklist de CONTRIBUTING §1.9 |
-| Condiciones de rechazo del login (cuenta con `estado` distinto de activo) y algoritmo de hash | #4 | Salen de la especificación v1.3 del CU-012, que pasa Martiniano. SIN VERIFICAR |
+| Condiciones de rechazo del login. Hoy: credencial inválida y cuenta con `estado` distinto de `activo` (lectura conservadora del DEFAULT). No se mira `pasajero.estado_habilitacion` ni la política de intentos o bloqueo | #4 | PENDIENTE DE VALIDACIÓN: salen de la especificación v1.3 del CU-012. No la encontré en el Drive (la carpeta 03 no responde a la búsqueda): la pasa Martiniano |
+| El contrato usa `password` (inglés) en `LoginRequest` mientras el resto es castellano | #4 | Cambiar una operación existente pide el acuerdo de los tres (§1.3). No se cambió |
+| Sin lista negra, un token vale hasta que vence aunque se suspenda la cuenta o se quite un rol | — | Es la decisión del 2026-10-13; la política de sesiones sigue pendiente (CONTEXTO §13) |
 | La CI corre por primera vez en GitHub | #3 | SIN VERIFICAR: el workflow se validó como YAML y la suite pasa en Docker, pero nadie vio todavía la corrida en Actions. La imagen no incluye `tests/` (`.dockerignore`): `pytest` corre sobre el checkout |
 
 ## Entorno y trampas
@@ -90,8 +93,14 @@ Quien escribe en cada tabla está en `REPARTO-PC2.md`.
 **También ya en `main`:** la migración `0001`. `docker compose run --rm backend alembic upgrade head` crea
 las 35 tablas y los 5 roles en una base limpia.
 
-**Todavía no:** autenticación y roles (#4), `registrar_evento(...)` y la guía de convención (#5) y datos de
-prueba (#6).
+**En la rama del login (#4), cuando se mergee:** `from app.core.security import usuario_actual, requiere_rol`
+y `from app.core.errors import ApiError`. `Depends(usuario_actual)` entrega un `UsuarioActual` con
+`id_persona` y `roles`; `Depends(requiere_rol("chofer"))` agrega el 403. Los servicios levantan
+`ApiError(estado, "CODIGO", "mensaje")` y el cliente recibe `{"error": {...}}` como pide el contrato.
+`requiere_rol` solo dice qué clase de operación se puede intentar; **el "solo lo propio" (RN-026 a 030) lo
+decide cada servicio** con `id_persona`.
+
+**Todavía no:** `registrar_evento(...)` y la guía de convención (#5) y datos de prueba (#6).
 
 **Qué necesito de las demás áreas:**
 - Martín: confirmar `hash_contrasena` en el DER (PR #11, ya mergeado) y resolver #7, #8 y #9.

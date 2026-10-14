@@ -15,6 +15,8 @@ lo que no queda escrito en el repositorio se pierde cuando se cierra el chat.
    - CLAUDE.md y CONTRIBUTING.md: reglas y método. No se tocan desde una tarea de área.
    - Documentos/Sesiones/CONTEXTO.md: contexto general del proyecto. Cambia poco y se toca solo con un PR
      de docs chico y aparte.
+   - backend/CONVENCIONES.md: cómo se escribe un servicio y un endpoint (capas, transacción, errores,
+     pruebas). Leelo antes de tu primera operación de backend; el ejemplo a copiar es el login.
    - Documentos/Sesiones/PC2/CONTEXTO-<mi-área>.md: el contexto VIVO de mi área. Es tuyo para mantener.
        · Martín:  CONTEXTO-chofer-y-viaje.md
        · Facundo: CONTEXTO-administracion-y-flutter.md

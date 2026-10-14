@@ -8,11 +8,11 @@
 ## Estado
 
 **La base común del backend está completa y en `main`.** Del circuito del pasajero están hechos el perfil
-(CU-001, PR #26) y la consulta de servicios, disponibilidad y paradas (CU-002, PR #29). La reserva
-(CU-003), la cancelación (CU-004) y mis reservas (CU-010) siguen frenadas por pendientes de validación con
-Martín (#7, #8, #9 y #28).
+(CU-001, PR #26), la consulta de servicios, disponibilidad y paradas (CU-002, PR #29) y la consulta de
+reservas propias (CU-010, PR #32). La reserva (CU-003) y la cancelación (CU-004) siguen frenadas por
+pendientes de validación con Martín (#7, #8, #9 y #28).
 
-La CI corre en cada PR y pasó en las ramas de la base y en `main`. La suite son 117 pruebas, algo más de un minuto.
+La CI corre en cada PR y pasó en las ramas de la base y en `main`. La suite son 130 pruebas, algo más de un minuto.
 
 ## Hecho
 
@@ -28,10 +28,11 @@ La CI corre en cada PR y pasó en las ramas de la base y en `main`. La suite son
 | Seed (`db/seed/`) y su cargador | #6 | #19 |
 | Perfil del pasajero (CU-001): `GET` y `PATCH /api/pasajeros/me`, 23 pruebas | #24 | #26 |
 | Servicios, disponibilidad y paradas (CU-002), 25 pruebas; `cupo_disponible` en `services/disponibilidad.py` | #27 | #29 |
+| Reservas propias (CU-010): `GET /api/pasajeros/me/reservas` y `GET /api/reservas/{id}`, 13 pruebas | #30 | #32 |
 
 ## En curso
 
-Lo que sigue es el circuito de reservas (CU-003, 004, 010); no se empieza sobre una regla indefinida:
+Lo que sigue es el circuito de reservas (CU-003, 004); no se empieza sobre una regla indefinida:
 CU-003 necesita el respaldo de la reserva (#7), la tarifa (#9) y la capacidad sin vehículo (#28).
 
 ## Decisiones
@@ -53,6 +54,7 @@ CU-003 necesita el respaldo de la reserva (#7), la tarifa (#9) y la capacidad si
 |---|---|---|
 | Respaldo de la reserva (XOR período de abono / contratación) que `POST /reservas` no informa | #7 | PENDIENTE DE VALIDACIÓN con Martín |
 | Filtro `destino` de `/servicios/disponibilidad` sin columna en el modelo. Hoy responde 400 `FILTRO_NO_DISPONIBLE` en vez de ignorarlo: la tool `consultar_disponibilidad` de AG-01 manda `destino`, así que esas consultas fallan hasta resolverlo | #8 | PENDIENTE DE VALIDACIÓN con Martín |
+| La `Reserva` del contrato no trae fecha ni horario del viaje: la pantalla "Mis reservas" no puede decir cuándo es cada una. Cambio aditivo de contrato, a proponer por PR | #31 | Propuesta mía; lo ven Martín y Facundo (CONTRIBUTING §1.3) |
 | Disponibilidad: capacidad de un viaje sin vehículo (hoy `capacidad_planificada`, o sin cupo), viajes ofrecidos (hoy solo `programado`) y si una ausencia libera el cupo (hoy no) | #28 | PENDIENTE DE VALIDACIÓN con Martín. CU-003 valida con la misma función |
 | La tool `consultar_disponibilidad` de AG-01 usa `ida`/`vuelta` en minúsculas y el contrato `IDA`/`VUELTA` | — | Lo mapea el ejecutor del agente (paso 2, AG-01); este endpoint rechaza `ida` con 400 |
 | Parámetros de `/tarifas` no corresponden a la tabla `tarifa` | #9 | PENDIENTE DE VALIDACIÓN con Martín |
@@ -94,6 +96,9 @@ CU-003 necesita el respaldo de la reserva (#7), la tarifa (#9) y la capacidad si
 - `from app.services.eventos import registrar_evento`: a lo sumo un origen (reserva, pago o viaje), hace
   `flush`, los `tipo_evento` los define cada dueño.
 - `backend/CONVENCIONES.md`: capas, transacción, errores y pruebas.
+- `from app.services.reservas import listar_reservas_del_pasajero, obtener_reserva_del_pasajero`: lectura de
+  reservas del pasajero. `reserva` es tabla de esta área; si necesitan otras lecturas (CU-027, el chofer),
+  se agregan ahí por PR.
 - `from app.services.disponibilidad import cupo_disponible`: **la definición única del cupo** (RN-001,
   RN-002). Si necesitan el cupo de un viaje (por ejemplo, CU-018 al asignar un vehículo), úsenla; no la
   reescriban.

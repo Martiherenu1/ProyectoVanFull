@@ -1,4 +1,5 @@
 """Configuración central de la app. Lee variables de entorno / .env (pydantic-settings)."""
+
 from functools import lru_cache
 
 from pydantic_settings import BaseSettings, SettingsConfigDict

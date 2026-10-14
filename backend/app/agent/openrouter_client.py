@@ -3,6 +3,7 @@
 Encapsula la llamada al gateway. Si el modelo principal falla (error de proveedor / indisponibilidad),
 reintenta con el fallback; si tampoco responde, se informa indisponibilidad y se ofrece derivar a humano.
 """
+
 import httpx
 
 from app.core.config import get_settings

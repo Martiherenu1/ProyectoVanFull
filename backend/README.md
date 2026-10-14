@@ -80,6 +80,11 @@ async def algo(usuario: UsuarioActual = Depends(usuario_actual)): ...           
 (`app/core/errors.py`) y el cliente recibe siempre `{"error": {"codigo", "mensaje", "detalles"}}`.
 `tests/test_rutas_contrato.py` falla si el backend implementa una ruta que `openapi.yaml` no declara.
 
+## Datos de prueba
+
+`docker compose run --rm backend python -m db.seed.cargar` carga cuentas de prueba por rol y un recorrido
+de ejemplo sobre una base migrada. Qué hay, qué falta y de quién es cada tabla: `db/seed/README.md`.
+
 ## Migraciones (Alembic)
 
 La base se crea con migraciones, no a mano. La migración inicial (`0001`) crea las 35 tablas de

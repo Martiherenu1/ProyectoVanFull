@@ -10,7 +10,8 @@
 Base común del backend en construcción. En `main` están los modelos de las 35 tablas (PR #10) y la migración
 inicial con `hash_contrasena` (PR #11); la base se crea con `alembic upgrade head`. El login (CU-012) está
 hecho, y el helper de eventos con la guía de convención también; ambos en ramas apiladas, a la espera de
-merge. Todavía no hay seed. Del circuito del pasajero no hay código. En `main` el único endpoint real sigue siendo `/health`.
+merge, y el seed con sus cuentas de prueba. Con eso la base común queda completa. Del circuito del pasajero
+no hay código. En `main` el único endpoint real sigue siendo `/health`.
 
 ## Hecho
 
@@ -28,12 +29,13 @@ merge. Todavía no hay seed. Del circuito del pasajero no hay código. En `main`
 | Corregir inconsistencias de docs y CODEOWNERS tras la base común | #14 | #15 | Abierto, sin revisor: lo mergea el autor |
 | Integración continua en GitHub Actions: `ruff`, `pytest` (incluye migración y contrato) | #3 | #16 | Abierto, Auto-fix activado. Falta ver la primera corrida en GitHub |
 | Login y logout (CU-012): `core/security.py`, `core/errors.py`, `/auth/*`, 42 pruebas en total | #4 | #17 | Abierto, Auto-fix activado. Apilado sobre #16 |
-| `registrar_evento` (`services/eventos.py`, 10 pruebas contra la base) y `backend/CONVENCIONES.md` | #5 | en esta rama | Probado en Docker. El patrón de la guía se corrió de punta a punta. Apilado sobre #17 |
+| `registrar_evento` (`services/eventos.py`, 10 pruebas contra la base) y `backend/CONVENCIONES.md` | #5 | #18 | Abierto. El patrón de la guía se corrió de punta a punta. Apilado sobre #17 |
+| Seed (`db/seed/`): 4 cuentas (2 pasajeros, chofer y administrador), un recorrido con 3 paradas; cargador con protección contra bases remotas. 17 pruebas | #6 | en esta rama | Probado en Docker, también el CLI documentado. Apilado sobre #18 |
 
 ## Orden de la base común (acordado el 2026-10-13)
 
 1. #1 modelos ✅ → 2. #2 migración inicial y `hash_contrasena` ✅ → 3. **#3 CI** (PR #16) → 4. #4 login
-(CU-012, PR #17) → 5. #5 helper de `evento_operativo` y convención (hecho, en esta rama) → 6. #6 seed. La CI
+(CU-012, PR #17) → 5. #5 helper de `evento_operativo` y convención (PR #18) → 6. #6 seed (hecho, en esta rama). La CI
 va antes del login para que los PR de auth, helper y seed ya pasen por ella.
 
 ## Decisiones
@@ -105,9 +107,15 @@ decide cada servicio** con `id_persona`.
 (a lo sumo un origen: reserva, pago o viaje; hace `flush`, el `commit` es tuyo; los `tipo_evento` los define
 cada dueño) y la guía `backend/CONVENCIONES.md`, que explica capas, transacción, errores y pruebas.
 
-**Todavía no:** datos de prueba (#6).
+**En la rama del seed (#6), cuando se mergee:** `docker compose run --rm backend python -m db.seed.cargar`
+(con la base migrada). Deja 4 cuentas: `pasajero1@vanfull.test`, `pasajero2@vanfull.test`,
+`chofer1@vanfull.test` y `admin1@vanfull.test`, con las contraseñas de `db/seed/contrasenas-de-prueba.csv`.
+Cada dueño suma los CSV de sus tablas por PR (ver `db/seed/README.md`). Se niega a correr contra una base
+no local: el repo es público y las contraseñas son de desarrollo.
 
 **Qué necesito de las demás áreas:**
 - Martín: confirmar `hash_contrasena` en el DER (PR #11, ya mergeado) y resolver #7, #8 y #9.
 - Facundo: el servicio de deuda (`GET /pasajeros/me/deuda`) que usa la tool de AG-01 y la pantalla, y el
-  backend de pagos que usa la pantalla de pago del pasajero.
+  backend de pagos que usa la pantalla de pago del pasajero. Sumar al seed `chofer`, `vehiculo` y `viaje`:
+  la cuenta `chofer1` todavía no tiene fila en `chofer`.
+- Martín: el escenario de la demo cruzada y los CSV de sus tablas.

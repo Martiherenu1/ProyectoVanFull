@@ -9,8 +9,8 @@
 
 Base común del backend en construcción. En `main` están los modelos de las 35 tablas (PR #10) y la migración
 inicial con `hash_contrasena` (PR #11); la base se crea con `alembic upgrade head`. El login (CU-012) está
-hecho en una rama apilada, a la espera de merge. Todavía no hay helper de eventos ni seed. Del circuito del
-pasajero no hay código. En `main` el único endpoint real sigue siendo `/health`.
+hecho, y el helper de eventos con la guía de convención también; ambos en ramas apiladas, a la espera de
+merge. Todavía no hay seed. Del circuito del pasajero no hay código. En `main` el único endpoint real sigue siendo `/health`.
 
 ## Hecho
 
@@ -27,13 +27,14 @@ pasajero no hay código. En `main` el único endpoint real sigue siendo `/health
 |---|---|---|---|
 | Corregir inconsistencias de docs y CODEOWNERS tras la base común | #14 | #15 | Abierto, sin revisor: lo mergea el autor |
 | Integración continua en GitHub Actions: `ruff`, `pytest` (incluye migración y contrato) | #3 | #16 | Abierto, Auto-fix activado. Falta ver la primera corrida en GitHub |
-| Login y logout (CU-012): `core/security.py`, `core/errors.py`, `/auth/*`, 42 pruebas en total | #4 | en esta rama | Probado en Docker. Apilado sobre #16 |
+| Login y logout (CU-012): `core/security.py`, `core/errors.py`, `/auth/*`, 42 pruebas en total | #4 | #17 | Abierto, Auto-fix activado. Apilado sobre #16 |
+| `registrar_evento` (`services/eventos.py`, 10 pruebas contra la base) y `backend/CONVENCIONES.md` | #5 | en esta rama | Probado en Docker. El patrón de la guía se corrió de punta a punta. Apilado sobre #17 |
 
 ## Orden de la base común (acordado el 2026-10-13)
 
 1. #1 modelos ✅ → 2. #2 migración inicial y `hash_contrasena` ✅ → 3. **#3 CI** (PR #16) → 4. #4 login
-(CU-012, hecho, en revisión del autor) → 5. #5 helper de `evento_operativo` y convención → 6. #6 seed. La CI va antes del login para que
-los PR de auth, helper y seed ya pasen por ella.
+(CU-012, PR #17) → 5. #5 helper de `evento_operativo` y convención (hecho, en esta rama) → 6. #6 seed. La CI
+va antes del login para que los PR de auth, helper y seed ya pasen por ella.
 
 ## Decisiones
 
@@ -100,7 +101,11 @@ y `from app.core.errors import ApiError`. `Depends(usuario_actual)` entrega un `
 `requiere_rol` solo dice qué clase de operación se puede intentar; **el "solo lo propio" (RN-026 a 030) lo
 decide cada servicio** con `id_persona`.
 
-**Todavía no:** `registrar_evento(...)` y la guía de convención (#5) y datos de prueba (#6).
+**En la rama del helper (#5), cuando se mergee:** `from app.services.eventos import registrar_evento`
+(a lo sumo un origen: reserva, pago o viaje; hace `flush`, el `commit` es tuyo; los `tipo_evento` los define
+cada dueño) y la guía `backend/CONVENCIONES.md`, que explica capas, transacción, errores y pruebas.
+
+**Todavía no:** datos de prueba (#6).
 
 **Qué necesito de las demás áreas:**
 - Martín: confirmar `hash_contrasena` en el DER (PR #11, ya mergeado) y resolver #7, #8 y #9.

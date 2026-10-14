@@ -45,9 +45,10 @@ async def iniciar_sesion(
     hash_guardado = cuenta.hash_contrasena if cuenta else _HASH_DE_RELLENO
     contrasena_ok = verificar_contrasena(contrasena, hash_guardado)
 
-    # PENDIENTE DE VALIDACIÓN (Issue #4): rechazar cuentas con estado distinto de 'activo' es la
-    # lectura conservadora del DEFAULT del schema; la regla real sale de la especificación v1.3
-    # del CU-012. Tampoco se miran `pasajero.estado_habilitacion` ni otras condiciones.
+    # DECISIÓN A CONFIRMAR (Issue #4): rechazar cuentas con estado distinto de 'activo' es mi lectura
+    # conservadora del DEFAULT del schema. La especificación v1.3 de CU-012 NO lo dice: define solo
+    # autenticación válida o inválida (A1). Tampoco se miran `pasajero.estado_habilitacion` ni hay
+    # intentos máximos, bloqueo o expiración: la v1.3 los deja como pendiente técnico del propio CU.
     if cuenta is None or not contrasena_ok or cuenta.estado != ESTADO_ACTIVO:
         raise _credenciales_invalidas()
 

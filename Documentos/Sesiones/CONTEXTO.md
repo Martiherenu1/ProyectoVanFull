@@ -202,7 +202,10 @@ async + `get_db`), `routers/health.py` (**el único endpoint real**), `agent/too
 - La integración continua, `.github/workflows/ci.yml`: `ruff`, `pytest`, migración y contrato, en cada PR
   (Issue #3).
 
-**No existe todavía:** todo endpoint que no sea `/health` o `/auth/*`. El estado de cada área y el del resto
+- `routers/perfil.py`, `services/perfil.py` y `schemas/perfil.py`: `GET` y `PATCH /api/pasajeros/me` (CU-001,
+  Issue #24).
+
+**No existe todavía:** todo endpoint que no sea `/health`, `/auth/*` o `/pasajeros/me`. El estado de cada área y el del resto
 del desarrollo está en `Documentos/Sesiones/PC2/CONTEXTO-<área>.md`.
 
 **Plan:** `services/` (reglas RN) → `routers/` (endpoints del OpenAPI) → tests. Los 37 CU entran en ~10 routers,

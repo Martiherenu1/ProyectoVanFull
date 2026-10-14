@@ -8,8 +8,8 @@
 ## Estado
 
 **La base común del backend está completa y en `main`.** Del circuito del pasajero todavía no hay código:
-está frenado por tres pendientes de validación con Martín (#7, #8 y #9). En `main` hay dos grupos de
-endpoints reales: `/health` y `/auth/*`.
+está frenado por tres pendientes de validación con Martín (#7, #8 y #9), salvo el perfil (CU-001), que
+está hecho. En `main` hay `/health`, `/auth/*` y, con el PR #26, `/pasajeros/me`.
 
 La CI corre en cada PR y pasó en las ramas de la base y en `main`. La suite son 69 pruebas, unos 50 a 60 s.
 
@@ -25,12 +25,12 @@ La CI corre en cada PR y pasó en las ramas de la base y en `main`. La suite son
 | Login y logout (CU-012), `core/security.py`, `core/errors.py`, `test_rutas_contrato.py` | #4 | #17 |
 | `registrar_evento` (`services/eventos.py`) y `backend/CONVENCIONES.md` | #5 | #18 |
 | Seed (`db/seed/`) y su cargador | #6 | #19 |
+| Perfil del pasajero (CU-001): `GET` y `PATCH /api/pasajeros/me`, 23 pruebas | #24 | #26 |
 
 ## En curso
 
-Nada abierto del área. Lo que sigue es el circuito de reservas (CU-002, 003, 004, 010); no se empieza sobre
-una regla indefinida. Lo que se puede hacer sin esos pendientes: servicios y disponibilidad sin el filtro
-`destino` (CU-002) y perfil del pasajero (CU-001).
+Lo que sigue es el circuito de reservas (CU-002, 003, 004, 010); no se empieza sobre una regla indefinida.
+Lo que se puede hacer sin esos pendientes: servicios y disponibilidad sin el filtro `destino` (CU-002).
 
 ## Decisiones
 
@@ -52,6 +52,7 @@ una regla indefinida. Lo que se puede hacer sin esos pendientes: servicios y dis
 | Respaldo de la reserva (XOR período de abono / contratación) que `POST /reservas` no informa | #7 | PENDIENTE DE VALIDACIÓN con Martín |
 | Filtro `destino` de `/servicios/disponibilidad` sin columna en el modelo | #8 | PENDIENTE DE VALIDACIÓN con Martín |
 | Parámetros de `/tarifas` no corresponden a la tabla `tarifa` | #9 | PENDIENTE DE VALIDACIÓN con Martín |
+| Campos editables del perfil: hoy son los del contrato (`email`, `telefono`, `direccion`), concentrados en `CAMPOS_EDITABLES` de `services/perfil.py`. Tampoco está definido si se puede vaciar un dato ni si el email lleva formato o verificación | #25 | PENDIENTE DE VALIDACIÓN con Martín (es pendiente del cierre de la etapa 03) |
 | Lista de espera de CU-003 sin operación en el contrato | sin Issue | Se completa en el circuito de reservas; pasa por el checklist de CONTRIBUTING §1.9 |
 | Condiciones de rechazo del login. Hoy: credencial inválida y cuenta con `estado` distinto de `activo` (lectura conservadora del DEFAULT); no se mira `pasajero.estado_habilitacion` ni hay política de intentos | #4 (cerrado) | PENDIENTE DE VALIDACIÓN con la especificación v1.3 del CU-012, que no estaba accesible |
 | El contrato usa `password` (inglés) en `LoginRequest` y el resto es castellano | — | Cambiarlo pide el acuerdo de los tres (§1.3). No se cambió |

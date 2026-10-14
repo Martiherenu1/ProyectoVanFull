@@ -1,9 +1,11 @@
 # VanFull — instrucciones del proyecto
 
 Plataforma **Web + Mobile** para VanFull, empresa **real** de charters que hoy opera con WhatsApp + Excel +
-teléfono. Trabajo de Campo, 4º año. Equipo de 3: **Martiniano + su compañero** cubren Integrante 1 (datos,
-backend, API) **+** Integrante 3 (IA/agentes, Flutter, modelo de desarrollo); **Integrante 2 (Martín Defez)**
-produce análisis, casos de uso, UML/C4 y el DER, y hace revisión cruzada.
+teléfono. Trabajo de Campo, 4º año. Equipo de 3: Martiniano, Facundo Barrientos y Martín Defez. Hasta el PC1,
+Martín produjo el análisis, los casos de uso, UML/C4 y el DER (siguen siendo la fuente de verdad). **Desde el
+13/10/2026 los tres desarrollan, repartidos por tipo de usuario** (frontend y backend de cada parte):
+Martiniano el pasajero, Martín el chofer y el viaje en curso, Facundo administración. Detalle y reglas para no
+pisarse en `Documentos/Sesiones/PC2/REPARTO-PC2.md`.
 
 ## Cómo trabajar conmigo
 
@@ -27,6 +29,7 @@ Cliente-servidor por capas. **La IA no accede a la base de datos**: invoca *tool
 | Para qué | Archivo |
 |---|---|
 | **Arrancar cualquier sesión** | `Documentos/Sesiones/CONTEXTO.md` — estado, decisiones y pendientes |
+| **Quién es dueño de qué en el desarrollo** | `Documentos/Sesiones/PC2/REPARTO-PC2.md` (y los prompts de cada uno en esa carpeta) |
 | Prompts de arranque por tipo de tarea | `Documentos/Sesiones/PROMPT-INICIAL.md` |
 | Convenciones de commits y ramas | `CONTRIBUTING.md` |
 | Línea funcional (RF/RNF/RN/CU) resumida | `Documentos/Documentacion/06-Notas-Ingesta-Drive-2026-09-08.md` |
@@ -61,8 +64,9 @@ binario hay que generarlo local y pedirle a Martiniano que lo suba — nunca rec
 
 ## Git
 
-Flujo **rama → commit → merge `--no-ff` → push**. Conventional Commits, mencionando el CU o la RN que
-justifica el cambio. `.env` nunca se sube. El tag **`pc1`** es la foto de la entrega; se congela después de la
+**El método completo está en `CONTRIBUTING.md` y es obligatorio:** Issue → verificar antes de hacer → rama →
+commits chicos con el CU/RN → PR con la plantilla → revisión de otro integrante → merge (merge commit, no
+squash). Desde el 13/10/2026 trabajan tres personas en el código: no se commitea directo a `main`. `.env` nunca se sube. El tag **`pc1`** es la foto de la entrega; se congela después de la
 presentación y de ahí en más cada cambio lleva tag nuevo.
 
 Mover un tag con `--force` **lo bloquea el clasificador de permisos**: hay que pasarle el comando a Martiniano.

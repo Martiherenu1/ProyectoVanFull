@@ -1,67 +1,150 @@
-# Guía de contribución — Vanfull
+# Guía de contribución — VanFull
 
-Convenciones de trabajo del equipo para mantener el repo ordenado y trazable.
-Base de trabajo: la línea funcional aprobada (RF, RNF, RN, CU, DER/MR). No inventar; ante dudas, marcar
-`PENDIENTE DE VALIDACIÓN` y coordinar.
+**El método de trabajo del equipo, para personas y para agentes de IA.** Este archivo es la única fuente del
+"cómo se trabaja": si algo de acá contradice a otro documento, vale lo que dice acá. Quién es dueño de qué está
+en `Documentos/Sesiones/PC2/REPARTO-PC2.md`.
 
-## Flujo de trabajo
+Base de trabajo: la línea funcional aprobada (45 RF, 14 RNF, 31 RN, 37 CU, DER/MR). **No inventar.** Ante una
+duda, marcar `PENDIENTE DE VALIDACIÓN` y consultar.
 
-```
-Issue → Branch → Desarrollo → Commit → Pull Request → Revisión → Merge
-```
+---
 
-- **Issue** por cada funcionalidad, defecto o tarea técnica (idealmente atado a un CU/RF/RN).
-- **Branch por tarea**, nunca commitear directo a `main`.
-- **Pull Request** como unidad de revisión. Revisión de un compañero antes del merge.
-- `main` siempre en estado desplegable.
-
-## Nombres de ramas
-
-`<tipo>/<descripcion-corta>` — ejemplos:
-
-- `feat/modelos-orm-personas`
-- `feat/endpoint-crear-reserva-cu003`
-- `fix/validacion-cupo-rn001`
-- `docs/actualizar-readme`
-- `chore/config-ci`
-
-## Commits — Conventional Commits
-
-`<tipo>: <descripción en imperativo>` — tipos: `feat`, `fix`, `docs`, `refactor`, `test`, `chore`.
+## 1. El ciclo de una tarea
 
 ```
-feat: agregar modelo ORM y migración de RESERVA (CU-003, RN-001/031)
-fix: corregir cálculo de cupo disponible
-test: cubrir período de pago de abonos (RN-003/004)
+Issue → verificar → rama → desarrollo en pasos chicos → checks → commit → PR → revisión → merge → cierre
 ```
 
-Cuando aplique, referenciar el **CU/RF/RN** en el cuerpo para mantener trazabilidad.
+### 1.1 Issue (antes de tocar nada)
 
-## Trazabilidad esperada (backend)
+- Toda tarea tiene un **Issue en GitHub** (plantilla "Tarea"): qué se hace, el CU/RF/RN que la justifica, el área
+  (pasajero, chofer, admin o común) y el criterio de aceptación.
+- Si no hay CU/RF/RN que la justifique y no es una tarea técnica (entorno, CI, refactor), **no es una tarea**: es
+  una propuesta y se consulta al equipo.
+- Con `gh`: `gh issue create --title "CU-003: crear reserva (backend)" --label pasajero`.
+
+### 1.2 Verificar antes de hacer
+
+Antes de escribir una línea:
+
+1. `git switch main && git pull` — trabajar siempre sobre lo último.
+2. **Buscar si ya existe** (`grep`, o leer la carpeta). No duplicar un modelo, un servicio ni una pantalla.
+3. **Leer lo que se va a tocar** y lo que lo usa: el contrato (`openapi.yaml`), el modelo (`schema.sql` y
+   `backend/app/models/`), la especificación del CU (v1.3, carpeta 03 del Drive) y el texto de la RN vigente
+   (carpeta 02).
+4. **Confirmar que es de tu área** (REPARTO). Si hay que tocar código de otro dueño, se abre un Issue para él o
+   se le pide permiso. No se arregla "de paso".
+5. Si las fuentes no coinciden entre sí (por ejemplo, el contrato pide un campo que el modelo no tiene), **se para
+   y se avisa**. No se elige una versión en silencio.
+
+### 1.3 Rama
+
+`<tipo>/<área>-<descripción>-<CU o #issue>`, desde `main` actualizado. Una rama por Issue.
+
+- `feat/pasajero-crear-reserva-cu003`
+- `feat/chofer-iniciar-viaje-cu030`
+- `fix/admin-confirmar-pago-rn015`
+- `chore/comun-ci`
+
+Áreas: `pasajero`, `chofer`, `admin`, `comun` (base compartida), `docs`.
+
+### 1.4 Desarrollo en pasos chicos
+
+- **Un concepto por commit.** Un modelo, un servicio, un endpoint, una pantalla. Si el mensaje necesita un "y",
+  son dos commits.
+- El código va **con sus pruebas** en la misma rama.
+- Nunca: commitear `.env` o claves, commitear directo a `main`, `push --force` sobre una rama compartida, mover o
+  borrar tags (`pc1`, `pc1.1`, `pc1.2`).
+
+### 1.5 Checks (antes de cada commit)
+
+| Si tocaste… | Correr | Debe dar |
+|---|---|---|
+| `backend/` | `ruff check .` · `ruff format --check .` · `pytest` (desde `backend/`) | sin errores |
+| `openapi.yaml` | regenerar `openapi.json` (comando en `backend/openapi/README.md`) y validar ambos con `openapi-spec-validator` | válidos y equivalentes |
+| modelos o migraciones | `alembic upgrade head` sobre una base limpia, y comparar las tablas con `schema.sql` | lo mismo |
+| `frontend/` | `flutter analyze` · `flutter test` | sin errores |
+
+Después, **leer el diff completo** (`git diff --staged`). Si un check no se pudo correr, se dice en el commit y en
+el PR. **Nunca se da por bueno algo que no se ejecutó.**
+
+### 1.6 Commit — Conventional Commits
 
 ```
-CU → operación → endpoint → servicio → datos → prueba
+<tipo>(<área>): <qué hace, en imperativo>
+
+<por qué: qué CU, RF o RN lo justifica y qué decisión se tomó>
+
+Refs #<issue>
 ```
 
-Las reglas de negocio (RN) se validan en **FastAPI/servicios**, nunca en el frontend ni en el agente.
-El agente de IA no accede directo a PostgreSQL: usa los servicios/API.
+Tipos: `feat`, `fix`, `test`, `refactor`, `docs`, `chore`. Ejemplo:
 
-## Checklist antes de marcar una tarea como terminada
-
-- [ ] ¿Existe RF/CU/RN que justifique el cambio?
-- [ ] ¿Respeta actores y permisos?
-- [ ] ¿Las RN se validan en backend?
-- [ ] ¿OpenAPI/contratos actualizados si cambió la API?
-- [ ] ¿No rompe contratos que consume Flutter/el agente?
-- [ ] ¿Tiene pruebas?
-- [ ] ¿`ruff check` y `pytest` pasan?
-- [ ] ¿Los pendientes quedaron documentados?
-
-## Calidad de código
-
-```bash
-cd backend
-ruff check .      # lint
-ruff format .     # formato
-pytest            # tests
 ```
+feat(pasajero): rechazar la reserva cuando no hay cupo
+
+RN-001: la reserva no puede superar la capacidad de la unidad. El cupo se calcula,
+no se guarda (MR-R30). Devuelve 409 con el error uniforme del contrato.
+
+Refs #12
+```
+
+Si el commit lo escribió un agente de IA, se agrega su línea `Co-Authored-By:`. Así queda registro de qué se hizo
+con ayuda de IA.
+
+### 1.7 Pull Request
+
+- **Un PR por Issue**, chico, con la plantilla completa: qué y por qué, CU/RN, si cambia el contrato o el modelo,
+  cómo se probó (comandos y resultado) y capturas si es una pantalla. El cuerpo lleva `Closes #<issue>`.
+- **Revisión de otro integrante** antes del merge. Además:
+  - si cambia `openapi.yaml` → revisa Martiniano (coherencia del contrato);
+  - si cambia modelos, migraciones o `schema.sql` → revisa Martiniano y se le avisa a Martín (dueño del DER);
+  - si cambia la base de Flutter (tema, navegación, cliente de API) → revisa Facundo.
+- El que revisa **lee el código y corre los checks**, no solo mira el título.
+- Se mergea con **"Create a merge commit"** (no squash): conserva cada commit y su CU en el historial.
+- Después del merge: borrar la rama, `git switch main && git pull`, y marcar el avance en el tablero de Notion.
+
+---
+
+## 2. Una sola fuente por dato
+
+La mayoría de los errores del PC1 fueron datos que se desalinearon entre documentos. Regla: **cada dato vive en un
+solo lugar, y el resto se deriva de ahí.**
+
+| Dato | Fuente única | Se propaga a | Si hay que cambiarlo |
+|---|---|---|---|
+| Tablas, columnas, FK, CHECK | `backend/db/schema.sql` = migraciones de Alembic | `backend/app/models/` | PR que cambie `schema.sql`, el modelo y una migración nueva **juntos**, con aviso a Martín (DER) |
+| Rutas, campos, códigos de error | `backend/openapi/openapi.yaml` | `openapi.json` (regenerado), routers y schemas Pydantic, DTOs de Flutter | PR al YAML. Agregar se puede; cambiar lo existente requiere acuerdo de los tres |
+| Reglas de negocio | Texto de la RN vigente (Drive, carpeta 02) | **Un** servicio en `backend/app/services/` | Control de cambio con Martín |
+| Comportamiento de cada CU | Especificación v1.3 (Drive, carpeta 03) | Servicios, pantallas, pruebas | Control de cambio con Martín |
+| Identificadores (CU, RF, RN, ACT, MR-R) | La línea base | Commits, Issues, código, pruebas | No se crean ni se renumeran |
+| Datos de prueba | `backend/db/seed/` (un solo conjunto) | Base local, pruebas, mocks de Flutter | PR al seed |
+| Valores derivados (saldo, deuda, cupo) | Se **calculan** (MR-R30) | — | No se guardan nunca |
+
+Las reglas de negocio se validan en el backend (`services/`), nunca en el frontend ni en el agente. El agente
+AG-01 no accede a PostgreSQL: usa los servicios del backend.
+
+---
+
+## 3. Cuándo una tarea está terminada
+
+- [ ] Tiene CU/RF/RN que la justifica (o es técnica y lo dice).
+- [ ] Respeta actores y permisos (RN-026 a 030).
+- [ ] Las reglas se validan en el backend, en el servicio del dueño del tema.
+- [ ] Si cambió la API, el contrato está actualizado y el JSON regenerado.
+- [ ] No rompe nada que consuma Flutter o el agente.
+- [ ] Tiene pruebas, y los checks del punto 1.5 pasan (o se explica cuál no se pudo correr).
+- [ ] Los pendientes quedaron registrados en un Issue.
+- [ ] El PR está mergeado y el tablero actualizado.
+
+---
+
+## 4. Si sos un agente de IA
+
+1. **Explicá antes de hacer:** qué archivo vas a tocar, por qué, y qué hace cada parte. Pasos chicos.
+2. **Mostrá el diff y esperá el visto bueno** antes de commitear, abrir un PR o mergear.
+3. **Explicá cada comando** que corrés. No ejecutes nada destructivo sin confirmación.
+4. **Verificá en vez de suponer.** Si no pudiste correr las pruebas, la migración o la app, decilo explícitamente.
+5. **No inventes:** ni reglas, ni campos, ni rutas, ni identificadores. Lo que falta es un pendiente.
+6. **Quedate en tu área.** Si necesitás algo de otro dueño, proponé un Issue para él.
+7. Al cerrar cada tarea, informá: qué quedó hecho, qué se probó y cómo, qué no se pudo verificar y qué sigue.

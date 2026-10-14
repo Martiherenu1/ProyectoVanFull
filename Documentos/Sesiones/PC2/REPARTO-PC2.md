@@ -70,13 +70,13 @@ reasignar (Facundo).
 2. **Archivos por dueño.** `backend/app/services/<tema>.py` y `backend/app/routers/<tema>.py` son del dueño del
    tema. `frontend/lib/screens/<usuario>/` es de quien tiene ese usuario. Los archivos compartidos (`main.py`, los
    modelos, la navegación de Flutter, el tema, el cliente de API, `openapi.yaml`) se cambian en PR chicos.
-3. **El contrato.** Agregar operaciones de tu tema está permitido, por PR, con Martiniano como revisor de
-   coherencia (nombres, schemas, errores) y de que el JSON se regenere desde el YAML. **Cambiar una operación que
+3. **El contrato.** Agregar operaciones de tu tema está permitido, por PR, con aviso a Martiniano, que puede
+   revisar la coherencia (nombres, schemas, errores) y que el JSON se regenere desde el YAML. **Cambiar una operación que
    ya existe** requiere el acuerdo de los tres.
 4. **No inventar.** Ni reglas, ni campos, ni rutas. Lo que no está en `schema.sql`, en el contrato o en la RN
    vigente es un pendiente y se consulta. El texto de cada RN vigente está en el Drive (carpeta 02); las
    especificaciones de los CU, en la carpeta 03 (v1.3).
-5. **Git:** Issue → rama → PR → revisión de otro integrante, como dice `CONTRIBUTING.md`. Ramas
+5. **Git:** Issue → rama → PR → CI en verde → merge; la revisión de otro integrante es opcional, como dice `CONTRIBUTING.md`. Ramas
    `<tipo>/<área>-<descripción>-<CU>`, con área `pasajero`, `chofer`, `admin` o `comun`. No se tocan los tags.
 6. **Seguimiento:** las tareas, en Issues de GitHub (se cierran con el PR); el avance por CU, en el tablero de Notion.
 

@@ -7,11 +7,12 @@
 
 ## Estado
 
-**La base común del backend está completa y en `main`.** Del circuito del pasajero todavía no hay código:
-está frenado por tres pendientes de validación con Martín (#7, #8 y #9), salvo el perfil (CU-001), que
-está hecho. En `main` hay `/health`, `/auth/*` y, con el PR #26, `/pasajeros/me`.
+**La base común del backend está completa y en `main`.** Del circuito del pasajero están hechos el perfil
+(CU-001, PR #26) y la consulta de servicios, disponibilidad y paradas (CU-002, PR #29). La reserva
+(CU-003), la cancelación (CU-004) y mis reservas (CU-010) siguen frenadas por pendientes de validación con
+Martín (#7, #8, #9 y #28).
 
-La CI corre en cada PR y pasó en las ramas de la base y en `main`. La suite son 69 pruebas, unos 50 a 60 s.
+La CI corre en cada PR y pasó en las ramas de la base y en `main`. La suite son 117 pruebas, algo más de un minuto.
 
 ## Hecho
 
@@ -26,11 +27,12 @@ La CI corre en cada PR y pasó en las ramas de la base y en `main`. La suite son
 | `registrar_evento` (`services/eventos.py`) y `backend/CONVENCIONES.md` | #5 | #18 |
 | Seed (`db/seed/`) y su cargador | #6 | #19 |
 | Perfil del pasajero (CU-001): `GET` y `PATCH /api/pasajeros/me`, 23 pruebas | #24 | #26 |
+| Servicios, disponibilidad y paradas (CU-002), 25 pruebas; `cupo_disponible` en `services/disponibilidad.py` | #27 | #29 |
 
 ## En curso
 
-Lo que sigue es el circuito de reservas (CU-002, 003, 004, 010); no se empieza sobre una regla indefinida.
-Lo que se puede hacer sin esos pendientes: servicios y disponibilidad sin el filtro `destino` (CU-002).
+Lo que sigue es el circuito de reservas (CU-003, 004, 010); no se empieza sobre una regla indefinida:
+CU-003 necesita el respaldo de la reserva (#7), la tarifa (#9) y la capacidad sin vehículo (#28).
 
 ## Decisiones
 
@@ -50,7 +52,9 @@ Lo que se puede hacer sin esos pendientes: servicios y disponibilidad sin el fil
 | Qué | Issue | Estado |
 |---|---|---|
 | Respaldo de la reserva (XOR período de abono / contratación) que `POST /reservas` no informa | #7 | PENDIENTE DE VALIDACIÓN con Martín |
-| Filtro `destino` de `/servicios/disponibilidad` sin columna en el modelo | #8 | PENDIENTE DE VALIDACIÓN con Martín |
+| Filtro `destino` de `/servicios/disponibilidad` sin columna en el modelo. Hoy responde 400 `FILTRO_NO_DISPONIBLE` en vez de ignorarlo: la tool `consultar_disponibilidad` de AG-01 manda `destino`, así que esas consultas fallan hasta resolverlo | #8 | PENDIENTE DE VALIDACIÓN con Martín |
+| Disponibilidad: capacidad de un viaje sin vehículo (hoy `capacidad_planificada`, o sin cupo), viajes ofrecidos (hoy solo `programado`) y si una ausencia libera el cupo (hoy no) | #28 | PENDIENTE DE VALIDACIÓN con Martín. CU-003 valida con la misma función |
+| La tool `consultar_disponibilidad` de AG-01 usa `ida`/`vuelta` en minúsculas y el contrato `IDA`/`VUELTA` | — | Lo mapea el ejecutor del agente (paso 2, AG-01); este endpoint rechaza `ida` con 400 |
 | Parámetros de `/tarifas` no corresponden a la tabla `tarifa` | #9 | PENDIENTE DE VALIDACIÓN con Martín |
 | Campos editables del perfil: hoy son los del contrato (`email`, `telefono`, `direccion`), concentrados en `CAMPOS_EDITABLES` de `services/perfil.py`. Tampoco está definido si se puede vaciar un dato ni si el email lleva formato o verificación | #25 | PENDIENTE DE VALIDACIÓN con Martín (es pendiente del cierre de la etapa 03) |
 | Lista de espera de CU-003 sin operación en el contrato | sin Issue | Se completa en el circuito de reservas; pasa por el checklist de CONTRIBUTING §1.9 |
@@ -90,6 +94,9 @@ Lo que se puede hacer sin esos pendientes: servicios y disponibilidad sin el fil
 - `from app.services.eventos import registrar_evento`: a lo sumo un origen (reserva, pago o viaje), hace
   `flush`, los `tipo_evento` los define cada dueño.
 - `backend/CONVENCIONES.md`: capas, transacción, errores y pruebas.
+- `from app.services.disponibilidad import cupo_disponible`: **la definición única del cupo** (RN-001,
+  RN-002). Si necesitan el cupo de un viaje (por ejemplo, CU-018 al asignar un vehículo), úsenla; no la
+  reescriban.
 - El seed: cuentas `pasajero1@vanfull.test`, `pasajero2@vanfull.test`, `chofer1@vanfull.test` y
   `admin1@vanfull.test`; las contraseñas están en `db/seed/contrasenas-de-prueba.csv`. Cada dueño suma los
   CSV de sus tablas por PR (`db/seed/README.md`).

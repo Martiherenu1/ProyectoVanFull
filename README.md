@@ -37,17 +37,25 @@ ProyectoVanFull/
 
 ## Puesta en marcha (backend + base de datos)
 
+Con Docker abierto, desde la raíz del repo:
+
 ```bash
-cp backend/.env.example backend/.env
-docker compose up --build
+cp backend/.env.example backend/.env                      # una vez; sin este archivo ningún comando del backend arranca
+docker compose up -d --build                              # PostgreSQL y la API
+docker compose run --rm backend alembic upgrade head      # crea las 35 tablas: la API no migra sola
+docker compose run --rm backend python -m db.seed.cargar  # cuentas de prueba (pasajero, chofer, administrador)
 ```
 
 - API: http://localhost:8000  ·  Docs OpenAPI: http://localhost:8000/docs
 - Salud: http://localhost:8000/api/health
+- Pruebas: `docker compose run --rm backend pytest -q`
+- Cuentas de prueba y qué datos hay: [`backend/db/seed/README.md`](backend/db/seed/README.md)
 
 ## Documentación clave
 
 - Contexto rápido del proyecto: [`Documentos/Sesiones/CONTEXTO.md`](Documentos/Sesiones/CONTEXTO.md)
+- Cómo se escribe un servicio y un endpoint: [`backend/CONVENCIONES.md`](backend/CONVENCIONES.md)
+- Quién es dueño de qué: [`Documentos/Sesiones/PC2/REPARTO-PC2.md`](Documentos/Sesiones/PC2/REPARTO-PC2.md)
 - Modelo de datos (DER): [`Documentos/Documentacion/03-Modelo-de-Datos-DER-v0.1.md`](Documentos/Documentacion/03-Modelo-de-Datos-DER-v0.1.md)
 - Cronograma: [`Documentos/Documentacion/02-Cronograma.md`](Documentos/Documentacion/02-Cronograma.md)
 

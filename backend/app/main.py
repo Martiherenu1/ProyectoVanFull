@@ -5,7 +5,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from app.core.config import get_settings
 from app.core.errors import registrar_manejadores
-from app.routers import auth, health, perfil
+from app.routers import auth, health, perfil, servicios
 
 settings = get_settings()
 
@@ -31,6 +31,7 @@ registrar_manejadores(app)
 app.include_router(health.router, prefix=settings.api_prefix)
 app.include_router(auth.router, prefix=settings.api_prefix)
 app.include_router(perfil.router, prefix=settings.api_prefix)
+app.include_router(servicios.router, prefix=settings.api_prefix)
 
 
 @app.get("/")

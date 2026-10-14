@@ -1,0 +1,5 @@
+id_cuenta_acceso,id_persona,identificador_acceso,estado
+1,1,pasajero1@vanfull.test,activo
+2,2,pasajero2@vanfull.test,activo
+3,3,chofer1@vanfull.test,activo
+4,4,admin1@vanfull.test,activo

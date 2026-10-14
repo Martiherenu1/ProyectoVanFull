@@ -1,0 +1,4 @@
+id_recorrido,orden,id_parada,comprometida
+1,1,1,false
+1,2,2,false
+1,3,3,false

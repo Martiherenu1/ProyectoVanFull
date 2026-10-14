@@ -1,0 +1,5 @@
+id_persona,nombre,apellido,dni,direccion,telefono,email
+1,Pasajera,Uno,90000001,,,pasajero1@vanfull.test
+2,Pasajero,Dos,90000002,,,pasajero2@vanfull.test
+3,Chofer,Uno,90000003,,,chofer1@vanfull.test
+4,Administrador,Uno,90000004,,,admin1@vanfull.test

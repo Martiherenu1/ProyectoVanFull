@@ -32,6 +32,9 @@ Cliente-servidor por capas. **La IA no accede a la base de datos**: invoca *tool
 | **Quién es dueño de qué en el desarrollo** | `Documentos/Sesiones/PC2/REPARTO-PC2.md` (y los prompts de cada uno en esa carpeta) |
 | Prompts de arranque por tipo de tarea | `Documentos/Sesiones/PROMPT-INICIAL.md` |
 | Convenciones de commits y ramas | `CONTRIBUTING.md` |
+| **Escribir un servicio o un endpoint del backend** | `backend/CONVENCIONES.md` (capas, transacción, errores, pruebas; el ejemplo a copiar es el login) |
+| **Estado de tu área** (hecho, decisiones, pendientes) | `Documentos/Sesiones/PC2/CONTEXTO-<área>.md`; cómo se mantiene: `Documentos/Sesiones/PC2/PROMPT-CONTEXTO-VIVO.md` |
+| Poner en marcha el backend y la base | `README.md` (raíz), «Puesta en marcha» |
 | Línea funcional (RF/RNF/RN/CU) resumida | `Documentos/Documentacion/06-Notas-Ingesta-Drive-2026-09-08.md` |
 | Reglas de diseño de UI | `Documentos/Documentacion/08-Brief-de-Diseno-UI.md` |
 | IA y agentes (AG-01, 13 tools) | `Documentos/Documentacion/07-IA-y-Agentes-Consolidado.md` |

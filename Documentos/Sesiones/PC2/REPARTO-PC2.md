@@ -89,10 +89,11 @@ Antes de repartir, hace falta lo que usan todos. Se arma en paralelo, en los pri
 | Entorno: Docker (PostgreSQL + backend) y Flutter instalados en las tres máquinas | Cada uno en la suya |
 | Modelos de las 35 tablas, primera migración de Alembic, autenticación (login, JWT, roles), helper para registrar `evento_operativo` | Martiniano |
 | Proyecto Flutter: tema con los tokens del brief, navegación con una sección por usuario, cliente de API intercambiable (mock o HTTP) | Facundo |
-| Escenario de la demo cruzada y datos de prueba comunes (CSV con las columnas de `schema.sql`) | Martín (vuelve el 16/10) |
+| Escenario de la demo cruzada y los CSV de sus tablas (el seed base y el cargador ya están: `backend/db/seed/README.md`) | Martín (vuelve el 16/10) |
 
-Mientras la base no está en `main`, cada uno puede avanzar sin código compartido: leer su parte del contrato y
-de las especificaciones, y proponer los endpoints que le faltan.
+**Estado:** la base del backend ya está en `main` (modelos, migración, login y roles, helper de eventos, seed y
+CI). Cómo arrancar: `README.md`; cómo se escribe una operación: `backend/CONVENCIONES.md`. Lo que sigue
+pendiente de esta base es el proyecto Flutter (Facundo) y el escenario de la demo (Martín).
 
 ## 4. La demo del PC2 cruza a los tres
 

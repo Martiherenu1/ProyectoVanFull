@@ -9,7 +9,7 @@ pydantic>=2.7
 pydantic-settings>=2.3
 
 # Base de datos (async)
-sqlalchemy>=2.0
+sqlalchemy[asyncio]>=2.0   # [asyncio] instala greenlet, que el motor async necesita
 asyncpg>=0.29
 alembic>=1.13
 

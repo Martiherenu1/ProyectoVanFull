@@ -61,4 +61,4 @@ docker compose run --rm backend python -m db.seed.cargar  # cuentas de prueba (p
 
 ## Equipo
 
-3 integrantes. Flujo de trabajo: Issue → Branch → PR → Revisión → Merge.
+3 integrantes. Flujo de trabajo: Issue → Branch → PR → CI en verde → Merge (la revisión es opcional).

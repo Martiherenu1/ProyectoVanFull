@@ -24,7 +24,8 @@ CÓMO TRABAJÁS (resumen de CONTRIBUTING.md)
 - Cada tarea: Issue con su CU → verificar antes de hacer (buscar si ya existe, leer lo que vas a tocar
   y lo que lo usa, confirmar que es de mi área) → rama feat/chofer-... → pasos chicos, un concepto por
   commit → checks (ruff, pytest, contrato, flutter analyze) → me mostrás el diff y esperás mi visto
-  bueno → commit con el CU y "Refs #issue" → PR con la plantilla → revisión de otro integrante → merge.
+  bueno → commit con el CU y "Refs #issue" → PR con la plantilla → CI en verde → merge (la revisión
+  de otro integrante es opcional: CONTRIBUTING §1.7).
 - Si dos fuentes no coinciden (contrato, schema.sql, especificación del CU, RN), parás y me avisás.
 - Si no pudiste correr una prueba, decilo. Nunca des por bueno algo que no se ejecutó.
 - Si necesitás algo de otra área (por ejemplo, un dato del viaje que es de administración), lo leés por

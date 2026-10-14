@@ -70,8 +70,8 @@ binario hay que generarlo local y pedirle a Martiniano que lo suba — nunca rec
 ## Git
 
 **El método completo está en `CONTRIBUTING.md` y es obligatorio:** Issue → verificar antes de hacer → rama →
-commits chicos con el CU/RN → PR con la plantilla → revisión de otro integrante → merge (merge commit, no
-squash). Desde el 13/10/2026 trabajan tres personas en el código: no se commitea directo a `main`. `.env` nunca se sube. El tag **`pc1`** es la foto de la entrega; se congela después de la
+commits chicos con el CU/RN → PR con la plantilla → CI en verde → merge (merge commit, no
+squash). La revisión de otro integrante es opcional (CONTRIBUTING §1.7). Desde el 13/10/2026 trabajan tres personas en el código: no se commitea directo a `main`. `.env` nunca se sube. El tag **`pc1`** es la foto de la entrega; se congela después de la
 presentación y de ahí en más cada cambio lleva tag nuevo.
 
 Mover un tag con `--force` **lo bloquea el clasificador de permisos**: hay que pasarle el comando a Martiniano.

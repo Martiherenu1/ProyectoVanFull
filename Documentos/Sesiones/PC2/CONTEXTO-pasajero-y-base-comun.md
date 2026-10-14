@@ -43,7 +43,7 @@ una regla indefinida. Lo que se puede hacer sin esos pendientes: servicios y dis
 | 2026-10-14 | `bcrypt` y `PyJWT` directos (no `passlib` ni `python-jose`) | CONTEXTO §7, PR #17 |
 | 2026-10-14 | El servicio hace el `commit`, una vez, al final; el helper de eventos solo hace `flush`. Un recurso ajeno responde 404 | `backend/CONVENCIONES.md` |
 | 2026-10-14 | El seed se niega a correr contra una base no local: las contraseñas de prueba están en un repo público | `db/seed/README.md` |
-| 2026-10-14 | Los PR #15 a #19 se mergearon sin revisión de otro integrante, por decisión de Martiniano. La regla general sigue siendo CONTRIBUTING §1.7: aclarar a Martín y Facundo cuál rige | Cuerpo de cada PR |
+| 2026-10-14 | **La revisión de otro integrante es opcional, para siempre**; el autor mergea con la CI en verde y deja asentado en el PR si hubo revisión. Los PR #10 a #21 se mergearon sin revisión registrada en GitHub | CONTRIBUTING §1.7 |
 
 ## Pendientes
 

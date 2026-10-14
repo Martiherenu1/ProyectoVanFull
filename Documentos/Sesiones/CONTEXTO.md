@@ -208,8 +208,11 @@ async + `get_db`), `routers/health.py` (**el único endpoint real**), `agent/too
 - `routers/servicios.py`, `services/servicios.py` y `services/disponibilidad.py`: `GET /api/servicios`,
   `/api/servicios/disponibilidad` y `/api/recorridos/{id}/paradas` (CU-002, Issue #27). El cupo se deriva en
   `cupo_disponible`: la definición única, que CU-003 va a reutilizar.
+- `routers/reservas.py`, `services/reservas.py` y `schemas/reservas.py`: `GET /api/pasajeros/me/reservas` y
+  `GET /api/reservas/{id}` (CU-010, Issue #30). Solo lectura; crear, cancelar y cambiar parada se suman ahí.
 
-**No existe todavía:** todo endpoint que no sea `/health`, `/auth/*`, `/pasajeros/me` o los de CU-002. El estado de cada área y el del resto
+**No existe todavía:** todo endpoint que no sea `/health`, `/auth/*`, `/pasajeros/me` o los de CU-002 y
+CU-010. El estado de cada área y el del resto
 del desarrollo está en `Documentos/Sesiones/PC2/CONTEXTO-<área>.md`.
 
 **Plan:** `services/` (reglas RN) → `routers/` (endpoints del OpenAPI) → tests. Los 37 CU entran en ~10 routers,

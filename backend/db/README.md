@@ -51,6 +51,13 @@ creación completa de las 35 tablas y sus 54 claves foráneas, y el seed de los 
 que las restricciones **rechazan datos inválidos**: un `tipo_servicio` fuera del dominio permitido es
 rechazado por la base, no por la aplicación.
 
-## Próximo paso
+## Relación con los modelos y las migraciones
 
-Este DDL es la base de los **modelos ORM (SQLAlchemy 2.0)** y de las **migraciones Alembic**.
+`schema.sql` es la fuente del modelo físico. De él salen `backend/app/models/` (SQLAlchemy 2.0) y las
+migraciones de Alembic (`backend/migrations/`), y **los tres tienen que coincidir**: `tests/test_modelos.py`
+compara los modelos contra este archivo, y `alembic upgrade head` sobre una base limpia tiene que producir el
+mismo esquema (se verificó comparando los `pg_dump --schema-only`). Si se cambia uno, se cambian los tres en
+el mismo PR. Para desarrollo se usa la migración; este archivo sirve de referencia y para la comparación.
+
+Decisión del modelo físico del 2026-10-13: `cuenta_acceso.hash_contrasena VARCHAR(255) NOT NULL`. El MR dejó
+diferida la autenticación; sin la columna no hay login (CU-012).

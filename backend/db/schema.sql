@@ -15,6 +15,8 @@
 --   * Valores derivados (saldo, deuda, cupo disponible) NO se persisten (MR-R30).
 --   * POSICION_GPS conserva solo la última posición, sin historial (MR-R31).
 --   * NOTIFICACION no es entidad (MR-R32).
+--   * CUENTA_ACCESO guarda el hash de la contraseña (hash_contrasena), decidido el 2026-10-13.
+--     El MR dejó diferido auth/hash/JWT al modelo físico; sin esta columna no hay login (CU-012).
 -- Reglas de negocio multi-fila (min. 2 paradas por recorrido, min. 1 representante,
 -- capacidad suficiente, etc.) se validan en el backend (FastAPI), no en el DDL.
 -- =============================================================================
@@ -94,6 +96,7 @@ CREATE TABLE cuenta_acceso (
     id_cuenta_acceso     BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
     id_persona           BIGINT       NOT NULL UNIQUE,    -- FK -> persona
     identificador_acceso VARCHAR(120) NOT NULL UNIQUE,    -- email/usuario de login
+    hash_contrasena      VARCHAR(255) NOT NULL,           -- hash de la contraseña; nunca la contraseña en claro (CU-012)
     estado               VARCHAR(20)  NOT NULL DEFAULT 'activo'
 );
 

@@ -7,7 +7,7 @@
 > datos de esta máquina. Los prompts de arranque por tipo de tarea, y el criterio de cuándo conviene
 > abrir un chat nuevo, están en `Documentos/Sesiones/PROMPT-INICIAL.md`.
 >
-> **Última actualización: 2026-10-08** · Reemplaza y consolida todas las versiones anteriores.
+> **Última actualización: 2026-10-14** (§7 y §11) · Reemplaza y consolida todas las versiones anteriores.
 
 ---
 
@@ -115,6 +115,8 @@ Disponibilidad 99 % mensual · 95 % de operaciones ≤ 2 s · operaciones pesada
 | **Una reserva por viaje** para los abonos | Resuelto así en el MR oficial (MR-R15/16); simplifica cupo, QR y reportes |
 | **`.docx` fuera del repo** | Drive = documentación oficial · GitHub = código y artefactos versionables |
 | **Contrato OpenAPI antes de implementar** | Permite que frontend, backend e IA avancen en paralelo sin romperse |
+| **`cuenta_acceso.hash_contrasena VARCHAR(255) NOT NULL`** (decidido el 2026-10-13) | El MR dejó diferida la autenticación al modelo físico y la tabla no tenía dónde guardar la contraseña, necesaria para el login (CU-012, RF-045). Entra en `schema.sql`, `models/` y la migración inicial en el mismo PR. El algoritmo de hash lo fija la tarea del login. Aviso a Martín por ser el DER |
+| **Logout sin lista negra** (decidido el 2026-10-13) | `POST /auth/logout` devuelve 204 y el cliente descarta el token. La política de sesiones sigue siendo un pendiente (§13) |
 | **Hosting de costo 0** (decidido el 2026-10-02): BD en **Neon**, backend en **Render** (servicio web gratis), web Flutter en **GitHub Pages**. Desarrollo diario con `docker-compose.yml` | Alcance académico: sirve para la entrega; si el producto se vende se paga algo mejor. Se descartó Firebase (NoSQL, no calza con `schema.sql`), Supabase (pausa el proyecto a los 7 días sin uso) y la BD gratis de Render (vence a los 30 días y la borra). Usar la BD **solo como Postgres estándar**, sin SDK ni funciones propias del proveedor, para que mudarse sea cambiar `DATABASE_URL` + `pg_dump` |
 
 ## 8. Equipo y reparto
@@ -184,13 +186,19 @@ originales están en la carpeta 04. Si Martiniano edita el Word a mano, comparar
 
 **Existe:** `main.py` (app + CORS + routers), `core/config.py` (variables de entorno), `core/database.py` (motor
 async + `get_db`), `routers/health.py` (**el único endpoint real**), `agent/tools.py` (13 tools + system prompt),
-`agent/openrouter_client.py` (cliente con fallback), `tests/test_health.py`, Dockerfile y docker-compose.
+`agent/openrouter_client.py` (cliente con fallback), Dockerfile y docker-compose, y desde el PC2:
 
-**No existe todavía:** `models/`, `schemas/` y `services/` están **vacíos**, y falta todo endpoint que no sea
-`/health`. También falta `core/security.py` (JWT/roles) y Alembic. **Esto es esperable:** el backend se dejó para después de cerrar el documento v1.1 (decisión del 08/10; el cronograma lo preveía desde el 05/10).
+- `models/`: las 35 tablas, un archivo por bloque (PR #10). `tests/test_modelos.py` los compara con `schema.sql`.
+- `migrations/` (Alembic async): migración `0001`, que crea las 35 tablas y carga los 5 roles. Se corre con
+  `docker compose run --rm backend alembic upgrade head`.
 
-**Plan cuando se programe:** `models/` (desde `schema.sql`, agrupados por dominio) → `services/` (reglas RN) →
-`routers/` (endpoints del OpenAPI) → tests. Los 37 CU entran en ~10 routers, no uno por CU.
+**No existe todavía:** `schemas/` y `services/` están **vacíos**, y falta todo endpoint que no sea `/health`.
+También falta `core/security.py` (JWT/roles), el helper de `evento_operativo`, el seed y la integración
+continua. Son las tareas de la base común (Issues #3 a #6); el estado de cada una y el del resto del
+desarrollo está en `Documentos/Sesiones/PC2/CONTEXTO-<área>.md`.
+
+**Plan:** `services/` (reglas RN) → `routers/` (endpoints del OpenAPI) → tests. Los 37 CU entran en ~10 routers,
+no uno por CU.
 
 ## 12. Cómo trabajamos (acordado el 2026-09-22)
 

@@ -247,6 +247,9 @@ antes de cada demo**, y sacar un `pg_dump` local antes de cada punto de control.
 
 - **Repo:** https://github.com/Martiherenu1/ProyectoVanFull (**público**) · entrega congelada en el tag `pc1`
 - **Tablero de los 37 CU (Notion):** https://app.notion.com/p/a05f244f1ab4438982da04067e2fe018
-- **Drive del equipo:** documentación oficial (ver memoria `drive-del-companero` para el mapa de carpetas e IDs)
+- **Drive del equipo:** documentación oficial. Los dos documentos que más se consultan para implementar:
+  `03_Especificaciones_Casos_de_Uso_VanFull_v1.3_Aprobado_Equipo` (los 37 CU, con flujos alternativos y
+  pendientes) y `02_Reglas_de_Negocio_VanFull_v1.1_Aprobado_Equipo` (las 31 RN). **Buscarlos por título**:
+  la búsqueda por carpeta o por texto no los encuentra. Los `.md` equivalentes de la v1.3 están en la misma carpeta.
 - **En este repo:** `Documentos/Documentacion/01..07`, `Documentos/HITOS.md`,
   `Documentos/Recursos/Stack-y-Referencias.md`, `backend/db/README.md`, `backend/openapi/README.md`

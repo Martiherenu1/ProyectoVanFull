@@ -119,10 +119,13 @@ Disponibilidad 99 % mensual · 95 % de operaciones ≤ 2 s · operaciones pesada
 
 ## 8. Equipo y reparto
 
-- **Integrante 2** → análisis: requisitos, casos de uso, UML/C4, modelo conceptual **y el DER/MR**. Llega como entrada.
-- **Martiniano + su compañero** → **juntos, sin subdividir**: Integrante 1 (datos, backend, API, integraciones)
-  **+** Integrante 3 (IA/agentes, frontend Flutter, modelo de desarrollo). Git y tablero los hacen igual.
-- Los repartos formales de los documentos del equipo cambiaron varias veces → **no darles peso**; vale lo de arriba.
+- **Hasta el PC1:** Martín (Integrante 2) produjo análisis, CU, UML/C4 y el DER, que siguen siendo la fuente de
+  verdad; Martiniano y Facundo cubrieron backend, API, IA y Flutter.
+- **Desde el 13/10/2026 (hacia el PC2), los tres desarrollan, por tipo de usuario**, cada uno frontend y backend
+  de su parte: **Martiniano** pasajero (y la base común del backend), **Martín** chofer y viaje en curso,
+  **Facundo** administración (y la base común de Flutter). Un dueño por tema en el backend; el contrato se amplía
+  por PR. Todo en `Documentos/Sesiones/PC2/REPARTO-PC2.md`, con un prompt por integrante en esa carpeta.
+- Herramientas: Martiniano usa Claude Code; Facundo, Codex (lee `AGENTS.md`, que remite a `CLAUDE.md`).
 
 ## 9. Cronograma (detalle en `02-Cronograma.md`)
 

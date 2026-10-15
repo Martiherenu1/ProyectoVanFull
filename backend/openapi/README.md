@@ -25,21 +25,31 @@ python -c "import yaml,json,io; io.open('backend/openapi/openapi.json','w',encod
 - `redocly preview-docs backend/openapi/openapi.yaml`, o
 - al implementar el backend: `http://localhost:8000/docs` (Swagger UI de FastAPI).
 
-Validado con `openapi-spec-validator`: **OpenAPI 3.0.3 · 21 paths · 22 operaciones · 23 schemas**.
+Validado con `openapi-spec-validator`: **OpenAPI 3.0.3 · 25 rutas · 27 operaciones HTTP · 28 schemas**.
 
 ## Cobertura de esta versión (v0.1)
 
-> **v0.1 cubre 16 de los 37 casos de uso, más RF-028.** Las 22 operaciones **no** cubren la totalidad
-> del sistema: los 21 CU restantes están declarados para la próxima iteración y se listan al final.
+> **v0.1 representa 18 de los 37 casos de uso, además de RF-028.** Los otros **19 CU** todavía no tienen
+> operaciones y se listan al final. Estos indicadores describen la **cobertura contractual de diseño**;
+> no indican funcionalidades implementadas en el backend ni en el frontend.
 
-Además, **dos de esos 16 están cubiertos parcialmente**:
+Se cuentan las rutas distintas de `paths`, los métodos HTTP de cada ruta, los schemas de
+`components.schemas` y los identificadores distintos de `x-cu`. RF-028 es un requisito, no un CU adicional.
+
+**Tres de los 18 CU representados tienen cobertura parcial documentada**:
 
 | CU | Qué cubre v0.1 | Qué falta |
 |---|---|---|
 | **CU-003** Crear reserva | La creación y el rechazo por falta de cupo | La incorporación y gestión de la **lista de espera** que anuncia el `409` |
 | **CU-018** Gestionar viajes | Únicamente la **creación** del viaje | Modificar, cancelar y reasignar vehículo o chofer |
+| **CU-030** Ejecutar viaje | Inicio, finalización y recepción de posiciones GPS | Avisos de demora y problemas, pendientes para otra tarea |
 
-Ambos quedan marcados con `x-cobertura: parcial` o aclarados en la descripción del endpoint.
+La cobertura parcial queda marcada con `x-cobertura: parcial` o aclarada en la descripción del endpoint.
+
+**CU-029 tiene documentadas sus operaciones de consulta**: viajes propios, el caso sin asignaciones y
+el detalle operativo con recorrido, paradas, identificación permitida y cantidades. El detalle separa
+pasajeros con reservas e integrantes de nómina y respeta RN-029. Su implementación funcional en backend
+y frontend continúa pendiente; documentar el contrato no implementa los servicios ni las pantallas.
 
 ## Convenciones
 
@@ -69,12 +79,23 @@ Ambos quedan marcados con `x-cobertura: parcial` o aclarados en la descripción 
 | CU-014 Registrar pago | `POST /pagos` | RF-009, RN-016 |
 | CU-016 Confirmar/rechazar pago | `POST /pagos/{id}/confirmacion` | RF-011, RN-015 — validación administrativa cuando el medio no acredita automáticamente |
 | CU-018 Gestionar viajes ⚠️ *parcial* | `POST /viajes` | RF-017/018, RN-001 |
+| CU-029 Consultar operación asignada | `GET /choferes/me/viajes` | RF-024, RN-029 |
+| CU-029 Consultar operación asignada | `GET /choferes/me/viajes/{id_viaje}` | RF-024, RN-029 |
+| CU-030 Ejecutar viaje ⚠️ *parcial* | `POST /viajes/{id_viaje}/inicio` | RF-025, ADJ-03 |
+| CU-030 Ejecutar viaje ⚠️ *parcial* | `POST /viajes/{id_viaje}/finalizacion` | RF-025 |
+| CU-030 Ejecutar viaje ⚠️ *parcial* | `POST /viajes/{id_viaje}/ubicacion` | RF-021, RF-025, RNF-007 a RNF-010 |
 | CU-036 Webhook Mercado Pago | `POST /webhooks/mercadopago` | RF-012, RN-015 — confirmación automática de operaciones aprobadas/acreditadas |
+
+Las referencias de la tabla describen el contrato; no prueban que las reglas estén implementadas.
+CU-030 relaciona en su especificación RN-022 (continuar el recorrido ante un pasajero ausente) y RN-023
+(condiciones de abordaje y ausencia de confirmación manual por el chofer). Son referencias generales del CU,
+no validaciones directas de los POST de inicio, finalización o envío GPS. RN-030 regula la **consulta** de
+ubicación en CU-009/CU-034 y no es una regla directa del POST GPS.
 
 ## CU pendientes de contrato (próxima iteración)
 
-Siguen el mismo patrón (recurso + roles + errores); se agregarán en una segunda versión del contrato:
+Estos **19 CU** todavía no tienen operaciones en el contrato:
 administración de pasajeros (CU-013), deuda admin (CU-015), créditos/devoluciones (CU-017), recorridos (CU-019),
-optimización de recorrido (CU-020), choferes (CU-021), vehículos (CU-022), corporativos (CU-023/033/034/035),
+optimización de recorrido (CU-020), choferes (CU-021), vehículos (CU-022), corporativos (CU-023, CU-033, CU-034, CU-035),
 facturación (CU-024), reportes (CU-025), historial (CU-026), reservas admin (CU-027), abonos (CU-028),
-operación del chofer (CU-029/030), tarifas y administradores del dueño (CU-031/032), notificaciones (CU-037).
+tarifas y administradores del dueño (CU-031, CU-032), notificaciones (CU-037).

@@ -31,6 +31,8 @@ tags:
     description: Autenticación y sesión (CU-012, RF-045)
   - name: pasajero
     description: Autoservicio del pasajero (CU-001, CU-006, CU-010)
+  - name: chofer
+    description: Consulta de la operación asignada al chofer (CU-029)
   - name: servicios
     description: Consulta de servicios, disponibilidad, recorridos y tarifas (CU-002)
   - name: reservas
@@ -167,6 +169,52 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/Reserva'
+
+  # ---------------------------------------------------------------------------
+  # CHOFER (operación asignada)
+  # ---------------------------------------------------------------------------
+  /choferes/me/viajes:
+    get:
+      tags: [chofer]
+      summary: Consultar viajes asignados al chofer
+      description: |
+        Solo rol chofer. El backend identifica al chofer mediante la sesión y devuelve
+        únicamente los viajes que tiene asignados para la fecha consultada.
+        Si no hay asignaciones, devuelve una lista vacía. (CU-029, RF-024, RN-029)
+
+        El campo horario se omite cuando no tiene valor; no se devuelve null.
+
+        COBERTURA PARCIAL de CU-029: esta operación lista los viajes asignados.
+        El detalle operativo con paradas, pasajeros, abordajes y cantidades queda
+        pendiente de otra operación del mismo caso de uso.
+      x-cu: CU-029
+      x-cobertura: parcial
+      parameters:
+        - name: fecha
+          in: query
+          required: false
+          schema: { type: string, format: date }
+          description: Fecha de los viajes. Si se omite, se usa la fecha actual determinada por el servidor.
+      responses:
+        '200':
+          description: Viajes asignados al chofer; lista vacía si no hay asignaciones para la fecha.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Viaje'
+              example: []
+        '400':
+          description: Parámetro fecha inválido (VALIDACION).
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          $ref: '#/components/responses/NoAutenticado'
+        '403':
+          $ref: '#/components/responses/SinPermiso'
 
   # ---------------------------------------------------------------------------
   # SERVICIOS / DISPONIBILIDAD / TARIFAS

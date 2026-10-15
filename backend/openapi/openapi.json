@@ -238,9 +238,8 @@
           "chofer"
         ],
         "summary": "Consultar viajes asignados al chofer",
-        "description": "Solo rol chofer. El backend identifica al chofer mediante la sesión y devuelve\núnicamente los viajes que tiene asignados para la fecha consultada.\nSi no hay asignaciones, devuelve una lista vacía. (CU-029, RF-024, RN-029)\n\nEl campo horario se omite cuando no tiene valor; no se devuelve null.\n\nCOBERTURA PARCIAL de CU-029: esta operación lista los viajes asignados.\nEl detalle operativo con paradas, pasajeros, abordajes y cantidades queda\npendiente de otra operación del mismo caso de uso.\n",
+        "description": "Solo rol chofer. El backend identifica al chofer mediante la sesión y devuelve\núnicamente los viajes que tiene asignados para la fecha consultada.\nSi no hay asignaciones, devuelve una lista vacía. (CU-029, RF-024, RN-029)\n\nEl campo horario se omite cuando no tiene valor; no se devuelve null.\n\nEl detalle operativo con paradas, pasajeros, abordajes y cantidades se\nconsulta en GET /choferes/me/viajes/{id_viaje}.\n",
         "x-cu": "CU-029",
-        "x-cobertura": "parcial",
         "parameters": [
           {
             "name": "fecha",
@@ -283,6 +282,52 @@
           },
           "403": {
             "$ref": "#/components/responses/SinPermiso"
+          }
+        }
+      }
+    },
+    "/choferes/me/viajes/{id_viaje}": {
+      "get": {
+        "tags": [
+          "chofer"
+        ],
+        "summary": "Consultar detalle operativo de un viaje asignado",
+        "description": "Solo rol chofer. Devuelve información del viaje asignado al chofer\nautenticado, sin modificar datos. (CU-029, RF-024, RN-029)\n\nIncluye el viaje, las paradas ordenadas y dos listas separadas:\npasajeros con reservas provisional o consolidada, e integrantes de\nla nómina del viaje. Excluye reservas cancelada.\n\nPara pasajeros con reserva informa identificación permitida, fotografía\ndisponible y existencia de un abordaje registrado. No expone teléfono,\nemail ni dirección personal. Para integrantes de nómina no atribuye\nfotografía, estado de reserva ni abordaje.\n\ntotal_reservas es la suma de consolidadas y provisionales.\ntotal_nomina es independiente. abordajes_registrados cuenta únicamente\npasajeros del listado de reservas con abordaje registrado.\nNo se calcula un total único de personas entre listas ni disponibilidad.\nLa capacidad_planificada es el valor del viaje, que puede ser null.\n\nUn viaje inexistente o ajeno devuelve 404; un rol incorrecto devuelve 403.\nEl campo horario se omite cuando no tiene valor. Los campos opcionales\nde Parada sin valor se omiten para respetar el schema existente.\n",
+        "x-cu": "CU-029",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/IdViaje"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Detalle operativo del viaje asignado; las listas pueden estar vacías.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OperacionAsignada"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Identificador de viaje inválido (VALIDACION).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/NoAutenticado"
+          },
+          "403": {
+            "$ref": "#/components/responses/SinPermiso"
+          },
+          "404": {
+            "$ref": "#/components/responses/NoEncontrado"
           }
         }
       }
@@ -1609,6 +1654,173 @@
           "fecha_hora": {
             "type": "string",
             "format": "date-time"
+          }
+        }
+      },
+      "OperacionAsignada": {
+        "type": "object",
+        "required": [
+          "viaje",
+          "capacidad_planificada",
+          "paradas",
+          "pasajeros_con_reserva",
+          "integrantes_nomina",
+          "cantidades"
+        ],
+        "properties": {
+          "viaje": {
+            "$ref": "#/components/schemas/Viaje"
+          },
+          "capacidad_planificada": {
+            "type": "integer",
+            "minimum": 0,
+            "nullable": true,
+            "description": "Valor de viaje.capacidad_planificada; no es cupo disponible."
+          },
+          "paradas": {
+            "type": "array",
+            "description": "Paradas de viaje.id_recorrido, ordenadas por orden ascendente.",
+            "items": {
+              "$ref": "#/components/schemas/Parada"
+            }
+          },
+          "pasajeros_con_reserva": {
+            "type": "array",
+            "description": "Pasajeros con reservas provisional o consolidada del viaje; excluye cancelada.",
+            "items": {
+              "$ref": "#/components/schemas/PasajeroOperacion"
+            }
+          },
+          "integrantes_nomina": {
+            "type": "array",
+            "description": "Integrantes registrados en la nómina del viaje, independientes del listado de reservas.",
+            "items": {
+              "$ref": "#/components/schemas/IntegranteNominaOperacion"
+            }
+          },
+          "cantidades": {
+            "type": "object",
+            "required": [
+              "consolidadas",
+              "provisionales",
+              "total_reservas",
+              "total_nomina",
+              "abordajes_registrados"
+            ],
+            "description": "Cantidades operativas calculadas; no se calcula disponibilidad ni un total único entre listas.",
+            "properties": {
+              "consolidadas": {
+                "type": "integer",
+                "minimum": 0,
+                "description": "Cantidad de reservas consolidadas en pasajeros_con_reserva."
+              },
+              "provisionales": {
+                "type": "integer",
+                "minimum": 0,
+                "description": "Cantidad de reservas provisionales en pasajeros_con_reserva."
+              },
+              "total_reservas": {
+                "type": "integer",
+                "minimum": 0,
+                "description": "Consolidadas más provisionales; tamaño de pasajeros_con_reserva."
+              },
+              "total_nomina": {
+                "type": "integer",
+                "minimum": 0,
+                "description": "Tamaño de integrantes_nomina, independiente de total_reservas."
+              },
+              "abordajes_registrados": {
+                "type": "integer",
+                "minimum": 0,
+                "description": "Pasajeros de pasajeros_con_reserva con abordaje_registrado true."
+              }
+            }
+          }
+        }
+      },
+      "PasajeroOperacion": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id_reserva",
+          "id_pasajero",
+          "id_viaje",
+          "orden_parada",
+          "estado",
+          "nombre",
+          "apellido",
+          "dni",
+          "fotografia",
+          "abordaje_registrado"
+        ],
+        "properties": {
+          "id_reserva": {
+            "type": "integer"
+          },
+          "id_pasajero": {
+            "type": "integer"
+          },
+          "id_viaje": {
+            "type": "integer"
+          },
+          "orden_parada": {
+            "type": "integer"
+          },
+          "estado": {
+            "type": "string",
+            "enum": [
+              "provisional",
+              "consolidada"
+            ]
+          },
+          "nombre": {
+            "type": "string",
+            "maxLength": 80
+          },
+          "apellido": {
+            "type": "string",
+            "maxLength": 80
+          },
+          "dni": {
+            "type": "string",
+            "maxLength": 20
+          },
+          "fotografia": {
+            "type": "string",
+            "maxLength": 500,
+            "nullable": true,
+            "description": "Referencia existente en pasajero.fotografia."
+          },
+          "abordaje_registrado": {
+            "type": "boolean",
+            "description": "Existe un abordaje para el pasajero y el viaje.\nfalse significa que no hay registro; no acredita una ausencia.\n"
+          }
+        }
+      },
+      "IntegranteNominaOperacion": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id_integrante_nomina",
+          "nombre",
+          "apellido",
+          "dni"
+        ],
+        "properties": {
+          "id_integrante_nomina": {
+            "type": "integer"
+          },
+          "nombre": {
+            "type": "string",
+            "maxLength": 80
+          },
+          "apellido": {
+            "type": "string",
+            "maxLength": 80
+          },
+          "dni": {
+            "type": "string",
+            "maxLength": 20
           }
         }
       },

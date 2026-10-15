@@ -63,7 +63,7 @@ def entorno():
             servicio,
         )
 
-        def viaje(fecha: str, horario: str, sentido: str = "IDA") -> int:
+        def viaje(fecha: str, horario: str | None, sentido: str = "IDA") -> int:
             return _uno(
                 base,
                 "INSERT INTO viaje (id_servicio, id_recorrido, fecha, horario, sentido) "
@@ -88,20 +88,23 @@ def entorno():
                 estado,
             )
 
-        ana, beto, sin_reservas, chofer = (
+        ana, beto, sin_reservas, chofer, gaby = (
             _persona(base, "1"),
             _persona(base, "2"),
             _persona(base, "3"),
             _persona(base, "4", pasajero=False),
+            _persona(base, "5"),
         )
         v_corto = viaje("2026-10-30", "07:30")
         v_futuro = viaje("2026-11-02", "09:00")
         v_tarde = viaje("2026-10-30", "18:00", "VUELTA")
+        v_sin_horario = viaje("2026-11-05", None)
         r = {
             "ana_consolidada": reserva(ana, v_corto, "consolidada"),
             "ana_provisional": reserva(ana, v_futuro, "provisional"),
             "ana_cancelada": reserva(ana, v_tarde, "cancelada"),
             "beto": reserva(beto, v_corto, "consolidada"),
+            "gaby_sin_horario": reserva(gaby, v_sin_horario, "provisional"),
         }
         with cliente_api(base) as http:
             yield {
@@ -109,8 +112,10 @@ def entorno():
                 "http": http,
                 "ana": ana,
                 "beto": beto,
+                "gaby": gaby,
                 "sin_reservas": sin_reservas,
                 "chofer": chofer,
+                "recorrido": recorrido,
                 "reservas": r,
             }
 
@@ -147,6 +152,39 @@ def test_la_lista_va_de_la_mas_reciente_a_la_mas_antigua(entorno):
     ]
 
 
+def test_cada_reserva_de_la_lista_trae_los_datos_de_su_viaje(entorno):
+    """Issue #31: la pantalla "Mis reservas" tiene que poder decir cuándo es cada una."""
+    r = entorno["reservas"]
+    respuesta = entorno["http"].get(LISTA, headers=_con(entorno["ana"], ["pasajero"]))
+    por_id = {x["id_reserva"]: x for x in respuesta.json()}
+    esperado = {
+        r["ana_consolidada"]: ("2026-10-30", "07:30", "IDA"),
+        r["ana_provisional"]: ("2026-11-02", "09:00", "IDA"),
+        r["ana_cancelada"]: ("2026-10-30", "18:00", "VUELTA"),
+    }
+    for id_reserva, (fecha, horario, sentido) in esperado.items():
+        reserva = por_id[id_reserva]
+        assert (reserva["fecha"], reserva["horario"], reserva["sentido"]) == (
+            fecha,
+            horario,
+            sentido,
+        )
+        assert reserva["id_recorrido"] == entorno["recorrido"]
+
+
+def test_un_viaje_sin_horario_informa_horario_null(entorno):
+    """`viaje.horario` admite NULL (viaje en planificación): el campo viaja igual, con null."""
+    id_reserva = entorno["reservas"]["gaby_sin_horario"]
+    http, gaby = entorno["http"], _con(entorno["gaby"], ["pasajero"])
+    de_la_lista = http.get(LISTA, headers=gaby).json()
+    detalle = http.get(f"/api/reservas/{id_reserva}", headers=gaby).json()
+    assert [x["id_reserva"] for x in de_la_lista] == [id_reserva]
+    for reserva in (de_la_lista[0], detalle):
+        assert "horario" in reserva and reserva["horario"] is None
+        assert reserva["fecha"] == "2026-11-05"
+        assert reserva["sentido"] == "IDA"
+
+
 def test_sin_reservas_la_lista_es_vacia(entorno):
     """A1 de CU-010: el sistema informa que no hay reservas; el cliente lo traduce de una lista vacía."""
     respuesta = entorno["http"].get(LISTA, headers=_con(entorno["sin_reservas"], ["pasajero"]))
@@ -168,6 +206,9 @@ def test_el_detalle_de_una_reserva_propia(entorno):
     assert cuerpo["id_pasajero"] == entorno["ana"]
     assert cuerpo["orden_parada"] == 1
     assert cuerpo["estado"] == "provisional"
+    # Datos del viaje (Issue #31): v_futuro, 2026-11-02 09:00, ida.
+    assert cuerpo["id_recorrido"] == entorno["recorrido"]
+    assert (cuerpo["fecha"], cuerpo["horario"], cuerpo["sentido"]) == ("2026-11-02", "09:00", "IDA")
 
 
 def test_una_reserva_ajena_responde_igual_que_una_que_no_existe(entorno):

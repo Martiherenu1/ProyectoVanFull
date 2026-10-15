@@ -15,12 +15,16 @@ from app.models.viajes import Viaje
 from app.schemas.reservas import Reserva
 
 
-def _a_schema(r: ReservaModelo) -> Reserva:
+def _a_schema(r: ReservaModelo, v: Viaje) -> Reserva:
     return Reserva(
         id_reserva=r.id_reserva,
         id_pasajero=r.id_pasajero,
         id_viaje=r.id_viaje,
+        id_recorrido=r.id_recorrido,
         orden_parada=r.orden_parada,
+        fecha=v.fecha,
+        horario=v.horario.strftime("%H:%M") if v.horario else None,
+        sentido=v.sentido,
         estado=r.estado,
     )
 
@@ -32,14 +36,14 @@ async def listar_reservas_del_pasajero(db: AsyncSession, usuario: UsuarioActual)
     El orden no está definido en la especificación; es el de la fecha del viaje, descendente.
     """
     consulta = (
-        select(ReservaModelo)
+        select(ReservaModelo, Viaje)
         .join(Viaje, Viaje.id_viaje == ReservaModelo.id_viaje)
         .where(ReservaModelo.id_pasajero == usuario.id_persona)
         .order_by(
             Viaje.fecha.desc(), Viaje.horario.desc().nulls_last(), ReservaModelo.id_reserva.desc()
         )
     )
-    return [_a_schema(r) for r in (await db.execute(consulta)).scalars()]
+    return [_a_schema(r, v) for r, v in (await db.execute(consulta)).all()]
 
 
 async def obtener_reserva_del_pasajero(
@@ -49,14 +53,16 @@ async def obtener_reserva_del_pasajero(
 
     Así quien consulta no puede averiguar qué reservas existen (CONVENCIONES.md §3).
     """
-    reserva = (
+    fila = (
         await db.execute(
-            select(ReservaModelo).where(
+            select(ReservaModelo, Viaje)
+            .join(Viaje, Viaje.id_viaje == ReservaModelo.id_viaje)
+            .where(
                 ReservaModelo.id_reserva == id_reserva,
                 ReservaModelo.id_pasajero == usuario.id_persona,
             )
         )
-    ).scalar_one_or_none()
-    if reserva is None:
+    ).one_or_none()
+    if fila is None:
         raise ApiError(404, "RESERVA_NO_ENCONTRADA", "La reserva no existe.")
-    return _a_schema(reserva)
+    return _a_schema(*fila)

@@ -668,6 +668,56 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
 
+  /viajes/{id_viaje}/finalizacion:
+    post:
+      tags: [chofer]
+      summary: Finalizar un viaje asignado
+      description: |
+        Solo rol chofer. El viaje debe pertenecer al chofer autenticado.
+        La finalización normal cambia el estado de en_curso a finalizado.
+        (CU-030, RF-025)
+
+        Si ya está finalizado, devuelve 200 con estado finalizado,
+        sin modificarlo nuevamente ni duplicar eventos.
+        Los permisos se comprueban también en los reintentos.
+
+        Un viaje programado o cancelado devuelve 409.
+        Un viaje inexistente o ajeno devuelve 404;
+        un rol incorrecto devuelve 403.
+        El campo horario se omite cuando no tiene valor.
+
+        COBERTURA PARCIAL de CU-030: los avisos de demora y problemas
+        quedan pendientes para otra tarea.
+      x-cu: CU-030
+      x-cobertura: parcial
+      parameters:
+        - $ref: '#/components/parameters/IdViaje'
+      responses:
+        '200':
+          description: Viaje finalizado o finalización ya realizada.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Viaje'
+        '400':
+          description: Identificador de viaje inválido (VALIDACION).
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          $ref: '#/components/responses/NoAutenticado'
+        '403':
+          $ref: '#/components/responses/SinPermiso'
+        '404':
+          $ref: '#/components/responses/NoEncontrado'
+        '409':
+          description: No se puede finalizar un viaje programado o cancelado.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
   # ---------------------------------------------------------------------------
   # CHATBOT (AG-01)
   # ---------------------------------------------------------------------------

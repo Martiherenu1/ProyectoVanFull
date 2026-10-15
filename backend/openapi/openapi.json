@@ -947,6 +947,63 @@
         }
       }
     },
+    "/viajes/{id_viaje}/finalizacion": {
+      "post": {
+        "tags": [
+          "chofer"
+        ],
+        "summary": "Finalizar un viaje asignado",
+        "description": "Solo rol chofer. El viaje debe pertenecer al chofer autenticado.\nLa finalización normal cambia el estado de en_curso a finalizado.\n(CU-030, RF-025)\n\nSi ya está finalizado, devuelve 200 con estado finalizado,\nsin modificarlo nuevamente ni duplicar eventos.\nLos permisos se comprueban también en los reintentos.\n\nUn viaje programado o cancelado devuelve 409.\nUn viaje inexistente o ajeno devuelve 404;\nun rol incorrecto devuelve 403.\nEl campo horario se omite cuando no tiene valor.\n\nCOBERTURA PARCIAL de CU-030: los avisos de demora y problemas\nquedan pendientes para otra tarea.\n",
+        "x-cu": "CU-030",
+        "x-cobertura": "parcial",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/IdViaje"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Viaje finalizado o finalización ya realizada.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Viaje"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Identificador de viaje inválido (VALIDACION).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/NoAutenticado"
+          },
+          "403": {
+            "$ref": "#/components/responses/SinPermiso"
+          },
+          "404": {
+            "$ref": "#/components/responses/NoEncontrado"
+          },
+          "409": {
+            "description": "No se puede finalizar un viaje programado o cancelado.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/chat": {
       "post": {
         "tags": [

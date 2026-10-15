@@ -1,0 +1,101 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Pendientes de validación del área pasajero</title>
+<style>
+  @page { size: A4 landscape; margin: 7mm 7mm; }
+  * { box-sizing: border-box; }
+  html { background: #fff; }
+  body {
+    margin: 0 auto; max-width: 283mm; padding: 7mm;
+    font: 7.4pt/1.24 "Segoe UI", Calibri, Arial, sans-serif; color: #1a1a1a; background: #fff;
+  }
+  @media print { body { padding: 0; max-width: none; } }
+  h1 { font-size: 11.5pt; margin: 0 0 1mm; }
+  .sub { margin: 0 0 1.8mm; color: #444; }
+  table { width: 100%; border-collapse: collapse; table-layout: fixed; }
+  th, td { border: 0.4pt solid #888; padding: 0.9mm 1.3mm; vertical-align: top; text-align: left; }
+  th { background: #e9edf2; font-size: 7.6pt; }
+  td.n { width: 17mm; font-weight: 700; }
+  td.q { width: 50mm; }
+  td.s { width: 111mm; }
+  tr { break-inside: avoid; }
+  .tag { display: block; font-weight: 400; font-size: 7pt; color: #7a1f1f; }
+  .tag.ok { color: #35572e; }
+  b { font-weight: 700; }
+  .foot { margin-top: 2.2mm; font-size: 7.4pt; color: #333; }
+  ul { margin: 0.6mm 0 0 3.6mm; padding: 0; }
+  li { margin: 0; }
+</style>
+</head>
+<body>
+
+<h1>VanFull · Pendientes de validación del área pasajero</h1>
+<p class="sub">Para Martín (analista, dueño de las reglas) · de Martiniano · 15/10/2026 · Fuentes: Especificaciones de CU <b>v1.3</b>, Reglas de Negocio <b>v1.1</b> (RN-001 a 031), <code>schema.sql</code>.
+Orden: lo que más bloquea primero. «Mi opción» es una propuesta mía, <b>no una decisión</b>: vale solo si la aprobás. Donde la v1.3 y las RN no dicen nada, lo digo.</p>
+
+<table>
+<thead>
+<tr><th>Issue</th><th>La pregunta</th><th>Qué dicen la v1.3 y las RN</th><th>Mi opción y por qué</th></tr>
+</thead>
+<tbody>
+
+<tr>
+<td class="n">#33<span class="tag">Bloquea CU-003</span></td>
+<td class="q"><b>¿Qué hecho consolida el cupo</b> (reserva provisional → consolidada) en cada modalidad: abono, ocasional, especial, corporativo?</td>
+<td class="s">CU-003 (paso 7 y A4): el estado sale de «las condiciones comerciales aplicables», <b>sin decir cuáles</b>. Pendientes: no hay regla universal «pago = reserva confirmada» (ADJ-02). RN-002: la provisional no garantiza cupo.
+Lo que sí hay: abono, pago del 1 al 10 (RN-003) y pago de julio para la reserva anual estudiantil (RN-008); especial, seña mínima del 50 % salvo acuerdos con empresas (RN-013); corporativo, acuerdos propios con cuenta corriente y facturación posterior (RN-014). <b>Ocasional: ninguna RN define qué paga ni cuándo.</b> Pago acreditado: RN-015.</td>
+<td>Consolida lo que la RN de cada modalidad ya nombra: abono → pago del período acreditado; especial → seña del 50 % acreditada; corporativo → acuerdo vigente. <b>Ocasional queda en vos</b> (propongo pago del viaje acreditado; sin RN que lo respalde).
+<i>Por qué:</i> usa solo hechos que las RN ya mencionan, sin la «regla universal» que ADJ-02 descartó. Ojo: <code>condiciones_comerciales</code> es texto libre, el sistema no lo puede leer.</td>
+</tr>
+
+<tr>
+<td class="n">#7<span class="tag">Bloquea CU-003</span></td>
+<td class="q"><b>¿De dónde sale el respaldo de la reserva</b> que crea el pasajero (período de abono XOR contratación)?</td>
+<td class="s">CU-003 paso 1: el pasajero «selecciona el viaje y las condiciones comerciales del servicio aplicables». <b>La v1.3 no nombra «contratación» ni «período de abono»</b>: el XOR (MR-R13) está solo en el DER. Hoy <code>ReservaCreate</code> trae únicamente viaje y parada. Para el pasajero ocasional sin contratación previa la v1.3 <b>no dice</b> cómo queda respaldado.</td>
+<td>Que <code>ReservaCreate</code> reciba una contratación o un período de abono <b>del propio pasajero y del servicio del viaje</b>; CU-003 la valida y rechaza si no hay, sin crear contratos al vuelo.
+<i>Por qué:</i> es lo que dice el paso 1 y no inventa un trámite comercial dentro de la reserva. Falta tu respuesta para el ocasional.</td>
+</tr>
+
+<tr>
+<td class="n">#9<span class="tag">Bloquea CU-003 (paso 5) y <code>GET /tarifas</code></span></td>
+<td class="q"><b>¿Cómo se elige la tarifa aplicable</b> y cómo se aplica el 15 % de efectivo?</td>
+<td class="s">RN-010: tarifas distintas para universitarios y laborales; el importe varía por días y por modalidad (ida, vuelta, ida y vuelta). RN-011: 15 % sobre la tarifa aplicable en todo pago en efectivo.
+Modelo: <code>tarifa</code> tiene nombre, importe, <code>tipo</code> (texto libre) y vigencia; el tipo de cliente está en <code>servicio</code>, modalidad y días en <code>abono_mensual</code>. <b>Nada une esos parámetros con la tarifa.</b></td>
+<td>Sumar a <code>tarifa</code> tipo de servicio, modalidad y días (cambio de DER, tuyo). El 15 % se calcula al pagar en efectivo, no se guarda como otra tarifa.
+<i>Por qué:</i> RN-010 dice que el importe depende justo de esas tres cosas; hoy habría que adivinarlas del texto de <code>tipo</code>.</td>
+</tr>
+
+<tr>
+<td class="n">#28<span class="tag">CU-003 valida con la misma función</span></td>
+<td class="q"><b>Tres puntos de disponibilidad:</b><br>(a) ¿qué capacidad rige sin vehículo asignado?<br>(b) ¿qué viajes se ofrecen?<br>(c) ¿una ausencia avisada libera el cupo?</td>
+<td class="s">(a) RN-001 habla de la capacidad «de la unidad»; la v1.2 permite un viaje con vehículo pendiente y no dice qué capacidad rige mientras tanto. (b) <b>Nada</b> sobre viajes en curso ni horarios ya pasados. (c) RN-025: el lugar «podrá quedar temporalmente disponible»; CU-008 y los pendientes consolidados: criterio exacto <b>PENDIENTE DE DEFINICIÓN</b>.</td>
+<td>(a) Usar <code>capacidad_planificada</code>; sin ella, sin cupo informado y CU-003 no reserva (no invento un número). (b) Solo viajes <code>programado</code>. (c) No libera hasta que lo definas.
+<i>Por qué:</i> es lo más restrictivo en los tres y se afloja sin migrar nada; liberar cupo mal sobrevende.</td>
+</tr>
+
+<tr>
+<td class="n">#8<span class="tag">Falla la tool de AG-01 con <code>destino</code></span></td>
+<td class="q"><b>¿Qué significa el filtro <code>destino</code></b> de <code>GET /servicios/disponibilidad</code>?</td>
+<td class="s">CU-002, pendientes: los filtros de interfaz «se definirán en diseño sin convertirlos en nuevas reglas de negocio»: es <b>decisión de diseño, no de negocio</b>. Ni <code>servicio</code>, ni <code>recorrido</code>, ni <code>parada</code> tienen un destino. Hoy responde 400 <code>FILTRO_NO_DISPONIBLE</code>.</td>
+<td>Quitar <code>destino</code> del contrato y de la tool; filtrar por servicio, sentido y parada, que sí existen.
+<i>Por qué:</i> evita un cambio de DER por un filtro que la v1.3 no exige. Alternativa sin cambio de modelo: la última parada del recorrido, pero el «CABA» del ejemplo del contrato es una zona, no una parada.</td>
+</tr>
+
+<tr>
+<td class="n">#25<span class="tag ok">No bloquea (hoy usa el contrato)</span></td>
+<td class="q"><b>¿Qué campos edita el pasajero por autoservicio</b> además del DNI? ¿Puede vaciar un dato? ¿El email lleva formato o verificación?</td>
+<td class="s">CU-001, pendientes: «la línea base no enumera exactamente cuáles campos, además del DNI, son modificables». RN-026 fija solo el DNI (lo cambia un administrador). RN-029: los datos de contacto son privados frente al chofer. El contrato propone email, teléfono y dirección; <b>esa lista no está aprobada</b>. Vaciar un dato o verificar el email: la v1.3 <b>no dice nada</b>.</td>
+<td>Confirmar email, teléfono y dirección; nombre, apellido y fotografía los cambia un administrador, como el DNI. Email con formato válido, sin verificación por ahora.
+<i>Por qué:</i> la lista corta es reversible: sumar un campo después es aditivo, sacar uno que ya se editó no.</td>
+</tr>
+
+</tbody>
+</table>
+
+<p class="foot"><b>Fuera de esta hoja:</b> CU-004 tiene su propio pendiente en la v1.3 (cancelación ocasional fuera de RN-017) y frena la cancelación · #34 (lista de espera sin operación en el contrato) y #31 (la reserva no trae fecha ni horario) son propuestas de contrato, no reglas · el login rechaza cuentas con estado distinto de «activo»: CU-012 no lo dice, es decisión mía a confirmar o sacar.</p>
+
+</body>
+</html>

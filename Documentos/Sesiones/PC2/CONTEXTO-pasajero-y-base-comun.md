@@ -58,9 +58,10 @@ CU-003 necesita el respaldo de la reserva (#7), la tarifa (#9) y la capacidad si
 | Disponibilidad: capacidad de un viaje sin vehículo (hoy `capacidad_planificada`, o sin cupo), viajes ofrecidos (hoy solo `programado`) y si una ausencia libera el cupo (hoy no) | #28 | PENDIENTE DE VALIDACIÓN con Martín. CU-003 valida con la misma función |
 | La tool `consultar_disponibilidad` de AG-01 usa `ida`/`vuelta` en minúsculas y el contrato `IDA`/`VUELTA` | — | Lo mapea el ejecutor del agente (paso 2, AG-01); este endpoint rechaza `ida` con 400 |
 | Parámetros de `/tarifas` no corresponden a la tabla `tarifa` | #9 | PENDIENTE DE VALIDACIÓN con Martín |
-| Campos editables del perfil: hoy son los del contrato (`email`, `telefono`, `direccion`), concentrados en `CAMPOS_EDITABLES` de `services/perfil.py`. Tampoco está definido si se puede vaciar un dato ni si el email lleva formato o verificación | #25 | PENDIENTE DE VALIDACIÓN con Martín (es pendiente del cierre de la etapa 03) |
-| Lista de espera de CU-003 sin operación en el contrato | sin Issue | Se completa en el circuito de reservas; pasa por el checklist de CONTRIBUTING §1.9 |
-| Condiciones de rechazo del login. Hoy: credencial inválida y cuenta con `estado` distinto de `activo` (lectura conservadora del DEFAULT); no se mira `pasajero.estado_habilitacion` ni hay política de intentos | #4 (cerrado) | PENDIENTE DE VALIDACIÓN con la especificación v1.3 del CU-012, que no estaba accesible |
+| Campos editables del perfil: hoy son los del contrato (`email`, `telefono`, `direccion`), concentrados en `CAMPOS_EDITABLES` de `services/perfil.py`. Tampoco está definido si se puede vaciar un dato ni si el email lleva formato o verificación | #25 | PENDIENTE DE VALIDACIÓN con Martín. La v1.3 de CU-001 lo dice textual: "la línea base no enumera cuáles campos, además del DNI, son modificables" |
+| Lista de espera de CU-003 sin operación en el contrato. La v1.3 define el registro a pedido (A1) y la incorporación FIFO (A1.1); propuesta: `POST /viajes/{id}/lista-espera` | #34 | Propuesta mía, por PR de contrato (checklist §1.9). La incorporación FIFO crea una reserva: depende de #7, #9 y #33 |
+| Qué determina que una reserva quede provisional o consolidada: la v1.3 de CU-003 dice "según las condiciones comerciales aplicables" sin decir cuáles | #33 | PENDIENTE DE VALIDACIÓN con Martín. Bloquea CU-003 |
+| Condiciones de rechazo del login. Hoy: credencial inválida y cuenta con `estado` distinto de `activo` (lectura conservadora del DEFAULT); no se mira `pasajero.estado_habilitacion` ni hay política de intentos | #4 (cerrado) | La v1.3 de CU-012 define solo autenticación válida o inválida (A1) y **no menciona el estado de la cuenta**: ese rechazo es decisión mía, a confirmar o sacar. Intentos máximos, bloqueo y expiración son pendiente técnico del propio CU |
 | El contrato usa `password` (inglés) en `LoginRequest` y el resto es castellano | — | Cambiarlo pide el acuerdo de los tres (§1.3). No se cambió |
 | Sin lista negra, un token vale hasta que vence (60 min) aunque se suspenda la cuenta | — | Política de sesiones: CONTEXTO §13 |
 | Confirmación de Martín por `hash_contrasena` en el DER | — | Pendiente de su respuesta |
@@ -80,6 +81,9 @@ CU-003 necesita el respaldo de la reserva (#7), la tarifa (#9) y la capacidad si
   corridas "canceladas" que no son fallas.
 - Las pruebas que usan la base crean bases temporales `vf_test_*` en el PostgreSQL de Docker y las borran
   (`tests/_bd.py`). En la CI fallan en vez de saltearse si no hay base.
+- **La v1.3 de los CU y las 31 RN están en el Drive** (`03_Especificaciones_Casos_de_Uso_VanFull_v1.3_...`
+  y `02_Reglas_de_Negocio_VanFull_v1.1_...`). Buscar por **título**: por carpeta (`parentId`) o por texto
+  (`fullText`) devuelve vacío o archivos de otras materias. Antes de implementar un CU, leerlo.
 - Git Bash en Windows: `git show origin/main:ruta` falla por la conversión de rutas; usar `MSYS_NO_PATHCONV=1`.
   Una ruta de clon muy larga falla: `git clone -c core.longpaths=true`.
 - Los números de Issue y de PR los asigna GitHub en orden de creación: verificar con `gh` antes de citarlos.

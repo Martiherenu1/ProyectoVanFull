@@ -107,7 +107,7 @@ def test_no_se_distingue_cuenta_inexistente_de_contrasena_incorrecta(sesion):
 
 
 def test_una_cuenta_que_no_esta_activa_no_entra(sesion):
-    """Lectura conservadora del DEFAULT del schema. PENDIENTE DE VALIDACIÓN con la v1.3 (#4)."""
+    """Decisión a confirmar (#4): la v1.3 de CU-012 no menciona el estado de la cuenta."""
     cliente, _ = sesion
     assert _login(cliente, "inactiva@prueba.test").status_code == 401
 

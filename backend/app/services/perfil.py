@@ -64,7 +64,9 @@ async def modificar_perfil(
         raise ApiError(
             403,
             "DATO_NO_MODIFICABLE",
-            "Hay datos que el pasajero no puede modificar por su cuenta (RN-026).",
+            # CU-001 A1: el cambio "debe ser realizado por un administrador autorizado".
+            "Ese dato no se puede modificar por autoservicio: el cambio debe ser realizado por un "
+            "administrador autorizado (RN-026).",
             {"campos": no_habilitados, "campos_editables": list(CAMPOS_EDITABLES)},
         )
 

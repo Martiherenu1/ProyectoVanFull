@@ -568,6 +568,77 @@ paths:
         '404':
           $ref: '#/components/responses/NoEncontrado'
 
+    post:
+      tags: [chofer]
+      summary: Enviar ubicación del viaje
+      description: |
+        Solo rol chofer. El viaje debe pertenecer al chofer autenticado
+        y estar en_curso. (CU-030, RF-021, RF-025)
+
+        Si el dispositivo omite la fecha/hora de posición o envía una futura respecto
+        del servidor, se utiliza la hora actual del servidor como timestamp efectivo.
+        Si envía una fecha/hora anterior a la del servidor, se conserva esa marca temporal.
+
+        La posición se actualiza únicamente si el timestamp efectivo es estrictamente
+        posterior al almacenado. Si es igual o anterior, se ignora la nueva posición:
+        no se modifican las coordenadas ni el timestamp guardados.
+        Se conserva únicamente la última posición por viaje, sin historial.
+
+        La respuesta informa si la posición se actualizó y la fecha/hora que
+        efectivamente permanece almacenada, incluso si se ignoró la posición enviada.
+
+        La precisión de 50 metros es un objetivo, no una causa automática de rechazo.
+        Aplican RNF-007 a RNF-010.
+
+        COBERTURA PARCIAL de CU-030: los avisos de demora y problemas quedan
+        pendientes para otra tarea.
+      x-cu: CU-030
+      x-cobertura: parcial
+      parameters:
+        - $ref: '#/components/parameters/IdViaje'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PosicionGpsCreate'
+      responses:
+        '200':
+          description: Resultado del procesamiento y fecha/hora de la posición conservada.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResultadoPosicionGps'
+              examples:
+                actualizada:
+                  summary: Posición actualizada
+                  value:
+                    actualizada: true
+                    fecha_hora_posicion: '2026-10-15T16:30:00Z'
+                ignorada:
+                  summary: Posición ignorada; se conserva la almacenada
+                  value:
+                    actualizada: false
+                    fecha_hora_posicion: '2026-10-15T16:30:00Z'
+        '400':
+          description: Identificador, coordenadas o formato de fecha inválidos (VALIDACION).
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          $ref: '#/components/responses/NoAutenticado'
+        '403':
+          $ref: '#/components/responses/SinPermiso'
+        '404':
+          $ref: '#/components/responses/NoEncontrado'
+        '409':
+          description: El viaje no está en_curso.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
   # ---------------------------------------------------------------------------
   # PAGOS (administración)
   # ---------------------------------------------------------------------------
@@ -1037,6 +1108,44 @@ components:
         fecha_hora_posicion: { type: string, format: date-time }
         desactualizada: { type: boolean, description: true si supera 30 s de antigüedad (RNF-008). }
         eta_minutos: { type: integer, nullable: true, description: "Estimación de llegada, si disponible." }
+
+    PosicionGpsCreate:
+      type: object
+      required: [latitud, longitud]
+      properties:
+        latitud:
+          type: number
+          format: double
+          minimum: -90
+          maximum: 90
+        longitud:
+          type: number
+          format: double
+          minimum: -180
+          maximum: 180
+        fecha_hora_posicion:
+          type: string
+          format: date-time
+          description: |
+            Marca temporal opcional del dispositivo, con zona horaria.
+            Si se omite o es futura respecto del servidor, se usa la hora actual
+            del servidor como timestamp efectivo. Si es anterior, se conserva.
+            Solo se actualiza la posición si el timestamp efectivo es estrictamente
+            posterior al almacenado; si es igual o anterior, se ignora la posición
+            sin modificar las coordenadas ni el timestamp guardados.
+
+    ResultadoPosicionGps:
+      type: object
+      required: [actualizada, fecha_hora_posicion]
+      description: Resultado calculado del procesamiento; no incorpora columnas a posicion_gps.
+      properties:
+        actualizada:
+          type: boolean
+          description: true si la posición enviada se guardó; false si se ignoró y se conservó la almacenada.
+        fecha_hora_posicion:
+          type: string
+          format: date-time
+          description: Fecha/hora con zona horaria de la posición que efectivamente permanece almacenada.
 
     PagoCreate:
       type: object

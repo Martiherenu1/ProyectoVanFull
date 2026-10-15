@@ -807,6 +807,87 @@
             "$ref": "#/components/responses/NoEncontrado"
           }
         }
+      },
+      "post": {
+        "tags": [
+          "chofer"
+        ],
+        "summary": "Enviar ubicación del viaje",
+        "description": "Solo rol chofer. El viaje debe pertenecer al chofer autenticado\ny estar en_curso. (CU-030, RF-021, RF-025)\n\nSi el dispositivo omite la fecha/hora de posición o envía una futura respecto\ndel servidor, se utiliza la hora actual del servidor como timestamp efectivo.\nSi envía una fecha/hora anterior a la del servidor, se conserva esa marca temporal.\n\nLa posición se actualiza únicamente si el timestamp efectivo es estrictamente\nposterior al almacenado. Si es igual o anterior, se ignora la nueva posición:\nno se modifican las coordenadas ni el timestamp guardados.\nSe conserva únicamente la última posición por viaje, sin historial.\n\nLa respuesta informa si la posición se actualizó y la fecha/hora que\nefectivamente permanece almacenada, incluso si se ignoró la posición enviada.\n\nLa precisión de 50 metros es un objetivo, no una causa automática de rechazo.\nAplican RNF-007 a RNF-010.\n\nCOBERTURA PARCIAL de CU-030: los avisos de demora y problemas quedan\npendientes para otra tarea.\n",
+        "x-cu": "CU-030",
+        "x-cobertura": "parcial",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/IdViaje"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PosicionGpsCreate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Resultado del procesamiento y fecha/hora de la posición conservada.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResultadoPosicionGps"
+                },
+                "examples": {
+                  "actualizada": {
+                    "summary": "Posición actualizada",
+                    "value": {
+                      "actualizada": true,
+                      "fecha_hora_posicion": "2026-10-15T16:30:00Z"
+                    }
+                  },
+                  "ignorada": {
+                    "summary": "Posición ignorada; se conserva la almacenada",
+                    "value": {
+                      "actualizada": false,
+                      "fecha_hora_posicion": "2026-10-15T16:30:00Z"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Identificador, coordenadas o formato de fecha inválidos (VALIDACION).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/NoAutenticado"
+          },
+          "403": {
+            "$ref": "#/components/responses/SinPermiso"
+          },
+          "404": {
+            "$ref": "#/components/responses/NoEncontrado"
+          },
+          "409": {
+            "description": "El viaje no está en_curso.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
       }
     },
     "/pagos": {
@@ -1584,6 +1665,51 @@
             "type": "integer",
             "nullable": true,
             "description": "Estimación de llegada, si disponible."
+          }
+        }
+      },
+      "PosicionGpsCreate": {
+        "type": "object",
+        "required": [
+          "latitud",
+          "longitud"
+        ],
+        "properties": {
+          "latitud": {
+            "type": "number",
+            "format": "double",
+            "minimum": -90,
+            "maximum": 90
+          },
+          "longitud": {
+            "type": "number",
+            "format": "double",
+            "minimum": -180,
+            "maximum": 180
+          },
+          "fecha_hora_posicion": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Marca temporal opcional del dispositivo, con zona horaria.\nSi se omite o es futura respecto del servidor, se usa la hora actual\ndel servidor como timestamp efectivo. Si es anterior, se conserva.\nSolo se actualiza la posición si el timestamp efectivo es estrictamente\nposterior al almacenado; si es igual o anterior, se ignora la posición\nsin modificar las coordenadas ni el timestamp guardados.\n"
+          }
+        }
+      },
+      "ResultadoPosicionGps": {
+        "type": "object",
+        "required": [
+          "actualizada",
+          "fecha_hora_posicion"
+        ],
+        "description": "Resultado calculado del procesamiento; no incorpora columnas a posicion_gps.",
+        "properties": {
+          "actualizada": {
+            "type": "boolean",
+            "description": "true si la posición enviada se guardó; false si se ignoró y se conservó la almacenada."
+          },
+          "fecha_hora_posicion": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Fecha/hora con zona horaria de la posición que efectivamente permanece almacenada."
           }
         }
       },

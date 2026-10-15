@@ -32,7 +32,7 @@ tags:
   - name: pasajero
     description: Autoservicio del pasajero (CU-001, CU-006, CU-010)
   - name: chofer
-    description: Consulta de la operación asignada al chofer (CU-029)
+    description: Operación asignada y ejecución del viaje por el chofer (CU-029, CU-030)
   - name: servicios
     description: Consulta de servicios, disponibilidad, recorridos y tarifas (CU-002)
   - name: reservas
@@ -614,6 +614,59 @@ paths:
                 $ref: '#/components/schemas/Viaje'
         '403':
           $ref: '#/components/responses/SinPermiso'
+
+  # ---------------------------------------------------------------------------
+  # VIAJES (ejecución — chofer)
+  # ---------------------------------------------------------------------------
+  /viajes/{id_viaje}/inicio:
+    post:
+      tags: [chofer]
+      summary: Iniciar un viaje asignado
+      description: |
+        Solo rol chofer. Para un inicio normal, el viaje debe pertenecer al chofer
+        autenticado, tener chofer y vehículo asignados y estar programado.
+        Cambia el estado de programado a en_curso. (CU-030, RF-025, ADJ-03)
+
+        Un reintento con el viaje en_curso devuelve 200 con su estado actual,
+        sin modificarlo nuevamente ni duplicar eventos. Si el viaje ya está
+        finalizado, devuelve 200 con estado finalizado por idempotencia:
+        no lo reinicia ni lo cambia a en_curso, y no genera otro evento de inicio.
+
+        Un viaje cancelado no puede iniciarse y devuelve 409. Un viaje inexistente
+        o ajeno devuelve 404; un rol incorrecto devuelve 403.
+        El campo horario se omite cuando no tiene valor.
+
+        COBERTURA PARCIAL de CU-030: los avisos de demora y problemas quedan
+        pendientes para otra tarea.
+      x-cu: CU-030
+      x-cobertura: parcial
+      parameters:
+        - $ref: '#/components/parameters/IdViaje'
+      responses:
+        '200':
+          description: Viaje iniciado o estado actual sin cambios ante un reintento.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Viaje'
+        '400':
+          description: Identificador de viaje inválido (VALIDACION).
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          $ref: '#/components/responses/NoAutenticado'
+        '403':
+          $ref: '#/components/responses/SinPermiso'
+        '404':
+          $ref: '#/components/responses/NoEncontrado'
+        '409':
+          description: El viaje está cancelado o falta el vehículo requerido para iniciar (ADJ-03).
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
 
   # ---------------------------------------------------------------------------
   # CHATBOT (AG-01)

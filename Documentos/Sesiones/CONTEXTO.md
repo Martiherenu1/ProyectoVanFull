@@ -7,7 +7,7 @@
 > datos de esta máquina. Los prompts de arranque por tipo de tarea, y el criterio de cuándo conviene
 > abrir un chat nuevo, están en `Documentos/Sesiones/PROMPT-INICIAL.md`.
 >
-> **Última actualización: 2026-10-14** (§7 y §11) · Reemplaza y consolida todas las versiones anteriores.
+> **Última actualización: 2026-10-15** (§11) · Reemplaza y consolida todas las versiones anteriores.
 
 ---
 
@@ -210,6 +210,8 @@ async + `get_db`), `routers/health.py` (**el único endpoint real**), `agent/too
   `cupo_disponible`: la definición única, que CU-003 va a reutilizar.
 - `routers/reservas.py`, `services/reservas.py` y `schemas/reservas.py`: `GET /api/pasajeros/me/reservas` y
   `GET /api/reservas/{id}` (CU-010, Issue #30). Solo lectura; crear, cancelar y cambiar parada se suman ahí.
+  Desde el PR #38 (Issue #31) la `Reserva` informa también `fecha`, `horario`, `sentido` e `id_recorrido`
+  del viaje: cambio aditivo del contrato.
 
 **No existe todavía:** todo endpoint que no sea `/health`, `/auth/*`, `/pasajeros/me` o los de CU-002 y
 CU-010. El estado de cada área y el del resto

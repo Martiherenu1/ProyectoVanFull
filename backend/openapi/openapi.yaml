@@ -31,6 +31,8 @@ tags:
     description: Autenticación y sesión (CU-012, RF-045)
   - name: pasajero
     description: Autoservicio del pasajero (CU-001, CU-006, CU-010)
+  - name: chofer
+    description: Operación asignada y ejecución del viaje por el chofer (CU-029, CU-030)
   - name: servicios
     description: Consulta de servicios, disponibilidad, recorridos y tarifas (CU-002)
   - name: reservas
@@ -167,6 +169,99 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/Reserva'
+
+  # ---------------------------------------------------------------------------
+  # CHOFER (operación asignada)
+  # ---------------------------------------------------------------------------
+  /choferes/me/viajes:
+    get:
+      tags: [chofer]
+      summary: Consultar viajes asignados al chofer
+      description: |
+        Solo rol chofer. El backend identifica al chofer mediante la sesión y devuelve
+        únicamente los viajes que tiene asignados para la fecha consultada.
+        Si no hay asignaciones, devuelve una lista vacía. (CU-029, RF-024, RN-029)
+
+        El campo horario se omite cuando no tiene valor; no se devuelve null.
+
+        El detalle operativo con paradas, pasajeros, abordajes y cantidades se
+        consulta en GET /choferes/me/viajes/{id_viaje}.
+      x-cu: CU-029
+      parameters:
+        - name: fecha
+          in: query
+          required: false
+          schema: { type: string, format: date }
+          description: Fecha de los viajes. Si se omite, se usa la fecha actual determinada por el servidor.
+      responses:
+        '200':
+          description: Viajes asignados al chofer; lista vacía si no hay asignaciones para la fecha.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Viaje'
+              example: []
+        '400':
+          description: Parámetro fecha inválido (VALIDACION).
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          $ref: '#/components/responses/NoAutenticado'
+        '403':
+          $ref: '#/components/responses/SinPermiso'
+
+  /choferes/me/viajes/{id_viaje}:
+    get:
+      tags: [chofer]
+      summary: Consultar detalle operativo de un viaje asignado
+      description: |
+        Solo rol chofer. Devuelve información del viaje asignado al chofer
+        autenticado, sin modificar datos. (CU-029, RF-024, RN-029)
+
+        Incluye el viaje, las paradas ordenadas y dos listas separadas:
+        pasajeros con reservas provisional o consolidada, e integrantes de
+        la nómina del viaje. Excluye reservas cancelada.
+
+        Para pasajeros con reserva informa identificación permitida, fotografía
+        disponible y existencia de un abordaje registrado. No expone teléfono,
+        email ni dirección personal. Para integrantes de nómina no atribuye
+        fotografía, estado de reserva ni abordaje.
+
+        total_reservas es la suma de consolidadas y provisionales.
+        total_nomina es independiente. abordajes_registrados cuenta únicamente
+        pasajeros del listado de reservas con abordaje registrado.
+        No se calcula un total único de personas entre listas ni disponibilidad.
+        La capacidad_planificada es el valor del viaje, que puede ser null.
+
+        Un viaje inexistente o ajeno devuelve 404; un rol incorrecto devuelve 403.
+        El campo horario se omite cuando no tiene valor. Los campos opcionales
+        de Parada sin valor se omiten para respetar el schema existente.
+      x-cu: CU-029
+      parameters:
+        - $ref: '#/components/parameters/IdViaje'
+      responses:
+        '200':
+          description: Detalle operativo del viaje asignado; las listas pueden estar vacías.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OperacionAsignada'
+        '400':
+          description: Identificador de viaje inválido (VALIDACION).
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          $ref: '#/components/responses/NoAutenticado'
+        '403':
+          $ref: '#/components/responses/SinPermiso'
+        '404':
+          $ref: '#/components/responses/NoEncontrado'
 
   # ---------------------------------------------------------------------------
   # SERVICIOS / DISPONIBILIDAD / TARIFAS
@@ -473,6 +568,77 @@ paths:
         '404':
           $ref: '#/components/responses/NoEncontrado'
 
+    post:
+      tags: [chofer]
+      summary: Enviar ubicación del viaje
+      description: |
+        Solo rol chofer. El viaje debe pertenecer al chofer autenticado
+        y estar en_curso. (CU-030, RF-021, RF-025)
+
+        Si el dispositivo omite la fecha/hora de posición o envía una futura respecto
+        del servidor, se utiliza la hora actual del servidor como timestamp efectivo.
+        Si envía una fecha/hora anterior a la del servidor, se conserva esa marca temporal.
+
+        La posición se actualiza únicamente si el timestamp efectivo es estrictamente
+        posterior al almacenado. Si es igual o anterior, se ignora la nueva posición:
+        no se modifican las coordenadas ni el timestamp guardados.
+        Se conserva únicamente la última posición por viaje, sin historial.
+
+        La respuesta informa si la posición se actualizó y la fecha/hora que
+        efectivamente permanece almacenada, incluso si se ignoró la posición enviada.
+
+        La precisión de 50 metros es un objetivo, no una causa automática de rechazo.
+        Aplican RNF-007 a RNF-010.
+
+        COBERTURA PARCIAL de CU-030: los avisos de demora y problemas quedan
+        pendientes para otra tarea.
+      x-cu: CU-030
+      x-cobertura: parcial
+      parameters:
+        - $ref: '#/components/parameters/IdViaje'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PosicionGpsCreate'
+      responses:
+        '200':
+          description: Resultado del procesamiento y fecha/hora de la posición conservada.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResultadoPosicionGps'
+              examples:
+                actualizada:
+                  summary: Posición actualizada
+                  value:
+                    actualizada: true
+                    fecha_hora_posicion: '2026-10-15T16:30:00Z'
+                ignorada:
+                  summary: Posición ignorada; se conserva la almacenada
+                  value:
+                    actualizada: false
+                    fecha_hora_posicion: '2026-10-15T16:30:00Z'
+        '400':
+          description: Identificador, coordenadas o formato de fecha inválidos (VALIDACION).
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          $ref: '#/components/responses/NoAutenticado'
+        '403':
+          $ref: '#/components/responses/SinPermiso'
+        '404':
+          $ref: '#/components/responses/NoEncontrado'
+        '409':
+          description: El viaje no está en_curso.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
   # ---------------------------------------------------------------------------
   # PAGOS (administración)
   # ---------------------------------------------------------------------------
@@ -566,6 +732,109 @@ paths:
                 $ref: '#/components/schemas/Viaje'
         '403':
           $ref: '#/components/responses/SinPermiso'
+
+  # ---------------------------------------------------------------------------
+  # VIAJES (ejecución — chofer)
+  # ---------------------------------------------------------------------------
+  /viajes/{id_viaje}/inicio:
+    post:
+      tags: [chofer]
+      summary: Iniciar un viaje asignado
+      description: |
+        Solo rol chofer. Para un inicio normal, el viaje debe pertenecer al chofer
+        autenticado, tener chofer y vehículo asignados y estar programado.
+        Cambia el estado de programado a en_curso. (CU-030, RF-025, ADJ-03)
+
+        Un reintento con el viaje en_curso devuelve 200 con su estado actual,
+        sin modificarlo nuevamente ni duplicar eventos. Si el viaje ya está
+        finalizado, devuelve 200 con estado finalizado por idempotencia:
+        no lo reinicia ni lo cambia a en_curso, y no genera otro evento de inicio.
+
+        Un viaje cancelado no puede iniciarse y devuelve 409. Un viaje inexistente
+        o ajeno devuelve 404; un rol incorrecto devuelve 403.
+        El campo horario se omite cuando no tiene valor.
+
+        COBERTURA PARCIAL de CU-030: los avisos de demora y problemas quedan
+        pendientes para otra tarea.
+      x-cu: CU-030
+      x-cobertura: parcial
+      parameters:
+        - $ref: '#/components/parameters/IdViaje'
+      responses:
+        '200':
+          description: Viaje iniciado o estado actual sin cambios ante un reintento.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Viaje'
+        '400':
+          description: Identificador de viaje inválido (VALIDACION).
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          $ref: '#/components/responses/NoAutenticado'
+        '403':
+          $ref: '#/components/responses/SinPermiso'
+        '404':
+          $ref: '#/components/responses/NoEncontrado'
+        '409':
+          description: El viaje está cancelado o falta el vehículo requerido para iniciar (ADJ-03).
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /viajes/{id_viaje}/finalizacion:
+    post:
+      tags: [chofer]
+      summary: Finalizar un viaje asignado
+      description: |
+        Solo rol chofer. El viaje debe pertenecer al chofer autenticado.
+        La finalización normal cambia el estado de en_curso a finalizado.
+        (CU-030, RF-025)
+
+        Si ya está finalizado, devuelve 200 con estado finalizado,
+        sin modificarlo nuevamente ni duplicar eventos.
+        Los permisos se comprueban también en los reintentos.
+
+        Un viaje programado o cancelado devuelve 409.
+        Un viaje inexistente o ajeno devuelve 404;
+        un rol incorrecto devuelve 403.
+        El campo horario se omite cuando no tiene valor.
+
+        COBERTURA PARCIAL de CU-030: los avisos de demora y problemas
+        quedan pendientes para otra tarea.
+      x-cu: CU-030
+      x-cobertura: parcial
+      parameters:
+        - $ref: '#/components/parameters/IdViaje'
+      responses:
+        '200':
+          description: Viaje finalizado o finalización ya realizada.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Viaje'
+        '400':
+          description: Identificador de viaje inválido (VALIDACION).
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          $ref: '#/components/responses/NoAutenticado'
+        '403':
+          $ref: '#/components/responses/SinPermiso'
+        '404':
+          $ref: '#/components/responses/NoEncontrado'
+        '409':
+          description: No se puede finalizar un viaje programado o cancelado.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
 
   # ---------------------------------------------------------------------------
   # CHATBOT (AG-01)
@@ -848,6 +1117,44 @@ components:
         desactualizada: { type: boolean, description: true si supera 30 s de antigüedad (RNF-008). }
         eta_minutos: { type: integer, nullable: true, description: "Estimación de llegada, si disponible." }
 
+    PosicionGpsCreate:
+      type: object
+      required: [latitud, longitud]
+      properties:
+        latitud:
+          type: number
+          format: double
+          minimum: -90
+          maximum: 90
+        longitud:
+          type: number
+          format: double
+          minimum: -180
+          maximum: 180
+        fecha_hora_posicion:
+          type: string
+          format: date-time
+          description: |
+            Marca temporal opcional del dispositivo, con zona horaria.
+            Si se omite o es futura respecto del servidor, se usa la hora actual
+            del servidor como timestamp efectivo. Si es anterior, se conserva.
+            Solo se actualiza la posición si el timestamp efectivo es estrictamente
+            posterior al almacenado; si es igual o anterior, se ignora la posición
+            sin modificar las coordenadas ni el timestamp guardados.
+
+    ResultadoPosicionGps:
+      type: object
+      required: [actualizada, fecha_hora_posicion]
+      description: Resultado calculado del procesamiento; no incorpora columnas a posicion_gps.
+      properties:
+        actualizada:
+          type: boolean
+          description: true si la posición enviada se guardó; false si se ignoró y se conservó la almacenada.
+        fecha_hora_posicion:
+          type: string
+          format: date-time
+          description: Fecha/hora con zona horaria de la posición que efectivamente permanece almacenada.
+
     PagoCreate:
       type: object
       required: [id_cliente, importe, medio_pago]
@@ -872,6 +1179,106 @@ components:
         medio_pago: { type: string }
         estado: { type: string, enum: [PENDIENTE, CONFIRMADO, RECHAZADO] }
         fecha_hora: { type: string, format: date-time }
+
+    OperacionAsignada:
+      type: object
+      required: [viaje, capacidad_planificada, paradas, pasajeros_con_reserva, integrantes_nomina, cantidades]
+      properties:
+        viaje:
+          $ref: '#/components/schemas/Viaje'
+        capacidad_planificada:
+          type: integer
+          minimum: 0
+          nullable: true
+          description: Valor de viaje.capacidad_planificada; no es cupo disponible.
+        paradas:
+          type: array
+          description: Paradas de viaje.id_recorrido, ordenadas por orden ascendente.
+          items:
+            $ref: '#/components/schemas/Parada'
+        pasajeros_con_reserva:
+          type: array
+          description: Pasajeros con reservas provisional o consolidada del viaje; excluye cancelada.
+          items:
+            $ref: '#/components/schemas/PasajeroOperacion'
+        integrantes_nomina:
+          type: array
+          description: Integrantes registrados en la nómina del viaje, independientes del listado de reservas.
+          items:
+            $ref: '#/components/schemas/IntegranteNominaOperacion'
+        cantidades:
+          type: object
+          required: [consolidadas, provisionales, total_reservas, total_nomina, abordajes_registrados]
+          description: Cantidades operativas calculadas; no se calcula disponibilidad ni un total único entre listas.
+          properties:
+            consolidadas:
+              type: integer
+              minimum: 0
+              description: Cantidad de reservas consolidadas en pasajeros_con_reserva.
+            provisionales:
+              type: integer
+              minimum: 0
+              description: Cantidad de reservas provisionales en pasajeros_con_reserva.
+            total_reservas:
+              type: integer
+              minimum: 0
+              description: Consolidadas más provisionales; tamaño de pasajeros_con_reserva.
+            total_nomina:
+              type: integer
+              minimum: 0
+              description: Tamaño de integrantes_nomina, independiente de total_reservas.
+            abordajes_registrados:
+              type: integer
+              minimum: 0
+              description: Pasajeros de pasajeros_con_reserva con abordaje_registrado true.
+
+    PasajeroOperacion:
+      type: object
+      additionalProperties: false
+      required: [id_reserva, id_pasajero, id_viaje, orden_parada, estado, nombre, apellido, dni, fotografia, abordaje_registrado]
+      properties:
+        id_reserva: { type: integer }
+        id_pasajero: { type: integer }
+        id_viaje: { type: integer }
+        orden_parada: { type: integer }
+        estado:
+          type: string
+          enum: [provisional, consolidada]
+        nombre:
+          type: string
+          maxLength: 80
+        apellido:
+          type: string
+          maxLength: 80
+        dni:
+          type: string
+          maxLength: 20
+        fotografia:
+          type: string
+          maxLength: 500
+          nullable: true
+          description: Referencia existente en pasajero.fotografia.
+        abordaje_registrado:
+          type: boolean
+          description: |
+            Existe un abordaje para el pasajero y el viaje.
+            false significa que no hay registro; no acredita una ausencia.
+
+    IntegranteNominaOperacion:
+      type: object
+      additionalProperties: false
+      required: [id_integrante_nomina, nombre, apellido, dni]
+      properties:
+        id_integrante_nomina: { type: integer }
+        nombre:
+          type: string
+          maxLength: 80
+        apellido:
+          type: string
+          maxLength: 80
+        dni:
+          type: string
+          maxLength: 20
 
     ViajeCreate:
       type: object

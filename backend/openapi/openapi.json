@@ -1519,6 +1519,7 @@
       },
       "Reserva": {
         "type": "object",
+        "description": "Una reserva con los datos del viaje que el pasajero necesita para reconocerla: `fecha`, `horario` y `sentido` son del viaje, no de la reserva. Los cuatro campos `id_recorrido`, `fecha`, `horario` y `sentido` se envían siempre.",
         "properties": {
           "id_reserva": {
             "type": "integer"
@@ -1529,8 +1530,31 @@
           "id_viaje": {
             "type": "integer"
           },
+          "id_recorrido": {
+            "type": "integer",
+            "description": "Recorrido del viaje; con `orden_parada` identifica la parada (GET /recorridos/{id}/paradas)."
+          },
           "orden_parada": {
             "type": "integer"
+          },
+          "fecha": {
+            "type": "string",
+            "format": "date",
+            "description": "Fecha del viaje."
+          },
+          "horario": {
+            "type": "string",
+            "nullable": true,
+            "example": "07:30",
+            "description": "Horario del viaje (HH:MM). null si el viaje todavía no tiene horario."
+          },
+          "sentido": {
+            "type": "string",
+            "enum": [
+              "IDA",
+              "VUELTA"
+            ],
+            "description": "Sentido del viaje."
           },
           "estado": {
             "type": "string",

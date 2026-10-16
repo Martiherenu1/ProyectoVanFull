@@ -3,16 +3,18 @@
 > Lo mantiene el agente de Martiniano, en el mismo PR que cambia algo. Convención en
 > `PROMPT-CONTEXTO-VIVO.md`. Si algo de acá contradice al código, manda el código: corregir este archivo.
 >
-> **Última actualización: 2026-10-14**
+> **Última actualización: 2026-10-15**
 
 ## Estado
 
 **La base común del backend está completa y en `main`.** Del circuito del pasajero están hechos el perfil
 (CU-001, PR #26), la consulta de servicios, disponibilidad y paradas (CU-002, PR #29) y la consulta de
-reservas propias (CU-010, PR #32). La reserva (CU-003) y la cancelación (CU-004) siguen frenadas por
-pendientes de validación con Martín (#7, #8, #9 y #28).
+reservas propias (CU-010, PR #32), que con el PR de #31 ya informa fecha, horario y sentido del viaje. La
+reserva (CU-003) y la cancelación (CU-004) siguen frenadas por pendientes de validación con Martín (#7, #9,
+#28 y #33).
 
-La CI corre en cada PR y pasó en las ramas de la base y en `main`. La suite son 130 pruebas, algo más de un minuto.
+La CI corre en cada PR y pasó en las ramas de la base y en `main`. La suite son 132 pruebas (130 más las 2 que
+suma el PR de #31), algo más de un minuto.
 
 ## Hecho
 
@@ -29,6 +31,8 @@ La CI corre en cada PR y pasó en las ramas de la base y en `main`. La suite son
 | Perfil del pasajero (CU-001): `GET` y `PATCH /api/pasajeros/me`, 23 pruebas | #24 | #26 |
 | Servicios, disponibilidad y paradas (CU-002), 25 pruebas; `cupo_disponible` en `services/disponibilidad.py` | #27 | #29 |
 | Reservas propias (CU-010): `GET /api/pasajeros/me/reservas` y `GET /api/reservas/{id}`, 13 pruebas | #30 | #32 |
+| `Reserva` del contrato con `fecha`, `horario`, `sentido` e `id_recorrido` del viaje (cambio aditivo): `openapi.yaml`, JSON regenerado y los dos endpoints de CU-010 | #31 | el que cierra #31 |
+| Hoja de pendientes de validación para Martín: `PENDIENTES-PARA-MARTIN-2026-10-15.html` (#33, #7, #9, #28, #8 y #25, cada uno con "mi opción") | — | el que cierra #31 |
 
 ## En curso
 
@@ -47,14 +51,21 @@ CU-003 necesita el respaldo de la reserva (#7), la tarifa (#9) y la capacidad si
 | 2026-10-14 | El servicio hace el `commit`, una vez, al final; el helper de eventos solo hace `flush`. Un recurso ajeno responde 404 | `backend/CONVENCIONES.md` |
 | 2026-10-14 | El seed se niega a correr contra una base no local: las contraseñas de prueba están en un repo público | `db/seed/README.md` |
 | 2026-10-14 | **La revisión de otro integrante es opcional, para siempre**; el autor mergea con la CI en verde y deja asentado en el PR si hubo revisión. Los PR #10 a #21 se mergearon sin revisión registrada en GitHub | CONTRIBUTING §1.7 |
+| 2026-10-15 | `Reserva` trae `fecha`, `horario` (`"HH:MM"`, `null` si el viaje no tiene), `sentido` e `id_recorrido`, **planos** y con los nombres de `Disponibilidad`: el schema `Viaje` expone chofer y vehículo, que el pasajero no necesita. `id_recorrido` es para resolver `orden_parada` con `GET /recorridos/{id}/paradas`. No se expone `estado_viaje`: ninguna RN dice qué pasa con las reservas de un viaje cancelado | Issue #31, `openapi.yaml` |
+| 2026-10-15 | **GPS (#37):** un timestamp futuro se reemplaza por la hora del servidor; ante un empate de timestamp se conserva la primera posición, porque `posicion_gps` guarda una fila por viaje. Decisión de Martiniano, respondida a Martín | Este archivo: #37 todavía no tiene comentario en GitHub |
 
 ## Pendientes
+
+Para Martín, la hoja `PENDIENTES-PARA-MARTIN-2026-10-15.html` reúne #33, #7, #9, #28, #8 y #25 con la fuente
+(v1.3, RN, `schema.sql`) y "mi opción" de cada uno. Es una propuesta mía, no una decisión: vale si él la aprueba.
 
 | Qué | Issue | Estado |
 |---|---|---|
 | Respaldo de la reserva (XOR período de abono / contratación) que `POST /reservas` no informa | #7 | PENDIENTE DE VALIDACIÓN con Martín |
 | Filtro `destino` de `/servicios/disponibilidad` sin columna en el modelo. Hoy responde 400 `FILTRO_NO_DISPONIBLE` en vez de ignorarlo: la tool `consultar_disponibilidad` de AG-01 manda `destino`, así que esas consultas fallan hasta resolverlo | #8 | PENDIENTE DE VALIDACIÓN con Martín |
-| La `Reserva` del contrato no trae fecha ni horario del viaje: la pantalla "Mis reservas" no puede decir cuándo es cada una. Cambio aditivo de contrato, a proponer por PR | #31 | Propuesta mía; lo ven Martín y Facundo (CONTRIBUTING §1.3) |
+| `Reserva` también la devuelven `POST /reservas`, `cambio-parada` y `ResultadoCancelacion` (CU-003, 005, 004): al implementarlos, `services/reservas.py::_a_schema(reserva, viaje)` ya arma los campos del viaje; necesitan el `JOIN` con `viaje` | #31 (cerrado) | Aviso a Martín y Facundo en el PR (CONTRIBUTING §1.8 fila 2) |
+| Qué ve el pasajero de una reserva cuyo viaje se cancela: hoy `Reserva.estado` no cambia y no se informa el estado del viaje. CU-018 solo crea viajes en el contrato | — | PENDIENTE DE VALIDACIÓN con Martín; sin Issue todavía |
+| `Disponibilidad.horario` devuelve `null` si el viaje no tiene horario pero el contrato no lo declara `nullable` (`Reserva.horario` sí) | — | Corrección chica de contrato; no se tocó para no ampliar el PR de #31 |
 | Disponibilidad: capacidad de un viaje sin vehículo (hoy `capacidad_planificada`, o sin cupo), viajes ofrecidos (hoy solo `programado`) y si una ausencia libera el cupo (hoy no) | #28 | PENDIENTE DE VALIDACIÓN con Martín. CU-003 valida con la misma función |
 | La tool `consultar_disponibilidad` de AG-01 usa `ida`/`vuelta` en minúsculas y el contrato `IDA`/`VUELTA` | — | Lo mapea el ejecutor del agente (paso 2, AG-01); este endpoint rechaza `ida` con 400 |
 | Parámetros de `/tarifas` no corresponden a la tabla `tarifa` | #9 | PENDIENTE DE VALIDACIÓN con Martín |
@@ -87,6 +98,12 @@ CU-003 necesita el respaldo de la reserva (#7), la tarifa (#9) y la capacidad si
 - Git Bash en Windows: `git show origin/main:ruta` falla por la conversión de rutas; usar `MSYS_NO_PATHCONV=1`.
   Una ruta de clon muy larga falla: `git clone -c core.longpaths=true`.
 - Los números de Issue y de PR los asigna GitHub en orden de creación: verificar con `gh` antes de citarlos.
+- **Regenerar `openapi.json` con el comando del README puede dejarlo vacío:** el comando abre el JSON para
+  escribir antes de parsear el YAML, así que un YAML con error (por ejemplo `{id}` sin comillas dentro de un
+  `{ ... }` de una línea) deja el JSON en 0 bytes. Si pasa, arreglar el YAML y volver a correr; `git diff --stat`
+  tiene que mostrar solo las líneas agregadas.
+- La regla de "quién decide un cambio de contrato" está en CONTRIBUTING **§1.8 fila 2** y en la tabla de §2.
+  §1.3 es "Rama": el Issue #31 lo citaba mal.
 - CODEOWNERS asigna `models/`, `migrations/`, `db/`, `openapi/` y `.github/` a `@Martiherenu1`, que es el
   autor de estos PR: GitHub no le pide la revisión a sí mismo, así que el revisor se asigna a mano.
 
@@ -102,7 +119,9 @@ CU-003 necesita el respaldo de la reserva (#7), la tarifa (#9) y la capacidad si
 - `backend/CONVENCIONES.md`: capas, transacción, errores y pruebas.
 - `from app.services.reservas import listar_reservas_del_pasajero, obtener_reserva_del_pasajero`: lectura de
   reservas del pasajero. `reserva` es tabla de esta área; si necesitan otras lecturas (CU-027, el chofer),
-  se agregan ahí por PR.
+  se agregan ahí por PR. Desde #31 el schema `Reserva` trae también `fecha`, `horario`, `sentido` e
+  `id_recorrido` del viaje: si arman un listado de reservas (CU-027, listado operativo del chofer), pueden
+  reusar el schema o declarar el suyo, pero el contrato del pasajero ya lo tiene.
 - `from app.services.disponibilidad import cupo_disponible`: **la definición única del cupo** (RN-001,
   RN-002). Si necesitan el cupo de un viaje (por ejemplo, CU-018 al asignar un vehículo), úsenla; no la
   reescriban.

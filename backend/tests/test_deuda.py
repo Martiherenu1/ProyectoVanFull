@@ -19,6 +19,7 @@ def _crear_pasajero(
     dni: str,
     roles: list[str],
     *,
+    con_cliente_individual: bool = True,
     con_cuenta_corriente: bool = True,
 ) -> dict:
     id_persona = asyncio.run(
@@ -38,7 +39,7 @@ def _crear_pasajero(
     )
 
     id_cliente = None
-    if con_cuenta_corriente:
+    if con_cliente_individual:
         id_cliente = asyncio.run(
             consultar(
                 base,
@@ -54,6 +55,7 @@ def _crear_pasajero(
                 id_persona,
             )
         )
+    if con_cuenta_corriente and id_cliente is not None:
         asyncio.run(
             ejecutar_sql(
                 base,
@@ -97,6 +99,13 @@ def entorno():
                 base,
                 "deuda-500",
                 ["pasajero"],
+                con_cuenta_corriente=False,
+            ),
+            "sin_cliente": _crear_pasajero(
+                base,
+                "deuda-600",
+                ["pasajero"],
+                con_cliente_individual=False,
                 con_cuenta_corriente=False,
             ),
         }
@@ -180,10 +189,19 @@ def test_sin_token_es_401_y_otro_rol_es_403(entorno):
     assert respuesta.json()["error"]["codigo"] == "SIN_PERMISO"
 
 
-def test_un_pasajero_sin_cuenta_corriente_es_404(entorno):
+def test_un_pasajero_sin_cuenta_corriente_esta_al_dia(entorno):
     _, cliente, personas = entorno
 
     respuesta = cliente.get(RUTA, headers=_con(personas["sin_cuenta"]))
 
+    assert respuesta.status_code == 200
+    assert respuesta.json() == {"saldo": 0.0, "estado": "al_dia"}
+
+
+def test_un_pasajero_sin_cliente_individual_es_404(entorno):
+    _, cliente, personas = entorno
+
+    respuesta = cliente.get(RUTA, headers=_con(personas["sin_cliente"]))
+
     assert respuesta.status_code == 404
-    assert respuesta.json()["error"]["codigo"] == "CUENTA_CORRIENTE_NO_ENCONTRADA"
+    assert respuesta.json()["error"]["codigo"] == "CLIENTE_NO_ENCONTRADO"

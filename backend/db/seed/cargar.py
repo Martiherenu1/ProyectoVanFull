@@ -33,6 +33,7 @@ ORDEN = (
     "pasajero",
     "cliente",
     "cliente_individual",
+    "cuenta_corriente",
     "cuenta_acceso",
     "cuenta_rol",
     "servicio",

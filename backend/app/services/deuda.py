@@ -22,20 +22,25 @@ async def consultar_deuda_propia(db: AsyncSession, usuario: UsuarioActual) -> De
     """Devuelve la deuda del cliente individual asociado al pasajero autenticado."""
     id_cliente = (
         await db.execute(
-            select(ClienteIndividual.id_cliente)
-            .join(
-                CuentaCorriente,
-                CuentaCorriente.id_cliente == ClienteIndividual.id_cliente,
+            select(ClienteIndividual.id_cliente).where(
+                ClienteIndividual.id_persona == usuario.id_persona
             )
-            .where(ClienteIndividual.id_persona == usuario.id_persona)
         )
     ).scalar_one_or_none()
     if id_cliente is None:
         raise ApiError(
             404,
-            "CUENTA_CORRIENTE_NO_ENCONTRADA",
-            "No hay una cuenta corriente asociada al pasajero autenticado.",
+            "CLIENTE_NO_ENCONTRADO",
+            "No hay un cliente individual asociado al pasajero autenticado.",
         )
+
+    tiene_cuenta = (
+        await db.execute(
+            select(CuentaCorriente.id_cliente).where(CuentaCorriente.id_cliente == id_cliente)
+        )
+    ).scalar_one_or_none()
+    if tiene_cuenta is None:
+        return Deuda(saldo=Decimal("0.00"), estado=ESTADO_AL_DIA)
 
     # MR-R30: DEUDOR aumenta el saldo y ACREEDOR lo reduce. El resultado no se guarda.
     # El MR define cada MOVIMIENTO_CUENTA como un impacto económico y deja pendiente el catálogo

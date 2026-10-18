@@ -54,6 +54,7 @@ def entorno():
 def _restaurar(entorno):
     base, _, _ = entorno
     asyncio.run(ejecutar_sql(base, "DELETE FROM evento_operativo"))
+    asyncio.run(ejecutar_sql(base, "DELETE FROM movimiento_cuenta"))
     asyncio.run(ejecutar_sql(base, "DELETE FROM comprobante"))
     asyncio.run(ejecutar_sql(base, "UPDATE pago SET estado = 'PENDIENTE'"))
 
@@ -62,7 +63,7 @@ def _estado(base: str, id_pago: int) -> str:
     return asyncio.run(consultar(base, "SELECT estado FROM pago WHERE id_pago = $1", id_pago))[0][0]
 
 
-def test_administrador_confirma_pago_y_genera_recibo_y_evento(entorno):
+def test_administrador_confirma_pago_y_genera_movimiento_recibo_y_evento(entorno):
     base, cliente, pagos = entorno
     id_pago = pagos["principal"]
 
@@ -94,13 +95,21 @@ def test_administrador_confirma_pago_y_genera_recibo_y_evento(entorno):
     assert asyncio.run(
         consultar(
             base,
+            "SELECT naturaleza, id_cliente, id_pago, importe "
+            "FROM movimiento_cuenta WHERE id_pago = $1",
+            id_pago,
+        )
+    ) == [("ACREEDOR", cuerpo["id_cliente"], id_pago, 1250.50)]
+    assert asyncio.run(
+        consultar(
+            base,
             "SELECT tipo_evento, id_pago FROM evento_operativo WHERE id_pago = $1",
             id_pago,
         )
     ) == [("pago_confirmado", id_pago)]
 
 
-def test_dueno_puede_rechazar_y_no_genera_recibo(entorno):
+def test_dueno_puede_rechazar_y_no_genera_movimiento_ni_recibo(entorno):
     base, cliente, pagos = entorno
     id_pago = pagos["principal"]
 
@@ -114,6 +123,9 @@ def test_dueno_puede_rechazar_y_no_genera_recibo(entorno):
     assert respuesta.json()["estado"] == "RECHAZADO"
     assert asyncio.run(
         consultar(base, "SELECT count(*) FROM comprobante WHERE id_pago = $1", id_pago)
+    ) == [(0,)]
+    assert asyncio.run(
+        consultar(base, "SELECT count(*) FROM movimiento_cuenta WHERE id_pago = $1", id_pago)
     ) == [(0,)]
     assert asyncio.run(
         consultar(
@@ -190,7 +202,7 @@ def test_decision_invalida_es_400_y_no_modifica_nada(entorno, cuerpo):
 
 
 def test_confirmacion_es_atomica_si_falla_el_recibo(entorno):
-    """Una falla del comprobante revierte también el nuevo estado y no deja evento."""
+    """Una falla del comprobante revierte estado, movimiento y evento."""
     base, _, pagos = entorno
     id_pago = pagos["atomico"]
     asyncio.run(
@@ -214,4 +226,7 @@ def test_confirmacion_es_atomica_si_falla_el_recibo(entorno):
     assert _estado(base, id_pago) == "PENDIENTE"
     assert asyncio.run(
         consultar(base, "SELECT count(*) FROM evento_operativo WHERE id_pago = $1", id_pago)
+    ) == [(0,)]
+    assert asyncio.run(
+        consultar(base, "SELECT count(*) FROM movimiento_cuenta WHERE id_pago = $1", id_pago)
     ) == [(0,)]

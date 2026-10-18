@@ -4,7 +4,7 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.errors import ApiError
-from app.models.cuenta_corriente import Comprobante
+from app.models.cuenta_corriente import Comprobante, MovimientoCuenta
 from app.models.cuenta_corriente import Pago as PagoModelo
 from app.schemas.pagos import Pago
 from app.services.eventos import registrar_evento
@@ -47,8 +47,16 @@ async def decidir_pago_pendiente(db: AsyncSession, id_pago: int, decision: str) 
     pago.estado = decision
     if decision == "CONFIRMADO":
         db.add(Comprobante(tipo="RECIBO", id_pago=pago.id_pago))
+        db.add(
+            MovimientoCuenta(
+                id_cliente=pago.id_cliente,
+                id_pago=pago.id_pago,
+                naturaleza="ACREEDOR",
+                importe=pago.importe,
+            )
+        )
 
-    # Fuerza ahora los controles del pago y del comprobante, antes de agregar el evento.
+    # Fuerza ahora los controles contables y del comprobante, antes de agregar el evento.
     await db.flush()
     await registrar_evento(
         db,

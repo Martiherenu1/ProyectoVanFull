@@ -1,7 +1,7 @@
 """CU-029: consultas de viajes del chofer contra PostgreSQL migrado y contrato vigente."""
 
 import asyncio
-from datetime import date
+from datetime import date, time
 from pathlib import Path
 
 import pytest
@@ -134,8 +134,8 @@ def _viaje(entorno, chofer=None, fecha="2026-10-30", horario="07:30", especial=F
         entorno["recorrido"],
         entorno["vehiculo"],
         chofer,
-        fecha,
-        horario,
+        date.fromisoformat(fecha) if isinstance(fecha, str) else fecha,
+        time.fromisoformat(horario) if isinstance(horario, str) else horario,
     )
 
 

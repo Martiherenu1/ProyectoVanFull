@@ -6,7 +6,7 @@ from pathlib import Path
 import pytest
 import yaml
 
-from app.services.disponibilidad import cupo_disponible
+from app.services.disponibilidad import CAPACIDAD_PREDETERMINADA, cupo_disponible
 from tests._bd import base_migrada, cliente_api, consultar, ejecutar_sql
 
 CONTRATO = Path(__file__).resolve().parents[1] / "openapi" / "openapi.yaml"
@@ -24,7 +24,10 @@ DISPONIBILIDAD = "/api/servicios/disponibilidad"
         (19, None, 5, 14),
         (19, 10, 5, 14),  # con vehículo manda el vehículo, no la planificada (ADJ-03)
         (None, 10, 4, 6),  # sin vehículo, la planificada
-        (None, None, 0, None),  # sin ninguna: no se inventa un número
+        (None, None, 0, 19),  # sin ninguna: la predeterminada de 19 (AC28-02)
+        (None, None, 12, 7),  # PT28-01 con la predeterminada
+        (None, None, 19, 0),  # PT28-03: la vigésima reserva no entra
+        (24, 19, 0, 24),  # PT28-04: prevalece la capacidad real de la unidad (AC28-03)
         (3, None, 3, 0),  # lleno
         (3, None, 5, 0),  # sobrevendido: nunca negativo
         (0, 10, 0, 0),  # un vehículo de capacidad 0 es capacidad 0, no "sin vehículo"
@@ -186,6 +189,8 @@ def entorno():
         with cliente_api(base) as cliente_http:
             yield {
                 "base": base,
+                "servicio": servicio,
+                "vehiculo_de_3": v3,
                 "cliente": cliente_http,
                 "viajes": viajes,
                 "r1": r1,
@@ -227,10 +232,11 @@ def test_el_cupo_es_la_capacidad_de_la_unidad_menos_las_consolidadas(entorno):
     assert por_viaje[v["sobrevendido"]]["cupo_disponible"] == 0
 
 
-def test_sin_capacidad_conocida_no_se_inventa_el_cupo(entorno):
+def test_sin_unidad_ni_capacidad_planificada_rige_la_predeterminada(entorno):
+    """AC28-02: VanFull identifica 19 como la capacidad mínima habitual de sus unidades."""
     sin_capacidad = _por_viaje(entorno)[entorno["viajes"]["sin_capacidad"]]
-    assert "cupo_disponible" not in sin_capacidad  # ausente, no 0 ni null
-    assert "horario" not in sin_capacidad
+    assert sin_capacidad["cupo_disponible"] == CAPACIDAD_PREDETERMINADA == 19
+    assert "horario" not in sin_capacidad  # el viaje no tiene horario: se omite, no va null
 
 
 def test_el_cupo_es_derivado_cambia_solo_al_cambiar_las_reservas(entorno):
@@ -327,3 +333,69 @@ def test_las_respuestas_no_traen_campos_que_el_contrato_no_declara(entorno):
     }
     for esquema, cuerpo in muestras.items():
         assert set(cuerpo) <= set(esquemas[esquema]["properties"]), esquema
+
+
+# --- #28: ausencia informada y viajes cuya hora ya pasó ---------------------------------------
+
+
+def _ausencia(base, pasajero, viaje):
+    asyncio.run(
+        ejecutar_sql(
+            base, "INSERT INTO ausencia (id_pasajero, id_viaje) VALUES ($1, $2)", pasajero, viaje
+        )
+    )
+
+
+def _viaje_lleno(entorno, fecha):
+    """Un viaje de 3 lugares con tres consolidadas (los pasajeros 0, 1 y 2): cupo 0."""
+    e = entorno
+    viaje = _viaje(
+        e["base"], e["servicio"], e["r1"], vehiculo=e["vehiculo_de_3"], horario="06:00", fecha=fecha
+    )
+    for pasajero in e["pasajeros"][:3]:
+        _reserva(e["base"], pasajero, viaje, e["r1"], e["contratacion"], "consolidada")
+    return viaje
+
+
+def test_la_ausencia_informada_libera_el_lugar(entorno):
+    """AC28-06 / PT28-09: al informar su ausencia, el lugar queda libre sin aprobación de nadie."""
+    fecha = "2026-11-02"
+    viaje = _viaje_lleno(entorno, fecha)
+    assert _por_viaje(entorno, fecha=fecha)[viaje]["cupo_disponible"] == 0
+
+    _ausencia(entorno["base"], entorno["pasajeros"][0], viaje)
+    assert _por_viaje(entorno, fecha=fecha)[viaje]["cupo_disponible"] == 1
+
+
+def test_cada_ausencia_libera_un_solo_lugar(entorno):
+    """Dos ausencias liberan dos lugares, no más: ni se cuenta doble ni se libera de más."""
+    fecha = "2026-11-03"
+    viaje = _viaje_lleno(entorno, fecha)
+    _ausencia(entorno["base"], entorno["pasajeros"][0], viaje)
+    _ausencia(entorno["base"], entorno["pasajeros"][1], viaje)
+    assert _por_viaje(entorno, fecha=fecha)[viaje]["cupo_disponible"] == 2
+
+
+def test_la_ausencia_en_otro_viaje_no_libera_este_lugar(entorno):
+    """La ausencia es de un pasajero en un viaje (MR-R25): no vale para otro viaje del mismo día."""
+    fecha = "2026-11-04"
+    este, otro = _viaje_lleno(entorno, fecha), _viaje_lleno(entorno, fecha)
+    _ausencia(entorno["base"], entorno["pasajeros"][0], otro)
+    por_viaje = _por_viaje(entorno, fecha=fecha)
+    assert por_viaje[este]["cupo_disponible"] == 0
+    assert por_viaje[otro]["cupo_disponible"] == 1
+
+
+def test_la_ausencia_de_quien_no_tiene_reserva_consolidada_no_cambia_el_cupo(entorno):
+    fecha = "2026-11-05"
+    viaje = _viaje_lleno(entorno, fecha)
+    # El pasajero 3 no tiene reserva en este viaje: su ausencia no puede liberar un lugar ajeno.
+    _ausencia(entorno["base"], entorno["pasajeros"][3], viaje)
+    assert _por_viaje(entorno, fecha=fecha)[viaje]["cupo_disponible"] == 0
+
+
+def test_un_viaje_programado_cuya_hora_ya_paso_sigue_ofreciendose(entorno):
+    """AC28-05 / PT28-06: el reloj no cierra el viaje; lo cierra que comience realmente."""
+    e = entorno
+    viaje = _viaje(e["base"], e["servicio"], e["r1"], horario="00:01", fecha="2020-01-02")
+    assert viaje in _por_viaje(entorno, fecha="2020-01-02")

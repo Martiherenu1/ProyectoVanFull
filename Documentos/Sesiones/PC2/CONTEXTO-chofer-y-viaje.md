@@ -1,6 +1,19 @@
 # Contexto vivo · Chofer y viaje en curso (Martín)
 
-## Estado al 18/10/2026 — ejecución CU-030 (#66)
+## Estado vigente al 19/10/2026 — CU-029 integrado y CU-030 en revisión
+
+- **Issue #37 / PR #40:** contrato OpenAPI de las operaciones del chofer integrado a `main` y Issue cerrado.
+- **Issue #64 / PR #65:** consultas CU-029 del chofer ya **mergeadas** en `main`, con CI aprobada (148 pruebas en su rama antes del merge).
+- **Issue #66 / PR #67:** inicio/finalización CU-030 implementados y en revisión, **sin merge a `main`**. Esta rama incorporó las rutas de CU-029 y CU-030 en `backend/app/main.py` al resolver el conflicto con PR #65. Debe verificarse la CI de la rama integrada antes de solicitar merge.
+- **Issue #39 / PR #63:** aclaración de GPS/ETA aprobada funcionalmente; pendiente de evaluación técnica y sin modificación automática de OpenAPI.
+- **PR #50 de Facundo:** alta administrativa de viaje integrada; asignaciones posteriores de chofer y vehículo no implementadas. ADJ-03 impide iniciar un viaje sin ambos asignados.
+- **PR #45 de Facundo:** base Flutter Web/Mobile **mergeada** y presente en `frontend/`. **PR #47** de tema visual sigue **abierta**. Las pantallas específicas de chofer continúan **pendientes** y corresponden a Martín sobre la base compartida; Issue #48 navegación por roles continúa como dependencia.
+- **Pendientes del área:** GPS (contrato Issue #39), pantallas del chofer, datos seed de posiciones/abordajes/nóminas, pruebas de integración y avisos de demora/problemas de CU-030 (cobertura parcial). El chofer **no escanea QR**; consulta abordajes existentes.
+
+---
+
+
+## Historial de avance al 18/10/2026 — ejecución CU-030 (#66)
 
 - **#66 / rama `feat/chofer-ejecucion-cu030-66`: en desarrollo.** Backend de las dos operaciones **existentes en OpenAPI**: `POST /viajes/{id_viaje}/inicio` y `POST /viajes/{id_viaje}/finalizacion`, trazadas a CU-030 / RF-025 / ADJ-03; sin nuevas operaciones ni cambios SQL/ORM.
 - Las transiciones bloquean la fila del viaje durante el cambio para evitar eventos duplicados ante solicitudes concurrentes. El acceso exige rol `chofer` y `viaje.id_chofer == usuario.id_persona`.
@@ -9,12 +22,12 @@
 - **Calidad verificada — PR #67 (18/10/2026):** CI GitHub Actions aprobada, `ruff check` y `ruff format --check` correctos; suite completa contra PostgreSQL: **156 pruebas aprobadas**, 0 fallidas (113 advertencias). Pruebas de concurrencia e idempotencia incluidas. PR abierta para revisión, **sin merge**.
 - Dependencia de Facundo: para iniciar, asignación previa de chofer y vehículo (ADJ-03). La implementación de reasignaciones posterior al alta sigue fuera de este bloque.
 - No se incluye GPS, UI Flutter, abordajes, avisos de demora/problemas (CU-030 parcialmente cubierto) ni cambios de línea base. Issue #39 GPS continúa en revisión documental.
-- **#64 / PR #65:** consulta CU-029 backend enviada para revisión, CI 148 pruebas aprobadas; aún sin merge a la fecha de este registro.
+- **#64 / PR #65 (estado histórico del 18/10):** consulta CU-029 enviada para revisión con CI aprobada; posteriormente mergeada en `main`, según estado vigente al 19/10 descrito arriba.
 
 ---
 
 
-## Estado
+## Historial técnico al 15/10/2026
 
 2026-10-15: #37 tiene completo el diseño contractual de las cinco operaciones acordadas y su README.
 Siete commits originales más el merge de integración; sin push, PR ni merge de nuestra rama a main.
@@ -114,6 +127,6 @@ Backend de estas operaciones y Flutter pendientes de implementación; CU-030 con
   Usar el helper común de eventos.
 - Facundo: avisar antes del merge de nuestra rama a main por la relación entre asignaciones y ejecución del viaje.
   Leer sus asignaciones sin modificarlas; faltan sus datos seed de chofer, vehículo y viaje.
-  En esta rama frontend contiene solo README; la base Flutter y sus pantallas siguen pendientes.
+  Flutter Web/Mobile ya fue integrada en `main` por Facundo mediante PR #45; la PR #47 del tema visual continúa abierta. Las pantallas específicas del chofer siguen pendientes y corresponden a Martín sobre la base común.
 - Martín: preparar seed de posiciones, abordajes, ausencias y nóminas, y la demo cruzada
   en tareas posteriores; implementar servicios, routers y pantallas del área por CU.

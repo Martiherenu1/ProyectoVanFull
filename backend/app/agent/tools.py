@@ -92,11 +92,10 @@ TOOLS: list[dict] = [
         "type": "function",
         "function": {
             "name": "consultar_reserva",
-            "description": "Consultar una reserva propia/autorizada.",
+            "description": "Consultar una reserva propia/autorizada. Sin reserva_id, lista las reservas propias.",
             "parameters": {
                 "type": "object",
                 "properties": {"reserva_id": {"type": "string"}},
-                "required": ["reserva_id"],
             },
         },
     },

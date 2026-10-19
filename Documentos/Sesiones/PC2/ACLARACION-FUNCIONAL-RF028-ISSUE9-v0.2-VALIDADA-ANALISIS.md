@@ -2,13 +2,14 @@
 
 **Versión:** 0.2 — VALIDADA POR ANÁLISIS (MARTÍN)  
 **Fecha:** 18/10/2026  
-**Estado:** **APROBADO FUNCIONALMENTE POR MARTÍN** el 18/10/2026. **PENDIENTE** la revisión técnica y aprobación por el equipo de cualquier cambio en RN, RF, CU, OpenAPI, SQL o código.  
+**Estado:** **APROBADO FUNCIONALMENTE POR MARTÍN** el 18/10/2026, con aclaración comercial complementaria del mismo día tras revisión de PR #59 (AC9-14/15 y fechas AC9-06). **PENDIENTE** la revisión técnica y aprobación por el equipo de cualquier cambio en RN, RF, CU, OpenAPI, SQL o código.
 **Origen:** [Issue #9 — RF-028: parámetros de `/tarifas` no corresponden a la tabla `tarifa`](https://github.com/Martiherenu1/ProyectoVanFull/issues/9).  
 **Responsable de relevamiento:** Martín (Integrante 2).  
+**Revisión complementaria:** 18/10/2026 — VanFull confirmó expresamente que el 15 % se aplica sobre la parte de deuda cancelada por cada pago en efectivo, y que ida y vuelta en días distintos utilizan contrataciones individuales (en coordinación con PR #58).  
 **Revisión posterior prevista:** Martiniano (servicios, tarifas, reservas y contrato API), Facundo (pagos, descuentos, deuda y cuenta corriente).  
 **Ubicación documental prevista en el repositorio:** `Documentos/Sesiones/PC2/ACLARACION-FUNCIONAL-RF028-ISSUE9-v0.2-VALIDADA-ANALISIS.md`.
 
-> **Control de cambios:** Este documento registra información comercial comunicada como **CONFIRMADO POR VANFULL** durante el relevamiento conversacional del 18/10/2026. Martín aprobó el contenido funcional de la v0.1 el 18/10/2026, sin aprobar diseños técnicos ni cambios a la línea base. No convierte automáticamente ninguna aclaración en una nueva RN, RF, CU o decisión tecnológica. No autoriza modificar `schema.sql`, OpenAPI, aplicaciones, contratos o documentos base sin el procedimiento y aprobación correspondientes.
+> **Control de cambios:** Este documento registra información comercial **CONFIRMADA POR VANFULL** el 18/10/2026; tras la revisión de Marti en PR #59 se validó expresamente el cálculo de descuento sobre la deuda cancelada (AC9-14, coherente con AC9-15) y la exigencia de dos contrataciones para idas/vueltas en días distintos (AC9-06; PR #58). La validación funcional de Martín no convierte aclaraciones en RN/RF/CU nuevos ni autoriza modificar `schema.sql`, OpenAPI, aplicaciones o línea base sin control de cambios.
 
 ## 1. Propósito, problema y alcance
 
@@ -31,7 +32,7 @@ El Issue #9 advierte que `GET /tarifas` recibe `tipo_cliente`, `modalidad`, `dia
 | [`backend/openapi/openapi.yaml`](https://github.com/Martiherenu1/ProyectoVanFull/blob/main/backend/openapi/openapi.yaml) | Contrato técnico en `main`, cotejado 18/10/2026 | `GET /tarifas` y respuesta `Tarifa`; parámetros actuales. |
 | [`backend/db/schema.sql`](https://github.com/Martiherenu1/ProyectoVanFull/blob/main/backend/db/schema.sql) | Modelo físico implementado en `main`, cotejado 18/10/2026 | `servicio`, `tarifa`, `contratacion`, `abono_mensual`, `periodo_abono`, `viaje`, `pago`, `movimiento_cuenta`, `comprobante`. |
 | [`Documentos/Sesiones/PC2/REPARTO-PC2.md`](https://github.com/Martiherenu1/ProyectoVanFull/blob/main/Documentos/Sesiones/PC2/REPARTO-PC2.md) | **DEFINIDO POR EL EQUIPO** | Dueños por área, alcance PC2, control de cambios de contratos. |
-| Aclaración [Issue #7](https://github.com/Martiherenu1/ProyectoVanFull/issues/7), v0.2 validada por análisis | Aclaración funcional relacionada | Una contratación ocasional puede agrupar ida y vuelta; el pago conjunto no implica que las dos reservas sean una sola. |
+| Aclaración [Issue #7](https://github.com/Martiherenu1/ProyectoVanFull/issues/7), v0.2 revisada en PR #58 | Aclaración funcional relacionada | Contratación compartida solo para ida y vuelta del **mismo día**; fechas distintas requieren contratos independientes y tarifas individuales. |
 | RF-028 y CU-003 vigentes, citados por Issue #9 | **DEFINIDO POR EL EQUIPO** | **PENDIENTE DE COTEJO DIRECTO DEL TEXTO INTEGRAL MÁS RECIENTE** de RF y CU antes de alterar sus especificaciones. |
 
 **Precedencia ante contradicciones:** indicaciones docentes > afirmaciones directas de VanFull > línea base aprobada por el equipo > propuestas de IA. Las aclaraciones posteriores de VanFull precisan el negocio; su incorporación normativa requiere control de cambio.
@@ -49,7 +50,7 @@ Todos los identificadores **AC9-xx** son referencias **locales a este documento*
 | AC9-03 | El ocasional tiene **tarifas fijas propias por viaje**, independientes del abono mensual, generalmente más altas por trayecto que el costo equivalente de un abonado. «Generalmente» no es una restricción numérica obligatoria. |
 | AC9-04 | Las tarifas ocasionales se diferencian por **servicio** (universitario/laboral) y **sentido** (ida/vuelta). La ida suele ser más cara que la vuelta, pero no siempre. |
 | AC9-05 | La contratación ocasional conjunta de **ida y vuelta** tiene **tarifa fija especial propia**; **no** se calcula necesariamente sumando ambas tarifas individuales. |
-| AC9-06 | La tarifa conjunta de ocasional `IDA_VUELTA` **solo corresponde cuando ambos viajes ocurren el mismo día**. La capacidad y las condiciones de reserva siguen sujetas a las reglas existentes. |
+| AC9-06 | La tarifa conjunta ocasional `IDA_VUELTA` **solo corresponde cuando ambos viajes ocurren el mismo día**. En **días distintos** se utilizan **dos contrataciones independientes**, cada una con su tarifa individual, conforme a AC7-03/04 del Issue #7 (PR #58). La capacidad y las condiciones de reserva siguen sujetas a las reglas existentes. |
 | AC9-07 | Los servicios **especiales** y **corporativos** se cotizan particularmente conforme a los parámetros de cada servicio; no se les aplica sin más la matriz fija de abonos u ocasionales. |
 | AC9-08 | La **cantidad de días** usada para determinar el precio de un abono es la cantidad de **días contratados por semana**, no los días efectivos de viaje de ese mes. |
 
@@ -67,11 +68,11 @@ Todos los identificadores **AC9-xx** son referencias **locales a este documento*
 |---|---|
 | AC9-12 | El descuento del **15 % por efectivo** aplica a **todos los servicios**, incluidos universitarios, laborales, ocasionales, especiales y corporativos. |
 | AC9-13 | Elegir `EFECTIVO` **no aplica** el descuento inmediatamente: solo se reconoce cuando VanFull **recibe y confirma efectivamente** el pago en efectivo. |
-| AC9-14 | En un pago parcial en efectivo confirmado, el descuento inicialmente reconocido equivale al **15 % del importe efectivamente entregado en efectivo**; dicho descuento reduce el saldo pendiente además del dinero pagado. |
-| AC9-15 | Si una contratación se **cancela íntegramente en efectivo**, se obtiene el **15 % del importe comercial aplicable**, aunque el cliente haya realizado varios pagos parciales en efectivo. El total entregado en efectivo termina siendo el 85 % de ese importe y el saldo queda en cero. |
+| AC9-14 | En un **pago parcial en efectivo confirmado**, el descuento del 15 % se calcula sobre la **porción de deuda que ese pago cancela**, **no** sobre el efectivo entregado. El efectivo recibido representa el **85 % de esa porción**: `deuda_cancelada = efectivo_confirmado / 0,85` y `descuento = deuda_cancelada − efectivo_confirmado`, expresados con importes monetarios a dos decimales. |
+| AC9-15 | Si una contratación se **cancela íntegramente en efectivo**, aun en varios pagos parciales confirmados, el efectivo total equivale al **85 % del importe comercial aplicable**: el descuento acumulado alcanza el 15 % y el saldo queda en cero, por aplicación consistente de AC9-14 a cada pago. |
 | AC9-16 | Los descuentos comerciales particulares **pueden acumularse** con el de efectivo; se aplican **sucesivamente**, primero el descuento comercial y luego el de efectivo sobre el resultado, **no** sumando porcentajes. |
 
-**Advertencia para el diseño:** AC9-14 y AC9-15 **no son equivalentes a aplicar incondicionalmente `pago × 15 %` en cada operación**, porque eso contradice la liquidación final confirmada. El ajuste de cancelación debe modelarse expresamente y quedar trazable (ver §4.2 y §6).
+**Coherencia funcional AC9-14 / AC9-15:** cada pago efectivo confirmado cancela una porción de deuda mayor que el efectivo entregado (`importe / 0,85`), por lo que los pagos parciales acumulados permiten cancelar íntegramente una deuda con el **85 % del precio aplicable**, **sin movimiento de descuento extraordinario de cierre**. **PENDIENTE DE DISEÑO CONTABLE:** imputación exacta de cada movimiento, control de saldo disponible, redondeos en casos límite, devoluciones y conciliación con pagos de otros medios.
 
 ### 3.4. FADEEAC, vigencia y reajuste de deuda
 
@@ -105,11 +106,13 @@ El cálculo de un abono y el control de reservas no deben deducir automáticamen
 
 **Caso 1 — pago total en efectivo:** servicio $100.000,00, descuento comercial 10 % ilustrativo → base ajustada $90.000,00. Se paga totalmente en efectivo → descuento efectivo $13.500,00; **cobro total $76.500,00; saldo $0,00**.
 
-**Caso 2 — primer pago parcial:** base aplicable $100.000,00; pago efectivo confirmado $30.000,00 → descuento reconocido inicialmente $4.500,00; **saldo $65.500,00**.
+**Caso 2 — primer pago parcial:** importe comercial aplicable $100.000,00; efectivo confirmado $30.000,00 → deuda cancelada `$30.000 / 0,85 = $35.294,12`; descuento reconocido `$35.294,12 − $30.000,00 = $5.294,12`; **saldo $64.705,88**.
 
-**Caso 3 — segundo pago que cancela completamente en efectivo:** continúa el caso 2. VanFull cobra **otros $55.000,00**, reconoce un ajuste/descuento adicional de **$10.500,00** y declara **saldo $0,00**. En total cobró $85.000,00 y reconoció un descuento total de $15.000,00.
+**Caso 3 — segundo pago que cancela completamente en efectivo:** continúa el caso 2. Segundo cobro efectivo confirmado **$55.000,00** → deuda cancelada `$55.000 / 0,85 = $64.705,88`, descuento correspondiente **$9.705,88** y **saldo $0,00**. Total efectivo cobrado **$85.000,00** y descuento acumulado **$15.000,00**. No se requiere descuento extraordinario para cerrar.
 
-> **Inconsistencia aparente resuelta funcionalmente, pero con mecanismo contable pendiente:** 15 % del segundo pago ($55.000,00) serían $8.250,00, **no** $10.500,00. Por tanto, el último movimiento incluye un **ajuste de cierre** para cumplir el total final confirmado. **No implementar `importe_pago * 0,15` como regla universal para todas las operaciones y cierres.** El asiento/movimiento exacto y la conciliación de pagos mixtos deben ser acordados por Facundo.
+**Caso 4 — pago mixto:** importe comercial aplicable $100.000,00; efectivo confirmado $30.000,00 cancela deuda **$35.294,12** (descuento **$5.294,12**). Si el saldo se paga mediante transferencia sin descuento por efectivo, se transfieren **$64.705,88**. Total desembolsado **$94.705,88** y saldo **$0,00**. Este cálculo deriva de AC9-14; las reglas de imputación, estados y conciliación de pagos mixtos permanecen pendientes de diseño.
+
+**Nota de cálculo:** no aplicar `efectivo × 0,15` como descuento. Con AC9-14, `efectivo = 0,85 × deuda_cancelada`; deben conservarse centavos según AC9-27. El método concreto de redondeo y casos de pago que exceda saldo están pendientes de validación técnica.
 
 ### 4.3. Variación trimestral compuesta FADEEAC
 
@@ -164,7 +167,7 @@ El contrato vigente declara los parámetros: `tipo_cliente` (**obligatorio**, `s
 
 1. **Selección de tarifa (Martiniano).** Establecer una correspondencia explícita entre tipo de servicio + clase comercial (abono/ocasional) + modalidad + días semanales cuando corresponda + vigencia y el registro tarifario. No calcular el ocasional por prorrateo del abono. Consultar dos reservas de ida y vuelta en la misma fecha antes de seleccionar el precio conjunto. Mantener la solución compatible con Issue #7.
 2. **Consulta y respuesta API (Martiniano + Facundo).** Separar **importe base** de cualquier **beneficio eventual** por elegir efectivo. No presentar el 15 % como descuento ya devengado hasta que Facundo confirme el pago. Cambiar una operación OpenAPI existente requiere acuerdo de los tres según `REPARTO-PC2.md`.
-3. **Movimientos de pagos y deuda (Facundo).** Definir asientos/movimientos para descuento comercial, descuento por pago parcial confirmado, ajuste de cierre íntegramente en efectivo, actualización FADEEAC, imputación a contrataciones y auditoría. Respetar saldos derivados y `NUMERIC(12,2)` del modelo.
+3. **Movimientos de pagos y deuda (Facundo).** Definir asientos/movimientos trazables para el descuento comercial, la porción de deuda cancelada por cada pago en efectivo confirmado (AC9-14), pagos mixtos, actualización FADEEAC, imputación a contrataciones y auditoría. Respetar saldos derivados y `NUMERIC(12,2)` del modelo, **sin incorporar un descuento extraordinario de cierre**.
 4. **Actualización periódica (evaluación posterior).** Una persona autorizada carga variaciones consultadas en FADEEAC; el backend puede calcular factores compuestos con precisión decimal y registrar vigencia. La **consulta automática externa** no forma parte de los hechos confirmados ni del alcance del PC2.
 5. **Permisos.** La entrevista AS-IS mencionó dueño/administrador, pero la **RN-027 aprobada para TO-BE reserva al dueño la creación/modificación estructural de tarifas y descuentos especiales**. Una carga delegada de índices o un proceso automático deberá diseñarse sin soslayar esta regla; cualquier cambio requiere aprobación del equipo.
 6. **Registros con decimales.** Utilizar aritmética decimal exacta y cuantización a 2 decimales monetarios. Confirmar el criterio de desempate cuando la tercera cifra decimal sea exactamente 5 antes de codificar el redondeo como RN.
@@ -181,13 +184,13 @@ El contrato vigente declara los parámetros: `tipo_cliente` (**obligatorio**, `s
 | Entrevista 25/08 indica que una tarifa nueva puede afectar servicios impagos; RN-012 dice que **podrá** afectar saldos. | AC9-21 a 26 acotan condiciones: abono vigente conserva importe; suspensión + reactivación actualiza deuda; especiales/corporativos solo con cláusula. | **CRITERIO MÁS ESPECÍFICO**; requiere cotejo y decisión de incorporación a línea base. |
 | Entrevista 25/08 dice actualización trimestral según FADEEAC; respuestas iniciales hablaban de actualización «automática». | AC9-18 precisa que **hoy** hay consulta/carga humana; cálculo backend automático es una propuesta de sistema. | **DIFERENCIA AS-IS / TO-BE**; no declarar integración FADEEAC aprobada. |
 | OpenAPI afirma que consultar `/tarifas` «incluye descuento 15 % efectivo». | AC9-13 confirma que solo se otorga después de **pago en efectivo confirmado**. | **INCONSISTENCIA DE CONTRATO**; propuesta de separar cotización de descuento devengado. |
-| RN-011 aprobada: «Todo pago realizado en efectivo tendrá un descuento del 15 % sobre la tarifa aplicable…». | AC9-14 y 15 detallan pagos parciales, saldo y ajuste de cierre. | **COMPLEMENTO NECESARIO**; el cálculo por movimiento no puede simplificarse como 15 % de cada cuota en todos los casos. |
+| RN-011 aprobada: «Todo pago realizado en efectivo tendrá un descuento del 15 % sobre la tarifa aplicable…». | AC9-14/15 precisan que **el 15 % se calcula sobre la deuda cancelada por el efectivo, no sobre el efectivo entregado**. | **COMPLEMENTO CONFIRMADO POR VANFULL**; resta definir imputación contable/precisión y aprobar cambios de línea base si correspondiera. |
 | Entrevista: dueño/administrador podía modificar tarifas AS-IS. | RN-027 TO-BE: dueño exclusivamente para modificaciones estructurales y descuentos especiales. | **ÁMBITOS DISTINTOS; aplicar RN-027** mientras el equipo no apruebe cambios. |
 
 ### 7.2. Pendientes comerciales puntuales (no bloquear automáticamente la aclaración)
 
 - **PV9-01 — Tarifa real y catálogo:** importes, cantidad de días semanales disponibles, combinaciones efectivamente comercializadas, vigencias y matrices de especiales/corporativos. Ninguno fue proporcionado durante este relevamiento.
-- **PV9-02 — Descuentos y pagos mixtos:** cálculo de cancelación final cuando una contratación reúne efectivo y otros medios, evitando beneficios sobre importes no pagados en efectivo; reglas de compensación si hay devoluciones o pagos rechazados. No inventar un algoritmo a partir de ejemplos únicamente en efectivo.
+- **PV9-02 — Contabilidad y situaciones especiales de pagos mixtos:** la regla de cálculo de efectivo quedó confirmada y el ejemplo mixto en §4.2 es consistente. Continúan **PENDIENTES DE DISEÑO/VALIDACIÓN** la imputación contable entre medios, devoluciones, pagos rechazados, sobrepagos y conciliación; no extrapolar a esos casos excepcionales una política no consultada.
 - **PV9-03 — Prorrateo:** convención de fecha de incorporación y cómo se manejan cambios de modalidad/días durante un mes, si existieran; no confundir con simple alta a mitad de mes.
 - **PV9-04 — FADEEAC y vigencia:** calendario exacto de los trimestres, periodicidad y responsable de la carga, origen oficial verificable de datos, control de errores, y precisión intermedia de los porcentajes. La variación compuesta sí está confirmada.
 - **PV9-05 — Condiciones contractuales:** representación estructurada y autorización de cláusulas FADEEAC; si existen excepciones por períodos de mora, renegociaciones o acuerdos no tratados, no suponerlas.
@@ -198,7 +201,7 @@ El contrato vigente declara los parámetros: `tipo_cliente` (**obligatorio**, `s
 - **PT9-01:** acuerdo del equipo sobre identificación y búsqueda inequívoca de tarifas por combinación (incluida vigencia), sin permitir coincidencias ambiguas.
 - **PT9-02:** contrato definitivo de `GET /tarifas`: nombres, obligatoriedad, tipos, respuesta y semántica del descuento en la **consulta**, con compatibilidad de las pantallas y CU-003.
 - **PT9-03:** impacto del esquema físico/ORM, migración si hace falta y semillas de tarifas para la demo. **No agregar columnas sin control de cambio.**
-- **PT9-04:** decisión de Facundo sobre contabilización y prueba de pagos parciales, descuento por cierre y ajustes FADEEAC; mecanismo para evitar doble aplicación de una variación.
+- **PT9-04:** decisión de Facundo sobre contabilización y pruebas de descuentos por porción de deuda cancelada, pagos mixtos y ajustes FADEEAC; mecanismo para evitar doble aplicación de una variación.
 - **PT9-05:** delimitación PC2 vs extensiones futuras y aprobación de los tres para modificar operaciones API existentes.
 - **PT9-06:** revisión del RF-028 y CU-003 más recientes y ajuste controlado de trazabilidad/documentación si correspondiere.
 
@@ -207,8 +210,8 @@ El contrato vigente declara los parámetros: `tipo_cliente` (**obligatorio**, `s
 | Necesidad / comportamiento | Fuente o requisito asociado | Interfaz / API / datos existentes | Test candidato | Estado |
 |---|---|---|---|---|
 | Consultar precio de universitario/laboral según días semanales y sentido | RN-010; RF-028 (según Issue #9); AC9-01/08 | `/tarifas`; `tarifa`, `servicio`, `abono_mensual` | TP9-01 | Relevamiento confirmado; mapeo técnico pendiente |
-| Consultar ocasional IDA/VUELTA/combinado | AC9-02..06; CU-003; Issue #7 | `/tarifas`, `/reservas`; `viaje`, `contratacion` | TP9-02/03 | Comercial confirmado; API pendiente |
-| Registrar descuentos después de pago efectivo confirmado | RN-011, RN-015; AC9-12..16 | `pago`, `movimiento_cuenta`; operaciones de pagos vigentes | TP9-04..07 | Comercial confirmado; cálculo/contabilidad pendiente |
+| Consultar ocasional IDA/VUELTA/combinado | AC9-02..06; AC7-03/04 del Issue #7 (PR #58); CU-003 | `/tarifas`, `/reservas`; `viaje`, `contratacion` | TP9-02/03 | Comercial confirmado; API pendiente |
+| Registrar descuentos después de pago efectivo confirmado | RN-011, RN-015; AC9-12..16 | `pago`, `movimiento_cuenta`; operaciones de pagos vigentes | TP9-04..07, TP9-16 | Comercial confirmado; cálculo/contabilidad pendiente |
 | Prorratear un abono incorporado a mitad de mes | RN-010; AC9-09..11 | `abono_mensual`, `periodo_abono` | TP9-08/09 | Confirmado; gestión completa fuera PC2 |
 | Actualizar referencias según FADEEAC | RN-012 (relación parcial); AC9-17..20 | `tarifa.fecha_vigencia` | TP9-10 | Confirmado AS-IS; mecanismo TO-BE pendiente/fuera PC2 |
 | Mantener abono vigente; reactivar deuda suspendida | RN-012; AC9-21..23 | `periodo_abono`, `pago`, `movimiento_cuenta` | TP9-11/12 | Confirmado; gestión fuera PC2 |
@@ -223,10 +226,10 @@ Los identificadores `TP9-xx` son **escenarios candidatos, no pruebas ejecutadas 
 |---|---|---|
 | TP9-01 | Consultar abono universitario de 3 días semanales IDA frente al de 3 días IDA_VUELTA, con ambos registros de tarifario. | Selección de cada **tarifa fija específica**; no multiplicación diaria ni mezcla entre modalidades. |
 | TP9-02 | Ocasional toma IDA de un charter laboral y consulta VUELTA. | Precio fijo de cada sentido; no forzar igualdad ni que ida sea siempre mayor. |
-| TP9-03 | Ocasional contrata IDA y VUELTA el mismo día; otro intenta combinado con fechas distintas. | Primer caso utiliza tarifa fija conjunta; segundo **no tiene derecho a esa tarifa conjunta** (sin inferir aquí si otra contratación múltiple es admisible). |
+| TP9-03 | Ocasional contrata IDA y VUELTA el mismo día; otro solicita ida y vuelta de fechas diferentes. | **Mismo día:** una contratación conjunta con tarifa especial. **Días distintos:** dos contrataciones independientes y tarifas individuales (AC9-06; AC7-03/04, PR #58). |
 | TP9-04 | Se selecciona EFECTIVO al consultar y existe pago PENDIENTE. | El descuento aún **no está otorgado**. |
-| TP9-05 | Importe base $100.000, pago efectivo CONFIRMADO de $30.000. | Descuento $4.500; saldo $65.500. |
-| TP9-06 | Tras TP9-05 se cancelan los restantes con $55.000 más en efectivo. | Descuento total $15.000; cobros totales $85.000; saldo $0. **No** solo 15 % del segundo importe. |
+| TP9-05 | Importe base $100.000, pago efectivo CONFIRMADO de $30.000. | Deuda cancelada $35.294,12; descuento $5.294,12; saldo $64.705,88. |
+| TP9-06 | Tras TP9-05 se cancelan los restantes con $55.000 más en efectivo. | Segunda deuda cancelada $64.705,88; descuento segundo pago $9.705,88; descuento total $15.000; cobros totales $85.000; saldo $0. |
 | TP9-07 | Contratación $100.000 con descuento comercial 10 % y pago total efectivo. | Cobro final $76.500; descuentos sucesivos, no sumados. |
 | TP9-08 | Abono $120.000 con 12 días contratados computables y 6 restantes al incorporar. | Importe proporcional $60.000. |
 | TP9-09 | Feriado sin viaje coincide con día semanal contratado. | Se cuenta para el denominador y, si corresponde, para los días restantes de TP9-08. |
@@ -236,6 +239,7 @@ Los identificadores `TP9-xx` son **escenarios candidatos, no pruebas ejecutadas 
 | TP9-13 | Servicio especial aceptado **sin** cláusula de ajuste, aún impago; entra nueva tarifa. | No se actualiza su importe acordado por FADEEAC. |
 | TP9-14 | Servicio corporativo con cláusula: deuda $200.000 tras pago previo; actualización +10 %, servicio ya realizado. | Saldo $220.000; pago previo intacto; posteriores actualizaciones mientras exista deuda. |
 | TP9-15 | Cálculo produce $132.637,506. | Importe monetario $132.637,51. |
+| TP9-16 | Importe base $100.000; $30.000 efectivo CONFIRMADO y el resto por transferencia confirmada. | Primer pago cancela $35.294,12 y reconoce $5.294,12 de descuento; transferencia del saldo $64.705,88; total desembolsado $94.705,88; saldo $0. |
 
 **No ejecutados.** Los casos dentro del PC2 se seleccionarán según `REPARTO-PC2.md`; los demás sirven de criterios diferidos, no como obligación de desarrollo inmediato.
 
@@ -249,4 +253,4 @@ Los identificadores `TP9-xx` son **escenarios candidatos, no pruebas ejecutadas 
 
 ---
 
-**Control de versión:** v0.2, aprobada funcionalmente por Martín el 18/10/2026 sobre el contenido de la v0.1, sin cambios sustantivos en aclaraciones AC9 ni en escenarios TP9. Ninguna decisión técnica aquí sugerida está aprobada; toda ambigüedad residual conserva el estado **PENDIENTE DE VALIDACIÓN**.
+**Control de versión:** documento v0.2 aprobado funcionalmente por Martín el 18/10/2026 y **revisado el mismo día tras observaciones de Marti sobre PR #59**: AC9-14 coherente con AC9-15, ejemplos de §4.2 y pruebas TP9-05/06/16 corregidos; AC9-06 vinculado expresamente a AC7-03/04 de PR #58. Ninguna decisión técnica aquí sugerida está aprobada; toda ambigüedad residual conserva el estado **PENDIENTE DE VALIDACIÓN**.

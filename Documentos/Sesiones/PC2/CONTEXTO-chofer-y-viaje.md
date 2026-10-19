@@ -1,5 +1,19 @@
 # Contexto vivo · Chofer y viaje en curso (Martín)
 
+## Estado al 18/10/2026 — ejecución CU-030 (#66)
+
+- **#66 / rama `feat/chofer-ejecucion-cu030-66`: en desarrollo.** Backend de las dos operaciones **existentes en OpenAPI**: `POST /viajes/{id_viaje}/inicio` y `POST /viajes/{id_viaje}/finalizacion`, trazadas a CU-030 / RF-025 / ADJ-03; sin nuevas operaciones ni cambios SQL/ORM.
+- Las transiciones bloquean la fila del viaje durante el cambio para evitar eventos duplicados ante solicitudes concurrentes. El acceso exige rol `chofer` y `viaje.id_chofer == usuario.id_persona`.
+- Inicio: `programado -> en_curso` solo con vehículo asignado; reintentos `en_curso` y `finalizado` responden 200 sin reinicio/evento; `cancelado` 409.
+- Finalización: `en_curso -> finalizado`; reintento finalizado 200 sin duplicación; programado/cancelado 409. Cada transición real deja un evento `viaje_iniciado` o `viaje_finalizado` con el helper compartido en la misma transacción (tipos internos del servicio, **no RN nuevas**).
+- **Estado de calidad al escribir este contexto:** PR/CI pendientes; pruebas declaradas **NO ejecutadas todavía**. Actualizar tras verificarlas.
+- Dependencia de Facundo: para iniciar, asignación previa de chofer y vehículo (ADJ-03). La implementación de reasignaciones posterior al alta sigue fuera de este bloque.
+- No se incluye GPS, UI Flutter, abordajes, avisos de demora/problemas (CU-030 parcialmente cubierto) ni cambios de línea base. Issue #39 GPS continúa en revisión documental.
+- **#64 / PR #65:** consulta CU-029 backend enviada para revisión, CI 148 pruebas aprobadas; aún sin merge a la fecha de este registro.
+
+---
+
+
 ## Estado
 
 2026-10-15: #37 tiene completo el diseño contractual de las cinco operaciones acordadas y su README.

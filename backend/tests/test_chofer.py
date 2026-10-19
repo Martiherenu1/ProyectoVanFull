@@ -45,8 +45,7 @@ def entorno():
         )
         segunda = _uno(
             base,
-            "INSERT INTO parada (nombre_descripcion) "
-            "VALUES ('Parada final') RETURNING id_parada",
+            "INSERT INTO parada (nombre_descripcion) VALUES ('Parada final') RETURNING id_parada",
         )
         _ejecutar(
             base,
@@ -179,9 +178,7 @@ def test_fecha_omitida_usa_servidor_y_fecha_invalida_es_400(entorno):
     resultado = entorno["http"].get(RUTA, headers=_token(mio, ["chofer"]))
     assert resultado.status_code == 200
     assert [fila["id_viaje"] for fila in resultado.json()] == [esperado]
-    invalida = entorno["http"].get(
-        RUTA, params={"fecha": "ayer"}, headers=_token(mio, ["chofer"])
-    )
+    invalida = entorno["http"].get(RUTA, params={"fecha": "ayer"}, headers=_token(mio, ["chofer"]))
     assert invalida.status_code == 400
     assert invalida.json()["error"]["codigo"] == "VALIDACION"
 
@@ -195,9 +192,7 @@ def test_detalle_inexistente_o_ajeno_es_404(entorno):
         assert respuesta.status_code == 404
         assert respuesta.json()["error"]["codigo"] == "VIAJE_NO_ENCONTRADO"
     assert http.get(f"{RUTA}/{id_viaje}").status_code == 401
-    assert http.get(
-        f"{RUTA}/{id_viaje}", headers=_token(mio, ["pasajero"])
-    ).status_code == 403
+    assert http.get(f"{RUTA}/{id_viaje}", headers=_token(mio, ["pasajero"])).status_code == 403
 
 
 def test_detalle_sin_reservas_ni_nomina_y_paradas_ordenadas(entorno):

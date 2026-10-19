@@ -3,7 +3,7 @@
 > Lo mantiene el agente de Martiniano, en el mismo PR que cambia algo. Convención en
 > `PROMPT-CONTEXTO-VIVO.md`. Si algo de acá contradice al código, manda el código: corregir este archivo.
 >
-> **Última actualización: 2026-10-15**
+> **Última actualización: 2026-10-19**
 
 ## Estado
 
@@ -11,10 +11,11 @@
 (CU-001, PR #26), la consulta de servicios, disponibilidad y paradas (CU-002, PR #29) y la consulta de
 reservas propias (CU-010, PR #32), que con el PR de #31 ya informa fecha, horario y sentido del viaje. La
 reserva (CU-003) y la cancelación (CU-004) siguen frenadas por pendientes de validación con Martín (#7, #9,
-#28 y #33).
+#28 y #33). **El asistente AG-01 (CU-011) está en una rama aparte, sin PR todavía:** `POST /api/chat` con las
+tools de lectura (ver «En curso»).
 
-La CI corre en cada PR y pasó en las ramas de la base y en `main`. La suite son 132 pruebas (130 más las 2 que
-suma el PR de #31), algo más de un minuto.
+La CI corre en cada PR y pasó en las ramas de la base y en `main`. En la rama del #42 la suite da 186 pruebas
+(30 son del chat), algo más de un minuto.
 
 ## Hecho
 
@@ -36,8 +37,16 @@ suma el PR de #31), algo más de un minuto.
 
 ## En curso
 
-Lo que sigue es el circuito de reservas (CU-003, 004); no se empieza sobre una regla indefinida:
-CU-003 necesita el respaldo de la reserva (#7), la tarifa (#9) y la capacidad sin vehículo (#28).
+**CU-011, rebanada de lectura de AG-01 (Issue #42), rama `feat/pasajero-chat-lectura-cu011`.** Hecho: schemas
+(`schemas/chat.py`), ejecutor de tools (`agent/ejecutor.py`), servicio (`services/agente.py`), router
+(`routers/chat.py`) y pruebas con un modelo falso (`test_ejecutor.py`, `test_agente.py`). Tools que se ejecutan:
+`consultar_disponibilidad`, `consultar_reserva` (sin `reserva_id` lista las propias), `consultar_paradas` y
+`derivar_humano`; las otras 9 de `tools.py` no se ofrecen al modelo y, si las pide, vuelven `TOOL_NO_HABILITADA`.
+`crear_reserva` y `cancelar_reserva` se suman en `_FUNCIONES` cuando existan CU-003 y CU-004.
+Falta: abrir el PR e integrar `main` (cambió `app/main.py`).
+
+Después, el circuito de reservas (CU-003, 004); no se empieza sobre una regla indefinida: CU-003 necesita el
+respaldo de la reserva (#7), la tarifa (#9) y la capacidad sin vehículo (#28).
 
 ## Decisiones
 
@@ -53,6 +62,9 @@ CU-003 necesita el respaldo de la reserva (#7), la tarifa (#9) y la capacidad si
 | 2026-10-14 | **La revisión de otro integrante es opcional, para siempre**; el autor mergea con la CI en verde y deja asentado en el PR si hubo revisión. Los PR #10 a #21 se mergearon sin revisión registrada en GitHub | CONTRIBUTING §1.7 |
 | 2026-10-15 | `Reserva` trae `fecha`, `horario` (`"HH:MM"`, `null` si el viaje no tiene), `sentido` e `id_recorrido`, **planos** y con los nombres de `Disponibilidad`: el schema `Viaje` expone chofer y vehículo, que el pasajero no necesita. `id_recorrido` es para resolver `orden_parada` con `GET /recorridos/{id}/paradas`. No se expone `estado_viaje`: ninguna RN dice qué pasa con las reservas de un viaje cancelado | Issue #31, `openapi.yaml` |
 | 2026-10-15 | **GPS (#37):** un timestamp futuro se reemplaza por la hora del servidor; ante un empate de timestamp se conserva la primera posición, porque `posicion_gps` guarda una fila por viaje. Decisión de Martiniano, respondida a Martín | Este archivo: #37 todavía no tiene comentario en GitHub |
+| 2026-10-19 | **`/chat` (Issue #42):** las conversaciones viven en memoria del proceso, atadas al `id_persona` que las abrió (ninguna de las 35 tablas las guarda). Topes: 40 mensajes por conversación (se descartan turnos enteros) y 500 conversaciones | `services/agente.py`, Issue #42 |
+| 2026-10-19 | Un `conversacion_id` inexistente o de otra persona **abre una conversación nueva** y devuelve su id, en vez de 404: tras reiniciar el servidor el chat del pasajero sigue andando, y una ajena no revela que existe (RN-026 a 030). Decisión mía al implementar, a confirmar | `services/agente.py`, `test_agente.py` |
+| 2026-10-19 | Cada mensaje admite hasta 5 vueltas modelo → tools y 2000 caracteres. Si el modelo no responde (principal ni fallback), responde algo ilegible o no cierra en las vueltas, sale `derivar_humano: true` y el turno no se guarda. `tool_usada` es la última tool habilitada que se ejecutó | `services/agente.py`, Issue #42 |
 
 ## Pendientes
 
@@ -62,12 +74,14 @@ Para Martín, la hoja `PENDIENTES-PARA-MARTIN-2026-10-15.html` reúne #33, #7, #
 | Qué | Issue | Estado |
 |---|---|---|
 | Respaldo de la reserva (XOR período de abono / contratación) que `POST /reservas` no informa | #7 | PENDIENTE DE VALIDACIÓN con Martín |
-| Filtro `destino` de `/servicios/disponibilidad` sin columna en el modelo. Hoy responde 400 `FILTRO_NO_DISPONIBLE` en vez de ignorarlo: la tool `consultar_disponibilidad` de AG-01 manda `destino`, así que esas consultas fallan hasta resolverlo | #8 | PENDIENTE DE VALIDACIÓN con Martín |
+| Filtro `destino` de `/servicios/disponibilidad` sin columna en el modelo. Hoy responde 400 `FILTRO_NO_DISPONIBLE` en vez de ignorarlo: la tool `consultar_disponibilidad` de AG-01 manda `destino`; en `/chat` ese error vuelve al modelo como resultado (no es un 500) y el asistente avisa que no puede filtrar por destino | #8 | PENDIENTE DE VALIDACIÓN con Martín |
 | `Reserva` también la devuelven `POST /reservas`, `cambio-parada` y `ResultadoCancelacion` (CU-003, 005, 004): al implementarlos, `services/reservas.py::_a_schema(reserva, viaje)` ya arma los campos del viaje; necesitan el `JOIN` con `viaje` | #31 (cerrado) | Aviso a Martín y Facundo en el PR (CONTRIBUTING §1.8 fila 2) |
 | Qué ve el pasajero de una reserva cuyo viaje se cancela: hoy `Reserva.estado` no cambia y no se informa el estado del viaje. CU-018 solo crea viajes en el contrato | — | PENDIENTE DE VALIDACIÓN con Martín; sin Issue todavía |
 | `Disponibilidad.horario` devuelve `null` si el viaje no tiene horario pero el contrato no lo declara `nullable` (`Reserva.horario` sí) | — | Corrección chica de contrato; no se tocó para no ampliar el PR de #31 |
 | Disponibilidad: capacidad de un viaje sin vehículo (hoy `capacidad_planificada`, o sin cupo), viajes ofrecidos (hoy solo `programado`) y si una ausencia libera el cupo (hoy no) | #28 | PENDIENTE DE VALIDACIÓN con Martín. CU-003 valida con la misma función |
-| La tool `consultar_disponibilidad` de AG-01 usa `ida`/`vuelta` en minúsculas y el contrato `IDA`/`VUELTA` | — | Lo mapea el ejecutor del agente (paso 2, AG-01); este endpoint rechaza `ida` con 400 |
+| Persistencia de las conversaciones de `/chat`: se pierden al reiniciar y no se comparten entre procesos. Dos mensajes simultáneos de una misma conversación se pisan (gana el último en guardar) | #42 | Pendiente de diseño: hace falta una tabla, y las 35 no incluyen una |
+| Qué recibe la persona a la que se deriva (RF-032): hoy `derivar_humano` solo marca la respuesta de `/chat` | #42 | Sin definir en la línea base |
+| `/chat` nunca se probó contra un modelo real de OpenRouter: las pruebas usan un modelo falso con guion. La calidad de las respuestas y el prompt (`SYSTEM_PROMPT`, «base de la PoC») | #42 | SIN VERIFICAR; hace falta la clave en `backend/.env` |
 | Parámetros de `/tarifas` no corresponden a la tabla `tarifa` | #9 | PENDIENTE DE VALIDACIÓN con Martín |
 | Campos editables del perfil: hoy son los del contrato (`email`, `telefono`, `direccion`), concentrados en `CAMPOS_EDITABLES` de `services/perfil.py`. Tampoco está definido si se puede vaciar un dato ni si el email lleva formato o verificación | #25 | PENDIENTE DE VALIDACIÓN con Martín. La v1.3 de CU-001 lo dice textual: "la línea base no enumera cuáles campos, además del DNI, son modificables" |
 | Lista de espera de CU-003 sin operación en el contrato. La v1.3 define el registro a pedido (A1) y la incorporación FIFO (A1.1); propuesta: `POST /viajes/{id}/lista-espera` | #34 | Propuesta mía, por PR de contrato (checklist §1.9). La incorporación FIFO crea una reserva: depende de #7, #9 y #33 |
@@ -79,7 +93,11 @@ Para Martín, la hoja `PENDIENTES-PARA-MARTIN-2026-10-15.html` reúne #33, #7, #
 
 ## Entorno y trampas
 
-- **Docker Desktop tiene que estar abierto.** Sin el motor nada corre; `docker info` lo confirma.
+- **Docker Desktop tiene que estar abierto.** Sin el motor nada corre; `docker info` lo confirma. Desde
+  PowerShell se abre con `Start-Process "C:\Program Files\Docker\Docker\Docker Desktop.exe"`.
+- **Para reemplazar el modelo en una prueba** se hace `monkeypatch.setattr(openrouter_client,
+  "chat_completion", ...)`: `services/agente.py` lo llama por el módulo. Con `from ... import chat_completion`
+  el reemplazo no tendría efecto.
 - **`backend/.env` hace falta** (`cp backend/.env.example backend/.env`): sin él ningún comando del backend
   arranca. No está en el repo; la clave de OpenRouter va solo ahí.
 - **La API no migra sola.** Tras `docker compose up -d --build`, `/health` da 200 pero el login da 500 hasta
@@ -125,6 +143,9 @@ Para Martín, la hoja `PENDIENTES-PARA-MARTIN-2026-10-15.html` reúne #33, #7, #
 - `from app.services.disponibilidad import cupo_disponible`: **la definición única del cupo** (RN-001,
   RN-002). Si necesitan el cupo de un viaje (por ejemplo, CU-018 al asignar un vehículo), úsenla; no la
   reescriban.
+- `POST /api/chat` (cuando se mergee el PR del #42): solo rol `pasajero`. Si suman un servicio de lectura que el
+  asistente deba usar (estado del viaje, ubicación, deuda), la tool se habilita en `_FUNCIONES` de
+  `agent/ejecutor.py` llamando a **su servicio**; las 13 definiciones ya están en `agent/tools.py`.
 - El seed: cuentas `pasajero1@vanfull.test`, `pasajero2@vanfull.test`, `chofer1@vanfull.test` y
   `admin1@vanfull.test`; las contraseñas están en `db/seed/contrasenas-de-prueba.csv`. Cada dueño suma los
   CSV de sus tablas por PR (`db/seed/README.md`).

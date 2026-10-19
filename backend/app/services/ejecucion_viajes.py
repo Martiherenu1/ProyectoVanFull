@@ -39,9 +39,7 @@ async def _bloquear_viaje_propio(
     return viaje
 
 
-async def iniciar_viaje(
-    db: AsyncSession, usuario: UsuarioActual, id_viaje: int
-) -> Viaje:
+async def iniciar_viaje(db: AsyncSession, usuario: UsuarioActual, id_viaje: int) -> Viaje:
     """programado -> en_curso; reintentos en_curso/finalizado no generan eventos."""
     viaje = await _bloquear_viaje_propio(db, usuario, id_viaje)
 
@@ -69,9 +67,7 @@ async def iniciar_viaje(
     return resultado
 
 
-async def finalizar_viaje(
-    db: AsyncSession, usuario: UsuarioActual, id_viaje: int
-) -> Viaje:
+async def finalizar_viaje(db: AsyncSession, usuario: UsuarioActual, id_viaje: int) -> Viaje:
     """en_curso -> finalizado; reintentos finalizado no generan eventos."""
     viaje = await _bloquear_viaje_propio(db, usuario, id_viaje)
 

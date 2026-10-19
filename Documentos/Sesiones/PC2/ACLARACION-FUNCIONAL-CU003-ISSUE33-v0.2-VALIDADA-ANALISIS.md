@@ -85,7 +85,9 @@ Los pagos no acreditados automáticamente mediante proveedor integrado requieren
 - `pago.estado` se administra independientemente de `reserva.estado`.
 - En `ReservaCreate` del OpenAPI vigente solo aparecen `id_viaje` y `orden_parada`: **no** está resuelto cómo identificar respaldo y aceptación comercial. **No agregar campos ni endpoints sin tramitar los Issues correspondientes.**
 
-**PENDIENTE DE VALIDACIÓN / DISEÑO:** qué constituye una *aceptación de VanFull* verificable al reservar desde app/AG-01 y con qué evidencia; tratamiento de ocasionales pagados anticipadamente por transferencia; cómo asociar pagos acreditados a períodos/contrataciones; cuándo se consolida el cupo de un nuevo período ya cubierto por un contrato anual; política exacta de suspensión/reactivación y estado en `reserva`; forma de comprobar acuerdo corporativo vigente. Ninguno de esos puntos se declara resuelto en este documento.
+**ACTUALIZACIÓN POSTERIOR — AC7-02 del Issue #7 (PR #58, ya mergeada):** para **pasajeros ocasionales**, la aceptación de la reserva solicitada por app/AG-01 es **automática**, siempre que se cumplan la disponibilidad y las condiciones comerciales aplicables. No exige aceptación manual previa de administración (**CONFIRMADO POR VANFULL** en la aclaración del Issue #7). Esta precisión **no se extiende** a abonos, especiales o corporativos, ni define por sí sola cómo persistir la evidencia técnica de la aceptación.
+
+**PENDIENTE DE VALIDACIÓN / DISEÑO:** representación y evidencia técnica verificable de esa aceptación automática ocasional; tratamiento de ocasionales pagados anticipadamente por transferencia; cómo asociar pagos acreditados a períodos/contrataciones; cuándo se consolida el cupo de un nuevo período ya cubierto por un contrato anual; política exacta de suspensión/reactivación y estado en `reserva`; forma de comprobar acuerdo/aceptación vigente en modalidades de abono, especial y corporativa. Estos puntos siguen pendientes; no convertir la decisión AC7-02 en aprobación técnica ni en regla aplicable a otras modalidades.
 
 ## 6. Criterios de prueba candidatos (no ejecutados ni aprobados)
 

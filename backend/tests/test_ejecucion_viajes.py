@@ -38,8 +38,7 @@ def entorno():
     with base_migrada() as base:
         id_servicio = _uno(
             base,
-            "INSERT INTO servicio (tipo_servicio) VALUES ('UNIVERSITARIO') "
-            "RETURNING id_servicio",
+            "INSERT INTO servicio (tipo_servicio) VALUES ('UNIVERSITARIO') RETURNING id_servicio",
         )
         id_recorrido = _uno(base, "INSERT INTO recorrido DEFAULT VALUES RETURNING id_recorrido")
         id_vehiculo = _uno(

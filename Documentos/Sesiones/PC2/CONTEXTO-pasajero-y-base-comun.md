@@ -14,8 +14,8 @@ reserva (CU-003) y la cancelación (CU-004) siguen frenadas por pendientes de va
 #28 y #33). **El asistente AG-01 (CU-011) está en una rama aparte, sin PR todavía:** `POST /api/chat` con las
 tools de lectura (ver «En curso»).
 
-La CI corre en cada PR y pasó en las ramas de la base y en `main`. En la rama del #42 la suite da 186 pruebas
-(30 son del chat), algo más de un minuto.
+La CI corre en cada PR y pasó en las ramas de la base y en `main`. En la rama del #42, ya integrada con `main`, la suite da 202 pruebas
+(30 son de `test_agente.py`), unos dos minutos.
 
 ## Hecho
 
@@ -43,7 +43,7 @@ La CI corre en cada PR y pasó en las ramas de la base y en `main`. En la rama d
 `consultar_disponibilidad`, `consultar_reserva` (sin `reserva_id` lista las propias), `consultar_paradas` y
 `derivar_humano`; las otras 9 de `tools.py` no se ofrecen al modelo y, si las pide, vuelven `TOOL_NO_HABILITADA`.
 `crear_reserva` y `cancelar_reserva` se suman en `_FUNCIONES` cuando existan CU-003 y CU-004.
-Falta: abrir el PR e integrar `main` (cambió `app/main.py`).
+Integrada con `main` el 2026-10-19; falta el PR.
 
 Después, el circuito de reservas (CU-003, 004); no se empieza sobre una regla indefinida: CU-003 necesita el
 respaldo de la reserva (#7), la tarifa (#9) y la capacidad sin vehículo (#28).

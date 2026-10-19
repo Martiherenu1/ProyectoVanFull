@@ -1,5 +1,24 @@
 # Contexto vivo · Chofer y viaje en curso (Martín)
 
+## Estado vigente al 18/10/2026 — avance CU-029
+
+- **#37 / PR #40: CERRADO y MERGEADO en `main`**. Contrato de cinco operaciones de chofer aprobado y disponible en OpenAPI; este documento conserva debajo el historial original del 15/10, cuyo estado inicial de #37 ya NO es vigente.
+- **#39 / PR #63: aclaración funcional GPS/ETA aprobada por VanFull**, presentada para revisión técnica; sigue abierta y no se modifica el contrato GPS automáticamente.
+- **#64 / rama `feat/chofer-consultas-cu029-64`: en desarrollo**. Backend exclusivo de las dos consultas del chofer `GET /choferes/me/viajes` y `GET /choferes/me/viajes/{id_viaje}`, con servicio, schemas, router y pruebas de PostgreSQL; **NO se declaran todavía probadas ni mergeadas** hasta CI y revisión.
+- **PR #50 de Facundo: mergeada**. Alta `POST /viajes` en `main`; aún no hay asignación posterior de chofer y vehículo. No iniciar un viaje sin ambos (ADJ-03).
+- **PR #45 Flutter base y #47 tema visual: abiertas**; Issue #48 navegación roles pendiente. La consulta CU-029 backend no depende del merge de estas PR.
+- Mantener pendientes inicio/finalización, GPS en servidor/consumo, abordajes/ausencias y pantallas de chofer. QR en la combi lo escanea el pasajero; el chofer consulta abordajes.
+
+### Reglas para este trabajo
+- No inventar nuevos endpoints o requisitos; leer la sesión y filtrar `viaje.id_chofer == usuario.id_persona` (CU-029, RF-024, RN-029).
+- Detalle: paradas ordenadas, reservas provisionales/consolidadas sin canceladas, integrantes de nómina en lista independiente; mostrar abordajes registrados sin inferir ausencia; no exponer contactos/dirección de pasajeros.
+- Sin cambios de OpenAPI, modelo SQL, migraciones ni código Flutter. CU-030 y RNF-008 quedan fuera de #64.
+- Tras CI, registrar pruebas y continuar con inicio/finalización de CU-030 en un Issue/PR aparte.
+
+---
+
+## Historial técnico al 15/10/2026 (se conserva sin reescribir)
+
 ## Estado
 
 2026-10-15: #37 tiene completo el diseño contractual de las cinco operaciones acordadas y su README.

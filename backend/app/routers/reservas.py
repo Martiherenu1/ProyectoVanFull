@@ -1,4 +1,4 @@
-"""Endpoints de reservas. Hoy solo la consulta del pasajero (CU-010).
+"""Endpoints de reservas del pasajero: consulta (CU-010) y creación (CU-003).
 
 Las rutas se declaran completas porque este router mezcla dos prefijos del contrato
 (`/pasajeros/me/reservas` y `/reservas/...`); al sumar CU-003, 004 y 005 siguen acá.
@@ -12,7 +12,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.database import get_db
 from app.core.security import UsuarioActual, requiere_rol
-from app.schemas.reservas import Reserva
+from app.schemas.reservas import Reserva, ReservaCreate
 from app.services import reservas as servicio
 
 router = APIRouter(tags=["reservas"])
@@ -33,3 +33,12 @@ async def consultar_reserva(
     db: AsyncSession = Depends(get_db),
 ):
     return await servicio.obtener_reserva_del_pasajero(db, usuario, id_reserva)
+
+
+@router.post("/reservas", response_model=Reserva, status_code=201)
+async def crear_reserva(
+    datos: ReservaCreate,
+    usuario: UsuarioActual = Depends(requiere_rol("pasajero")),
+    db: AsyncSession = Depends(get_db),
+):
+    return await servicio.crear_reserva(db, usuario, datos)

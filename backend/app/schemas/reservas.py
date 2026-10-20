@@ -1,9 +1,15 @@
-"""Salida de las reservas. Nombre del contrato: `Reserva`."""
+"""Entrada y salida de las reservas. Nombres del contrato: `ReservaCreate`, `Reserva`."""
 
 from datetime import date
 from typing import Literal
 
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
+
+
+class ReservaCreate(BaseModel):
+    id_viaje: int
+    # Parada de ascenso dentro del recorrido del viaje. Los órdenes empiezan en 1.
+    orden_parada: int = Field(ge=1)
 
 
 class Reserva(BaseModel):

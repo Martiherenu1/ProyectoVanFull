@@ -5,7 +5,19 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from app.core.config import get_settings
 from app.core.errors import registrar_manejadores
-from app.routers import auth, chat, chofer, health, perfil, reservas, servicios, viajes
+from app.routers import (
+    auth,
+    chat,
+    chofer,
+    deuda,
+    ejecucion_viajes,
+    health,
+    pagos,
+    perfil,
+    reservas,
+    servicios,
+    viajes,
+)
 
 settings = get_settings()
 
@@ -31,11 +43,14 @@ registrar_manejadores(app)
 app.include_router(health.router, prefix=settings.api_prefix)
 app.include_router(auth.router, prefix=settings.api_prefix)
 app.include_router(perfil.router, prefix=settings.api_prefix)
+app.include_router(deuda.router, prefix=settings.api_prefix)
 app.include_router(servicios.router, prefix=settings.api_prefix)
 app.include_router(reservas.router, prefix=settings.api_prefix)
+app.include_router(pagos.router, prefix=settings.api_prefix)
 app.include_router(viajes.router, prefix=settings.api_prefix)
 app.include_router(chofer.router, prefix=settings.api_prefix)
 app.include_router(chat.router, prefix=settings.api_prefix)
+app.include_router(ejecucion_viajes.router, prefix=settings.api_prefix)
 
 
 @app.get("/")

@@ -2,8 +2,9 @@
 
 ## Estado
 
-2026-10-19: el PR #47 corrige el tema visual compartido de Flutter sobre `main`.
-CU-018 y la base común Flutter siguen siendo trabajos independientes.
+2026-10-19: el PR #47 (tema visual compartido de Flutter) está en `main`. `POST /viajes` de CU-018 también.
+CU-006 está en el PR #54 y CU-016 en el PR #52, ambos con CI aprobada. CU-018 y la base común Flutter siguen
+siendo trabajos independientes.
 
 ## Hecho
 
@@ -12,10 +13,12 @@ CU-018 y la base común Flutter siguen siendo trabajos independientes.
 - PR #47: temas oscuro para pasajero/chofer y claro para administración, tokens compartidos y vista temporal de
   verificación. La corrección A.0–A.8 deja esquemas de color explícitos, dorado accesible en el tema claro,
   tipografía Material completa y superficies sin sombras ni tintes.
+- Issue #53 implementado en el PR #54: consulta de deuda propia de CU-006.
+- Issue #51 implementado en el PR #52: confirmación o rechazo manual de pagos de CU-016.
 
 ## En curso
 
-- Issue #46 / PR #47: correcciones del tema visual compartido y sus pruebas.
+- PR #54 (CU-006) y PR #52 (CU-016): integrar `main` y mergear.
 
 ## Decisiones
 
@@ -29,11 +32,31 @@ CU-018 y la base común Flutter siguen siendo trabajos independientes.
   Las etiquetas en mayúsculas se transforman en el widget, porque `TextStyle` no modifica el contenido.
 - 2026-10-19, #47: aplicar las densidades 48/64/36 y la navegación real en #48; #47 sólo define los tokens y
   muestra los tres temas sin incorporar funcionalidad de navegación.
+- 2026-10-18, Facundo: CU-006 calcula el saldo sin persistirlo; los movimientos `DEUDOR` suman y los
+  `ACREEDOR` restan según MR-R30. Un saldo neto acreedor se informa como cero.
+- 2026-10-18, Facundo: si existe el cliente individual pero no su cuenta corriente, CU-006 responde
+  `200`, saldo `0` y estado `al_dia`, porque sin cuenta no puede haber movimientos asociados.
+- 2026-10-18, Facundo: CU-016 crea el movimiento `ACREEDOR` al confirmar el pago; CU-014 y el rechazo
+  no crean movimientos. CU-006 conserva el cálculo por movimientos sin inventar estados.
+- 2026-10-18, Facundo: CU-016 crea, al confirmar, exactamente un `MovimientoCuenta` de naturaleza
+  `ACREEDOR`, asociado al cliente y al pago, por el importe pagado. El rechazo y CU-014 no crean
+  movimientos. Motivo: MR-R30 calcula la deuda desde movimientos y esta alternativa evita inventar
+  un catálogo de estados todavía pendiente. El movimiento se confirma en la misma transacción que
+  el pago y el recibo.
 
 ## Pendientes
 
+- #53 y #51: cerrar mediante la revisión e integración de los PR #54 y #52.
+- CU-006 devuelve `404 CLIENTE_NO_ENCONTRADO` si no existe el cliente individual. Esa respuesta no
+  figura en OpenAPI y agregarla al contrato requiere el acuerdo de los tres integrantes.
+- PR #52 debe integrarse para que las confirmaciones de pago creen los movimientos acreedores que
+  CU-006 usa al calcular la deuda.
+- El catálogo físico de estados de `movimiento_cuenta` continúa PENDIENTE DE VALIDACIÓN; CU-006 no
+  filtra por un estado no aprobado.
+- CU-015 contempla acciones administrativas sobre deuda, pero todavía no tiene operaciones en
+  OpenAPI; no se inventan en este PR.
 - CU-018: reglas detalladas de conflictos o solapamientos de asignaciones están PENDIENTES DE
-  VALIDACIÓN y no fueron implementadas por #50.
+  VALIDACIÓN y no fueron implementadas por #50 (#49).
 - CU-018 continúa con cobertura parcial: modificación, cancelación y reasignaciones requieren una
   tarea y contrato posteriores; fuera del alcance de #49.
 - #47: Martiniano debe confirmar Archivo + IBM Plex Mono antes de incorporar archivos de fuentes y desactivar
@@ -47,7 +70,7 @@ CU-018 y la base común Flutter siguen siendo trabajos independientes.
 - Docker Desktop debe estar iniciado para ejecutar PostgreSQL, Ruff y Pytest según el flujo del repo.
 - `gh` no está instalado en este equipo; el Issue #49 se creó desde GitHub en el navegador.
 - Ejecutar el formateador solamente sobre los archivos de esta tarea para no tocar otras áreas.
-- La suite completa mantiene 84 advertencias conocidas de JWT de desarrollo y TestClient en desuso.
+- La suite completa mantiene advertencias conocidas de JWT de desarrollo y TestClient en desuso.
 
 ## Para otras áreas
 

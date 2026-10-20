@@ -55,6 +55,45 @@ def cupo_disponible(
     return max(capacidad - ocupados, 0)
 
 
+def _lugares_ocupados():
+    """Subconsulta correlacionada con `Viaje`: cuántas reservas ocupan lugar en cada viaje.
+
+    Es la única definición de "ocupado" (RN-002, AC28-06): la consulta de disponibilidad y la
+    creación de una reserva (CU-003) tienen que contar lo mismo, o el pasajero vería un cupo que
+    el backend después rechaza.
+    """
+    # AC28-06: el pasajero que informó su ausencia (CU-008) libera su lugar de inmediato, sin que lo
+    # apruebe nadie. La tabla `ausencia` es de Martín; acá solo se lee. Se asume que cada fila es un
+    # aviso voluntario: una inasistencia sin aviso no libera cupo (PT28-18, RN-022).
+    aviso_su_ausencia = exists().where(
+        Ausencia.id_pasajero == Reserva.id_pasajero, Ausencia.id_viaje == Reserva.id_viaje
+    )
+    return (
+        select(func.count())
+        .select_from(Reserva)
+        .where(
+            Reserva.id_viaje == Viaje.id_viaje,
+            Reserva.estado == ESTADO_QUE_OCUPA_CUPO,
+            ~aviso_su_ausencia,
+        )
+        .correlate(Viaje)
+        .scalar_subquery()
+    )
+
+
+async def cupo_del_viaje(db: AsyncSession, id_viaje: int) -> int:
+    """Lugares libres de un viaje concreto, con la misma regla que `consultar_disponibilidad`."""
+    capacidad_vehiculo, planificada, ocupados = (
+        await db.execute(
+            select(Vehiculo.capacidad, Viaje.capacidad_planificada, _lugares_ocupados())
+            .select_from(Viaje)
+            .outerjoin(Vehiculo, Vehiculo.id_vehiculo == Viaje.id_vehiculo)
+            .where(Viaje.id_viaje == id_viaje)
+        )
+    ).one()
+    return cupo_disponible(capacidad_vehiculo, planificada, ocupados)
+
+
 async def consultar_disponibilidad(
     db: AsyncSession,
     *,
@@ -74,23 +113,7 @@ async def consultar_disponibilidad(
             {"parametro": "destino"},
         )
 
-    # AC28-06: el pasajero que informó su ausencia (CU-008) libera su lugar de inmediato, sin que lo
-    # apruebe nadie. La tabla `ausencia` es de Martín; acá solo se lee. Se asume que cada fila es un
-    # aviso voluntario: una inasistencia sin aviso no libera cupo (PT28-18, RN-022).
-    aviso_su_ausencia = exists().where(
-        Ausencia.id_pasajero == Reserva.id_pasajero, Ausencia.id_viaje == Reserva.id_viaje
-    )
-    ocupados = (
-        select(func.count())
-        .select_from(Reserva)
-        .where(
-            Reserva.id_viaje == Viaje.id_viaje,
-            Reserva.estado == ESTADO_QUE_OCUPA_CUPO,
-            ~aviso_su_ausencia,
-        )
-        .correlate(Viaje)
-        .scalar_subquery()
-    )
+    ocupados = _lugares_ocupados()
     consulta = (
         select(Viaje, Vehiculo.capacidad, ocupados.label("ocupados"))
         .outerjoin(Vehiculo, Vehiculo.id_vehiculo == Viaje.id_vehiculo)

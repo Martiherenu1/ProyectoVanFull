@@ -1,24 +1,32 @@
-"""Reservas del pasajero: consulta (CU-010, RF-043) y creación (CU-003, RF-005).
+"""Reservas del pasajero: consulta (CU-010, RF-043), creación (CU-003, RF-005) y cancelación (CU-004).
 
-Cancelar (CU-004) y cambiar de parada (CU-005) se suman acá cuando sus reglas estén definidas.
+Cambiar de parada (CU-005) no es del PC2 (REPARTO-PC2.md).
 `reserva` es una tabla de este módulo: lo que otras áreas necesiten de ella lo piden por estas
 funciones.
 """
 
-from sqlalchemy import select
+from datetime import date, datetime, time, timedelta, timezone
+
+from sqlalchemy import exists, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.errors import ApiError
 from app.core.security import UsuarioActual
 from app.models.personas import Cliente, ClienteIndividual, Pasajero
-from app.models.servicios import Contratacion
-from app.models.viajes import ParadaRecorrido, Viaje
+from app.models.servicios import Contratacion, Servicio
+from app.models.viajes import Ausencia, ParadaRecorrido, Viaje
 from app.models.viajes import Reserva as ReservaModelo
-from app.schemas.reservas import Reserva, ReservaCreate
+from app.schemas.reservas import Reserva, ReservaCreate, ResultadoCancelacion
 from app.services.disponibilidad import ESTADO_OFRECIDO, cupo_del_viaje
 from app.services.eventos import registrar_evento
 
 TIPO_RESERVA_CREADA = "reserva_creada"
+TIPO_RESERVA_CANCELADA = "reserva_cancelada"
+
+# RN-017: la referencia operativa para cancelar un viaje ocasional es antes de las 18:00 del día
+# anterior. Argentina no tiene horario de verano: UTC-3 todo el año.
+ZONA_ARGENTINA = timezone(timedelta(hours=-3))
+LIMITE_CANCELACION = time(18, 0)
 
 
 def _a_schema(r: ReservaModelo, v: Viaje) -> Reserva:
@@ -188,5 +196,94 @@ async def crear_reserva(db: AsyncSession, usuario: UsuarioActual, datos: Reserva
     await db.flush()
     await registrar_evento(db, tipo_evento=TIPO_RESERVA_CREADA, id_reserva=reserva.id_reserva)
     resultado = _a_schema(reserva, viaje)
+    await db.commit()
+    return resultado
+
+
+def _en_termino(fecha_viaje: date, ahora: datetime) -> bool:
+    """RN-017: ¿se cancela antes de las 18:00 del día anterior al viaje?"""
+    limite = datetime.combine(fecha_viaje - timedelta(days=1), LIMITE_CANCELACION, ZONA_ARGENTINA)
+    return ahora < limite
+
+
+def _motivo(reserva: ReservaModelo, tipo_servicio: str, fecha_viaje: date, ahora: datetime) -> str:
+    """Qué regla corresponde a esta cancelación. Ninguna consecuencia económica se aplica todavía.
+
+    No hay dónde guardar el crédito de RN-017 (ninguna de las 35 tablas lo contempla) y la
+    devolución de RN-018 depende de los pagos y la tarifa (#9): el motivo lo dice en vez de
+    sugerir que se aplicó algo.
+    """
+    if reserva.id_periodo_abono is not None:
+        return "RN-007: los viajes de un abono no generan devolución, crédito ni traslado."
+    if tipo_servicio == "ESPECIAL":
+        return "Servicio especial (RN-018): la devolución todavía no se calcula."
+    if _en_termino(fecha_viaje, ahora):
+        return (
+            "Cancelación en término (antes de las 18:00 del día anterior). RN-017 prevé un "
+            "crédito para otro viaje del mes, que todavía no se otorga."
+        )
+    return (
+        "Cancelación fuera del término de referencia de RN-017 (18:00 del día anterior): "
+        "el caso no está definido y no se aplica ninguna consecuencia."
+    )
+
+
+async def cancelar_reserva(
+    db: AsyncSession, usuario: UsuarioActual, id_reserva: int
+) -> ResultadoCancelacion:
+    """Cancela una reserva propia y devuelve el lugar al viaje (CU-004, RF-006).
+
+    La reserva queda `cancelada`; el cupo no se guarda, se calcula (MR-R30), así que el lugar vuelve
+    solo. Se puede cancelar mientras el viaje está `programado`, fuera del término de RN-017 también:
+    esa ventana solo decide el crédito, que todavía no se otorga (Issue #74).
+
+    Se bloquea la fila de la reserva: dos cancelaciones simultáneas no pueden pasar las dos.
+    """
+    fila = (
+        await db.execute(
+            select(ReservaModelo, Viaje)
+            .join(Viaje, Viaje.id_viaje == ReservaModelo.id_viaje)
+            .where(
+                ReservaModelo.id_reserva == id_reserva,
+                ReservaModelo.id_pasajero == usuario.id_persona,
+            )
+            .with_for_update(of=ReservaModelo)
+        )
+    ).one_or_none()
+    if fila is None:
+        raise ApiError(404, "RESERVA_NO_ENCONTRADA", "La reserva no existe.")
+    reserva, viaje = fila
+
+    if reserva.estado == "cancelada":
+        raise ApiError(409, "RESERVA_NO_CANCELABLE", "La reserva ya estaba cancelada.")
+    if viaje.estado != ESTADO_OFRECIDO:
+        raise ApiError(409, "VIAJE_NO_CANCELABLE", "El viaje ya no está programado.")
+
+    # El lugar vuelve solo si lo ocupaba: una provisional no lo ocupa (RN-002) y quien avisó su
+    # ausencia ya lo había liberado (AC28-06).
+    aviso_su_ausencia = await db.scalar(
+        select(
+            exists().where(
+                Ausencia.id_pasajero == reserva.id_pasajero, Ausencia.id_viaje == reserva.id_viaje
+            )
+        )
+    )
+    cupo_liberado = reserva.estado == "consolidada" and not aviso_su_ausencia
+
+    tipo_servicio = await db.scalar(
+        select(Servicio.tipo_servicio).where(Servicio.id_servicio == viaje.id_servicio)
+    )
+    motivo = _motivo(reserva, tipo_servicio, viaje.fecha, datetime.now(ZONA_ARGENTINA))
+
+    reserva.estado = "cancelada"
+    await db.flush()
+    await registrar_evento(db, tipo_evento=TIPO_RESERVA_CANCELADA, id_reserva=reserva.id_reserva)
+    resultado = ResultadoCancelacion(
+        reserva=_a_schema(reserva, viaje),
+        cupo_liberado=cupo_liberado,
+        penalidad_aplicada=False,
+        importe_penalidad=0.0,
+        motivo=motivo,
+    )
     await db.commit()
     return resultado

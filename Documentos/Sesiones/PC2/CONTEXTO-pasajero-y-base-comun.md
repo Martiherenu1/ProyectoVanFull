@@ -9,10 +9,11 @@
 
 **La base común del backend está completa y en `main`.** Del circuito del pasajero están hechos el perfil
 (CU-001), servicios, disponibilidad y paradas (CU-002), las reservas propias (CU-010) y el asistente AG-01 de
-lectura (CU-011, `POST /api/chat`). La **creación de la reserva (CU-003) está en curso, solo para el
-ocasional y sin tarifa** (ver «En curso»); la cancelación (CU-004) sigue frenada.
+lectura (CU-011, `POST /api/chat`). La **creación de la reserva (CU-003) está en `main`, solo para el
+ocasional y sin tarifa**; la **cancelación (CU-004) está lista en su PR, sin crédito ni penalidad** (ver
+«En curso»). El cambio de parada (CU-005) **no es del PC2** (REPARTO-PC2).
 
-La CI corre en cada PR. En `main` la suite da 250 pruebas; la rama de CU-003 suma 27 (277), unos dos minutos.
+La CI corre en cada PR. En `main` la suite da 277 pruebas; la rama de CU-004 suma 23 (300), unos dos minutos.
 
 ## Hecho
 
@@ -33,17 +34,20 @@ La CI corre en cada PR. En `main` la suite da 250 pruebas; la rama de CU-003 sum
 | Hoja de pendientes de validación para Martín: `PENDIENTES-PARA-MARTIN-2026-10-15.html` (#33, #7, #9, #28, #8 y #25, cada uno con "mi opción"); superada por las aclaraciones validadas del 2026-10-18 | — | el que cierra #31 |
 | Asistente AG-01 de lectura (CU-011): `POST /api/chat`, ejecutor de 4 tools y servicio con modelo + fallback; 30 + 24 pruebas | #42 | #69 |
 | Cupo: capacidad del vehículo, si no la planificada, si no 19; la ausencia informada libera el lugar (#28 parcial) | #28 | #70 |
+| Crear la reserva del ocasional, sin tarifa (CU-003): `POST /api/reservas`, 27 pruebas; `cupo_del_viaje` como definición única | #72 | #73 |
 
 ## En curso
 
-**CU-003, crear reserva del ocasional, sin tarifa (Issue #72), rama `feat/pasajero-crear-reserva-ocasional-72`.**
-`POST /api/reservas` (`services/reservas.py::crear_reserva`): valida viaje `programado`, parada del recorrido,
-RN-031 (una ida y una vuelta por día) y RN-001 (`cupo_del_viaje`, la misma regla que la consulta), con la fila del
-pasajero y la del viaje bloqueadas. El respaldo es una contratación directa por reserva (cliente individual
-creado si falta) y la reserva queda `consolidada`. Falta: el PR. Quedan fuera de esta rebanada la tarifa (#9),
-abonos, lista de espera (#34), perfil completo, `en_curso` y la tool `crear_reserva` de AG-01.
+**CU-004, cancelar reserva, sin crédito ni penalidad (Issue #74), rama `feat/pasajero-cancelar-reserva-cu004-74`.**
+`POST /api/reservas/{id}/cancelacion` (`services/reservas.py::cancelar_reserva`): la reserva propia pasa a
+`cancelada` y el lugar vuelve solo (el cupo se calcula). Responde 409 `RESERVA_NO_CANCELABLE` si ya estaba
+cancelada y `VIAJE_NO_CANCELABLE` si el viaje no está `programado`. Devuelve `cupo_liberado` (solo si era
+`consolidada` y no había avisado ausencia), `penalidad_aplicada: false`, `importe_penalidad: 0` y un `motivo` que
+nombra la regla (RN-017 en o fuera de término, RN-018, RN-007). PR #76. Fuera de esta rebanada: el crédito de
+RN-017 (sin tabla), la devolución de RN-018 y el reintegro de RN-019 (dependen de pagos y tarifa, #9).
 
-Después, la cancelación (CU-004) y el cambio de parada (CU-005).
+Después: la tool `crear_reserva` (y `cancelar_reserva`) de AG-01 en `agent/ejecutor.py`, las pantallas Flutter del
+pasajero y la deuda (CU-006, pantalla).
 
 ## Decisiones
 
@@ -63,6 +67,7 @@ Después, la cancelación (CU-004) y el cambio de parada (CU-005).
 | 2026-10-19 | Un `conversacion_id` inexistente o de otra persona **abre una conversación nueva** y devuelve su id, en vez de 404: tras reiniciar el servidor el chat del pasajero sigue andando, y una ajena no revela que existe (RN-026 a 030). Decisión mía al implementar, a confirmar | `services/agente.py`, `test_agente.py` |
 | 2026-10-19 | Cada mensaje admite hasta 5 vueltas modelo → tools y 2000 caracteres. Si el modelo no responde (principal ni fallback), responde algo ilegible o no cierra en las vueltas, sale `derivar_humano: true` y el turno no se guarda. `tool_usada` es la última tool habilitada que se ejecutó | `services/agente.py`, Issue #42 |
 | 2026-10-20 | **CU-003 (Issue #72):** el ocasional queda `consolidada` al reservar (la aceptación es automática: AC7-02 y #33); su respaldo es **una contratación por reserva**, sin `id_tarifa` ni `importe_acordado`, y no genera deuda. Si el pasajero no tiene cliente individual se crea. Decisiones mías al implementar, a confirmar | `services/reservas.py`, Issue #72 |
+| 2026-10-20 | **CU-004 (Issue #74):** cancelar no otorga crédito ni cobra penalidad, porque ninguna de las 35 tablas guarda el crédito de RN-017. Se puede cancelar mientras el viaje esté `programado`, también fuera de las 18:00 del día anterior: esa referencia solo decide el crédito y el caso fuera de término está sin definir (CU-004 en 06-Notas §6.3), así que solo cambia el `motivo`. Un viaje cancelado, en curso o finalizado responde 409. Decisiones mías al implementar, a confirmar | `services/reservas.py`, Issue #74 |
 | 2026-10-20 | Una reserva cancelada del mismo viaje no se reactiva ni se pisa: responde 409 `RESERVA_CANCELADA_PREVIA`, porque MR-R15 deja una fila por pasajero y viaje y reactivarla no está definido (AC28-08) | `services/reservas.py` |
 
 ## Pendientes
@@ -77,7 +82,8 @@ superada en esos seis puntos.
 |---|---|---|
 | Respaldo de la reserva que `POST /reservas` no informa. Aclarado (AC7-01 a 06): se puede reservar sin contratación previa y el sistema la acepta solo; ida y vuelta del **mismo día** van en una contratación, de días distintos en dos; con la ida impaga y el mismo día se cancela la contratación y se genera una conjunta; con la ida paga se contrata la vuelta aparte; sin cupo de vuelta se conserva la ida. `contratacion` no tiene `estado` y `servicio.tipo_servicio` no tiene `OCASIONAL` | #7 | Funcional VALIDADO. **Parcial en CU-003 (#72):** el ocasional ya reserva con una contratación por reserva. Falta: ida y vuelta del mismo día en una sola contratación (AC7-03/04/06), cómo se registra cancelar una contratación (no tiene `estado`) y el respaldo por abono |
 | Filtro `destino` de `/servicios/disponibilidad` sin columna en el modelo; hoy 400 `FILTRO_NO_DISPONIBLE` (en `/chat` vuelve al modelo como resultado, no es un 500). Aclarado (AC08-01 a 05): el destino de IDA de un abonado se fija al contratar; el ocasional elige un destino habilitado y se listan los viajes que pasan por una parada de descenso habilitada; el filtro **no es la última parada**; en VUELTA el descenso se elige en cada viaje. Las paradas de ascenso y descenso pueden variar por viaje | #8 | Funcional VALIDADO. Falta el diseño: qué es `destino` técnicamente, la parada de descenso por reserva (hoy solo se guarda la de ascenso) y la habilitación por viaje. Pide PR de contrato y de modelo |
-| `Reserva` también la devuelven `POST /reservas`, `cambio-parada` y `ResultadoCancelacion` (CU-003, 005, 004): al implementarlos, `services/reservas.py::_a_schema(reserva, viaje)` ya arma los campos del viaje; necesitan el `JOIN` con `viaje` | #31 (cerrado) | Aviso a Martín y Facundo en el PR (CONTRIBUTING §1.8 fila 2) |
+| `Reserva` también la devuelven `POST /reservas` y `ResultadoCancelacion` (CU-003 y 004, ya hechos) y `cambio-parada` (CU-005, fuera del PC2): `services/reservas.py::_a_schema(reserva, viaje)` arma los campos del viaje con el `JOIN` | #31 (cerrado) | Aviso a Martín y Facundo en el PR (CONTRIBUTING §1.8 fila 2) |
+| Crédito de RN-017: la cancelación de un ocasional en término genera un crédito para otro viaje del mismo mes, que se pierde si no se usa. Las 35 tablas no lo guardan (el DER v0.1 tenía `CREDITO_REINTEGRO`). Tampoco hay devolución de RN-018 ni reintegro de RN-019 | #75 | PENDIENTE DE VALIDACIÓN con Martín: dónde se guarda (PR de modelo, §1.9) y la cancelación del ocasional fuera de término |
 | Qué ve el pasajero de una reserva cuyo viaje se cancela: hoy `Reserva.estado` no cambia y no se informa el estado del viaje. CU-018 solo crea viajes en el contrato | — | PENDIENTE DE VALIDACIÓN con Martín; sin Issue todavía |
 | `Disponibilidad.horario` devuelve `null` si el viaje no tiene horario pero el contrato no lo declara `nullable` (`Reserva.horario` sí) | — | Corrección chica de contrato; no se tocó para no ampliar el PR de #31 |
 | Disponibilidad (#28). **En `main` (PR #70):** capacidad = vehículo asignado, si no `capacidad_planificada`, si no 19 (AC28-01 a 03); una fila de `ausencia` libera el lugar de esa reserva consolidada (AC28-06); un viaje `programado` se ofrece aunque haya pasado su hora (AC28-05). **Sigue pendiente:** reservar en viajes `en_curso` (AC28-04; el modelo no guarda qué paradas se alcanzaron y el GPS solo no alcanza, PV28-01), recuperar el lugar tras una ausencia (AC28-08, PV28-04), la sobrecapacidad al asignar un vehículo (PV28-02, Facundo) y las carreras al reservar (CU-003) | #28 | Parcial. **Confirmado por Martín el 2026-10-20 (opción a):** cada fila de `ausencia` es un aviso voluntario del pasajero (CU-008); `POST /ausencias` no registra inasistencias sin aviso (RN-022) ni se generan ausencias por falta de abordaje, así que el cálculo de #70 no necesita distinguir tipos (PT28-18 resuelto en ese sentido). Siguen pendientes la recuperación del lugar y las paradas pendientes. CU-003 valida con la misma función |

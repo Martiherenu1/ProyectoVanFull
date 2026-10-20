@@ -641,11 +641,17 @@
               }
             }
           },
+          "401": {
+            "$ref": "#/components/responses/NoAutenticado"
+          },
+          "403": {
+            "$ref": "#/components/responses/SinPermiso"
+          },
           "404": {
             "$ref": "#/components/responses/NoEncontrado"
           },
           "409": {
-            "description": "La reserva no está en un estado cancelable",
+            "description": "La reserva no está en un estado cancelable: ya estaba cancelada (`RESERVA_NO_CANCELABLE`) o su viaje ya no está programado (`VIAJE_NO_CANCELABLE`).",
             "content": {
               "application/json": {
                 "schema": {

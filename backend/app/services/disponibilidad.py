@@ -7,19 +7,26 @@ pasajero al consultar y lo que el backend valida al reservar no pueden diverger.
 
 from datetime import date
 
-from sqlalchemy import func, select
+from sqlalchemy import exists, func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.errors import ApiError
 from app.models.servicios import Servicio
-from app.models.viajes import Reserva, Vehiculo, Viaje
+from app.models.viajes import Ausencia, Reserva, Vehiculo, Viaje
 from app.schemas.servicios import Disponibilidad
 
 # RN-002: una reserva provisional no garantiza el cupo; solo la consolidada lo ocupa.
 ESTADO_QUE_OCUPA_CUPO = "consolidada"
 
-# PENDIENTE DE VALIDACIÓN (#27): qué viajes se ofrecen. Se ofrecen los 'programado'; no hay una regla
-# aprobada sobre un viaje 'en_curso' (¿se puede subir alguien a último momento?).
+# Capacidad de referencia cuando el viaje no tiene unidad ni capacidad planificada: la mínima habitual
+# de las unidades de VanFull (AC28-02, aclaración funcional validada de #28).
+CAPACIDAD_PREDETERMINADA = 19
+
+# Se ofrecen los viajes 'programado', sin mirar la hora: uno cuyo horario ya pasó pero todavía no
+# comenzó sigue recibiendo reservas (AC28-05).
+# PENDIENTE (#28): VanFull también acepta reservas en un viaje 'en_curso' si la parada de ascenso aún no
+# fue alcanzada (AC28-04). No se implementa: el modelo no guarda qué paradas se alcanzaron y la última
+# posición GPS no alcanza para probarlo (PV28-01).
 ESTADO_OFRECIDO = "programado"
 
 
@@ -27,19 +34,24 @@ def cupo_disponible(
     capacidad_vehiculo: int | None,
     capacidad_planificada: int | None,
     ocupados: int,
-) -> int | None:
-    """Lugares libres de un viaje, o None si no se puede determinar.
+) -> int:
+    """Lugares libres de un viaje.
 
-    - RN-001: la capacidad es la de la unidad. ADJ-03: se valida contra el vehículo cuando hay uno
-      asignado.
-    - Sin vehículo asignado, se usa `capacidad_planificada` (lo que la planificación del viaje
-      declara). ADJ-03 no define qué capacidad rige antes de asignar la unidad: es una asunción.
-    - Sin ninguna de las dos no hay forma de saberlo, y no se inventa un número.
-    - Nunca negativo: un viaje sobrevendido muestra 0.
+    La capacidad que rige, en este orden (AC28-01 a AC28-03):
+
+    1. La del vehículo asignado (RN-001, ADJ-03): prevalece sobre las demás.
+    2. Sin vehículo, `capacidad_planificada`.
+    3. Sin ninguna de las dos, `CAPACIDAD_PREDETERMINADA` (19).
+
+    `ocupados` son las reservas consolidadas que siguen ocupando lugar: quien informó su ausencia
+    ya no cuenta (AC28-06). Nunca es negativo: un viaje sobrevendido muestra 0.
     """
-    capacidad = capacidad_vehiculo if capacidad_vehiculo is not None else capacidad_planificada
-    if capacidad is None:
-        return None
+    if capacidad_vehiculo is not None:
+        capacidad = capacidad_vehiculo
+    elif capacidad_planificada is not None:
+        capacidad = capacidad_planificada
+    else:
+        capacidad = CAPACIDAD_PREDETERMINADA
     return max(capacidad - ocupados, 0)
 
 
@@ -62,10 +74,20 @@ async def consultar_disponibilidad(
             {"parametro": "destino"},
         )
 
+    # AC28-06: el pasajero que informó su ausencia (CU-008) libera su lugar de inmediato, sin que lo
+    # apruebe nadie. La tabla `ausencia` es de Martín; acá solo se lee. Se asume que cada fila es un
+    # aviso voluntario: una inasistencia sin aviso no libera cupo (PT28-18, RN-022).
+    aviso_su_ausencia = exists().where(
+        Ausencia.id_pasajero == Reserva.id_pasajero, Ausencia.id_viaje == Reserva.id_viaje
+    )
     ocupados = (
         select(func.count())
         .select_from(Reserva)
-        .where(Reserva.id_viaje == Viaje.id_viaje, Reserva.estado == ESTADO_QUE_OCUPA_CUPO)
+        .where(
+            Reserva.id_viaje == Viaje.id_viaje,
+            Reserva.estado == ESTADO_QUE_OCUPA_CUPO,
+            ~aviso_su_ausencia,
+        )
         .correlate(Viaje)
         .scalar_subquery()
     )

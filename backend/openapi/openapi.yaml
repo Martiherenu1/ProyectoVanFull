@@ -398,11 +398,28 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Reserva'
+        '400':
+          description: >-
+            Cuerpo inválido, o `orden_parada` que no pertenece al recorrido del viaje
+            (`PARADA_NO_VALIDA`).
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          $ref: '#/components/responses/NoAutenticado'
+        '403':
+          $ref: '#/components/responses/SinPermiso'
+        '404':
+          $ref: '#/components/responses/NoEncontrado'
         '409':
           description: >-
-            Sin cupo o reserva duplicada (RN-031). Cuando no hay cupo, la respuesta informa que
-            existe lista de espera; la incorporación y la gestión de esa lista NO tienen operación
-            en esta versión (cobertura parcial de CU-003, se completa en v0.2).
+            Sin cupo (`CUPO_NO_DISPONIBLE`), reserva duplicada para esa fecha y sentido
+            (`RESERVA_DUPLICADA_DEL_DIA`, RN-031), reserva cancelada previa del mismo viaje
+            (`RESERVA_CANCELADA_PREVIA`) o viaje que no admite reservas (`VIAJE_NO_RESERVABLE`).
+            Cuando no hay cupo, `detalles.lista_espera` es `true`: informa que existe lista de
+            espera; la incorporación y la gestión de esa lista NO tienen operación en esta versión
+            (cobertura parcial de CU-003, se completa en v0.2).
           content:
             application/json:
               schema:

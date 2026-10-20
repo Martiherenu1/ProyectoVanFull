@@ -10,6 +10,7 @@ from app.routers import (
     chat,
     chofer,
     deuda,
+    ejecucion_viajes,
     health,
     pagos,
     perfil,
@@ -49,6 +50,7 @@ app.include_router(pagos.router, prefix=settings.api_prefix)
 app.include_router(viajes.router, prefix=settings.api_prefix)
 app.include_router(chofer.router, prefix=settings.api_prefix)
 app.include_router(chat.router, prefix=settings.api_prefix)
+app.include_router(ejecucion_viajes.router, prefix=settings.api_prefix)
 
 
 @app.get("/")

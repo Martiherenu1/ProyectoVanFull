@@ -31,3 +31,15 @@ class Reserva(BaseModel):
     sentido: Literal["IDA", "VUELTA"]
     # Los tres valores del CHECK de `reserva.estado` en schema.sql.
     estado: Literal["provisional", "consolidada", "cancelada"]
+
+
+class ResultadoCancelacion(BaseModel):
+    """Resultado de cancelar una reserva (CU-004): la reserva ya cancelada y su consecuencia."""
+
+    reserva: Reserva
+    # true si la cancelación devolvió un lugar al viaje (RN-001, RN-002).
+    cupo_liberado: bool
+    penalidad_aplicada: bool
+    importe_penalidad: float
+    # La regla que decidió: dice también cuando la consecuencia económica todavía no se aplica.
+    motivo: str

@@ -28,6 +28,7 @@ verifica, incluido que se pueda iniciar sesión con cada cuenta.
 | Archivo | Contenido |
 |---|---|
 | `persona`, `pasajero`, `cliente`, `cliente_individual` | 4 personas: 2 pasajeros (con su cliente individual), 1 chofer y 1 administrador |
+| `cuenta_corriente` | Una cuenta corriente para cada uno de los 2 clientes individuales |
 | `cuenta_acceso`, `cuenta_rol` | Una cuenta por persona. Roles: `pasajero` ×2, `chofer`, `administrador` |
 | `servicio` | Un servicio universitario y uno laboral |
 | `recorrido`, `parada`, `parada_recorrido` | Un recorrido con 3 paradas (nombres y sin coordenadas: son de prueba) |
@@ -45,7 +46,7 @@ El REPARTO dice que cada dueño agrega los datos de sus tablas, por PR a esta ca
 |---|---|---|
 | `chofer`, `vehiculo`, `viaje` (alta) | Facundo | La cuenta `chofer1` existe, pero todavía no tiene fila en `chofer`: se agrega con el seed de esa área |
 | `posicion_gps`, `abordaje`, `ausencia`, `nomina_pasajeros`, `integrante_nomina` | Martín | El escenario de la demo cruzada también es suyo |
-| `cuenta_corriente`, `pago`, `movimiento_cuenta`, `comprobante`, `abono_mensual`, `periodo_abono*` | Facundo | |
+| `pago`, `movimiento_cuenta`, `comprobante`, `abono_mensual`, `periodo_abono*` | Facundo | |
 | `tarifa`, `contratacion`, `reserva`, `registro_lista_espera` | Martiniano | No se siembran a propósito: dependen de los pendientes #7 (respaldo de la reserva) y #9 (parámetros de tarifa), y cargarlas ahora sería inventar esa regla |
 
 Para sumar tus tablas: agregá el `.csv` y su nombre en `ORDEN` (`cargar.py`), después de las tablas que

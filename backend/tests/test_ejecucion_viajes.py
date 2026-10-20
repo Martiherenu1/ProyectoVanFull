@@ -9,6 +9,7 @@ from sqlalchemy.ext.asyncio import async_sessionmaker, create_async_engine
 from sqlalchemy.pool import NullPool
 
 from app.core.security import UsuarioActual, crear_token
+from app.services import ejecucion_viajes as servicio
 from app.services.ejecucion_viajes import (
     TIPO_VIAJE_FINALIZADO,
     TIPO_VIAJE_INICIADO,
@@ -276,3 +277,24 @@ def test_dos_solicitudes_concurrentes_generan_un_evento(entorno, operacion):
     tipo = TIPO_VIAJE_INICIADO if operacion == "inicio" else TIPO_VIAJE_FINALIZADO
     assert all(r.estado == esperado for r in respuestas)
     assert _eventos(entorno, id_viaje) == [(tipo,)]
+
+
+@pytest.mark.parametrize(
+    "operacion,estado",
+    [("inicio", "programado"), ("finalizacion", "en_curso")],
+)
+def test_fallo_tras_flush_revierte_estado_y_evento(entorno, monkeypatch, operacion, estado):
+    id_viaje = _crear_viaje(entorno, estado=estado)
+    original = servicio.registrar_evento
+
+    async def fallar_despues_de_flush(db, **datos):
+        await original(db, **datos)
+        raise RuntimeError("fallo simulado despues del flush")
+
+    monkeypatch.setattr(servicio, "registrar_evento", fallar_despues_de_flush)
+    with pytest.raises(RuntimeError, match="fallo simulado despues del flush"):
+        _post(entorno, id_viaje, operacion)
+
+    # Los helpers abren otra conexion: verifican lo persistido tras cerrar la sesion fallida.
+    assert _estado(entorno, id_viaje) == estado
+    assert _eventos(entorno, id_viaje) == []

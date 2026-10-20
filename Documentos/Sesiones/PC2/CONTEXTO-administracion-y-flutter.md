@@ -14,6 +14,7 @@ siendo trabajos independientes.
   verificación. La corrección A.0–A.8 deja esquemas de color explícitos, dorado accesible en el tema claro,
   tipografía Material completa y superficies sin sombras ni tintes.
 - Issue #53 implementado en el PR #54: consulta de deuda propia de CU-006.
+- Issue #51 implementado en el PR #52: confirmación o rechazo manual de pagos de CU-016.
 
 ## En curso
 
@@ -37,10 +38,15 @@ siendo trabajos independientes.
   `200`, saldo `0` y estado `al_dia`, porque sin cuenta no puede haber movimientos asociados.
 - 2026-10-18, Facundo: CU-016 crea el movimiento `ACREEDOR` al confirmar el pago; CU-014 y el rechazo
   no crean movimientos. CU-006 conserva el cálculo por movimientos sin inventar estados.
+- 2026-10-18, Facundo: CU-016 crea, al confirmar, exactamente un `MovimientoCuenta` de naturaleza
+  `ACREEDOR`, asociado al cliente y al pago, por el importe pagado. El rechazo y CU-014 no crean
+  movimientos. Motivo: MR-R30 calcula la deuda desde movimientos y esta alternativa evita inventar
+  un catálogo de estados todavía pendiente. El movimiento se confirma en la misma transacción que
+  el pago y el recibo.
 
 ## Pendientes
 
-- #53: cerrar mediante la revisión e integración del PR #54.
+- #53 y #51: cerrar mediante la revisión e integración de los PR #54 y #52.
 - CU-006 devuelve `404 CLIENTE_NO_ENCONTRADO` si no existe el cliente individual. Esa respuesta no
   figura en OpenAPI y agregarla al contrato requiere el acuerdo de los tres integrantes.
 - PR #52 debe integrarse para que las confirmaciones de pago creen los movimientos acreedores que

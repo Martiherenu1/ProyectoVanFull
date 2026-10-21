@@ -2,7 +2,7 @@
 
 ## Estado vigente al 21/10/2026 — detalle Flutter CU-029 local con mocks
 
-- Entrega local sin push, Issue ni PR del detalle. Rama `feat/chofer-detalle-flutter-cu029`, worktree `F:\dev\vanfull-flutter-cu029-detalle`. Los seis archivos revisados se preservaron en `a6f234eb107214dd0380670f368a1e0110042efc`. Base inicial: `28cfe338fde8bdcd8eb25c56b17c8911dfdb8d7e`; se reutiliza `ViajeResumen`, sin copiarlo ni modificar la rama del listado.
+- Entrega del detalle asociada al Issue #88, con etiqueta `chofer`; publicación de la rama y apertura de PR autorizadas el 21/10/2026. Rama `feat/chofer-detalle-flutter-cu029`, worktree `F:\dev\vanfull-flutter-cu029-detalle`. Los seis archivos revisados se preservaron en `a6f234eb107214dd0380670f368a1e0110042efc`. Base inicial: `28cfe338fde8bdcd8eb25c56b17c8911dfdb8d7e`; se reutiliza `ViajeResumen`, sin copiarlo ni modificar la rama del listado.
 - Base integrada el 21/10/2026: `origin/main 5bf3117daf8ce8ab943cf234ac19dbac3fb6196d`, mediante merge local `b81ca4c3967360fe94ed9dabc4bf7fa535adf6da` (padres `a6f234e` y `5bf3117`). #81 ya está mergeada y #80 cerrado; #79 también integrada y #48 cerrado. La dependencia de una PR abierta quedó resuelta. Merge automático, sin conflictos ni rebase/force; historial del contexto conservado, sin borradores ajenos. El detalle aún no está integrado a main ni conectado a navegación/listado.
 
 ### Hecho
@@ -21,20 +21,20 @@
 
 ### Pendientes
 
-- Issue específico de detalle: propuesta preparada, SIN CREAR por instrucción de Martín. Trazabilidad CU-029, RF-024, RN-029; referencias #64/#48/#81. #81 ya integrada: no hay dependencia de una PR abierta. Esta entrega no cierra #64 ni declara CU-029 completo.
-- Coordinar cliente común y conexión efectiva entre navegación, listado y detalle en otra tarea. Sin prueba HTTP ni en dispositivo, fotografías no visualizadas ni CI remota de estos cambios locales. La nómina se prueba solo con mocks; no acredita C12 ni modifica el guion/dataset.
+- Issue específico [#88](https://github.com/Martiherenu1/ProyectoVanFull/issues/88) creado el 21/10/2026 con el texto revisado y etiqueta `chofer`. Trazabilidad CU-029, RF-024, RN-029; referencias #64/#48/#81. La PR cerrará únicamente #88, manteniendo esas referencias. #81 ya integrada: no hay dependencia de una PR abierta; no se declara CU-029 completo.
+- Coordinar cliente común y conexión efectiva entre navegación, listado y detalle en otra tarea. Sin prueba HTTP ni en dispositivo; fotografías no visualizadas. La nómina se prueba solo con mocks: no acredita C12 ni modifica el guion/dataset. La CI y las revisiones del HEAD publicado se informan en la PR; no sustituyen la evidencia Flutter local.
 
 ### Entorno y comprobaciones
 
 - Flutter 3.47.7 stable / Dart 3.13.5, SDK `F:\dev\flutter`; PATH/PUB_CACHE ajustados solo para el proceso como en la preparación del listado. `flutter pub get --enforce-lockfile` correcto; lockfile SHA-256 intacto `1016007f35a680bb417cafa59e6498ead13c0b6ed116b6d406d03d22c17eac15`.
 - Registro histórico previo a integrar main (base `28cfe33`): formato de los cinco archivos nuevos correcto; `flutter analyze --no-pub` sin problemas (20,7 s); `flutter test --no-pub --reporter expanded`: **39 aprobadas, 0 fallidas, 0 omitidas** (24 nuevas: 7 modelo + 17 pantalla; 15 de la base #81: 13 del listado + 2 preexistentes). Pruebas con mocks, incluida pantalla pequeña, privacidad y resultados/errores/null atrasados; no equivalen a integración real.
-- **Combinación final local con main `5bf3117`:** formato de cinco archivos nuevos correcto (cero cambios); `flutter analyze --no-pub` sin problemas (25,0 s); `flutter test --no-pub --reporter expanded`: **45 aprobadas, 0 fallidas, 0 omitidas** (24 nuevas del detalle: 7 modelo + 17 pantalla; 21 de main: 13 listado + 8 navegación/tema). Suite de widgets en aproximadamente 10 s, sin HTTP/dispositivo ni CI remota de esta rama. No se modificaron dependencias ni lockfile, y no fue necesario repetir pub get. `git diff --check` correcto; diff propio contra main limitado a los seis archivos del detalle/contexto.
+- **Combinación final local con main `5bf3117`:** formato de cinco archivos nuevos correcto (cero cambios); `flutter analyze --no-pub` sin problemas (25,0 s); `flutter test --no-pub --reporter expanded`: **45 aprobadas, 0 fallidas, 0 omitidas** (24 nuevas del detalle: 7 modelo + 17 pantalla; 21 de main: 13 listado + 8 navegación/tema). Suite de widgets en aproximadamente 10 s, sin HTTP/dispositivo; esta evidencia Flutter es local y se distingue de la CI remota. No se modificaron dependencias ni lockfile, y no fue necesario repetir pub get. `git diff --check` correcto; diff propio contra main limitado a los seis archivos del detalle/contexto.
 - Durante la preparación previa se corrigieron un aviso de estilo del test, el tipo nullable del fixture y la separación/limpieza de la semántica de fotografía. Sus ejecuciones con fallos no se presentan como aprobadas. Google Fonts emitió avisos desde el test preexistente en ejecuciones previas y en la combinación con main; no se modificó el tema.
 - No se ejecutó backend ni se llamó a la demo. Un intento auxiliar de comparación YAML/JSON no pudo correr en Python local por falta de PyYAML; contrato y backend no tienen diferencias entre esta base y main, ni cambios propios en esta entrega.
 
 ### Para otras áreas
 
-- Facundo: la pantalla recibe `idViaje` y `cargarDetalle`; no crea `MaterialApp` ni conecta el detalle con la navegación de #79 o el listado de #81. Martiniano: el futuro adaptador conserva sesión/permisos en backend y mapea el resultado a esta interfaz; no se incorporan reglas de reservas en Flutter. Textos de Issue/PR actualizados, sin publicar ni enviar mensajes.
+- Facundo: la pantalla recibe `idViaje` y `cargarDetalle`; no crea `MaterialApp` ni conecta el detalle con la navegación de #79 o el listado de #81. Martiniano: el futuro adaptador conserva sesión/permisos en backend y mapea el resultado a esta interfaz; no se incorporan reglas de reservas en Flutter. Textos de Issue/PR revisados; publicación autorizada y sin mensajes enviados.
 - Preservados checkout original, ramas publicadas, borradores documentales, demás worktrees, `.env` y demo. No se copió el guion ni la matriz de otros worktrees.
 
 ## Registro histórico al 21/10/2026 — listado Flutter CU-029 verificado con mocks

@@ -13,6 +13,8 @@ siendo trabajos independientes.
 - PR #47: temas oscuro para pasajero/chofer y claro para administración, tokens compartidos y vista temporal de
   verificación. La corrección A.0–A.8 deja esquemas de color explícitos, dorado accesible en el tema claro,
   tipografía Material completa y superficies sin sombras ni tintes.
+- Issue #48 implementado en esta rama: enrutador inicial por rol y portadas temporales para CU-002, CU-029 y
+  CU-018.
 - Issue #53 implementado en el PR #54: consulta de deuda propia de CU-006.
 - Issue #51 implementado en el PR #52: confirmación o rechazo manual de pagos de CU-016.
 
@@ -32,6 +34,10 @@ siendo trabajos independientes.
   Las etiquetas en mayúsculas se transforman en el widget, porque `TextStyle` no modifica el contenido.
 - 2026-10-19, #47: aplicar las densidades 48/64/36 y la navegación real en #48; #47 sólo define los tokens y
   muestra los tres temas sin incorporar funcionalidad de navegación.
+- 2026-10-20, #48: la navegación acepta un único rol conocido (`pasajero`, `chofer` o `administrador`). Sin rol,
+  con varios roles o con un rol desconocido no selecciona una portada y muestra un estado pendiente explícito.
+- 2026-10-20, #48: las entradas temporales son Buscar servicio (CU-002), Lista del viaje (CU-029) y Viajes del
+  día (CU-018), con sus temas y alturas 48/64/36; no implementan todavía funcionalidad ni permisos.
 - 2026-10-18, Facundo: CU-006 calcula el saldo sin persistirlo; los movimientos `DEUDOR` suman y los
   `ACREEDOR` restan según MR-R30. Un saldo neto acreedor se informa como cero.
 - 2026-10-18, Facundo: si existe el cliente individual pero no su cuenta corriente, CU-006 responde
@@ -62,8 +68,10 @@ siendo trabajos independientes.
 - #47: Martiniano debe confirmar Archivo + IBM Plex Mono antes de incorporar archivos de fuentes y desactivar
   la descarga en ejecución. No se descargaron ni agregaron fuentes en esta corrección.
 - #47: completar la plantilla del cuerpo del PR requiere una autorización remota separada.
-- #48: aplicar tamaños táctiles y alturas 48 px pasajero, 64 px chofer y 36 px administración en los widgets de
-  navegación y pantallas reales; reemplazar `ThemePreview`.
+- #48: integrar los roles de la autenticación cuando esté disponible y reemplazar las portadas temporales por
+  las definitivas; la resolución de cuentas con múltiples roles continúa PENDIENTE DE VALIDACIÓN.
+- #48: `AppTheme.admin` es sólo el fallback visual temporal de los estados sin rol; no selecciona el rol de
+  administración y debe revisarse al integrar autenticación.
 
 ## Entorno y trampas
 

@@ -1,6 +1,14 @@
 # Contexto vivo · Chofer y viaje en curso (Martín)
 
-## Estado vigente al 21/10/2026 — inicio/finalización Flutter CU-030 local con mocks
+## Estado vigente al 22/10/2026 — CU-030 actualizado sobre main
+
+- Se preservaron los seis archivos en el commit local `84dd2c997d6c5a9e5d7077a10e36babbd8ef9ba9`. `origin/main` consultado e integrado en `feat/chofer-ejecucion-flutter-cu030`: `a86ce5a2f8d8c657d198108367c24500116a617b`, mediante merge local `2b52eaa099f476f832a4437ce250dc205d21167c`, sin conflictos. Ambos historiales del contexto se conservan debajo; el contexto de Pasajero incorporado desde main permanece intacto.
+- #89 ya integrada en main por `a86ce5a`; #88 cerrado y #64 abierto. Se elimina la dependencia de una PR abierta. CU-030 sigue solo local, sin Issue/PR ni push; publicación pendiente de revisión posterior. Base original y evidencia histórica de 110 pruebas se conservan, sin atribuirlas a la nueva combinación.
+- Sobre la combinación del merge: formato de los cinco archivos Dart del alcance correcto (0 cambios); `flutter analyze --no-pub` sin problemas (106,0 s); `flutter test --no-pub --reporter expanded`: **149 aprobadas, 0 fallidas, 0 omitidas**, aproximadamente 28 s (65 propias CU-030 y 84 de base). Logs: `F:\dev\vanfull-cu030-main-analyze.log` y `F:\dev\vanfull-cu030-main-test.log`. Avisos preexistentes de Google Fonts, sin fallas. Sin repetir pub get; dependencias y lockfile intactos (SHA-256 `1016007f35a680bb417cafa59e6498ead13c0b6ed116b6d406d03d22c17eac15`). Sin CI remota propia ni pruebas de backend.
+- Se incorpora a los borradores de Issue/PR la revisión manual Web del usuario del 22/10 detallada debajo, realizada antes de este merge: ventanas amplia/angosta, estados y reconciliación informados; observaciones de separación vertical y claridad del procesamiento pendientes. No se repitió la revisión visual tras el merge; no se acreditan otros escenarios, Android/dispositivo, HTTP ni C12. CU-030 continúa parcial; navegación y cliente compartidos, GPS y avisos siguen pendientes según el alcance previo.
+- `frontend/local_chofer_preview.dart` permanece sin seguimiento y fuera de los commits y del diff de entrega. Sin cambios productivos adicionales, reglas nuevas, POST reales, demo ni otros worktrees. Borradores externos actualizados; marcador de Issue específico pendiente de sustituir solo al publicar con autorización.
+
+## Registro histórico al 21/10/2026 — inicio/finalización Flutter CU-030 local con mocks
 
 ### Estado
 

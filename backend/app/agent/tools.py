@@ -103,16 +103,23 @@ TOOLS: list[dict] = [
         "type": "function",
         "function": {
             "name": "crear_reserva",
-            "description": "Solicitar la creación de una reserva. FastAPI valida cupo, reglas, estado y datos.",
+            "description": (
+                "Solicitar la creación de una reserva en un viaje. FastAPI valida cupo, reglas, "
+                "estado y datos. Usar solo después de que el pasajero confirme."
+            ),
             "parameters": {
                 "type": "object",
                 "properties": {
-                    "fecha": {"type": "string"},
-                    "recorrido": {"type": "string"},
-                    "parada": {"type": "string"},
-                    "sentido": {"type": "string", "enum": ["ida", "vuelta"]},
+                    "viaje_id": {
+                        "type": "string",
+                        "description": "id_viaje, tal como lo devolvió consultar_disponibilidad.",
+                    },
+                    "orden_parada": {
+                        "type": "string",
+                        "description": "Orden de la parada de ascenso, según consultar_paradas.",
+                    },
                 },
-                "required": ["fecha", "sentido"],
+                "required": ["viaje_id", "orden_parada"],
             },
         },
     },
@@ -120,7 +127,10 @@ TOOLS: list[dict] = [
         "type": "function",
         "function": {
             "name": "cancelar_reserva",
-            "description": "Solicitar la cancelación de una reserva. FastAPI valida titularidad y plazo.",
+            "description": (
+                "Solicitar la cancelación de una reserva propia. FastAPI valida titularidad y "
+                "estado. Usar solo después de que el pasajero confirme."
+            ),
             "parameters": {
                 "type": "object",
                 "properties": {"reserva_id": {"type": "string"}},
@@ -173,5 +183,7 @@ Fecha actual del sistema: {fecha_actual}.
 - No permitas reservas por encima del cupo.
 - Las reglas de negocio las valida el backend.
 - Si faltan datos esenciales, pedilos antes de ejecutar una acción.
+- Antes de crear o cancelar una reserva, decile al pasajero qué vas a hacer (viaje, fecha, horario,
+  parada) y esperá que lo confirme. Después contale el resultado tal cual lo devolvió la herramienta.
 - Si el usuario pide atención humana, usá derivar_humano().
 - Rechazá solicitudes ajenas a VanFull de manera breve."""

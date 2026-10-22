@@ -24,6 +24,8 @@ HABILITADAS = {
     "consultar_disponibilidad",
     "consultar_reserva",
     "consultar_paradas",
+    "crear_reserva",
+    "cancelar_reserva",
     "derivar_humano",
 }
 
@@ -175,6 +177,10 @@ def entorno():
         with cliente_api(base) as http:
             yield {
                 "http": http,
+                "base": base,
+                "persona": persona,
+                "viaje": viaje,
+                "reserva": reserva,
                 "recorrido": recorrido,
                 "ana": ana,
                 "beto": beto,
@@ -206,7 +212,7 @@ def test_el_pasajero_recibe_la_respuesta_del_agente(entorno, hablar):
 
 
 def test_al_modelo_solo_se_le_ofrecen_las_tools_habilitadas(entorno, hablar):
-    """A3 de CU-011: crear y cancelar reservas no se ofrecen todavía."""
+    """A3 de CU-011: solo las tools habilitadas; las demás de las 13 no se ofrecen."""
     guion = hablar(_texto("ok"))
     _hablar_como(entorno, "ana", "Hola")
     ofrecidas = {t["function"]["name"] for t in guion.llamadas[0]["tools"]}
@@ -261,12 +267,12 @@ def test_una_reserva_ajena_vuelve_como_inexistente_y_sin_datos(entorno, hablar):
 
 
 def test_una_tool_no_habilitada_no_se_ejecuta_y_el_modelo_lo_sabe(entorno, hablar):
-    """A3: si el modelo pide crear una reserva, no pasa nada; el pasajero igual recibe respuesta."""
+    """A3: si el modelo pide una tool sin habilitar, no pasa nada; el pasajero igual recibe respuesta."""
     guion = hablar(
-        _llamada(("crear_reserva", {"viaje_id": "1"})),
-        _texto("Todavía no puedo reservar por acá."),
+        _llamada(("consultar_deuda", {})),
+        _texto("Todavía no puedo consultar la deuda por acá."),
     )
-    respuesta = _hablar_como(entorno, "ana", "Reservame el viaje 1")
+    respuesta = _hablar_como(entorno, "ana", "¿Cuánto debo?")
     assert respuesta.status_code == 200
     assert guion.resultados_de_tools(1)[0]["error"]["codigo"] == "TOOL_NO_HABILITADA"
     # `tool_usada` informa lo que se ejecutó, no lo que se pidió.
@@ -288,6 +294,45 @@ def test_un_error_de_negocio_vuelve_al_modelo_y_no_es_un_500(entorno, hablar):
     assert respuesta.status_code == 200
     assert guion.resultados_de_tools(1)[0]["error"]["codigo"] == "FILTRO_NO_DISPONIBLE"
     assert respuesta.json()["tool_usada"] == "consultar_disponibilidad"
+
+
+def test_el_pasajero_reserva_por_el_chat(entorno, hablar):
+    """CU-003 por el chat (07-IA §6): el mismo servicio, a nombre de quien habla."""
+    gus, id_viaje = entorno["persona"]("40"), entorno["viaje"]("IDA")
+    guion = hablar(
+        _llamada(("crear_reserva", {"viaje_id": str(id_viaje), "orden_parada": "1"})),
+        _texto("Listo, quedó reservado."),
+    )
+    respuesta = entorno["http"].post(
+        CHAT, json={"mensaje": "Sí, reservalo"}, headers=_con(gus, ["pasajero"])
+    )
+    assert respuesta.status_code == 200
+    assert respuesta.json()["tool_usada"] == "crear_reserva"
+    assert guion.resultados_de_tools(1)[0]["reserva"]["estado"] == "consolidada"
+    dueño = _uno(
+        entorno["base"],
+        "SELECT id_pasajero FROM reserva WHERE id_viaje = $1",
+        id_viaje,
+    )
+    assert dueño == gus
+
+
+def test_el_pasajero_cancela_por_el_chat(entorno, hablar):
+    """CU-004 por el chat: el modelo recibe el motivo y no se le oculta que no hay crédito."""
+    hugo, id_viaje = entorno["persona"]("41"), entorno["viaje"]("VUELTA")
+    id_reserva = entorno["reserva"](hugo, id_viaje)
+    guion = hablar(
+        _llamada(("cancelar_reserva", {"reserva_id": str(id_reserva)})),
+        _texto("Cancelada."),
+    )
+    respuesta = entorno["http"].post(
+        CHAT, json={"mensaje": "Sí, cancelala"}, headers=_con(hugo, ["pasajero"])
+    )
+    assert respuesta.json()["tool_usada"] == "cancelar_reserva"
+    (resultado,) = guion.resultados_de_tools(1)
+    assert resultado["reserva"]["estado"] == "cancelada"
+    assert resultado["penalidad_aplicada"] is False
+    assert "todavía no se otorga" in resultado["motivo"]
 
 
 def test_varias_tools_en_un_mensaje_se_ejecutan_y_se_informa_la_ultima(entorno, hablar):

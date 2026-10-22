@@ -19,6 +19,8 @@ HABILITADAS = {
     "consultar_disponibilidad",
     "consultar_reserva",
     "consultar_paradas",
+    "crear_reserva",
+    "cancelar_reserva",
     "derivar_humano",
 }
 
@@ -120,6 +122,8 @@ def entorno():
             "vuelta": vuelta,
             "ana": _pasajero(ana),
             "beto": _pasajero(beto),
+            "persona": persona,
+            "reserva": reserva,
             "reserva_ana": reserva(ana, ida),
             "reserva_beto": reserva(beto, vuelta),
         }
@@ -135,9 +139,9 @@ def test_al_modelo_solo_se_le_ofrecen_las_tools_habilitadas():
     assert len(TOOLS) == 13
 
 
-@pytest.mark.parametrize("nombre", ["crear_reserva", "cancelar_reserva", "consultar_deuda", "x"])
+@pytest.mark.parametrize("nombre", ["consultar_deuda", "consultar_ubicacion_vehiculo", "x"])
 def test_una_tool_no_habilitada_no_se_ejecuta(nombre):
-    """A3 de CU-011: no se inventa capacidad. Reservar y cancelar siguen en CU-003 y CU-004."""
+    """A3 de CU-011: no se inventa capacidad. Las que no están habilitadas no llegan al servicio."""
     resultado = asyncio.run(ejecutar(None, _pasajero(1), nombre, {"reserva_id": "1"}))
     assert resultado["error"]["codigo"] == "TOOL_NO_HABILITADA"
 
@@ -248,6 +252,139 @@ def test_una_reserva_ajena_da_lo_mismo_que_una_inexistente(entorno):
     )
     assert ajena == inexistente
     assert ajena["error"]["codigo"] == "RESERVA_NO_ENCONTRADA"
+
+
+# --- Reservar y cancelar (CU-003 y CU-004 por el chat) -------------------------------------
+
+
+def _estado_en_base(entorno, id_reserva: int) -> str:
+    return _uno(entorno["base"], "SELECT estado FROM reserva WHERE id_reserva = $1", id_reserva)
+
+
+def test_crear_reserva_usa_la_identidad_del_token_y_el_servicio(entorno):
+    carla = _pasajero(entorno["persona"]("30"))
+    resultado = _correr(
+        entorno["base"],
+        carla,
+        "crear_reserva",
+        json.dumps({"viaje_id": str(entorno["ida"]), "orden_parada": "1"}),
+    )
+    assert resultado["reserva"]["estado"] == "consolidada"
+    assert (resultado["reserva"]["id_viaje"], resultado["reserva"]["orden_parada"]) == (
+        entorno["ida"],
+        1,
+    )
+    assert "id_pasajero" not in resultado["reserva"]
+    dueño = _uno(
+        entorno["base"],
+        "SELECT id_pasajero FROM reserva WHERE id_reserva = $1",
+        resultado["reserva"]["id_reserva"],
+    )
+    assert dueño == carla.id_persona
+
+
+def test_crear_reserva_descarta_un_id_de_pasajero_inventado_por_el_modelo(entorno):
+    """RN-026 a 030: la reserva queda a nombre de quien habla, no de quien dice el modelo."""
+    dani = _pasajero(entorno["persona"]("31"))
+    resultado = _correr(
+        entorno["base"],
+        dani,
+        "crear_reserva",
+        {
+            "viaje_id": entorno["vuelta"],
+            "orden_parada": 1,
+            "id_pasajero": entorno["ana"].id_persona,
+        },
+    )
+    dueño = _uno(
+        entorno["base"],
+        "SELECT id_pasajero FROM reserva WHERE id_reserva = $1",
+        resultado["reserva"]["id_reserva"],
+    )
+    assert dueño == dani.id_persona
+
+
+@pytest.mark.parametrize(
+    ("argumentos", "codigo"),
+    [
+        ({"viaje_id": "ida", "orden_parada": 1}, "ARGUMENTO_INVALIDO"),
+        ({"viaje_id": 1}, "ARGUMENTO_INVALIDO"),
+        ({"orden_parada": 1}, "ARGUMENTO_INVALIDO"),
+        ({"viaje_id": 1, "orden_parada": 0}, "ARGUMENTO_INVALIDO"),
+        ({"viaje_id": 999999, "orden_parada": 1}, "VIAJE_NO_ENCONTRADO"),
+    ],
+)
+def test_crear_reserva_con_argumentos_o_viaje_invalidos_vuelve_como_error(
+    entorno, argumentos, codigo
+):
+    resultado = _correr(entorno["base"], entorno["ana"], "crear_reserva", argumentos)
+    assert resultado["error"]["codigo"] == codigo
+
+
+def test_crear_reserva_devuelve_al_modelo_el_error_de_la_regla(entorno):
+    """RN-031 la valida el servicio: Ana ya tiene una ida ese día."""
+    resultado = _correr(
+        entorno["base"],
+        entorno["ana"],
+        "crear_reserva",
+        {"viaje_id": entorno["ida"], "orden_parada": 1},
+    )
+    assert resultado["error"]["codigo"] == "RESERVA_DUPLICADA_DEL_DIA"
+
+
+def test_crear_reserva_en_una_parada_que_no_es_del_recorrido(entorno):
+    resultado = _correr(
+        entorno["base"],
+        _pasajero(entorno["persona"]("32")),
+        "crear_reserva",
+        {"viaje_id": entorno["ida"], "orden_parada": 99},
+    )
+    assert resultado["error"]["codigo"] == "PARADA_NO_VALIDA"
+
+
+def test_cancelar_reserva_propia_trae_el_resultado_para_el_modelo(entorno):
+    eli = entorno["persona"]("33")
+    id_reserva = entorno["reserva"](eli, entorno["ida"])
+    resultado = _correr(
+        entorno["base"], _pasajero(eli), "cancelar_reserva", {"reserva_id": str(id_reserva)}
+    )
+    assert resultado["reserva"]["estado"] == "cancelada"
+    assert "id_pasajero" not in resultado["reserva"]
+    assert resultado["cupo_liberado"] is True
+    assert resultado["penalidad_aplicada"] is False
+    assert "RN-017" in resultado["motivo"]
+    assert _estado_en_base(entorno, id_reserva) == "cancelada"
+
+
+def test_cancelar_una_reserva_ajena_da_lo_mismo_que_una_inexistente(entorno):
+    ajena = _correr(
+        entorno["base"], entorno["ana"], "cancelar_reserva", {"reserva_id": entorno["reserva_beto"]}
+    )
+    inexistente = _correr(
+        entorno["base"], entorno["ana"], "cancelar_reserva", {"reserva_id": 999999}
+    )
+    assert ajena == inexistente
+    assert ajena["error"]["codigo"] == "RESERVA_NO_ENCONTRADA"
+    assert _estado_en_base(entorno, entorno["reserva_beto"]) == "consolidada"
+
+
+def test_cancelar_dos_veces_devuelve_el_error_del_servicio(entorno):
+    fer = entorno["persona"]("34")
+    id_reserva = entorno["reserva"](fer, entorno["vuelta"])
+    primera = _correr(
+        entorno["base"], _pasajero(fer), "cancelar_reserva", {"reserva_id": id_reserva}
+    )
+    segunda = _correr(
+        entorno["base"], _pasajero(fer), "cancelar_reserva", {"reserva_id": id_reserva}
+    )
+    assert "error" not in primera
+    assert segunda["error"]["codigo"] == "RESERVA_NO_CANCELABLE"
+
+
+@pytest.mark.parametrize("argumentos", [{}, {"reserva_id": "abc"}])
+def test_cancelar_sin_un_id_valido_vuelve_como_error(argumentos):
+    resultado = asyncio.run(ejecutar(None, _pasajero(1), "cancelar_reserva", argumentos))
+    assert resultado["error"]["codigo"] == "ARGUMENTO_INVALIDO"
 
 
 # --- Paradas -------------------------------------------------------------------------------

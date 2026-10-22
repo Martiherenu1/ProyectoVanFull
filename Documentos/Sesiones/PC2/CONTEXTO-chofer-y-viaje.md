@@ -1,6 +1,55 @@
 # Contexto vivo · Chofer y viaje en curso (Martín)
 
-## Estado vigente al 21/10/2026 — detalle Flutter CU-029 local con mocks
+## Estado vigente al 21/10/2026 — inicio/finalización Flutter CU-030 local con mocks
+
+### Estado
+
+- Rama local `feat/chofer-ejecucion-flutter-cu030`, worktree `F:\dev\vanfull-flutter-cu030-ejecucion`, sin commits propios ni publicación. Base exacta: HEAD de #89 `c2cf701a764ebb4f008800e7d11310cc87673acd`; #89 sigue abierta, no se modifica su rama ni se copia el detalle.
+- Main remoto consultado al preparar: `5b730397cdabff18c0399cc8bc30327c1e935751` (#91). Al cerrar avanzó a `a867de9d77fd640c45cd32e7c91f5e51589b1f89` (#93). Ambos avances son del pasajero; sin cambios en ViajeResumen, detalle chofer, contrato o dependencias. No incorporados: la base elegida sigue siendo #89, no se atribuyen a main vigente los resultados siguientes.
+
+### Hecho
+
+- Backend de inicio/finalización integrado por #71/#67; #66 cerrado. Listado Flutter integrado por #81; detalle CU-029 publicado en #89, todavía no integrado. CU-030 continúa parcial por GPS y avisos de demora/problemas.
+
+### En curso
+
+- Acciones inyectables de inicio/finalización en el detalle existente, sin HTTP/sesión/navegación propios. Coordinador en `controllers/chofer/ejecucion_viaje_controller.dart`: una sola coordinación de lecturas, escrituras y reconciliación. Componente `acciones_viaje_chofer.dart`, pruebas y ajuste acotado de la pantalla; se reutilizan ViajeResumen y CargarDetalleViajeChofer (reexportada para compatibilidad). Sin acciones inyectadas, conserva el detalle de consulta.
+- Trazabilidad CU-030 / RF-025 / ADJ-03; sin cambios de contrato, modelo, asignaciones o reglas. No se creó Issue ni PR para esta tarea: publicación y número específico pendientes de autorización.
+
+### Decisiones
+
+- Confirmación del usuario del 21/10/2026: programado permite iniciar; en_curso permite finalizar con «¿Finalizar este viaje?» / «El viaje quedará finalizado.» y «Volver» / «Finalizar viaje». Finalizado/cancelado sin transiciones nuevas; controles compartidos de 64 px y tema de chofer.
+- El Viaje de una respuesta de operación válida confirma el estado, también inicio que devuelve finalizado; no se anuncia una transición nueva por recibir 200. Bloqueo durante operación/recarga y lectura completa posterior, retirando listas anteriores. Recarga fallida conserva estado confirmado y ofrece «Actualizar detalle».
+- Resultado incierto conserva la operación pendiente: «Consultar estado» no reenvía escrituras. Si la consulta falla, sigue incierto; si devuelve el estado previo, solo habilita repetición explícita de esa misma operación. Un rechazo posterior no resuelve el envío anterior. Fallos tipados para rechazos conocidos y resultado incierto; errores no clasificados de operación se consideran inciertos.
+- Cambio de ID/fuente o desmontaje invalida resultados tardíos, sin cancelar efectos del servidor. En el mismo viaje se conserva la incertidumbre de un envío pendiente al cambiar la fuente o retirar las acciones. IDs recibidos comprobados; sin validaciones locales nuevas de fecha, horario, capacidad o pasajeros.
+
+### Pendientes
+
+- Integrar/revisar la base cuando #89 se incorpore a main. Sin conexión de navegación, HTTP/autenticación reales ni prueba en dispositivo; CU-030 no completo. GPS/ETA, QR, ausencias y demoras fuera del alcance. Nómina con mocks no acredita C12.
+- Conservados los borradores, guion, matriz, demo, .env y demás worktrees; sin carga de datos ni solicitudes operativas reales.
+
+### Entorno y comprobaciones
+
+- SDK ejecutado: Flutter 3.47.7 stable, framework `abaf9c5237`, Dart 3.13.5, `F:\dev\flutter`. PATH/PUB_CACHE solo del proceso. `flutter pub get --enforce-lockfile` correcto; lockfile intacto respecto de la base (SHA-256 `1016007f35a680bb417cafa59e6498ead13c0b6ed116b6d406d03d22c17eac15`), sin cambios de dependencias.
+- Verificación anterior local: formato de cinco archivos Dart correcto (0 cambios); `flutter analyze --no-pub` sin problemas (15,2 s); `flutter test --no-pub --reporter expanded`: **104 aprobadas, 0 fallidas, 0 omitidas** (59 nuevas: 35 coordinador + 24 pantalla; 45 de la base: 24 detalle + 13 listado + 8 navegación/tema), aproximadamente 10 s. Registro externo `F:\dev\vanfull-cu030-flutter-test.log`.
+- Ajuste de reconciliación posterior: un detalle incompatible no borra el Viaje confirmado ni habilita acciones o muestra sus listas; conserva «Actualizar detalle». Admite igualdad y el avance en_curso → finalizado respaldado por el backend. Verificado: formato de tres archivos sin cambios pendientes; analyze sin problemas (16,3 s); suite completa **110 aprobadas, 0 fallidas, 0 omitidas** (6 pruebas adicionales respecto de las 104 anteriores), aproximadamente 13 s. Registro local externo: `F:\dev\vanfull-cu030-reconciliacion-test.log`. Sin cambios de backend, #89 ni demo.
+- Se preservan los avisos preexistentes de Google Fonts en el test del tema. El intento inicial de pruebas en la ruta temporal con `&` falló antes de ejecutar casos; worktree trasladado a F:\dev y referencia reparada. Avisos iniciales de estilo corregidos. Sin prueba backend/HTTP/dispositivo ni CI remota de esta entrega local.
+
+### Revisión visual manual local — 22/10/2026
+
+- Realizada por el usuario con mocks en Flutter Web, en ventana amplia y angosta: listado y detalle legibles; horario omitido como «Sin horario». Pasajeros, nómina y diálogo legibles en ventana angosta.
+- Inicio muestra «En curso» y «Finalizar viaje». «Volver» cancela la confirmación y conserva En curso; confirmar la finalización muestra «Finalizado» y retira las acciones.
+- Resultado incierto exige consultar el estado; permite reintentar inicio explícitamente y recupera el detalle. Recarga fallida conserva el estado confirmado, oculta las listas y permite recuperarlas con «Actualizar detalle».
+- Bloqueo visual observado durante operación y recarga: se retiran las acciones y aparecen «Procesando solicitud» / «Actualizando detalle», con indicador de carga. Durante la recarga se conserva «Estado confirmado: En curso».
+- Observaciones pendientes, sin correcciones de código: separación vertical amplia y pantalla de procesamiento poco clara.
+- Alcance limitado a los recorridos informados: no se declaran revisados los demás escenarios del menú, Android/dispositivo ni integración HTTP/backend. No acredita C12 ni CU-030 completo; sin llamadas a la demo. No se repitió la suite ni se cambió código productivo.
+- Entrada temporal `frontend/local_chofer_preview.dart` sin seguimiento, fuera de los seis archivos de la entrega y de los textos preparados de Issue/PR. Este registro no actualiza la consulta remota de #89/main: comprobarla al retomar antes de actualizar la base y publicar.
+
+### Para otras áreas
+
+- Futuro contenedor: inyectar `AccionesEjecucionViaje(iniciar, finalizar, onRechazo)` junto a `cargarDetalle`. El adaptador común deberá enviar los POST sin cuerpo, devolver ViajeResumen, distinguir rechazo conocido/resultado incierto y efectuar consultas nuevas después de la escritura. Permisos y transacciones siguen en backend; no se envió ningún mensaje.
+
+## Registro histórico al 21/10/2026 — detalle Flutter CU-029 local con mocks
 
 - Entrega publicada en [PR #89](https://github.com/Martiherenu1/ProyectoVanFull/pull/89), abierta y sin merge a main; Issue #88 abierto con etiqueta `chofer`. Rama `feat/chofer-detalle-flutter-cu029`, worktree `F:\dev\vanfull-flutter-cu029-detalle`. Los seis archivos revisados se preservaron en `a6f234eb107214dd0380670f368a1e0110042efc`. Base inicial: `28cfe338fde8bdcd8eb25c56b17c8911dfdb8d7e`; se reutiliza `ViajeResumen`, sin copiarlo ni modificar la rama del listado.
 - Primera base integrada el 21/10/2026: `origin/main 5bf3117daf8ce8ab943cf234ac19dbac3fb6196d`, mediante merge local `b81ca4c3967360fe94ed9dabc4bf7fa535adf6da` (padres `a6f234e` y `5bf3117`). #81 ya está mergeada y #80 cerrado; #79 también integrada y #48 cerrado. La dependencia de una PR abierta quedó resuelta. Merge automático, sin conflictos ni rebase/force; historial del contexto conservado, sin borradores ajenos. El detalle aún no está integrado a main ni conectado a navegación/listado.

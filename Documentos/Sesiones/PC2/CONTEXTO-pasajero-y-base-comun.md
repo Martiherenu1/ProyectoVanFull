@@ -3,17 +3,17 @@
 > Lo mantiene el agente de Martiniano, en el mismo PR que cambia algo. Convención en
 > `PROMPT-CONTEXTO-VIVO.md`. Si algo de acá contradice al código, manda el código: corregir este archivo.
 >
-> **Última actualización: 2026-10-20**
+> **Última actualización: 2026-10-21**
 
 ## Estado
 
 **La base común del backend está completa y en `main`.** Del circuito del pasajero están hechos el perfil
-(CU-001), servicios, disponibilidad y paradas (CU-002), las reservas propias (CU-010) y el asistente AG-01 de
-lectura (CU-011, `POST /api/chat`). La **creación de la reserva (CU-003) está en `main`, solo para el
-ocasional y sin tarifa**; la **cancelación (CU-004) está lista en su PR, sin crédito ni penalidad** (ver
-«En curso»). El cambio de parada (CU-005) **no es del PC2** (REPARTO-PC2).
+(CU-001), servicios, disponibilidad y paradas (CU-002), las reservas propias (CU-010), el asistente AG-01
+(CU-011, `POST /api/chat`), la **creación de la reserva (CU-003, solo ocasional y sin tarifa)** y la
+**cancelación (CU-004, sin crédito ni penalidad)**. El asistente puede reservar y cancelar (ver «En curso»).
+El cambio de parada (CU-005) **no es del PC2** (REPARTO-PC2).
 
-La CI corre en cada PR. En `main` la suite da 277 pruebas; la rama de CU-004 suma 23 (300), unos dos minutos.
+La CI corre en cada PR. En `main` la suite da 300 pruebas; la rama de las tools de AG-01 suma 15 (315), unos dos minutos.
 
 ## Hecho
 
@@ -33,21 +33,36 @@ La CI corre en cada PR. En `main` la suite da 277 pruebas; la rama de CU-004 sum
 | `Reserva` del contrato con `fecha`, `horario`, `sentido` e `id_recorrido` del viaje (cambio aditivo): `openapi.yaml`, JSON regenerado y los dos endpoints de CU-010 | #31 | el que cierra #31 |
 | Hoja de pendientes de validación para Martín: `PENDIENTES-PARA-MARTIN-2026-10-15.html` (#33, #7, #9, #28, #8 y #25, cada uno con "mi opción"); superada por las aclaraciones validadas del 2026-10-18 | — | el que cierra #31 |
 | Asistente AG-01 de lectura (CU-011): `POST /api/chat`, ejecutor de 4 tools y servicio con modelo + fallback; 30 + 24 pruebas | #42 | #69 |
+| Cancelar una reserva propia, sin crédito ni penalidad (CU-004): `POST /api/reservas/{id}/cancelacion`, 23 pruebas | #74 | #76 |
 | Cupo: capacidad del vehículo, si no la planificada, si no 19; la ausencia informada libera el lugar (#28 parcial) | #28 | #70 |
 | Crear la reserva del ocasional, sin tarifa (CU-003): `POST /api/reservas`, 27 pruebas; `cupo_del_viaje` como definición única | #72 | #73 |
+| Tools `crear_reserva` y `cancelar_reserva` de AG-01: `agent/ejecutor.py` las traduce a los servicios de reservas; `crear_reserva` recibe `viaje_id` y `orden_parada` | #77 | #78 |
 
 ## En curso
 
-**CU-004, cancelar reserva, sin crédito ni penalidad (Issue #74), rama `feat/pasajero-cancelar-reserva-cu004-74`.**
-`POST /api/reservas/{id}/cancelacion` (`services/reservas.py::cancelar_reserva`): la reserva propia pasa a
-`cancelada` y el lugar vuelve solo (el cupo se calcula). Responde 409 `RESERVA_NO_CANCELABLE` si ya estaba
-cancelada y `VIAJE_NO_CANCELABLE` si el viaje no está `programado`. Devuelve `cupo_liberado` (solo si era
-`consolidada` y no había avisado ausencia), `penalidad_aplicada: false`, `importe_penalidad: 0` y un `motivo` que
-nombra la regla (RN-017 en o fuera de término, RN-018, RN-007). PR #76. Fuera de esta rebanada: el crédito de
-RN-017 (sin tabla), la devolución de RN-018 y el reintegro de RN-019 (dependen de pagos y tarifa, #9).
+**Pantalla Flutter Buscar servicio (CU-002, Issue #90, PR #91), rama `feat/pasajero-buscar-servicio-cu002`.**
+`screens/pasajero/buscar_servicio_screen.dart` y `models/pasajero/` (`DisponibilidadViaje`, `Parada`). Carga
+**inyectable** (`CargarDisponibilidad`, `CargarParadas`), igual que el listado del chofer: no crea clientes HTTP.
+Fecha y sentido explícitos; **no manda `destino`** (el backend lo rechaza con 400 `FILTRO_NO_DISPONIBLE` hasta
+resolver #8). Estados: esqueleto, vacío, error con reintento, "Sin cupo". Verificado: `flutter analyze` y
+`flutter test` (40/40). **SIN VERIFICAR:** contra el backend real y en un dispositivo o navegador. **No está
+conectada** al `RoleRouter`: falta el cliente común (#87) y el login (pantalla 1).
 
-Después: la tool `crear_reserva` (y `cancelar_reserva`) de AG-01 en `agent/ejecutor.py`, las pantallas Flutter del
-pasajero y la deuda (CU-006, pantalla).
+Después: Mis reservas y deuda (CU-010/CU-006); el Asistente (CU-011) y el login. El tipo de servicio no se muestra
+(la respuesta trae solo `id_servicio`; haría falta `GET /servicios`).
+
+**Pantalla Flutter Confirmar reserva (CU-003, Issue #92), rama `feat/pasajero-confirmar-reserva-cu003`, apilada
+sobre la de Buscar servicio (#91).** `screens/pasajero/confirmar_reserva_screen.dart` y `models/pasajero/reserva.dart`
+(`Reserva`, `EstadoReserva`, `ReservaRechazada`). Recibe el `DisponibilidadViaje` que entrega Buscar servicio
+(`onReservar`), pide las paradas del recorrido (`CargarParadas`), el pasajero marca dónde sube y confirma con
+`CrearReserva(idViaje, ordenParada)` **inyectable**: el adaptador común debe lanzar `ReservaRechazada` ante los
+400/409 con cuerpo de error. Muestra el motivo concreto de cada rechazo (`CUPO_NO_DISPONIBLE`,
+`RESERVA_DUPLICADA_DEL_DIA`, `RESERVA_CANCELADA_PREVIA`, `VIAJE_NO_RESERVABLE`, `PARADA_NO_VALIDA`, red); los
+cuatro primeros bloquean el botón porque reintentar no cambia el resultado. Sin doble envío. `consolidada` se
+muestra como «Confirmada». **No muestra tarifa** (CU-003 no la calcula hasta #9) **ni lista de espera** (#34: el
+409 la anuncia pero no hay operación). Verificado: `flutter analyze` y `flutter test` (60/60). **SIN VERIFICAR:**
+contra el backend real y en un dispositivo o navegador; **no está conectada** (falta #87 y el login). Las
+paradas se listan todas, incluida la última: ninguna regla dice cuáles admiten ascenso.
 
 ## Decisiones
 

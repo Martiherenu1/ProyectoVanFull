@@ -3,7 +3,7 @@
 > Lo mantiene el agente de Martiniano, en el mismo PR que cambia algo. Convención en
 > `PROMPT-CONTEXTO-VIVO.md`. Si algo de acá contradice al código, manda el código: corregir este archivo.
 >
-> **Última actualización: 2026-10-20**
+> **Última actualización: 2026-10-21**
 
 ## Estado
 
@@ -36,18 +36,33 @@ La CI corre en cada PR. En `main` la suite da 300 pruebas; la rama de las tools 
 | Cancelar una reserva propia, sin crédito ni penalidad (CU-004): `POST /api/reservas/{id}/cancelacion`, 23 pruebas | #74 | #76 |
 | Cupo: capacidad del vehículo, si no la planificada, si no 19; la ausencia informada libera el lugar (#28 parcial) | #28 | #70 |
 | Crear la reserva del ocasional, sin tarifa (CU-003): `POST /api/reservas`, 27 pruebas; `cupo_del_viaje` como definición única | #72 | #73 |
+| Tools `crear_reserva` y `cancelar_reserva` de AG-01: `agent/ejecutor.py` las traduce a los servicios de reservas; `crear_reserva` recibe `viaje_id` y `orden_parada` | #77 | #78 |
 
 ## En curso
 
-**Tools `crear_reserva` y `cancelar_reserva` de AG-01 (Issue #77), rama `feat/pasajero-tools-reservar-cancelar-ag01-77`.**
-`agent/ejecutor.py` las traduce a `reservas.crear_reserva` y `reservas.cancelar_reserva`, los mismos servicios que
-los endpoints. `crear_reserva` pasa a recibir `viaje_id` y `orden_parada` (lo que devuelven `consultar_disponibilidad`
-y `consultar_paradas`): la definición anterior (`fecha`, `recorrido`, `parada`, `sentido`) no alcanzaba para el
-servicio. El prompt le pide al modelo mostrar lo que va a hacer y esperar la confirmación del pasajero. Falta: el PR.
-**SIN VERIFICAR:** que un modelo real respete esa confirmación (las pruebas usan un modelo con guion, ver Pendientes).
+**Pantalla Flutter Buscar servicio (CU-002, Issue #90, PR #91), rama `feat/pasajero-buscar-servicio-cu002`.**
+`screens/pasajero/buscar_servicio_screen.dart` y `models/pasajero/` (`DisponibilidadViaje`, `Parada`). Carga
+**inyectable** (`CargarDisponibilidad`, `CargarParadas`), igual que el listado del chofer: no crea clientes HTTP.
+Fecha y sentido explícitos; **no manda `destino`** (el backend lo rechaza con 400 `FILTRO_NO_DISPONIBLE` hasta
+resolver #8). Estados: esqueleto, vacío, error con reintento, "Sin cupo". Verificado: `flutter analyze` y
+`flutter test` (40/40). **SIN VERIFICAR:** contra el backend real y en un dispositivo o navegador. **No está
+conectada** al `RoleRouter`: falta el cliente común (#87) y el login (pantalla 1).
 
-Después: las pantallas Flutter del pasajero (Buscar servicio, Confirmar reserva, Mis reservas y deuda, Asistente)
-y la deuda (CU-006, pantalla).
+Después: Mis reservas y deuda (CU-010/CU-006); el Asistente (CU-011) y el login. El tipo de servicio no se muestra
+(la respuesta trae solo `id_servicio`; haría falta `GET /servicios`).
+
+**Pantalla Flutter Confirmar reserva (CU-003, Issue #92), rama `feat/pasajero-confirmar-reserva-cu003`, apilada
+sobre la de Buscar servicio (#91).** `screens/pasajero/confirmar_reserva_screen.dart` y `models/pasajero/reserva.dart`
+(`Reserva`, `EstadoReserva`, `ReservaRechazada`). Recibe el `DisponibilidadViaje` que entrega Buscar servicio
+(`onReservar`), pide las paradas del recorrido (`CargarParadas`), el pasajero marca dónde sube y confirma con
+`CrearReserva(idViaje, ordenParada)` **inyectable**: el adaptador común debe lanzar `ReservaRechazada` ante los
+400/409 con cuerpo de error. Muestra el motivo concreto de cada rechazo (`CUPO_NO_DISPONIBLE`,
+`RESERVA_DUPLICADA_DEL_DIA`, `RESERVA_CANCELADA_PREVIA`, `VIAJE_NO_RESERVABLE`, `PARADA_NO_VALIDA`, red); los
+cuatro primeros bloquean el botón porque reintentar no cambia el resultado. Sin doble envío. `consolidada` se
+muestra como «Confirmada». **No muestra tarifa** (CU-003 no la calcula hasta #9) **ni lista de espera** (#34: el
+409 la anuncia pero no hay operación). Verificado: `flutter analyze` y `flutter test` (60/60). **SIN VERIFICAR:**
+contra el backend real y en un dispositivo o navegador; **no está conectada** (falta #87 y el login). Las
+paradas se listan todas, incluida la última: ninguna regla dice cuáles admiten ascenso.
 
 ## Decisiones
 

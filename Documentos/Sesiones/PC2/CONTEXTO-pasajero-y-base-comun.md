@@ -8,12 +8,12 @@
 ## Estado
 
 **La base común del backend está completa y en `main`.** Del circuito del pasajero están hechos el perfil
-(CU-001), servicios, disponibilidad y paradas (CU-002), las reservas propias (CU-010) y el asistente AG-01 de
-lectura (CU-011, `POST /api/chat`). La **creación de la reserva (CU-003) está en `main`, solo para el
-ocasional y sin tarifa**; la **cancelación (CU-004) está lista en su PR, sin crédito ni penalidad** (ver
-«En curso»). El cambio de parada (CU-005) **no es del PC2** (REPARTO-PC2).
+(CU-001), servicios, disponibilidad y paradas (CU-002), las reservas propias (CU-010), el asistente AG-01
+(CU-011, `POST /api/chat`), la **creación de la reserva (CU-003, solo ocasional y sin tarifa)** y la
+**cancelación (CU-004, sin crédito ni penalidad)**. El asistente puede reservar y cancelar (ver «En curso»).
+El cambio de parada (CU-005) **no es del PC2** (REPARTO-PC2).
 
-La CI corre en cada PR. En `main` la suite da 277 pruebas; la rama de CU-004 suma 23 (300), unos dos minutos.
+La CI corre en cada PR. En `main` la suite da 300 pruebas; la rama de las tools de AG-01 suma 15 (315), unos dos minutos.
 
 ## Hecho
 
@@ -33,21 +33,21 @@ La CI corre en cada PR. En `main` la suite da 277 pruebas; la rama de CU-004 sum
 | `Reserva` del contrato con `fecha`, `horario`, `sentido` e `id_recorrido` del viaje (cambio aditivo): `openapi.yaml`, JSON regenerado y los dos endpoints de CU-010 | #31 | el que cierra #31 |
 | Hoja de pendientes de validación para Martín: `PENDIENTES-PARA-MARTIN-2026-10-15.html` (#33, #7, #9, #28, #8 y #25, cada uno con "mi opción"); superada por las aclaraciones validadas del 2026-10-18 | — | el que cierra #31 |
 | Asistente AG-01 de lectura (CU-011): `POST /api/chat`, ejecutor de 4 tools y servicio con modelo + fallback; 30 + 24 pruebas | #42 | #69 |
+| Cancelar una reserva propia, sin crédito ni penalidad (CU-004): `POST /api/reservas/{id}/cancelacion`, 23 pruebas | #74 | #76 |
 | Cupo: capacidad del vehículo, si no la planificada, si no 19; la ausencia informada libera el lugar (#28 parcial) | #28 | #70 |
 | Crear la reserva del ocasional, sin tarifa (CU-003): `POST /api/reservas`, 27 pruebas; `cupo_del_viaje` como definición única | #72 | #73 |
 
 ## En curso
 
-**CU-004, cancelar reserva, sin crédito ni penalidad (Issue #74), rama `feat/pasajero-cancelar-reserva-cu004-74`.**
-`POST /api/reservas/{id}/cancelacion` (`services/reservas.py::cancelar_reserva`): la reserva propia pasa a
-`cancelada` y el lugar vuelve solo (el cupo se calcula). Responde 409 `RESERVA_NO_CANCELABLE` si ya estaba
-cancelada y `VIAJE_NO_CANCELABLE` si el viaje no está `programado`. Devuelve `cupo_liberado` (solo si era
-`consolidada` y no había avisado ausencia), `penalidad_aplicada: false`, `importe_penalidad: 0` y un `motivo` que
-nombra la regla (RN-017 en o fuera de término, RN-018, RN-007). PR #76. Fuera de esta rebanada: el crédito de
-RN-017 (sin tabla), la devolución de RN-018 y el reintegro de RN-019 (dependen de pagos y tarifa, #9).
+**Tools `crear_reserva` y `cancelar_reserva` de AG-01 (Issue #77), rama `feat/pasajero-tools-reservar-cancelar-ag01-77`.**
+`agent/ejecutor.py` las traduce a `reservas.crear_reserva` y `reservas.cancelar_reserva`, los mismos servicios que
+los endpoints. `crear_reserva` pasa a recibir `viaje_id` y `orden_parada` (lo que devuelven `consultar_disponibilidad`
+y `consultar_paradas`): la definición anterior (`fecha`, `recorrido`, `parada`, `sentido`) no alcanzaba para el
+servicio. El prompt le pide al modelo mostrar lo que va a hacer y esperar la confirmación del pasajero. Falta: el PR.
+**SIN VERIFICAR:** que un modelo real respete esa confirmación (las pruebas usan un modelo con guion, ver Pendientes).
 
-Después: la tool `crear_reserva` (y `cancelar_reserva`) de AG-01 en `agent/ejecutor.py`, las pantallas Flutter del
-pasajero y la deuda (CU-006, pantalla).
+Después: las pantallas Flutter del pasajero (Buscar servicio, Confirmar reserva, Mis reservas y deuda, Asistente)
+y la deuda (CU-006, pantalla).
 
 ## Decisiones
 

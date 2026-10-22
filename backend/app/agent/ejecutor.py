@@ -17,12 +17,13 @@ from collections.abc import Awaitable, Callable
 from datetime import date
 from typing import Any
 
+from pydantic import ValidationError
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.agent.tools import TOOLS
 from app.core.errors import ApiError
 from app.core.security import UsuarioActual
-from app.schemas.reservas import Reserva
+from app.schemas.reservas import Reserva, ReservaCreate
 from app.services import disponibilidad, reservas, servicios
 
 DERIVAR_HUMANO = "derivar_humano"
@@ -102,6 +103,29 @@ async def _consultar_reserva(db: AsyncSession, usuario: UsuarioActual, args: dic
     return {"reserva": _reserva_para_el_modelo(reserva)}
 
 
+async def _crear_reserva(db: AsyncSession, usuario: UsuarioActual, args: dict) -> dict:
+    """CU-003 por el chat: el mismo servicio que `POST /reservas`, con las mismas validaciones."""
+    try:
+        datos = ReservaCreate(
+            id_viaje=_entero(args.get("viaje_id"), "viaje_id"),
+            orden_parada=_entero(args.get("orden_parada"), "orden_parada"),
+        )
+    except ValidationError as exc:
+        raise _ArgumentoInvalido("`orden_parada` tiene que ser 1 o más.") from exc
+    return {"reserva": _reserva_para_el_modelo(await reservas.crear_reserva(db, usuario, datos))}
+
+
+async def _cancelar_reserva(db: AsyncSession, usuario: UsuarioActual, args: dict) -> dict:
+    """CU-004 por el chat: el mismo servicio que `POST /reservas/{id}/cancelacion`."""
+    resultado = await reservas.cancelar_reserva(
+        db, usuario, _entero(args.get("reserva_id"), "reserva_id")
+    )
+    return {
+        **resultado.model_dump(mode="json", exclude={"reserva"}),
+        "reserva": _reserva_para_el_modelo(resultado.reserva),
+    }
+
+
 async def _consultar_paradas(db: AsyncSession, usuario: UsuarioActual, args: dict) -> dict:
     paradas = await servicios.paradas_de_recorrido(db, _entero(args.get("recorrido"), "recorrido"))
     return {"paradas": [p.model_dump(mode="json", exclude_none=True) for p in paradas]}
@@ -117,6 +141,8 @@ _FUNCIONES: dict[str, Callable[[AsyncSession, UsuarioActual, dict], Awaitable[di
     "consultar_disponibilidad": _consultar_disponibilidad,
     "consultar_reserva": _consultar_reserva,
     "consultar_paradas": _consultar_paradas,
+    "crear_reserva": _crear_reserva,
+    "cancelar_reserva": _cancelar_reserva,
     DERIVAR_HUMANO: _derivar_humano,
 }
 
@@ -130,7 +156,7 @@ async def ejecutar(
     """Ejecuta la tool `nombre` para `usuario` y devuelve lo que se le pasa al modelo."""
     funcion = _FUNCIONES.get(nombre)
     if funcion is None:
-        # A3: no se inventa capacidad. Reservar es CU-003 y cancelar CU-004.
+        # A3: no se inventa capacidad.
         return _error("TOOL_NO_HABILITADA", "Esa operación no está disponible en el asistente.")
     try:
         return await funcion(db, usuario, _leer_argumentos(argumentos))

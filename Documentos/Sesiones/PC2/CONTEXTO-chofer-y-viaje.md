@@ -1,6 +1,45 @@
 # Contexto vivo · Chofer y viaje en curso (Martín)
 
-## Estado vigente al 21/10/2026 — listado Flutter CU-029 verificado con mocks
+## Estado vigente al 21/10/2026 — detalle Flutter CU-029 local con mocks
+
+- Entrega publicada en [PR #89](https://github.com/Martiherenu1/ProyectoVanFull/pull/89), abierta y sin merge a main; Issue #88 abierto con etiqueta `chofer`. Rama `feat/chofer-detalle-flutter-cu029`, worktree `F:\dev\vanfull-flutter-cu029-detalle`. Los seis archivos revisados se preservaron en `a6f234eb107214dd0380670f368a1e0110042efc`. Base inicial: `28cfe338fde8bdcd8eb25c56b17c8911dfdb8d7e`; se reutiliza `ViajeResumen`, sin copiarlo ni modificar la rama del listado.
+- Primera base integrada el 21/10/2026: `origin/main 5bf3117daf8ce8ab943cf234ac19dbac3fb6196d`, mediante merge local `b81ca4c3967360fe94ed9dabc4bf7fa535adf6da` (padres `a6f234e` y `5bf3117`). #81 ya está mergeada y #80 cerrado; #79 también integrada y #48 cerrado. La dependencia de una PR abierta quedó resuelta. Merge automático, sin conflictos ni rebase/force; historial del contexto conservado, sin borradores ajenos. El detalle aún no está integrado a main ni conectado a navegación/listado.
+- Reanudación del 21/10/2026: incorporado `origin/main 34d3855c1af3ddb9b5eab33f30e70b8323d94772` mediante merge local `a78dba2c46af501c534c298e78513b584402b496`, sin conflictos. Incluye #78 (AG-01) y #83 (CI Flutter). No cambian pantallas, DTO, contratos ni dependencias propios; el diff contra main conserva únicamente los seis archivos del detalle/contexto. La publicación anterior ya existía: se reutilizan #88/#89, sin duplicarlos. La nueva CI comprende backend y Flutter; su resultado se verifica en la PR para cada HEAD.
+
+### Hecho
+
+- Backend CU-029 integrado por #65; listado Flutter integrado por #81, todavía sin HTTP ni conexión a navegación. Inicio/finalización backend por #71/#67 y #66 cerrado. CU-030 sigue parcial por GPS y avisos de demora/problemas. #79 aporta entradas temporales por rol, no autorización ni integración HTTP.
+
+### En curso
+
+- Modelo de lectura `OperacionAsignada`, pantalla `DetalleViajeChoferScreen`, dos archivos de pruebas y un fixture sintético compartido. Información del viaje, capacidad planificada, paradas en orden recibido, reservas y nómina separadas y cantidades del servidor sin calcular disponibilidad u ocupación total.
+- Carga, contenido, no disponible, error/reintento; invalidación al cambiar ID o fuente, protección tras desmontaje y rechazo de una respuesta con otro ID. Sin contactos privados ni inferencia de ausencia; nómina sin fotografía, reserva ni abordaje inventados.
+
+### Decisiones de esta entrega
+
+- Interfaz local `CargarDetalleViajeChofer = Future<OperacionAsignada?> Function(int idViaje)`: `null` representa detalle no disponible; el futuro adaptador común traducirá el 404 sin distinguir viaje ajeno de inexistente. Otros fallos muestran un error genérico. No cambia contrato ni permisos.
+- Fotografía nullable requerida en el modelo; el contrato proporciona una referencia, no necesariamente una URL. Presentación alternativa accesible, sin descarga de imágenes; resolver la referencia real queda para la integración. Horario omitido muestra «Sin horario». Tema de chofer y mínimos compartidos de 64 px; sin navegación, HTTP ni autenticación propios.
+
+### Pendientes
+
+- Issue específico [#88](https://github.com/Martiherenu1/ProyectoVanFull/issues/88) creado el 21/10/2026 con el texto revisado y etiqueta `chofer`. Trazabilidad CU-029, RF-024, RN-029; referencias #64/#48/#81. La [PR #89](https://github.com/Martiherenu1/ProyectoVanFull/pull/89) cierra únicamente #88 al integrarse y mantiene esas referencias. #81 ya integrada: no hay dependencia de una PR abierta; no se declara CU-029 completo.
+- Coordinar cliente común y conexión efectiva entre navegación, listado y detalle en otra tarea. Sin prueba HTTP ni en dispositivo; fotografías no visualizadas. La nómina se prueba solo con mocks: no acredita C12 ni modifica el guion/dataset. La CI y las revisiones del HEAD publicado se informan en la PR; no sustituyen la evidencia Flutter local.
+
+### Entorno y comprobaciones
+
+- Flutter 3.47.7 stable / Dart 3.13.5, SDK `F:\dev\flutter`; PATH/PUB_CACHE ajustados solo para el proceso como en la preparación del listado. `flutter pub get --enforce-lockfile` correcto; lockfile SHA-256 intacto `1016007f35a680bb417cafa59e6498ead13c0b6ed116b6d406d03d22c17eac15`.
+- Registro histórico previo a integrar main (base `28cfe33`): formato de los cinco archivos nuevos correcto; `flutter analyze --no-pub` sin problemas (20,7 s); `flutter test --no-pub --reporter expanded`: **39 aprobadas, 0 fallidas, 0 omitidas** (24 nuevas: 7 modelo + 17 pantalla; 15 de la base #81: 13 del listado + 2 preexistentes). Pruebas con mocks, incluida pantalla pequeña, privacidad y resultados/errores/null atrasados; no equivalen a integración real.
+- **Combinación previa local con main `5bf3117`:** formato de cinco archivos nuevos correcto (cero cambios); `flutter analyze --no-pub` sin problemas (25,0 s); `flutter test --no-pub --reporter expanded`: **45 aprobadas, 0 fallidas, 0 omitidas** (24 nuevas del detalle: 7 modelo + 17 pantalla; 21 de main: 13 listado + 8 navegación/tema). Suite de widgets en aproximadamente 10 s, sin HTTP/dispositivo; esta evidencia Flutter es local y se distingue de la CI remota. No se modificaron dependencias ni lockfile, y no fue necesario repetir pub get. `git diff --check` correcto; diff propio contra main limitado a los seis archivos del detalle/contexto.
+- **Combinación vigente con main `34d3855`:** formato de los cinco archivos nuevos correcto (cero cambios), `flutter analyze --no-pub` sin problemas (25,6 s) y `flutter test --no-pub --reporter expanded`: **45 aprobadas, 0 fallidas, 0 omitidas** (24 detalle, 13 listado y 8 navegación/tema; aproximadamente 9 s). Avisos conocidos de Google Fonts en el test preexistente, sin fallas. SDK Flutter 3.47.7 / Dart 3.13.5; lockfile y dependencias intactos. No se ejecutó backend local ni se llamó a la demo; la CI del nuevo HEAD se informa separadamente en #89.
+- Durante la preparación previa se corrigieron un aviso de estilo del test, el tipo nullable del fixture y la separación/limpieza de la semántica de fotografía. Sus ejecuciones con fallos no se presentan como aprobadas. Google Fonts emitió avisos desde el test preexistente en ejecuciones previas y en la combinación con main; no se modificó el tema.
+- No se ejecutó backend ni se llamó a la demo. Un intento auxiliar de comparación YAML/JSON no pudo correr en Python local por falta de PyYAML; contrato y backend no tienen diferencias entre esta base y main, ni cambios propios en esta entrega.
+
+### Para otras áreas
+
+- Facundo: la pantalla recibe `idViaje` y `cargarDetalle`; no crea `MaterialApp` ni conecta el detalle con la navegación de #79 o el listado de #81. Martiniano: el futuro adaptador conserva sesión/permisos en backend y mapea el resultado a esta interfaz; no se incorporan reglas de reservas en Flutter. Textos de Issue/PR revisados; publicación autorizada y sin mensajes enviados.
+- Preservados checkout original, ramas publicadas, borradores documentales, demás worktrees, `.env` y demo. No se copió el guion ni la matriz de otros worktrees.
+
+## Registro histórico al 21/10/2026 — listado Flutter CU-029 verificado con mocks
 
 - Base original: `80a85634a2ab40bf201bb78e8787e8c87d51f0f2`. Issue específico #80 creado con etiqueta `chofer`; entrega local registrada en `ccb5eea8cd5dece5996e9e54a18f1f92d686dcbf`. El 21/10 se integró `origin/main 742476b7c2181a184498f57489888834e1cf2fa7` mediante merge `f00c48aa64c4419ee659ff6277d4186144eb54f3`, sin conflictos, rebase ni force. Incorpora los 11 commits de #73/#76 sin cambios propios de reservas/contrato; Flutter, el listado CU-029 y el schema `Viaje` no cambiaron en ese avance. Backend CU-029 integrado por #65; inicio/finalización integrados por #71/#67 y #66 cerrado. CU-030 continúa parcial: GPS y avisos de demora/problemas pendientes. Los registros inferiores describen verificaciones históricas.
 - Rama aislada `feat/chofer-listado-flutter-cu029`: modelo `ViajeResumen` y pantalla de listado por fecha con fuente asíncrona inyectable y callback de selección por ID. Estados de carga, listado, vacío y error/reintento; horario omitido se presenta como «Sin horario». Sin nombres deducidos de identificadores.

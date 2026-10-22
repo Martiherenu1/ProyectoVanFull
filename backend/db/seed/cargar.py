@@ -31,6 +31,7 @@ CONTRASENAS = CARPETA / "contrasenas-de-prueba.csv"
 ORDEN = (
     "persona",
     "pasajero",
+    "chofer",
     "cliente",
     "cliente_individual",
     "cuenta_corriente",
@@ -40,6 +41,8 @@ ORDEN = (
     "recorrido",
     "parada",
     "parada_recorrido",
+    "vehiculo",
+    "viaje",
 )
 
 # cuenta_rol.csv usa ids. Los fija la migración inicial, en este orden.

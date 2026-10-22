@@ -48,7 +48,7 @@ resolver #8). Estados: esqueleto, vacío, error con reintento, "Sin cupo". Verif
 `flutter test` (40/40). **SIN VERIFICAR:** contra el backend real y en un dispositivo o navegador. **No está
 conectada** al `RoleRouter`: falta el cliente común (#87) y el login (pantalla 1).
 
-Después: Mis reservas y deuda (CU-010/CU-006); el Asistente (CU-011) y el login. El tipo de servicio no se muestra
+Después: el Asistente (CU-011), el login y Pago (pantalla 5, de Facundo). El tipo de servicio no se muestra
 (la respuesta trae solo `id_servicio`; haría falta `GET /servicios`).
 
 **Pantalla Flutter Confirmar reserva (CU-003, Issue #92), rama `feat/pasajero-confirmar-reserva-cu003`, apilada
@@ -63,6 +63,20 @@ muestra como «Confirmada». **No muestra tarifa** (CU-003 no la calcula hasta #
 409 la anuncia pero no hay operación). Verificado: `flutter analyze` y `flutter test` (60/60). **SIN VERIFICAR:**
 contra el backend real y en un dispositivo o navegador; **no está conectada** (falta #87 y el login). Las
 paradas se listan todas, incluida la última: ninguna regla dice cuáles admiten ascenso.
+
+**Pantalla Flutter Mis reservas y deuda (CU-010 / CU-006 / CU-004, Issue #94), rama `feat/pasajero-mis-reservas-cu010`,
+apilada sobre la de Confirmar reserva (#93).** `screens/pasajero/mis_reservas_screen.dart`, `models/pasajero/deuda.dart`,
+`ResultadoCancelacion` en `models/pasajero/reserva.dart` y `core/format/importe.dart` (`$ 11.600,00`). Tres cargas
+**inyectables** (`CargarReservas`, `CargarDeuda`, `CancelarReserva`). El saldo (dato dominante: «Al día» o el importe en
+rojo) y la lista fallan y se reintentan por separado. Cancelar pide confirmación; los 409 `RESERVA_NO_CANCELABLE` y
+`VIAJE_NO_CANCELABLE` se muestran con su motivo (el adaptador debe lanzar `ReservaRechazada`), y la cancelada
+muestra el `motivo` que devuelve el backend. **No muestra la ventana de cancelación de RN-017** (“Podés cancelar hasta
+…” del brief): hoy se puede cancelar mientras el viaje esté programado y el crédito no existe (#75), así que mostrar
+una hora prometería algo que no se aplica; la `Reserva` tampoco informa el estado del viaje. **Abierto:** si el pasajero
+no tiene cliente individual todavía (no reservó nunca), `GET /pasajeros/me/deuda` responde 404
+`CLIENTE_NO_ENCONTRADO` y la pantalla muestra «No pudimos cargar tu saldo»; decidir con Facundo si ese caso es
+«Al día». Verificado: `flutter analyze` y `flutter test` (79/79). **SIN VERIFICAR:** contra el backend real y en
+un dispositivo o navegador; no está conectada (#87 y el login).
 
 ## Decisiones
 

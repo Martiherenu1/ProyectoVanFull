@@ -627,4 +627,112 @@ void main() {
     expect(c.viajeConfirmado, isNull);
     expect(c.puedeIniciar || c.puedeFinalizar || c.puedeRepetir, isFalse);
   });
+  for (final cambioFuente in [true, false]) {
+    for (final recargaFallida in [true, false]) {
+      for (final caso in [
+        (confirmado: 'finalizado', consultado: 'en_curso', compatible: false),
+        (confirmado: 'finalizado', consultado: 'programado', compatible: false),
+        (confirmado: 'en_curso', consultado: 'programado', compatible: false),
+        (confirmado: 'finalizado', consultado: 'finalizado', compatible: true),
+        (confirmado: 'en_curso', consultado: 'en_curso', compatible: true),
+        (confirmado: 'en_curso', consultado: 'finalizado', compatible: true),
+      ]) {
+        test('cambia fuente=$cambioFuente tras confirmar ${caso.confirmado}, '
+            'recargaFallida=$recargaFallida, GET ${caso.consultado}', () async {
+          final anterior = Completer<OperacionAsignada?>();
+          final nueva = Completer<OperacionAsignada?>();
+          var lecturas = 0;
+          var posts = 0;
+          final confirmado = snapshot(caso.confirmado).viaje;
+          final recibido = snapshot(caso.consultado);
+          Future<OperacionAsignada?> cargar(int id) {
+            if (++lecturas == 1) return Future.value(snapshot('programado'));
+            if (lecturas > 2) return nueva.future;
+            return recargaFallida
+                ? Future.error(StateError('recarga fallida'))
+                : anterior.future;
+          }
+
+          final acciones = fuentes(
+            inicio: (_) async {
+              posts++;
+              return confirmado;
+            },
+          );
+          final c = EjecucionViajeController(
+            idViaje: 41,
+            cargarDetalle: cargar,
+            acciones: acciones,
+          );
+          addTearDown(c.dispose);
+          await c.consultar();
+          final operacion = c.iniciar();
+          await Future<void>.delayed(Duration.zero);
+          if (recargaFallida) await operacion;
+          expect(c.viajeConfirmado, same(confirmado));
+          final contextoAnterior = c.contexto;
+          c.actualizarContexto(
+            idViaje: 41,
+            cargarDetalle: cambioFuente ? (_) => nueva.future : cargar,
+            acciones: cambioFuente ? acciones : fuentes(),
+          );
+          expect(c.contexto, isNot(same(contextoAnterior)));
+          expect(c.fase, FaseDetalleViaje.recargando);
+          expect(c.viajeConfirmado, same(confirmado));
+          expect(c.detalle, isNull);
+          expect(c.puedeIniciar || c.puedeFinalizar || c.puedeRepetir, isFalse);
+          nueva.complete(recibido);
+          await Future<void>.delayed(Duration.zero);
+          if (!recargaFallida) {
+            // La lectura del contexto anterior no puede rehabilitar acciones.
+            anterior.complete(snapshot('programado'));
+            await operacion;
+          }
+          if (caso.compatible) {
+            expect(c.fase, FaseDetalleViaje.listo);
+            expect(c.detalle, same(recibido));
+            expect(c.viajeConfirmado, isNull);
+            expect(c.puedeFinalizar, caso.consultado == 'en_curso');
+          } else {
+            expect(c.fase, FaseDetalleViaje.confirmadoSinDetalle);
+            expect(c.viajeConfirmado, same(confirmado));
+            expect(c.detalle, isNull);
+            expect(
+              c.puedeIniciar || c.puedeFinalizar || c.puedeRepetir,
+              isFalse,
+            );
+            await c.iniciar();
+            await c.finalizar();
+            await c.repetir();
+          }
+          expect(posts, 1);
+        });
+      }
+    }
+  }
+
+  test('cambiar de viaje limpia la confirmación del viaje anterior', () async {
+    var lecturas = 0;
+    final c = EjecucionViajeController(
+      idViaje: 41,
+      cargarDetalle: (_) async {
+        if (++lecturas == 1) return snapshot('programado');
+        throw StateError('recarga fallida');
+      },
+      acciones: fuentes(inicio: (_) async => snapshot('finalizado').viaje),
+    );
+    addTearDown(c.dispose);
+    await c.consultar();
+    await c.iniciar();
+    expect(c.viajeConfirmado!.estado, EstadoViaje.finalizado);
+    c.actualizarContexto(
+      idViaje: 42,
+      cargarDetalle: (_) async => snapshot('programado', id: 42),
+      acciones: fuentes(),
+    );
+    expect(c.viajeConfirmado, isNull);
+    await Future<void>.delayed(Duration.zero);
+    expect(c.detalle!.viaje.idViaje, 42);
+    expect(c.puedeIniciar, isTrue);
+  });
 }

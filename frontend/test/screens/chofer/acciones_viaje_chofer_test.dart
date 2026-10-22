@@ -551,4 +551,48 @@ void main() {
       expect(posts, 1);
     },
   );
+  for (final cambioFuente in [true, false]) {
+    testWidgets(
+      'cambio fuente=$cambioFuente conserva confirmación y Actualizar detalle',
+      (tester) async {
+        var lecturas = 0;
+        var recuperar = false;
+        Future<OperacionAsignada?> cargar(int id) async {
+          if (++lecturas == 1) return snapshot('programado');
+          if (lecturas == 2) throw StateError('recarga fallida');
+          return snapshot(recuperar ? 'finalizado' : 'en_curso');
+        }
+
+        final acciones = fuentes(
+          inicio: (_) async => snapshot('finalizado').viaje,
+        );
+        await mostrar(tester, cargar, acciones);
+        await tester.pumpAndSettle();
+        await tester.tap(find.text('Iniciar viaje'));
+        await tester.pumpAndSettle();
+        await mostrar(
+          tester,
+          cambioFuente ? (id) => cargar(id) : cargar,
+          cambioFuente ? acciones : fuentes(),
+        );
+        await tester.pumpAndSettle();
+        expect(find.text('Estado confirmado: Finalizado'), findsOneWidget);
+        expect(find.text('Actualizar detalle'), findsOneWidget);
+        expect(find.text('Pasajeros con reserva'), findsNothing);
+        expect(find.text('Cantidades independientes'), findsNothing);
+        expect(find.text('Iniciar viaje'), findsNothing);
+        expect(find.text('Finalizar viaje'), findsNothing);
+        recuperar = true;
+        await tester.tap(find.text('Actualizar detalle'));
+        await tester.pumpAndSettle();
+        expect(find.text('Ida · Finalizado'), findsOneWidget);
+        await tester.scrollUntilVisible(
+          find.text('Pasajeros con reserva'),
+          250,
+        );
+        expect(find.text('Pasajeros con reserva'), findsOneWidget);
+        expect(find.text('Actualizar detalle'), findsNothing);
+      },
+    );
+  }
 }

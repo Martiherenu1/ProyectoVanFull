@@ -139,7 +139,10 @@ class EjecucionViajeController extends ChangeNotifier {
   }) {
     if (!_activo) return;
     // En el mismo viaje, cambiar la fuente no prueba que un POST en vuelo falló.
-    _pendiente = idViaje == _idViaje ? _pendiente ?? _enviada : null;
+    final mismoViaje = idViaje == _idViaje;
+    _pendiente = mismoViaje ? _pendiente ?? _enviada : null;
+    // Cambiar callbacks no invalida un estado ya confirmado por el servidor.
+    if (!mismoViaje) _viajeConfirmado = null;
     _enviada = null;
     _idViaje = idViaje;
     _cargarDetalle = cargarDetalle;
@@ -147,7 +150,6 @@ class EjecucionViajeController extends ChangeNotifier {
     _contexto = Object();
     _generacion++;
     _detalle = null;
-    _viajeConfirmado = null;
     _estadoConsultado = null;
     _rechazo = null;
     _repetible = false;

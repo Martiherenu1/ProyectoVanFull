@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../core/format/fecha_legible.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_spacing.dart';
 import '../../core/theme/app_theme.dart';
@@ -186,7 +187,7 @@ class _BuscarServicioScreenState extends State<BuscarServicioScreen> {
               ),
             ),
             icon: const Icon(Icons.calendar_today),
-            label: Text('Fecha: ${_fechaLegible(_fecha)}'),
+            label: Text('Fecha: ${fechaLegible(_fecha)}'),
           ),
           const SizedBox(height: AppSpacing.sm),
           SegmentedButton<SentidoViaje>(
@@ -221,7 +222,7 @@ class _BuscarServicioScreenState extends State<BuscarServicioScreen> {
         children: [
           Text(
             'VIAJES · ${_sentido.etiqueta.toUpperCase()} · '
-            '${_fechaLegible(_fecha)}',
+            '${fechaLegible(_fecha)}',
             style: textTheme.labelSmall,
           ),
           Text(
@@ -247,7 +248,7 @@ class _BuscarServicioScreenState extends State<BuscarServicioScreen> {
       return _Mensaje(
         texto:
             'No hay viajes ${_sentido.etiqueta.toLowerCase()} para el '
-            '${_fechaLegible(_fecha)}. Probá con otra fecha.',
+            '${fechaLegible(_fecha)}. Probá con otra fecha.',
         accion: 'Cambiar fecha',
         onAccion: () => _elegirFecha(context),
       );
@@ -513,8 +514,3 @@ class _Mensaje extends StatelessWidget {
     );
   }
 }
-
-String _fechaLegible(DateTime fecha) =>
-    '${fecha.day.toString().padLeft(2, '0')}/'
-    '${fecha.month.toString().padLeft(2, '0')}/'
-    '${fecha.year.toString().padLeft(4, '0')}';

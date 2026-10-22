@@ -89,7 +89,7 @@ tratamiento propio porque el cliente ya valida. La presentación inicial solo pr
 hacen (viajes, cupos, reservas, derivar a una persona) y avisa que no confirma pagos. **No usa `tool_usada`**:
 al reservar o cancelar por chat, Mis reservas no se entera; cuando se arme la navegación hay que recargarla al volver.
 Las conversaciones viven en memoria del backend (#42): al reiniciar el servidor se abre una nueva sin avisar, y esta
-pantalla tampoco guarda el historial. Verificado: `flutter analyze` y `flutter test` (72 sobre `main`, 90 con #95).
+pantalla tampoco guarda el historial. Verificado: `flutter analyze` y `flutter test` (72 sobre `main`, 91 con #95).
 **SIN VERIFICAR:** contra `/chat` real ni contra un modelo de OpenRouter, y en un dispositivo o navegador; no está
 conectada (#87 y el login).
 

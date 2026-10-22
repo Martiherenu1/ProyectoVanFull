@@ -3,7 +3,7 @@
 > Lo mantiene el agente de Martiniano, en el mismo PR que cambia algo. Convención en
 > `PROMPT-CONTEXTO-VIVO.md`. Si algo de acá contradice al código, manda el código: corregir este archivo.
 >
-> **Última actualización: 2026-10-20**
+> **Última actualización: 2026-10-21**
 
 ## Estado
 
@@ -48,9 +48,21 @@ resolver #8). Estados: esqueleto, vacío, error con reintento, "Sin cupo". Verif
 `flutter test` (40/40). **SIN VERIFICAR:** contra el backend real y en un dispositivo o navegador. **No está
 conectada** al `RoleRouter`: falta el cliente común (#87) y el login (pantalla 1).
 
-Después: Confirmar reserva (CU-003) y Mis reservas y deuda (CU-010/CU-006), que reciben el `DisponibilidadViaje`
-de esta pantalla; el Asistente (CU-011) y el login. El tipo de servicio no se muestra (la respuesta trae solo
-`id_servicio`; haría falta `GET /servicios`).
+Después: Mis reservas y deuda (CU-010/CU-006); el Asistente (CU-011) y el login. El tipo de servicio no se muestra
+(la respuesta trae solo `id_servicio`; haría falta `GET /servicios`).
+
+**Pantalla Flutter Confirmar reserva (CU-003, Issue #92), rama `feat/pasajero-confirmar-reserva-cu003`, apilada
+sobre la de Buscar servicio (#91).** `screens/pasajero/confirmar_reserva_screen.dart` y `models/pasajero/reserva.dart`
+(`Reserva`, `EstadoReserva`, `ReservaRechazada`). Recibe el `DisponibilidadViaje` que entrega Buscar servicio
+(`onReservar`), pide las paradas del recorrido (`CargarParadas`), el pasajero marca dónde sube y confirma con
+`CrearReserva(idViaje, ordenParada)` **inyectable**: el adaptador común debe lanzar `ReservaRechazada` ante los
+400/409 con cuerpo de error. Muestra el motivo concreto de cada rechazo (`CUPO_NO_DISPONIBLE`,
+`RESERVA_DUPLICADA_DEL_DIA`, `RESERVA_CANCELADA_PREVIA`, `VIAJE_NO_RESERVABLE`, `PARADA_NO_VALIDA`, red); los
+cuatro primeros bloquean el botón porque reintentar no cambia el resultado. Sin doble envío. `consolidada` se
+muestra como «Confirmada». **No muestra tarifa** (CU-003 no la calcula hasta #9) **ni lista de espera** (#34: el
+409 la anuncia pero no hay operación). Verificado: `flutter analyze` y `flutter test` (60/60). **SIN VERIFICAR:**
+contra el backend real y en un dispositivo o navegador; **no está conectada** (falta #87 y el login). Las
+paradas se listan todas, incluida la última: ninguna regla dice cuáles admiten ascenso.
 
 ## Decisiones
 

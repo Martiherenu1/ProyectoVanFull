@@ -147,6 +147,7 @@ conectada (#87 y el login).
 | 2026-10-20 | Una reserva cancelada del mismo viaje no se reactiva ni se pisa: responde 409 `RESERVA_CANCELADA_PREVIA`, porque MR-R15 deja una fila por pasajero y viaje y reactivarla no está definido (AC28-08) | `services/reservas.py` |
 | 2026-10-23 | **Deploy (#116):** la migración corre en el arranque del servicio de Render (`backend/arrancar.sh`: `alembic upgrade head` y después uvicorn; va en un script porque Render no parte un `sh -c "…"` como un shell, #119), porque el plan free no tiene shell ni jobs; es idempotente. Pages se publica a mano (`workflow_dispatch`); la API, cuando la CI de `main` pasa. Fuera de desarrollo, sin `CORS_ORIGINS` la API no arranca. CORS sin `allow_credentials`: el token va en `Authorization` | `render.yaml`, `DESPLIEGUE.md` |
 | 2026-10-23 | En una base remota, el seed exige `--permitir-base-remota` **y** un archivo de contraseñas fuera del repo (la bandera sola ya no alcanza); las contraseñas de la demo se generan al azar y no se imprimen | `db/seed/README.md`, `DESPLIEGUE.md` |
+| 2026-10-23 | **La URL de la demo es `vanfull.onrender.com`** (sitio estático de Render), no la de Pages, que muestra el usuario de GitHub (#122). Flutter se compila en GitHub Actions (workflow **Web**) y se publica en la rama `sitio-web`, que Render sirve sin compilar; Pages queda de respaldo | `render.yaml`, `DESPLIEGUE.md` |
 
 ## Pendientes
 

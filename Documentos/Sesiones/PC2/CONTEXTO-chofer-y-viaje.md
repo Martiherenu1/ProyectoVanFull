@@ -1,5 +1,27 @@
 # Contexto vivo · Chofer y viaje en curso (Martín)
 
+## Adaptador HTTP de ejecución CU-030 / #118 — 23/10/2026
+
+- Entrega revisada, con commits y publicación autorizados el 23/10/2026 por Martín.
+  Rama `feat/chofer-http-ejecucion-cu030-118`, worktree `.worktrees/cu030-http-118`,
+  desde main remoto `792792cdb35cf861b116e8907cdfe9d9ec1929ac`. #87/#103 ya integradas.
+- `EjecucionViajeApi.iniciar/finalizar` compatibles con CambiarEstadoViajeChofer: ApiClient externo
+  con base /api/, POST sin body, ViajeResumen e ID comprobado. Inicio admite en_curso/finalizado;
+  finalizar admite finalizado. Conserva el estado recibido, sin inferir una transición nueva.
+- ApiException contractual 400/401/403/404/409 se traduce a RechazoOperacionViaje con motivo/código;
+  transporte, timeout, 5xx, protocolo o respuesta incompatible son ResultadoViajeIncierto.
+  Sin reenvíos automáticos, sesión propia ni cierre de transporte; reconciliación de #103 intacta.
+- Verificación: formato correcto (2 Dart, cero cambios finales); analyze sin problemas (30,4 s).
+  Suite Flutter: 349 aprobadas, 0 fallidas/omitidas (87 nuevas + 262 de base; 89 s).
+  Pub get offline con lockfile exigido y diff --check correctos; dependencias/lockfile intactos.
+  Avisos preexistentes de Google Fonts sin fallas. Logs ignorados frontend/cu030-118-{analyze,test}.log.
+- Main y código coinciden con la verificación local anterior; no se repitieron los checks al publicar.
+  Estado de publicación y CI remota del HEAD publicado: consultar la PR vinculada en #118;
+  sus resultados se registran separados de las 349 pruebas locales. Cierre exclusivo de #118, sin merge.
+- Sin POST reales, demo, integración productiva ni dispositivo. Navegación y GPS fuera de alcance;
+  sin modificaciones de #113/#115 ni otros trabajos. CU-030 sigue parcial.
+  Los registros inferiores son históricos y conservan el estado de sus fechas.
+
 ## Estado al 23/10/2026 — actualización de PR #109
 
 - Rama `feat/chofer-adaptador-listado-cu029`, worktree `F:/dev/vanfull-cu029-adaptador`, limpia antes de actualizar y coincidente con HEAD remoto `6eef07436aa4defed0afa961a2b717331a38df8c`. Se incorpora `origin/main 6e39d5f129ac3c9cc999594d58749ab0d11691b4` mediante merge, sin rebase ni force. #103 ya integrada y #102 cerrado; #109 continúa abierta para #104; #64 permanece independiente.

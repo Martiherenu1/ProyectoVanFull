@@ -1,6 +1,14 @@
 # Contexto vivo · Chofer y viaje en curso (Martín)
 
-## Estado vigente al 21/10/2026 — detalle Flutter CU-029 local con mocks
+## Estado vigente al 23/10/2026 — adaptador HTTP del detalle CU-029
+
+- Issue [#110](https://github.com/Martiherenu1/ProyectoVanFull/issues/110), rama `feat/chofer-http-detalle-cu029`, base `origin/main 4d8213a3112bc08c9794366b5d4c1a9a7314b5f1` (main remoto vuelto a verificar el 23/10). #110 ya existía al retomar; se reutiliza el worktree separado sin duplicar tarea ni publicar cambios. Cliente común #87 y detalle #89 presentes en esta base; los registros inferiores son históricos.
+- `DetalleViajeChoferApi.cargarDetalle(int)` usa `ApiClient` externo con base `/api/`, devuelve `OperacionAsignada` y traduce exclusivamente `ApiException` 404 a null. Otros errores se propagan sin reintentos; DTO inválido o ID distinto produce `DetalleViajeInvalidoException` con mensaje fijo y sin datos recibidos.
+- Pruebas con transporte simulado: ruta GET, token externo vigente, callback compatible, orden/listas/cantidades, horario omitido y nullable, 404 y demás errores, JSON/DTO inválidos, ID distinto y comprobación explícita de transporte externo abierto tras éxito/error.
+- Sin cambios en backend, contrato, modelo, dependencias, sesión o navegación. Sin fotografías descargadas, HTTP real ni prueba en dispositivo; CU-029 no se declara completo. Conexión de pantallas sigue pendiente; listado HTTP #104 es una entrega independiente.
+- Verificación local: formato correcto (dos archivos, cero cambios); `flutter pub get --enforce-lockfile` correcto y lockfile intacto; `flutter analyze --no-pub` sin issues; `flutter test --no-pub --concurrency=1 --reporter expanded`: 148 aprobadas (19 nuevas y 129 de base), sin fallidas/omitidas; 19 del adaptador también aprobadas aisladamente. Primer intento concurrente interrumpido tras demorarse sin progreso, sin resultado completo. Avisos preexistentes de Google Fonts sin fallas. En esta reanudación no hubo commits, push, Issues, PR ni publicaciones. Sin CI remota de esta entrega.
+
+## Registro histórico al 21/10/2026 — detalle Flutter CU-029 con mocks
 
 - Entrega publicada en [PR #89](https://github.com/Martiherenu1/ProyectoVanFull/pull/89), abierta y sin merge a main; Issue #88 abierto con etiqueta `chofer`. Rama `feat/chofer-detalle-flutter-cu029`, worktree `F:\dev\vanfull-flutter-cu029-detalle`. Los seis archivos revisados se preservaron en `a6f234eb107214dd0380670f368a1e0110042efc`. Base inicial: `28cfe338fde8bdcd8eb25c56b17c8911dfdb8d7e`; se reutiliza `ViajeResumen`, sin copiarlo ni modificar la rama del listado.
 - Primera base integrada el 21/10/2026: `origin/main 5bf3117daf8ce8ab943cf234ac19dbac3fb6196d`, mediante merge local `b81ca4c3967360fe94ed9dabc4bf7fa535adf6da` (padres `a6f234e` y `5bf3117`). #81 ya está mergeada y #80 cerrado; #79 también integrada y #48 cerrado. La dependencia de una PR abierta quedó resuelta. Merge automático, sin conflictos ni rebase/force; historial del contexto conservado, sin borradores ajenos. El detalle aún no está integrado a main ni conectado a navegación/listado.
@@ -38,6 +46,7 @@
 
 - Facundo: la pantalla recibe `idViaje` y `cargarDetalle`; no crea `MaterialApp` ni conecta el detalle con la navegación de #79 o el listado de #81. Martiniano: el futuro adaptador conserva sesión/permisos en backend y mapea el resultado a esta interfaz; no se incorporan reglas de reservas en Flutter. Textos de Issue/PR revisados; publicación autorizada y sin mensajes enviados.
 - Preservados checkout original, ramas publicadas, borradores documentales, demás worktrees, `.env` y demo. No se copió el guion ni la matriz de otros worktrees.
+
 
 ## Registro histórico al 21/10/2026 — listado Flutter CU-029 verificado con mocks
 

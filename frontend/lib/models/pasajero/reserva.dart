@@ -72,7 +72,8 @@ class Reserva {
 }
 
 /// Cuerpo de error del contrato (`{"error": {codigo, mensaje, detalles}}`)
-/// que el adaptador común lanza cuando POST /reservas responde 400 o 409.
+/// que el adaptador común lanza cuando una operación sobre una reserva
+/// (POST /reservas, POST /reservas/{id}/cancelacion) responde 400 o 409.
 class ReservaRechazada implements Exception {
   const ReservaRechazada({
     required this.codigo,
@@ -91,7 +92,8 @@ class ReservaRechazada implements Exception {
   }
 
   /// Códigos de CU-003: CUPO_NO_DISPONIBLE, RESERVA_DUPLICADA_DEL_DIA,
-  /// RESERVA_CANCELADA_PREVIA, VIAJE_NO_RESERVABLE y PARADA_NO_VALIDA.
+  /// RESERVA_CANCELADA_PREVIA, VIAJE_NO_RESERVABLE y PARADA_NO_VALIDA; de
+  /// CU-004: RESERVA_NO_CANCELABLE y VIAJE_NO_CANCELABLE.
   final String codigo;
   final String mensaje;
 
@@ -101,4 +103,33 @@ class ReservaRechazada implements Exception {
 
   @override
   String toString() => 'ReservaRechazada($codigo)';
+}
+
+/// Lectura de ResultadoCancelacion en POST /reservas/{id}/cancelacion (CU-004).
+class ResultadoCancelacion {
+  const ResultadoCancelacion({
+    required this.reserva,
+    required this.cupoLiberado,
+    required this.penalidadAplicada,
+    required this.importePenalidad,
+    required this.motivo,
+  });
+
+  factory ResultadoCancelacion.fromJson(Map<String, dynamic> json) =>
+      ResultadoCancelacion(
+        reserva: Reserva.fromJson(json['reserva'] as Map<String, dynamic>),
+        cupoLiberado: json['cupo_liberado'] as bool,
+        penalidadAplicada: json['penalidad_aplicada'] as bool,
+        importePenalidad: (json['importe_penalidad'] as num).toDouble(),
+        motivo: json['motivo'] as String,
+      );
+
+  /// La reserva ya cancelada.
+  final Reserva reserva;
+  final bool cupoLiberado;
+  final bool penalidadAplicada;
+  final double importePenalidad;
+
+  /// La regla que decidió la consecuencia económica, en texto del backend.
+  final String motivo;
 }

@@ -37,6 +37,8 @@ dependencies:
   google_fonts: ^9.0.0
   geolocator: 14.1.2
 
+  http: ^1.6.0
+
 dev_dependencies:
   flutter_test:
     sdk: flutter

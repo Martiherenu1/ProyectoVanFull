@@ -48,7 +48,7 @@ resolver #8). Estados: esqueleto, vacío, error con reintento, "Sin cupo". Verif
 `flutter test` (40/40). **SIN VERIFICAR:** contra el backend real y en un dispositivo o navegador. **No está
 conectada** al `RoleRouter`: falta el cliente común (#87) y el login (pantalla 1).
 
-Después: Mis reservas y deuda (CU-010/CU-006); el Asistente (CU-011) y el login. El tipo de servicio no se muestra
+Después: el login, la navegación entre las pantallas del pasajero y Pago (pantalla 5, de Facundo). El tipo de servicio no se muestra
 (la respuesta trae solo `id_servicio`; haría falta `GET /servicios`).
 
 **Pantalla Flutter Confirmar reserva (CU-003, Issue #92), rama `feat/pasajero-confirmar-reserva-cu003`, apilada
@@ -63,6 +63,35 @@ muestra como «Confirmada». **No muestra tarifa** (CU-003 no la calcula hasta #
 409 la anuncia pero no hay operación). Verificado: `flutter analyze` y `flutter test` (60/60). **SIN VERIFICAR:**
 contra el backend real y en un dispositivo o navegador; **no está conectada** (falta #87 y el login). Las
 paradas se listan todas, incluida la última: ninguna regla dice cuáles admiten ascenso.
+
+**Pantalla Flutter Mis reservas y deuda (CU-010 / CU-006 / CU-004, Issue #94), rama `feat/pasajero-mis-reservas-cu010`,
+apilada sobre la de Confirmar reserva (#93).** `screens/pasajero/mis_reservas_screen.dart`, `models/pasajero/deuda.dart`,
+`ResultadoCancelacion` en `models/pasajero/reserva.dart` y `core/format/importe.dart` (`$ 11.600,00`). Tres cargas
+**inyectables** (`CargarReservas`, `CargarDeuda`, `CancelarReserva`). El saldo (dato dominante: «Al día» o el importe en
+rojo) y la lista fallan y se reintentan por separado. Cancelar pide confirmación; los 409 `RESERVA_NO_CANCELABLE` y
+`VIAJE_NO_CANCELABLE` se muestran con su motivo (el adaptador debe lanzar `ReservaRechazada`), y la cancelada
+muestra el `motivo` que devuelve el backend. **No muestra la ventana de cancelación de RN-017** (“Podés cancelar hasta
+…” del brief): hoy se puede cancelar mientras el viaje esté programado y el crédito no existe (#75), así que mostrar
+una hora prometería algo que no se aplica; la `Reserva` tampoco informa el estado del viaje. **Abierto:** si el pasajero
+no tiene cliente individual todavía (no reservó nunca), `GET /pasajeros/me/deuda` responde 404
+`CLIENTE_NO_ENCONTRADO` y la pantalla muestra «No pudimos cargar tu saldo»; decidir con Facundo si ese caso es
+«Al día». Verificado: `flutter analyze` y `flutter test` (79/79). **SIN VERIFICAR:** contra el backend real y en
+un dispositivo o navegador; no está conectada (#87 y el login).
+
+**Pantalla Flutter Asistente (CU-011, Issue #96), rama `feat/pasajero-asistente-cu011`, apilada sobre la de Mis reservas
+(#95).** `screens/pasajero/asistente_screen.dart` y `models/pasajero/respuesta_chat.dart`. Envío **inyectable**
+(`EnviarMensaje(mensaje, conversacionId)` → `RespuestaChat`); la pantalla guarda el `conversacion_id` que devuelve el
+backend y lo reenvía. No envía vacío ni más de 2000 caracteres (el tope del backend), un mensaje a la vez, avisa
+«El asistente está respondiendo…» con texto y no con spinner, marca «Derivado a una persona de VanFull» cuando
+`derivar_humano` es `true` y, si el envío falla, deja el mensaje con «No se pudo enviar» y «Reintentar» (reenvía con
+el mismo `conversacion_id`). Cualquier excepción del adaptador es «no se pudo enviar»; el 400 `VALIDACION` no tiene
+tratamiento propio porque el cliente ya valida. La presentación inicial solo promete lo que las tools habilitadas
+hacen (viajes, cupos, reservas, derivar a una persona) y avisa que no confirma pagos. **No usa `tool_usada`**:
+al reservar o cancelar por chat, Mis reservas no se entera; cuando se arme la navegación hay que recargarla al volver.
+Las conversaciones viven en memoria del backend (#42): al reiniciar el servidor se abre una nueva sin avisar, y esta
+pantalla tampoco guarda el historial. Verificado: `flutter analyze` y `flutter test` (72 sobre `main`, 91 con #95).
+**SIN VERIFICAR:** contra `/chat` real ni contra un modelo de OpenRouter, y en un dispositivo o navegador; no está
+conectada (#87 y el login).
 
 ## Decisiones
 

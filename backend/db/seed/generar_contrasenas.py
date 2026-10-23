@@ -38,6 +38,7 @@ def generar(destino: Path) -> int:
     if destino.exists():
         raise ValueError(f"{destino} ya existe: no se pisa (las contraseñas viejas se perderían).")
     cuentas = identificadores()
+    destino.parent.mkdir(parents=True, exist_ok=True)
     with destino.open("x", encoding="utf-8", newline="") as archivo:
         escritor = csv.writer(archivo)
         escritor.writerow(["identificador_acceso", "contrasena"])

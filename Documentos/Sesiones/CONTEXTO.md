@@ -245,6 +245,10 @@ sin uso. Render, se duerme a los 15 min sin tráfico y despertar tarda cerca de 
 toca la BD, la mantiene despierta. En su lugar, **calentar con `/health` y una consulta real unos 5 minutos
 antes de cada demo**, y sacar un `pg_dump` local antes de cada punto de control.
 
+**Configuración del deploy lista (2026-10-23, Issue #116):** `render.yaml`, `.github/workflows/pages.yml` y la
+guía `DESPLIEGUE.md`, con qué variable va dónde, cómo sembrar Neon sin las contraseñas públicas y el ensayo.
+Falta crear los servicios: lo hace Martiniano, que carga los secretos.
+
 ## 14. Recursos
 
 - **Repo:** https://github.com/Martiherenu1/ProyectoVanFull (**público**) · entrega congelada en el tag `pc1`

@@ -57,11 +57,17 @@ referencia por FK. `tests/test_seed.py` falla si un archivo y `ORDEN` no coincid
 Las contraseñas de `contrasenas-de-prueba.csv` las puede leer cualquiera. Por eso el cargador **se
 niega a correr contra una base que no sea local** (`localhost`, `127.0.0.1` o `db`).
 
-Para sembrar la base de la demo (Neon), usar un archivo de contraseñas propio, **fuera del repo**:
+Para sembrar la base de la demo (Neon) hacen falta las dos cosas: `--permitir-base-remota` y
+`--contrasenas` con un archivo **fuera del repo**. La bandera sola no alcanza: con el archivo del repo, el
+cargador se niega igual. El archivo se genera con contraseñas aleatorias, que no se imprimen:
 
 ```bash
-python -m db.seed.cargar --contrasenas /ruta/propia.csv --permitir-base-remota
+python -m db.seed.generar_contrasenas /ruta/fuera/del/repo/contrasenas-demo.csv
+python -m db.seed.cargar --permitir-base-remota --contrasenas /ruta/fuera/del/repo/contrasenas-demo.csv
 ```
+
+El comando completo, con Docker y sin escribir la cadena de Neon en ningún archivo, está en
+[`DESPLIEGUE.md`](../../../DESPLIEGUE.md).
 
 ## Detalles que conviene saber
 

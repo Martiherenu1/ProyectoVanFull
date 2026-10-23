@@ -1,6 +1,67 @@
 # Contexto vivo · Chofer y viaje en curso (Martín)
 
-## Estado vigente al 21/10/2026 — detalle Flutter CU-029 local con mocks
+## Estado vigente al 22/10/2026 — CU-030 actualizado sobre main
+
+- Publicación autorizada el 22/10/2026: búsqueda sin Issue/PR Flutter CU-030 equivalente; creado [Issue #102](https://github.com/Martiherenu1/ProyectoVanFull/issues/102), etiqueta chofer. Ajuste guardado mediante commit normal `a172ea5401df468dddd118b8625e917762f23cf6`; código/base coinciden con la verificación local de 176 (92 propias y 84 base), por lo que no se repiten checks. `origin/main` sigue en `a86ce5a`; sin merge adicional. Se prepara PR hacia main con cierre exclusivo de #102 y referencias #66/#89/#88/#64/#81. CI del HEAD publicado por verificar en GitHub; la aprobación de #89 no se hereda. Sin revisión formal de otro integrante para CU-030 al preparar la publicación; la revisión manual Web fue anterior al ajuste. Entrada temporal excluida; sin merge remoto, demo ni otros worktrees.
+- Ajuste acotado posterior sobre HEAD local `c38a07e`, guardado posteriormente en `a172ea5`: `actualizarContexto()` conserva el Viaje confirmado si no cambia el ID y lo limpia al cambiar de viaje; mantiene invalidación por generación. GET regresivos mantienen listas ocultas, acciones bloqueadas y «Actualizar detalle»; igualdad y avance en_curso → finalizado siguen aceptados. Sin reglas nuevas ni cambios en la entrada temporal.
+- Verificación final del ajuste: formato de tres archivos correcto; analyze sin problemas (28,3 s); suite completa **176 aprobadas, 0 fallidas, 0 omitidas**, aproximadamente 31 s (92 propias CU-030 y 84 de base). Se agregaron 27 casos: 24 combinaciones de cambio de fuente/acciones con recarga pendiente/fallida y tres regresiones, igualdad o avance; uno de cambio de ID y dos de pantalla con recuperación mediante Actualizar detalle. Logs `F:\dev\vanfull-cu030-contexto-confirmado-analyze.log` y `F:\dev\vanfull-cu030-contexto-confirmado-test.log`. Primer intento: 174 aprobadas y 2 fallidas por aserción nueva sobre un encabezado fuera de la zona visible; corregido desplazando la lista en el test, sin otro cambio productivo. Log inicial conservado con sufijo `-test-inicial.log`. Avisos preexistentes de Google Fonts sin fallas finales; lockfile intacto. Revisión Web anterior no repetida tras el ajuste.
+- Desglose de las 39 pruebas aportadas previamente por main (110 → 149), todas de Pasajero: `test/models/pasajero/disponibilidad_y_parada_test.dart` (6), `test/screens/pasajero/buscar_servicio_screen_test.dart` (13), `test/models/pasajero/reserva_test.dart` (6) y `test/screens/pasajero/confirmar_reserva_screen_test.dart` (14). No son pruebas nuevas de Chofer. Los resultados de 149 siguientes corresponden al merge previo al ajuste.
+- Se preservaron los seis archivos en el commit local `84dd2c997d6c5a9e5d7077a10e36babbd8ef9ba9`. `origin/main` consultado e integrado en `feat/chofer-ejecucion-flutter-cu030`: `a86ce5a2f8d8c657d198108367c24500116a617b`, mediante merge local `2b52eaa099f476f832a4437ce250dc205d21167c`, sin conflictos. Ambos historiales del contexto se conservan debajo; el contexto de Pasajero incorporado desde main permanece intacto.
+- #89 ya integrada en main por `a86ce5a`; #88 cerrado y #64 abierto. Se elimina la dependencia de una PR abierta. CU-030 sigue solo local, sin Issue/PR ni push; publicación pendiente de revisión posterior. Base original y evidencia histórica de 110 pruebas se conservan, sin atribuirlas a la nueva combinación.
+- Sobre la combinación del merge: formato de los cinco archivos Dart del alcance correcto (0 cambios); `flutter analyze --no-pub` sin problemas (106,0 s); `flutter test --no-pub --reporter expanded`: **149 aprobadas, 0 fallidas, 0 omitidas**, aproximadamente 28 s (65 propias CU-030 y 84 de base). Logs: `F:\dev\vanfull-cu030-main-analyze.log` y `F:\dev\vanfull-cu030-main-test.log`. Avisos preexistentes de Google Fonts, sin fallas. Sin repetir pub get; dependencias y lockfile intactos (SHA-256 `1016007f35a680bb417cafa59e6498ead13c0b6ed116b6d406d03d22c17eac15`). Sin CI remota propia ni pruebas de backend.
+- Se incorpora a los borradores de Issue/PR la revisión manual Web del usuario del 22/10 detallada debajo, realizada antes de este merge: ventanas amplia/angosta, estados y reconciliación informados; observaciones de separación vertical y claridad del procesamiento pendientes. No se repitió la revisión visual tras el merge; no se acreditan otros escenarios, Android/dispositivo, HTTP ni C12. CU-030 continúa parcial; navegación y cliente compartidos, GPS y avisos siguen pendientes según el alcance previo.
+- `frontend/local_chofer_preview.dart` permanece sin seguimiento y fuera de los commits y del diff de entrega. Sin ampliación de alcance ni reglas nuevas, POST reales, demo u otros worktrees; ajuste productivo acotado descrito arriba. Borradores externos actualizados; marcador de Issue específico pendiente de sustituir solo al publicar con autorización.
+
+## Registro histórico al 21/10/2026 — inicio/finalización Flutter CU-030 local con mocks
+
+### Estado
+
+- Rama local `feat/chofer-ejecucion-flutter-cu030`, worktree `F:\dev\vanfull-flutter-cu030-ejecucion`, sin commits propios ni publicación. Base exacta: HEAD de #89 `c2cf701a764ebb4f008800e7d11310cc87673acd`; #89 sigue abierta, no se modifica su rama ni se copia el detalle.
+- Main remoto consultado al preparar: `5b730397cdabff18c0399cc8bc30327c1e935751` (#91). Al cerrar avanzó a `a867de9d77fd640c45cd32e7c91f5e51589b1f89` (#93). Ambos avances son del pasajero; sin cambios en ViajeResumen, detalle chofer, contrato o dependencias. No incorporados: la base elegida sigue siendo #89, no se atribuyen a main vigente los resultados siguientes.
+
+### Hecho
+
+- Backend de inicio/finalización integrado por #71/#67; #66 cerrado. Listado Flutter integrado por #81; detalle CU-029 publicado en #89, todavía no integrado. CU-030 continúa parcial por GPS y avisos de demora/problemas.
+
+### En curso
+
+- Acciones inyectables de inicio/finalización en el detalle existente, sin HTTP/sesión/navegación propios. Coordinador en `controllers/chofer/ejecucion_viaje_controller.dart`: una sola coordinación de lecturas, escrituras y reconciliación. Componente `acciones_viaje_chofer.dart`, pruebas y ajuste acotado de la pantalla; se reutilizan ViajeResumen y CargarDetalleViajeChofer (reexportada para compatibilidad). Sin acciones inyectadas, conserva el detalle de consulta.
+- Trazabilidad CU-030 / RF-025 / ADJ-03; sin cambios de contrato, modelo, asignaciones o reglas. No se creó Issue ni PR para esta tarea: publicación y número específico pendientes de autorización.
+
+### Decisiones
+
+- Confirmación del usuario del 21/10/2026: programado permite iniciar; en_curso permite finalizar con «¿Finalizar este viaje?» / «El viaje quedará finalizado.» y «Volver» / «Finalizar viaje». Finalizado/cancelado sin transiciones nuevas; controles compartidos de 64 px y tema de chofer.
+- El Viaje de una respuesta de operación válida confirma el estado, también inicio que devuelve finalizado; no se anuncia una transición nueva por recibir 200. Bloqueo durante operación/recarga y lectura completa posterior, retirando listas anteriores. Recarga fallida conserva estado confirmado y ofrece «Actualizar detalle».
+- Resultado incierto conserva la operación pendiente: «Consultar estado» no reenvía escrituras. Si la consulta falla, sigue incierto; si devuelve el estado previo, solo habilita repetición explícita de esa misma operación. Un rechazo posterior no resuelve el envío anterior. Fallos tipados para rechazos conocidos y resultado incierto; errores no clasificados de operación se consideran inciertos.
+- Cambio de ID/fuente o desmontaje invalida resultados tardíos, sin cancelar efectos del servidor. En el mismo viaje se conserva la incertidumbre de un envío pendiente al cambiar la fuente o retirar las acciones. IDs recibidos comprobados; sin validaciones locales nuevas de fecha, horario, capacidad o pasajeros.
+
+### Pendientes
+
+- Integrar/revisar la base cuando #89 se incorpore a main. Sin conexión de navegación, HTTP/autenticación reales ni prueba en dispositivo; CU-030 no completo. GPS/ETA, QR, ausencias y demoras fuera del alcance. Nómina con mocks no acredita C12.
+- Conservados los borradores, guion, matriz, demo, .env y demás worktrees; sin carga de datos ni solicitudes operativas reales.
+
+### Entorno y comprobaciones
+
+- SDK ejecutado: Flutter 3.47.7 stable, framework `abaf9c5237`, Dart 3.13.5, `F:\dev\flutter`. PATH/PUB_CACHE solo del proceso. `flutter pub get --enforce-lockfile` correcto; lockfile intacto respecto de la base (SHA-256 `1016007f35a680bb417cafa59e6498ead13c0b6ed116b6d406d03d22c17eac15`), sin cambios de dependencias.
+- Verificación anterior local: formato de cinco archivos Dart correcto (0 cambios); `flutter analyze --no-pub` sin problemas (15,2 s); `flutter test --no-pub --reporter expanded`: **104 aprobadas, 0 fallidas, 0 omitidas** (59 nuevas: 35 coordinador + 24 pantalla; 45 de la base: 24 detalle + 13 listado + 8 navegación/tema), aproximadamente 10 s. Registro externo `F:\dev\vanfull-cu030-flutter-test.log`.
+- Ajuste de reconciliación posterior: un detalle incompatible no borra el Viaje confirmado ni habilita acciones o muestra sus listas; conserva «Actualizar detalle». Admite igualdad y el avance en_curso → finalizado respaldado por el backend. Verificado: formato de tres archivos sin cambios pendientes; analyze sin problemas (16,3 s); suite completa **110 aprobadas, 0 fallidas, 0 omitidas** (6 pruebas adicionales respecto de las 104 anteriores), aproximadamente 13 s. Registro local externo: `F:\dev\vanfull-cu030-reconciliacion-test.log`. Sin cambios de backend, #89 ni demo.
+- Se preservan los avisos preexistentes de Google Fonts en el test del tema. El intento inicial de pruebas en la ruta temporal con `&` falló antes de ejecutar casos; worktree trasladado a F:\dev y referencia reparada. Avisos iniciales de estilo corregidos. Sin prueba backend/HTTP/dispositivo ni CI remota de esta entrega local.
+
+### Revisión visual manual local — 22/10/2026
+
+- Realizada por el usuario con mocks en Flutter Web, en ventana amplia y angosta: listado y detalle legibles; horario omitido como «Sin horario». Pasajeros, nómina y diálogo legibles en ventana angosta.
+- Inicio muestra «En curso» y «Finalizar viaje». «Volver» cancela la confirmación y conserva En curso; confirmar la finalización muestra «Finalizado» y retira las acciones.
+- Resultado incierto exige consultar el estado; permite reintentar inicio explícitamente y recupera el detalle. Recarga fallida conserva el estado confirmado, oculta las listas y permite recuperarlas con «Actualizar detalle».
+- Bloqueo visual observado durante operación y recarga: se retiran las acciones y aparecen «Procesando solicitud» / «Actualizando detalle», con indicador de carga. Durante la recarga se conserva «Estado confirmado: En curso».
+- Observaciones pendientes, sin correcciones de código: separación vertical amplia y pantalla de procesamiento poco clara.
+- Alcance limitado a los recorridos informados: no se declaran revisados los demás escenarios del menú, Android/dispositivo ni integración HTTP/backend. No acredita C12 ni CU-030 completo; sin llamadas a la demo. No se repitió la suite ni se cambió código productivo.
+- Entrada temporal `frontend/local_chofer_preview.dart` sin seguimiento, fuera de los seis archivos de la entrega y de los textos preparados de Issue/PR. Este registro no actualiza la consulta remota de #89/main: comprobarla al retomar antes de actualizar la base y publicar.
+
+### Para otras áreas
+
+- Futuro contenedor: inyectar `AccionesEjecucionViaje(iniciar, finalizar, onRechazo)` junto a `cargarDetalle`. El adaptador común deberá enviar los POST sin cuerpo, devolver ViajeResumen, distinguir rechazo conocido/resultado incierto y efectuar consultas nuevas después de la escritura. Permisos y transacciones siguen en backend; no se envió ningún mensaje.
+
+## Registro histórico al 21/10/2026 — detalle Flutter CU-029 local con mocks
 
 - Entrega publicada en [PR #89](https://github.com/Martiherenu1/ProyectoVanFull/pull/89), abierta y sin merge a main; Issue #88 abierto con etiqueta `chofer`. Rama `feat/chofer-detalle-flutter-cu029`, worktree `F:\dev\vanfull-flutter-cu029-detalle`. Los seis archivos revisados se preservaron en `a6f234eb107214dd0380670f368a1e0110042efc`. Base inicial: `28cfe338fde8bdcd8eb25c56b17c8911dfdb8d7e`; se reutiliza `ViajeResumen`, sin copiarlo ni modificar la rama del listado.
 - Primera base integrada el 21/10/2026: `origin/main 5bf3117daf8ce8ab943cf234ac19dbac3fb6196d`, mediante merge local `b81ca4c3967360fe94ed9dabc4bf7fa535adf6da` (padres `a6f234e` y `5bf3117`). #81 ya está mergeada y #80 cerrado; #79 también integrada y #48 cerrado. La dependencia de una PR abierta quedó resuelta. Merge automático, sin conflictos ni rebase/force; historial del contexto conservado, sin borradores ajenos. El detalle aún no está integrado a main ni conectado a navegación/listado.

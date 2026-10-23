@@ -5,7 +5,9 @@ import csv
 
 import pytest
 
+from app.core.config import Settings
 from db.seed import cargar as seed
+from db.seed import generar_contrasenas
 from tests._bd import base_migrada, base_temporal, cliente_api, consultar, ejecutar_sql, url_de
 
 CUENTAS = {  # identificador_acceso -> roles esperados
@@ -173,3 +175,76 @@ def test_main_se_niega_a_cargar_en_una_base_remota(monkeypatch, capsys):
     assert seed.main([]) == 2
     assert not llamado, "no debería ni intentar conectarse"
     assert "no local" in capsys.readouterr().err
+
+
+NEON = "postgresql://u:p@ep-algo.neon.tech/x"
+
+
+def _cargar_falso(llamado: list):
+    async def falso(*args, **kwargs):
+        llamado.append(kwargs)
+        return {}
+
+    return falso
+
+
+def test_con_la_bandera_y_las_contrasenas_del_repo_tampoco_carga(monkeypatch, capsys):
+    """`--permitir-base-remota` sin `--contrasenas` sembraría las contraseñas públicas."""
+    monkeypatch.setattr(seed, "_dsn_de_settings", lambda: NEON)
+    llamado = []
+    monkeypatch.setattr(seed, "cargar", _cargar_falso(llamado))
+    assert seed.main(["--permitir-base-remota"]) == 2
+    archivo_del_repo = str(seed.CARPETA / "otras.csv")
+    assert seed.main(["--permitir-base-remota", "--contrasenas", archivo_del_repo]) == 2
+    assert not llamado
+    assert "fuera del repositorio" in capsys.readouterr().err
+
+
+def test_con_la_bandera_y_un_archivo_propio_carga_en_la_base_remota(monkeypatch, tmp_path):
+    propio = tmp_path / "contrasenas-demo.csv"
+    monkeypatch.setattr(seed, "_dsn_de_settings", lambda: NEON)
+    llamado = []
+    monkeypatch.setattr(seed, "cargar", _cargar_falso(llamado))
+    assert seed.main(["--permitir-base-remota", "--contrasenas", str(propio)]) == 0
+    assert llamado == [{"reiniciar": False, "archivo_contrasenas": propio}]
+
+
+def test_la_dsn_del_seed_traduce_ssl_a_sslmode(monkeypatch):
+    """La configuración deja `ssl` (SQLAlchemy); la DSN de asyncpg necesita `sslmode`."""
+    ajustes = Settings(
+        _env_file=None, database_url=f"{NEON}?sslmode=require&channel_binding=require"
+    )
+    monkeypatch.setattr(seed, "get_settings", lambda: ajustes)
+    assert seed._dsn_de_settings() == f"{NEON}?sslmode=require"
+
+
+# --- Contraseñas para la base de la demo ---------------------------------------------------
+
+
+def test_genera_una_contrasena_nueva_por_cuenta(tmp_path, capsys):
+    destino = tmp_path / "demo.csv"
+    assert generar_contrasenas.main([str(destino)]) == 0
+    generadas = seed.leer_contrasenas(destino)
+    publicas = seed.leer_contrasenas(seed.CONTRASENAS)
+    assert set(generadas) == set(CUENTAS)
+    assert len(set(generadas.values())) == len(generadas)
+    assert not set(generadas.values()) & set(publicas.values())
+    salida = capsys.readouterr().out
+    assert not any(c in salida for c in generadas.values()), "no debe imprimir las contraseñas"
+
+
+def test_las_contrasenas_generadas_sirven_para_el_cargador(tmp_path):
+    destino = tmp_path / "demo.csv"
+    generar_contrasenas.generar(destino)
+    assert seed._filas_a_cargar(destino)["cuenta_acceso"][0]["hash_contrasena"].startswith("$2")
+
+
+def test_no_genera_dentro_del_repo_ni_pisa_un_archivo(tmp_path):
+    with pytest.raises(ValueError, match="fuera del repositorio"):
+        generar_contrasenas.generar(seed.CARPETA / "demo.csv")
+    assert not (seed.CARPETA / "demo.csv").exists()
+    existente = tmp_path / "demo.csv"
+    existente.write_text("no tocar", encoding="utf-8")
+    with pytest.raises(ValueError, match="ya existe"):
+        generar_contrasenas.generar(existente)
+    assert existente.read_text(encoding="utf-8") == "no tocar"

@@ -83,46 +83,74 @@ void main() {
     });
   }
 
-  testWidgets('administrador abre Viajes del día con dependencias inyectadas', (
-    WidgetTester tester,
-  ) async {
-    final fechas = <DateTime>[];
-    int? seleccionado;
-    final viaje = ViajeResumen(
-      idViaje: 42,
-      idServicio: 1,
-      idRecorrido: 1,
-      idVehiculo: 1,
-      idChofer: 3,
-      fecha: DateTime(2026, 10, 30),
-      horario: '07:30',
-      sentido: SentidoViaje.ida,
-      estado: EstadoViaje.programado,
-    );
+  testWidgets(
+    'administrador integra consulta, estados y selección inyectados',
+    (WidgetTester tester) async {
+      final fechas = <DateTime>[];
+      int? seleccionado;
+      final viajeCompleto = ViajeResumen(
+        idViaje: 42,
+        idServicio: 1,
+        idRecorrido: 1,
+        idVehiculo: 1,
+        idChofer: 3,
+        fecha: DateTime(2026, 10, 30),
+        horario: '07:30',
+        sentido: SentidoViaje.ida,
+        estado: EstadoViaje.programado,
+      );
+      final viajeIncompleto = ViajeResumen(
+        idViaje: 43,
+        idServicio: 1,
+        idRecorrido: 1,
+        fecha: DateTime(2026, 10, 30),
+        horario: '09:30',
+        sentido: SentidoViaje.vuelta,
+        estado: EstadoViaje.programado,
+      );
 
-    await tester.pumpWidget(
-      VanFullApp(
-        roles: const ['administrador'],
-        fechaAdmin: DateTime(2026, 10, 30, 18),
-        cargarViajesAdmin: (fecha) async {
-          fechas.add(fecha);
-          return [viaje];
-        },
-        onViajeAdminSeleccionado: (id) => seleccionado = id,
-      ),
-    );
-    await tester.pumpAndSettle();
+      await tester.pumpWidget(
+        VanFullApp(
+          roles: const ['administrador'],
+          fechaAdmin: DateTime(2026, 10, 30, 18),
+          cargarViajesAdmin: (fecha) async {
+            fechas.add(fecha);
+            if (fechas.length == 1) throw Exception('sin conexión');
+            return [viajeCompleto, viajeIncompleto];
+          },
+          onViajeAdminSeleccionado: (id) => seleccionado = id,
+        ),
+      );
+      await tester.pumpAndSettle();
 
-    expect(find.byType(ViajesDiaAdminScreen), findsOneWidget);
-    expect(fechas, [DateTime(2026, 10, 30)]);
-    expect(find.text('CU-018 · Entrada temporal'), findsNothing);
-    expect(
-      Theme.of(tester.element(find.byType(Scaffold))).brightness,
-      Brightness.light,
-    );
-    await tester.tap(find.text('42'));
-    expect(seleccionado, 42);
-  });
+      expect(find.byType(ViajesDiaAdminScreen), findsOneWidget);
+      expect(
+        find.text('No pudimos cargar los viajes. Volvé a intentar.'),
+        findsOneWidget,
+      );
+      await tester.tap(find.text('Reintentar'));
+      await tester.pumpAndSettle();
+
+      expect(fechas, [DateTime(2026, 10, 30), DateTime(2026, 10, 30)]);
+      expect(find.text('CU-018 · Entrada temporal'), findsNothing);
+      expect(find.text('42'), findsOneWidget);
+      expect(find.text('43'), findsOneWidget);
+      expect(
+        find.byKey(const ValueKey('viaje-43-vehículo-pendiente')),
+        findsOneWidget,
+      );
+      expect(
+        find.byKey(const ValueKey('viaje-43-chofer-pendiente')),
+        findsOneWidget,
+      );
+      expect(
+        Theme.of(tester.element(find.byType(Scaffold))).brightness,
+        Brightness.light,
+      );
+      await tester.tap(find.text('42'));
+      expect(seleccionado, 42);
+    },
+  );
 
   testWidgets('administrador sin servicio no usa datos simulados', (
     WidgetTester tester,

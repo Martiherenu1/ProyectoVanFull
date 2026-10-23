@@ -1,25 +1,27 @@
 import 'package:flutter/material.dart';
 
+import '../../controllers/chofer/ejecucion_viaje_controller.dart';
 import '../../core/theme/app_spacing.dart';
 import '../../core/theme/app_theme.dart';
 import '../../models/chofer/operacion_asignada.dart';
 
-/// null indica detalle no disponible. El adaptador común traducirá el 404;
-/// los demás fallos se comunican mediante un Future fallido, sin exponer su texto.
-/// No distingue viaje ajeno de inexistente ni reemplaza permisos del backend.
-typedef CargarDetalleViajeChofer = Future<OperacionAsignada?> Function(
-  int idViaje,
-);
+import 'acciones_viaje_chofer.dart';
+
+// Conserva la interfaz de carga publicada por CU-029.
+export '../../controllers/chofer/ejecucion_viaje_controller.dart'
+    show CargarDetalleViajeChofer;
 
 class DetalleViajeChoferScreen extends StatefulWidget {
   const DetalleViajeChoferScreen({
     required this.idViaje,
     required this.cargarDetalle,
+    this.acciones,
     super.key,
   });
 
   final int idViaje;
   final CargarDetalleViajeChofer cargarDetalle;
+  final AccionesEjecucionViaje? acciones;
 
   @override
   State<DetalleViajeChoferScreen> createState() =>
@@ -27,52 +29,42 @@ class DetalleViajeChoferScreen extends StatefulWidget {
 }
 
 class _DetalleViajeChoferScreenState extends State<DetalleViajeChoferScreen> {
-  OperacionAsignada? _detalle;
-  bool _cargando = true;
-  bool _error = false;
-  int _solicitud = 0;
+  late final EjecucionViajeController _controlador;
 
   @override
   void initState() {
     super.initState();
-    _cargar();
+    _controlador = EjecucionViajeController(
+      idViaje: widget.idViaje,
+      cargarDetalle: widget.cargarDetalle,
+      acciones: widget.acciones,
+    )..addListener(_actualizar);
+    _controlador.consultar();
+  }
+
+  void _actualizar() {
+    if (mounted) setState(() {});
   }
 
   @override
   void didUpdateWidget(covariant DetalleViajeChoferScreen oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.idViaje != widget.idViaje ||
-        oldWidget.cargarDetalle != widget.cargarDetalle) {
-      _cargar();
+        oldWidget.cargarDetalle != widget.cargarDetalle ||
+        oldWidget.acciones != widget.acciones) {
+      _controlador.actualizarContexto(
+        idViaje: widget.idViaje,
+        cargarDetalle: widget.cargarDetalle,
+        acciones: widget.acciones,
+      );
     }
   }
 
-  Future<void> _cargar() async {
-    final solicitud = ++_solicitud;
-    final idViaje = widget.idViaje;
-    setState(() {
-      _cargando = true;
-      _error = false;
-      _detalle = null;
-    });
-    try {
-      final detalle = await widget.cargarDetalle(idViaje);
-      if (!mounted || solicitud != _solicitud) return;
-      // Una fuente mal conectada no debe mostrar información de otro viaje.
-      if (detalle != null && detalle.viaje.idViaje != idViaje) {
-        throw const FormatException('Detalle de otro viaje');
-      }
-      setState(() {
-        _detalle = detalle;
-        _cargando = false;
-      });
-    } catch (_) {
-      if (!mounted || solicitud != _solicitud) return;
-      setState(() {
-        _error = true;
-        _cargando = false;
-      });
-    }
+  @override
+  void dispose() {
+    _controlador.removeListener(_actualizar);
+    _controlador.dispose();
+    super.dispose();
   }
 
   @override
@@ -87,14 +79,24 @@ class _DetalleViajeChoferScreenState extends State<DetalleViajeChoferScreen> {
   );
 
   Widget _contenido(BuildContext context) {
-    if (_cargando) {
+    if (_controlador.fase == FaseDetalleViaje.cargando) {
       return const Center(
         child: CircularProgressIndicator(
           semanticsLabel: 'Cargando detalle del viaje',
         ),
       );
     }
-    if (_error || _detalle == null) {
+    if (_controlador.fase != FaseDetalleViaje.listo) {
+      if (widget.acciones != null ||
+          _controlador.operacionPendiente != null ||
+          _controlador.viajeConfirmado != null) {
+        return Center(
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.all(AppSpacing.lg),
+            child: AccionesViajeChofer(controlador: _controlador),
+          ),
+        );
+      }
       return Center(
         child: SingleChildScrollView(
           padding: const EdgeInsets.all(AppSpacing.lg),
@@ -102,13 +104,13 @@ class _DetalleViajeChoferScreenState extends State<DetalleViajeChoferScreen> {
             mainAxisSize: MainAxisSize.min,
             children: [
               Text(
-                _error
+                _controlador.fase == FaseDetalleViaje.error
                     ? 'No pudimos cargar el detalle.'
                     : 'Detalle no disponible.',
               ),
               const SizedBox(height: AppSpacing.lg),
               ElevatedButton(
-                onPressed: _cargar,
+                onPressed: _controlador.consultar,
                 style: ElevatedButton.styleFrom(
                   minimumSize: const Size(0, AppSpacing.driverTouchTarget),
                 ),
@@ -119,7 +121,7 @@ class _DetalleViajeChoferScreenState extends State<DetalleViajeChoferScreen> {
         ),
       );
     }
-    final detalle = _detalle!;
+    final detalle = _controlador.detalle!;
     final viaje = detalle.viaje;
     final fecha =
         '${viaje.fecha.day.toString().padLeft(2, '0')}/'
@@ -129,6 +131,8 @@ class _DetalleViajeChoferScreenState extends State<DetalleViajeChoferScreen> {
       key: ValueKey('detalle-${viaje.idViaje}'),
       padding: const EdgeInsets.all(AppSpacing.lg),
       children: [
+        if (widget.acciones != null)
+          AccionesViajeChofer(controlador: _controlador),
         _titulo(context, 'Viaje ${viaje.idViaje}'),
         _fila('Fecha: $fecha · ${viaje.horario ?? 'Sin horario'}'),
         _fila('${viaje.sentido.etiqueta} · ${viaje.estado.etiqueta}'),

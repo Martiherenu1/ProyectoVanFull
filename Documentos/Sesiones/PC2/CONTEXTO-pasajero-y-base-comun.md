@@ -48,7 +48,7 @@ resolver #8). Estados: esqueleto, vacío, error con reintento, "Sin cupo". Verif
 `flutter test` (40/40). **SIN VERIFICAR:** contra el backend real y en un dispositivo o navegador. **No está
 conectada** al `RoleRouter`: falta el cliente común (#87) y el login (pantalla 1).
 
-Después: el Asistente (CU-011), el login y Pago (pantalla 5, de Facundo). El tipo de servicio no se muestra
+Después: el login, la navegación entre las pantallas del pasajero y Pago (pantalla 5, de Facundo). El tipo de servicio no se muestra
 (la respuesta trae solo `id_servicio`; haría falta `GET /servicios`).
 
 **Pantalla Flutter Confirmar reserva (CU-003, Issue #92), rama `feat/pasajero-confirmar-reserva-cu003`, apilada
@@ -77,6 +77,21 @@ no tiene cliente individual todavía (no reservó nunca), `GET /pasajeros/me/deu
 `CLIENTE_NO_ENCONTRADO` y la pantalla muestra «No pudimos cargar tu saldo»; decidir con Facundo si ese caso es
 «Al día». Verificado: `flutter analyze` y `flutter test` (79/79). **SIN VERIFICAR:** contra el backend real y en
 un dispositivo o navegador; no está conectada (#87 y el login).
+
+**Pantalla Flutter Asistente (CU-011, Issue #96), rama `feat/pasajero-asistente-cu011`, apilada sobre la de Mis reservas
+(#95).** `screens/pasajero/asistente_screen.dart` y `models/pasajero/respuesta_chat.dart`. Envío **inyectable**
+(`EnviarMensaje(mensaje, conversacionId)` → `RespuestaChat`); la pantalla guarda el `conversacion_id` que devuelve el
+backend y lo reenvía. No envía vacío ni más de 2000 caracteres (el tope del backend), un mensaje a la vez, avisa
+«El asistente está respondiendo…» con texto y no con spinner, marca «Derivado a una persona de VanFull» cuando
+`derivar_humano` es `true` y, si el envío falla, deja el mensaje con «No se pudo enviar» y «Reintentar» (reenvía con
+el mismo `conversacion_id`). Cualquier excepción del adaptador es «no se pudo enviar»; el 400 `VALIDACION` no tiene
+tratamiento propio porque el cliente ya valida. La presentación inicial solo promete lo que las tools habilitadas
+hacen (viajes, cupos, reservas, derivar a una persona) y avisa que no confirma pagos. **No usa `tool_usada`**:
+al reservar o cancelar por chat, Mis reservas no se entera; cuando se arme la navegación hay que recargarla al volver.
+Las conversaciones viven en memoria del backend (#42): al reiniciar el servidor se abre una nueva sin avisar, y esta
+pantalla tampoco guarda el historial. Verificado: `flutter analyze` y `flutter test` (72 sobre `main`, 91 con #95).
+**SIN VERIFICAR:** contra `/chat` real ni contra un modelo de OpenRouter, y en un dispositivo o navegador; no está
+conectada (#87 y el login).
 
 ## Decisiones
 

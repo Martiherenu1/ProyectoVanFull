@@ -1,14 +1,25 @@
 import 'package:flutter/material.dart';
 
+import '../../models/chofer/viaje_resumen.dart';
+import '../../screens/admin/viajes_dia_admin_screen.dart';
 import '../theme/app_spacing.dart';
 import '../theme/app_theme.dart';
 import 'app_role.dart';
 
 /// Decide la portada inicial sin reemplazar la futura integración con login.
 class RoleRouter extends StatelessWidget {
-  const RoleRouter({required this.roles, super.key});
+  const RoleRouter({
+    required this.roles,
+    this.fechaAdmin,
+    this.cargarViajesAdmin,
+    this.onViajeAdminSeleccionado,
+    super.key,
+  });
 
   final List<String> roles;
+  final DateTime? fechaAdmin;
+  final CargarViajesDelDia? cargarViajesAdmin;
+  final ValueChanged<int>? onViajeAdminSeleccionado;
 
   @override
   Widget build(BuildContext context) {
@@ -18,13 +29,27 @@ class RoleRouter extends StatelessWidget {
       title: 'VanFull',
       debugShowCheckedModeBanner: false,
       theme: resolution.role?.theme ?? AppTheme.admin,
-      home: resolution.role == null
-          ? _PendingRoleScreen(
-              title: resolution.title,
-              message: resolution.message,
-            )
-          : _RoleEntryScreen(role: resolution.role!),
+      home: _destination(resolution),
     );
+  }
+
+  Widget _destination(_RoleResolution resolution) {
+    final role = resolution.role;
+    if (role == null) {
+      return _PendingRoleScreen(
+        title: resolution.title,
+        message: resolution.message,
+      );
+    }
+    if (role == AppRole.admin) {
+      return ViajesDiaAdminScreen(
+        fecha: fechaAdmin ?? DateTime.now(),
+        cargarViajes: cargarViajesAdmin ?? _cargarViajesAdminPendiente,
+        onViajeSeleccionado:
+            onViajeAdminSeleccionado ?? _seleccionAdminPendiente,
+      );
+    }
+    return _RoleEntryScreen(role: role);
   }
 
   _RoleResolution _resolve(List<String> values) {
@@ -50,6 +75,15 @@ class RoleRouter extends StatelessWidget {
     }
     return _RoleResolution.ready(role);
   }
+}
+
+Future<List<ViajeResumen>> _cargarViajesAdminPendiente(DateTime _) =>
+    Future.error(
+      StateError('La consulta administrativa todavía no está integrada.'),
+    );
+
+void _seleccionAdminPendiente(int _) {
+  // La navegación al detalle queda para una integración posterior.
 }
 
 class _RoleEntryScreen extends StatelessWidget {

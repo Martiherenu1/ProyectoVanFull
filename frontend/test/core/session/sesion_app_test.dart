@@ -5,6 +5,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:frontend/core/session/sesion.dart';
 import 'package:frontend/core/session/sesion_app.dart';
 import 'package:frontend/core/session/sesion_controller.dart';
+import 'package:frontend/screens/admin/viajes_dia_admin_screen.dart';
 
 Sesion sesionDe(List<String> roles) =>
     Sesion(accessToken: 'tok', roles: roles);
@@ -116,7 +117,7 @@ void main() {
 
     espera.complete(sesionDe(['administrador']));
     await tester.pumpAndSettle();
-    expect(find.text('VanFull — Administración'), findsOneWidget);
+    expect(find.byType(ViajesDiaAdminScreen), findsOneWidget);
   });
 
   testWidgets('salir vuelve al login aunque el logout falle', (tester) async {

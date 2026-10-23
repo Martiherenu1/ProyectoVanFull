@@ -2,6 +2,10 @@
 
 ## Estado
 
+2026-10-23: #87 y #99 integrados en `main`. Issue #111 conecta la entrada del rol administrador con
+`ViajesDiaAdminScreen` mediante fecha, consulta y selección inyectables, sin login, sesión, HTTP ni datos
+simulados en producción. Sin rol, múltiples roles y rol desconocido conservan el comportamiento de #48.
+
 2026-10-22: Issue #98 en desarrollo para la pantalla administrativa de Viajes del día (CU-018), con consulta
 inyectable y sin HTTP, autenticación ni navegación. CU-014 permanece pausado en el Draft PR #85 por decisiones
 pendientes sobre tipo/evidencia, descuento y respuestas para cliente o cuenta inexistentes.
@@ -13,6 +17,8 @@ siendo trabajos independientes.
 ## Hecho
 
 - PR #50: `POST /viajes`, primera operación backend de administración, integrado en `main`.
+- PR #87: cliente API HTTP compartido, integrado en `main`.
+- PR #99 / Issue #98: pantalla Flutter administrativa de Viajes del día, integrada en `main`.
 - CU-018 mantiene cobertura parcial en el contrato vigente.
 - PR #47: temas oscuro para pasajero/chofer y claro para administración, tokens compartidos y vista temporal de
   verificación. La corrección A.0–A.8 deja esquemas de color explícitos, dorado accesible en el tema claro,
@@ -24,8 +30,8 @@ siendo trabajos independientes.
 
 ## En curso
 
-- Issue #98: pantalla Flutter administrativa de Viajes del día, independiente del endpoint de listado todavía
-  no contratado.
+- Issue #111: navegación hacia Viajes del día con dependencias inyectables; el endpoint administrativo todavía
+  no está contratado.
 - PR #54 (CU-006) y PR #52 (CU-016): integrar `main` y mergear.
 
 ## Decisiones
@@ -60,8 +66,8 @@ siendo trabajos independientes.
 
 - CU-014: Draft PR #85 pausado; no declarar completo hasta resolver persistencia de tipo/evidencia, descuento y
   respuestas para clientes inexistentes o sin cuenta corriente.
-- Issue #98: la integración real queda pendiente del endpoint administrativo para listar viajes, del cliente API
-  compartido y de autenticación; esta pantalla no inventa esas dependencias.
+- Issue #111: la consulta real queda pendiente del endpoint administrativo para listar viajes y de la
+  autenticación; el cliente compartido ya está integrado, pero esta tarea no inventa un adaptador sin contrato.
 - #53 y #51: cerrar mediante la revisión e integración de los PR #54 y #52.
 - CU-006 devuelve `404 CLIENTE_NO_ENCONTRADO` si no existe el cliente individual. Esa respuesta no
   figura en OpenAPI y agregarla al contrato requiere el acuerdo de los tres integrantes.

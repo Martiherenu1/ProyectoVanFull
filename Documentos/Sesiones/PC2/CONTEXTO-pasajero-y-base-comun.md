@@ -37,8 +37,24 @@ La CI corre en cada PR. En `main` la suite da 300 pruebas; la rama de las tools 
 | Cupo: capacidad del vehículo, si no la planificada, si no 19; la ausencia informada libera el lugar (#28 parcial) | #28 | #70 |
 | Crear la reserva del ocasional, sin tarifa (CU-003): `POST /api/reservas`, 27 pruebas; `cupo_del_viaje` como definición única | #72 | #73 |
 | Tools `crear_reserva` y `cancelar_reserva` de AG-01: `agent/ejecutor.py` las traduce a los servicios de reservas; `crear_reserva` recibe `viaje_id` y `orden_parada` | #77 | #78 |
+| Integración del pasajero: login, Buscar, Confirmar, Mis reservas y Asistente conectados a la API (detalle abajo, en «En curso», hasta limpiar esa sección) | #107 | #108 |
 
 ## En curso
+
+**Deploy de la demo (Issue #116, rama `chore/comun-deploy-demo-116`).** Neon + Render + GitHub Pages; la guía,
+con qué variable va dónde y el ensayo, está en `DESPLIEGUE.md` (raíz). Cambios: `core/cors.py` (`CORS_ORIGINS`;
+sin ella, en desarrollo localhost y fuera de desarrollo la API no arranca), `normalizar_database_url` en
+`core/config.py` (la cadena de Neon se pega tal cual), `render.yaml` (migra en el arranque), workflow
+`pages.yml` (manual) y `db/seed/generar_contrasenas.py`, más la guarda del cargador. **Verificado de verdad
+(2026-10-23):** ruff y pytest en Docker; el `dockerCommand` del `render.yaml` en la imagen del Dockerfile con
+`ENV=production` y `PORT=10000` sobre una base vacía (migra, arranca, un reinicio no vuelve a migrar, health
+`up`); sin `CORS_ORIGINS` no arranca; el build web con `--base-href /ProyectoVanFull/` servido desde otro
+origen: carga, y un `fetch` del navegador hace login (200) y `GET /pasajeros/me` con token (200), mientras
+que otro origen da 400 en el preflight; el seed contra una base que cuenta como remota (la IP del contenedor)
+se niega sin archivo propio, carga con el generado, entran las contraseñas generadas y no las públicas.
+**SIN VERIFICAR:** Neon, Render y Pages reales (los crea Martiniano); el login tocando la UI en el sitio servido
+(el panel del navegador no dibujaba Flutter con la ventana minimizada: se probó con `fetch`); el `render.yaml`
+contra el validador de Render. **Pendiente:** los viajes de la demo llegan con #101 (Facundo).
 
 **Integración del pasajero (Issue #107, PR de la rama `feat/pasajero-integracion-107`).** Con #87 en `main`, las cuatro
 pantallas del pasajero y el login (#106) quedan **conectadas a la API**: `core/api/auth_api.dart` y `pasajero_api.dart`
@@ -129,6 +145,8 @@ conectada (#87 y el login).
 | 2026-10-20 | **CU-003 (Issue #72):** el ocasional queda `consolidada` al reservar (la aceptación es automática: AC7-02 y #33); su respaldo es **una contratación por reserva**, sin `id_tarifa` ni `importe_acordado`, y no genera deuda. Si el pasajero no tiene cliente individual se crea. Decisiones mías al implementar, a confirmar | `services/reservas.py`, Issue #72 |
 | 2026-10-20 | **CU-004 (Issue #74):** cancelar no otorga crédito ni cobra penalidad, porque ninguna de las 35 tablas guarda el crédito de RN-017. Se puede cancelar mientras el viaje esté `programado`, también fuera de las 18:00 del día anterior: esa referencia solo decide el crédito y el caso fuera de término está sin definir (CU-004 en 06-Notas §6.3), así que solo cambia el `motivo`. Un viaje cancelado, en curso o finalizado responde 409. Decisiones mías al implementar, a confirmar | `services/reservas.py`, Issue #74 |
 | 2026-10-20 | Una reserva cancelada del mismo viaje no se reactiva ni se pisa: responde 409 `RESERVA_CANCELADA_PREVIA`, porque MR-R15 deja una fila por pasajero y viaje y reactivarla no está definido (AC28-08) | `services/reservas.py` |
+| 2026-10-23 | **Deploy (#116):** la migración corre en el arranque del servicio de Render (`alembic upgrade head && uvicorn`), porque el plan free no tiene shell ni jobs; es idempotente. Pages se publica a mano (`workflow_dispatch`); la API, cuando la CI de `main` pasa. Fuera de desarrollo, sin `CORS_ORIGINS` la API no arranca. CORS sin `allow_credentials`: el token va en `Authorization` | `render.yaml`, `DESPLIEGUE.md` |
+| 2026-10-23 | En una base remota, el seed exige `--permitir-base-remota` **y** un archivo de contraseñas fuera del repo (la bandera sola ya no alcanza); las contraseñas de la demo se generan al azar y no se imprimen | `db/seed/README.md`, `DESPLIEGUE.md` |
 
 ## Pendientes
 

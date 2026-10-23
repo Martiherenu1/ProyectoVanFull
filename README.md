@@ -51,6 +51,8 @@ docker compose run --rm backend python -m db.seed.cargar  # cuentas de prueba (p
 - Pruebas: `docker compose run --rm backend pytest -q`
 - Cuentas de prueba y qué datos hay: [`backend/db/seed/README.md`](backend/db/seed/README.md)
 
+Despliegue de la demo (Neon + Render + GitHub Pages), variables y ensayo: [`DESPLIEGUE.md`](DESPLIEGUE.md).
+
 ## Documentación clave
 
 - Contexto rápido del proyecto: [`Documentos/Sesiones/CONTEXTO.md`](Documentos/Sesiones/CONTEXTO.md)

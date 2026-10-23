@@ -1,0 +1,41 @@
+# Blueprint de Render: la API de la demo (Issue #116). Guía completa en DESPLIEGUE.md.
+# Ningún secreto vive acá: DATABASE_URL y OPENROUTER_API_KEY se cargan en el panel de Render
+# (sync: false los pide al crear el Blueprint) y JWT_SECRET lo genera Render.
+services:
+  - type: web
+    name: vanfull-api
+    runtime: docker
+    plan: free
+    # Misma región que la base de Neon (AWS us-east-2, Ohio). No se puede cambiar después.
+    region: ohio
+    branch: main
+    dockerfilePath: ./backend/Dockerfile
+    dockerContext: ./backend
+    # Migra antes de servir (el plan free no tiene shell ni jobs). Es idempotente: si la base ya
+    # está en head no hace nada, y si una migración falla la API no arranca con el esquema viejo.
+    dockerCommand: >-
+      sh -c "alembic upgrade head && exec uvicorn app.main:app --host 0.0.0.0 --port $PORT
+      --proxy-headers --forwarded-allow-ips='*'"
+    healthCheckPath: /api/health
+    # Despliega solo cuando la CI de main está en verde, y solo si cambió el backend.
+    autoDeployTrigger: checksPass
+    buildFilter:
+      paths:
+        - backend/**
+    envVars:
+      - key: ENV
+        value: production
+      - key: API_PREFIX
+        value: /api
+      # El origen de GitHub Pages: sin la ruta del repositorio (la ruta no es parte del origen).
+      - key: CORS_ORIGINS
+        value: https://martiherenu1.github.io
+      # Base64 de 256 bits al azar: supera los 32 bytes que exige core/security.py.
+      - key: JWT_SECRET
+        generateValue: true
+      # Cadena de conexión DIRECTA de Neon (no la "-pooler"), tal como la da el panel.
+      - key: DATABASE_URL
+        sync: false
+      # Opcional: sin clave, el asistente deriva a una persona de VanFull.
+      - key: OPENROUTER_API_KEY
+        sync: false

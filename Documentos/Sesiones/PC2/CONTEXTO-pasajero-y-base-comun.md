@@ -3,7 +3,7 @@
 > Lo mantiene el agente de Martiniano, en el mismo PR que cambia algo. Convención en
 > `PROMPT-CONTEXTO-VIVO.md`. Si algo de acá contradice al código, manda el código: corregir este archivo.
 >
-> **Última actualización: 2026-10-21**
+> **Última actualización: 2026-10-23**
 
 ## Estado
 
@@ -39,6 +39,22 @@ La CI corre en cada PR. En `main` la suite da 300 pruebas; la rama de las tools 
 | Tools `crear_reserva` y `cancelar_reserva` de AG-01: `agent/ejecutor.py` las traduce a los servicios de reservas; `crear_reserva` recibe `viaje_id` y `orden_parada` | #77 | #78 |
 
 ## En curso
+
+**Integración del pasajero (Issue #107, PR de la rama `feat/pasajero-integracion-107`).** Con #87 en `main`, las cuatro
+pantallas del pasajero y el login (#106) quedan **conectadas a la API**: `core/api/auth_api.dart` y `pasajero_api.dart`
+implementan los `typedef` de las pantallas sobre `ApiClient` (400/409 → `ReservaRechazada`, 401 → `CredencialesInvalidas`);
+`screens/pasajero/pasajero_shell.dart` une Buscar → Confirmar, Mis reservas, Asistente y Cuenta (cerrar sesión), y Mis
+reservas se recarga cada vez que se vuelve a ella; `main()` arma el cliente con `--dart-define=API_BASE_URL` y usa
+`SesionApp`, que da la entrada real solo al pasajero (chofer y administración siguen en la portada temporal de
+`RoleRouter`). Cómo correrla: `frontend/README.md`. **Verificado de verdad (2026-10-23):** `flutter analyze` y
+`flutter test` (143), y el flujo en Chrome contra el backend en Docker con el seed: login con contraseña incorrecta
+(mensaje) y correcta, disponibilidad y paradas reales, reserva creada en PostgreSQL (una sola fila `consolidada`),
+Mis reservas con saldo «Al día», cancelación con el motivo del backend, el chat llegando a `/chat` y cerrar sesión.
+**SIN VERIFICAR:** el asistente con un modelo real (`OPENROUTER_API_KEY` vacía: sin modelo `/chat` deriva a una
+persona), en Android/iOS, y los rechazos 409 contra el backend real (solo con pruebas). **Pendiente:** el token no
+se persiste; faltan perfil (CU-001) y pago (de Facundo); el seed no trae viajes (se crean con `POST /viajes` o con el
+seed de la demo, #101). Si la base local de Docker viene de una versión vieja y el login da 500, recrearla con
+`docker compose down -v` y repetir migración y seed.
 
 **Pantalla Flutter Buscar servicio (CU-002, Issue #90, PR #91), rama `feat/pasajero-buscar-servicio-cu002`.**
 `screens/pasajero/buscar_servicio_screen.dart` y `models/pasajero/` (`DisponibilidadViaje`, `Parada`). Carga

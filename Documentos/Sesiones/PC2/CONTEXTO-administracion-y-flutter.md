@@ -2,6 +2,10 @@
 
 ## Estado
 
+2026-10-22: Issue #98 en desarrollo para la pantalla administrativa de Viajes del día (CU-018), con consulta
+inyectable y sin HTTP, autenticación ni navegación. CU-014 permanece pausado en el Draft PR #85 por decisiones
+pendientes sobre tipo/evidencia, descuento y respuestas para cliente o cuenta inexistentes.
+
 2026-10-19: el PR #47 (tema visual compartido de Flutter) está en `main`. `POST /viajes` de CU-018 también.
 CU-006 está en el PR #54 y CU-016 en el PR #52, ambos con CI aprobada. CU-018 y la base común Flutter siguen
 siendo trabajos independientes.
@@ -20,6 +24,8 @@ siendo trabajos independientes.
 
 ## En curso
 
+- Issue #98: pantalla Flutter administrativa de Viajes del día, independiente del endpoint de listado todavía
+  no contratado.
 - PR #54 (CU-006) y PR #52 (CU-016): integrar `main` y mergear.
 
 ## Decisiones
@@ -52,6 +58,10 @@ siendo trabajos independientes.
 
 ## Pendientes
 
+- CU-014: Draft PR #85 pausado; no declarar completo hasta resolver persistencia de tipo/evidencia, descuento y
+  respuestas para clientes inexistentes o sin cuenta corriente.
+- Issue #98: la integración real queda pendiente del endpoint administrativo para listar viajes, del cliente API
+  compartido y de autenticación; esta pantalla no inventa esas dependencias.
 - #53 y #51: cerrar mediante la revisión e integración de los PR #54 y #52.
 - CU-006 devuelve `404 CLIENTE_NO_ENCONTRADO` si no existe el cliente individual. Esa respuesta no
   figura en OpenAPI y agregarla al contrato requiere el acuerdo de los tres integrantes.

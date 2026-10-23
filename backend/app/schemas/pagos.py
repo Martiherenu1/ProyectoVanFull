@@ -1,9 +1,20 @@
-"""Entrada y salida de pagos según el contrato OpenAPI (CU-016)."""
+"""Entrada y salida de pagos según el contrato OpenAPI (CU-014 y CU-016)."""
 
 from datetime import datetime
+from decimal import Decimal
 from typing import Literal
 
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
+
+
+class PagoCreate(BaseModel):
+    id_cliente: int
+    importe: Decimal = Field(ge=0)
+    medio_pago: Literal[
+        "EFECTIVO", "TRANSFERENCIA", "BILLETERA", "CUENTA_CORRIENTE", "MERCADO_PAGO"
+    ]
+    tipo: Literal["total", "parcial", "senia"] | None = None
+    evidencia_pago: str | None = None
 
 
 class DecisionPago(BaseModel):

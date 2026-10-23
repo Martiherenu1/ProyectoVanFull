@@ -1,5 +1,26 @@
 # Contexto vivo · Chofer y viaje en curso (Martín)
 
+## Resumen vigente — control previo de ubicación, 2026-10-23
+
+- Entrega de revisión vinculada a [Issue #114](https://github.com/Martiherenu1/ProyectoVanFull/issues/114), rama feat/chofer-control-ubicacion-cu030; PR hacia main con cierre exclusivo de #114. #64 permanece independiente; CU-030/GPS no completos. Publicación autorizada mediante push normal, sin merge. Vínculo de PR, HEAD publicado y resultado real de CI se registran en la descripción de la PR vinculada al Issue.
+- Base fa2264c4347655e20ab70a9c689c4e99fe06e15b, #103/#109 integradas. Preservación 90b32ca y merge b44c6da; este commit documental completa el procedimiento y el contexto de la entrega. Ambos historiales anteriores se conservan debajo como registros de su momento.
+- 17 archivos revisados; código/base/dependencias sin cambios desde la verificación: formato correcto, analyze sin problemas, 300 pruebas locales aprobadas y APK técnica compilada. Ajustes editoriales sin repetir suites/build. Permisos mínimos COARSE/FINE, sin MainActivity/tema/navegación común/backend modificados.
+- Acuerdo: servicio activo y permiso concedido antes de iniciar/repetir; aproximado admitido, sin primera posición. Bloqueo local no resuelve POST incierto; finalizar no consulta GPS. Adaptador real y operaciones simuladas; sin HTTP, captura/envío ni seguimiento integrado.
+- Observaciones de Martín son de la tanda anterior sobre base 16b0d35 y hash identificado en procedimiento, no nueva prueba física de esta compilación; contador 1 → 0 de causa desconocida y aclaración de pulsación explícita conservados.
+- Ensayo original, otros worktrees y demo preservados. Sin instalación en teléfono, POST reales ni mensajes a terceros. CI remota se verifica en GitHub sobre el HEAD publicado; el resultado no se infiere de las verificaciones locales.
+
+
+
+## Sincronización del control previo con main — 2026-10-23
+
+- Main remoto verificado fa2264c4347655e20ab70a9c689c4e99fe06e15b: #103 y #109 integradas, sin dependencia de PR abierta. Trabajo preservado en 90b32ca15a30265cb8b38cbc2764bfd999bfe7ae; merge local b44c6dabf4b486be088c85dd443ab2f1e94edff5, sin rebase/push. Ambos historiales conservados debajo; conflictos de contexto/pubspec resueltos conservando ambas adiciones, http y geolocator 14.1.2. Las 59 dependencias previas de main mantienen versiones/contenido; solo paquetes necesarios del plugin añadidos.
+- Control/adaptador/entrada técnica sin cambios funcionales: ubicación activa y permiso concedido (aproximado admitido), sin primera posición/requestPermission/inicio al volver de Ajustes; finalizar no consulta GPS y bloqueo local no resuelve incertidumbre previa. Teléfono real y operaciones simuladas; sin HTTP, captura/envío ni navegación productiva.
+- Nueva combinación: formato de 12 Dart, 0 cambios; analyze sin problemas (20,0 s); 300 pruebas aprobadas, 0 fallidas/omitidas (~62 s); APK técnica debug compilada (131,6 s). Advertencia de metadatos SDK XML sin fallo; Gradle/JDK/MainActivity intactos. Manifiesto fusionado/empaquetado revisado, solo COARSE/FINE más INTERNET debug y permiso interno AndroidX, sin permisos de captura. Logs F:/dev/vanfull-cu030-merge-{pubget,analyze,test,build}.log.
+- APK SHA-256 8a3c579eafe70ed40b0633654fe27c1ef2c93d69a6967ba7ec9567c06173d483, igual al anterior; sin instalación ni conexión al teléfono en esta tarea. Observaciones manuales siguientes corresponden a la tanda anterior sobre base 16b0d35 y ese hash, no a una nueva prueba física. Se conserva contador 1 → 0 de causa desconocida y aclaración de pulsación explícita; sin validación de circuito completo/seguimiento.
+- Búsquedas por control previo/geolocator/permiso/ubicación sin Issue específico equivalente; #110/#113 corresponden al adaptador HTTP del detalle y excluyen el control GPS. Borradores actualizados y diff final contra fa2264c en F:/dev/vanfull-cu030-revision-main-fa2264c; único cierre futuro: Issue específico por asignar, no #64. Documentación de esta sincronización queda local sin commit; sin publicaciones, backend, demo u otros worktrees modificados.
+
+
+
 ## Cierre local para revisión — 2026-10-23
 
 - Base conservada: 16b0d3593803d72d48020b7daaab8b2d49d38fe9; #103 sigue abierta y conserva ese HEAD, dependencia explícita. Main remoto ahora 4d8213a3112bc08c9794366b5d4c1a9a7314b5f1 (#95/#106/#97/#87), con cambios compartidos y pubspec/lockfile; no incorporado. Sincronización/verificación de la combinación posteriores; no se atribuyen las 230 pruebas a main nuevo.

@@ -1,5 +1,70 @@
 # Control previo Android con operaciones simuladas — 2026-10-22
 
+## Preparación editorial y publicación autorizada — 2026-10-23
+
+Main remoto nuevamente verificado en fa2264c, sin cambios de código, dependencias
+o base desde la verificación de 300 pruebas locales y build debug. Inventario de
+los mismos 17 archivos comprobado. No se repiten suites ni compilación por cambios
+editoriales. Búsqueda renovada sin Issue equivalente; creado Issue #114 específico.
+La PR hacia main usa únicamente Closes #114; #64 es independiente.
+
+Este commit documental completa el registro antes del push normal y apertura de
+la PR. La descripción remota se mantiene breve y registra el HEAD publicado y
+resultado real de su CI; la cronología permanece aquí. No hay merge ni force push.
+Los commits previos son 90b32ca (preservación) y b44c6da (merge de main).
+Las observaciones físicas de la tanda anterior se conservan con su base/hash;
+300 pruebas locales/build y CI remota son evidencias separadas.
+
+
+
+## Sincronización con main y nueva verificación — 2026-10-23
+
+Estado actual: main remoto fa2264c4347655e20ab70a9c689c4e99fe06e15b, con #103 y
+#109 integradas; sin dependencia de PR abierta. Preservación local 90b32ca15a30265cb8b38cbc2764bfd999bfe7ae;
+merge b44c6dabf4b486be088c85dd443ab2f1e94edff5, sin rebase/push. Ambos historiales
+de contexto conservados. Conflictos únicamente en contexto y pubspec; resolución
+conserva http integrado y geolocator 14.1.2. Las 59 dependencias preexistentes de
+main mantienen versiones/contenido; lockfile solo añade las del plugin.
+Control, adaptador y entrada técnica intactos respecto de la implementación revisada.
+
+Acuerdo vigente: ubicación activa y permiso concedido para iniciar/repetir inicio;
+aproximado admitido, sin primera posición. Ajustes explícitos sin solicitud de
+permiso ni inicio automáticos. Finalizar no consulta GPS. El bloqueo local no
+envía inicio ni resuelve una solicitud anterior incierta. Control real del teléfono
+y operaciones simuladas; sin HTTP, captura/envío ni integración productiva.
+
+Verificaciones de ESTA combinación:
+- pub get --offline --enforce-lockfile: correcto, sin cambio del lockfile.
+- Formato de 12 archivos Dart del diff: correcto, 0 cambios.
+- flutter analyze --no-pub: sin problemas (20,0 s).
+- flutter test --no-pub --reporter expanded: 300 aprobadas, 0 fallidas/omitidas (~62 s).
+- flutter build apk --debug --no-pub --target lib/technical/control_ubicacion_inicio_main.dart:
+  correcto (131,6 s). Advertencia de metadatos SDK XML v4 frente a lector hasta v3,
+  sin fallo ni cambios de herramientas/Gradle/JDK.
+- Manifiesto fusionado/empaquetado revisado: COARSE/FINE, INTERNET debug e interno
+  signature AndroidX. Servicio auxiliar del plugin declarado, no iniciado aquí.
+  Sin permisos background/foreground/notificación/wake lock; sin MainActivity modificado.
+- Logs F:/dev/vanfull-cu030-merge-{pubget,analyze,test,build}.log.
+
+APK actual: F:/dev/vanfull-cu030-ubicacion/frontend/build/app/outputs/flutter-apk/app-debug.apk
+SHA-256: 8a3c579eafe70ed40b0633654fe27c1ef2c93d69a6967ba7ec9567c06173d483
+Tamaño: 172570106 bytes. applicationId com.vanfull.frontend, mismo ensayo.
+El hash coincide con el artefacto anterior. No se instaló ni conectó el teléfono
+en esta tarea; no se registra una nueva prueba física por igualdad de bytes.
+
+**Versión de las observaciones físicas preservadas abajo:** APK del control
+compilada sobre base 16b0d3593803d72d48020b7daaab8b2d49d38fe9 y el SHA-256 anterior,
+instalada y observada por Martín en la tanda previa. Son evidencia histórica de
+esa tanda, no pruebas físicas repetidas de esta sincronización. Conservan el
+contador 1 → 0 al volver de Ajustes, causa desconocida, sin comparación entre sesiones.
+La aparente observación de inicio automático se aclaró como pulsación explícita.
+Los escenarios físicos no observados y validación del circuito completo siguen pendientes.
+
+Lo que sigue conserva el procedimiento e historial de preparación/prueba anterior,
+incluidos estados de base/instalación de su momento; este bloque fija el estado actual.
+
+
+
 Continuación del procedimiento del ensayo. Esta sección corresponde a la nueva
 entrada lib/technical/control_ubicacion_inicio_main.dart, en el worktree
 F:\dev\vanfull-cu030-ubicacion, rama feat/chofer-control-ubicacion-cu030.

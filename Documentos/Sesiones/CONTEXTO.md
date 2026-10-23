@@ -247,7 +247,7 @@ antes de cada demo**, y sacar un `pg_dump` local antes de cada punto de control.
 
 **Demo desplegada (2026-10-23):** app en https://vanfull.onrender.com, API en https://vanfull-api.onrender.com/api,
 base en Neon (us-east-2). Ensayada desde un celular con el flujo completo del pasajero. Cómo se despliega, qué
-variable va dónde y el ensayo: `DESPLIEGUE.md`. Render **no pide tarjeta** para el plan free.
+variable va dónde y el ensayo: `DESPLIEGUE.md`.
 
 ## 14. Recursos
 

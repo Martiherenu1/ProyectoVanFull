@@ -50,3 +50,9 @@ services:
     buildCommand: echo "Compilado en GitHub Actions (workflow Web)"
     staticPublishPath: ./
     autoDeployTrigger: commit
+    # Sin esta regla, `/` daba 404 aunque index.html estaba publicado (Issue #125). Render no aplica
+    # reglas a una ruta donde existe un archivo: main.dart.js y los assets se sirven igual.
+    routes:
+      - type: rewrite
+        source: /*
+        destination: /index.html

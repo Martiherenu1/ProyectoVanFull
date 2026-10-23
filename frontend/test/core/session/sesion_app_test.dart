@@ -5,6 +5,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:frontend/core/session/sesion.dart';
 import 'package:frontend/core/session/sesion_app.dart';
 import 'package:frontend/core/session/sesion_controller.dart';
+import 'package:frontend/screens/admin/viajes_dia_admin_screen.dart';
 
 Sesion sesionDe(List<String> roles) => Sesion(accessToken: 'tok', roles: roles);
 
@@ -116,7 +117,7 @@ void main() {
 
     espera.complete(sesionDe(['administrador']));
     await tester.pumpAndSettle();
-    expect(find.text('VanFull — Administración'), findsOneWidget);
+    expect(find.byType(ViajesDiaAdminScreen), findsOneWidget);
   });
 
   testWidgets('salir vuelve al login aunque el logout falle', (tester) async {
@@ -172,5 +173,29 @@ void main() {
 
       expect(find.text(esperado), findsOneWidget, reason: rol);
     }
+  });
+
+  testWidgets('el administrador recibe sus dependencias en Viajes del día', (
+    tester,
+  ) async {
+    final fechas = <DateTime>[];
+    final c = SesionController(
+      iniciarSesion: (_, _) async => sesionDe(['administrador']),
+    );
+    await tester.pumpWidget(
+      SesionApp(
+        controller: c,
+        fechaAdmin: DateTime(2026, 10, 30, 18),
+        cargarViajesAdmin: (fecha) async {
+          fechas.add(fecha);
+          return const [];
+        },
+      ),
+    );
+    await completar(tester);
+    await tester.pumpAndSettle();
+
+    expect(find.byType(ViajesDiaAdminScreen), findsOneWidget);
+    expect(fechas, [DateTime(2026, 10, 30)]);
   });
 }

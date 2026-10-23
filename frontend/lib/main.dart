@@ -7,6 +7,7 @@ import 'core/api/pasajero_api.dart';
 import 'core/navigation/role_router.dart';
 import 'core/session/sesion_app.dart';
 import 'core/session/sesion_controller.dart';
+import 'screens/admin/viajes_dia_admin_screen.dart';
 import 'screens/pasajero/pasajero_shell.dart';
 
 /// URL base de la API, con el prefijo `/api`. En el emulador de Android el
@@ -30,6 +31,8 @@ void main() {
   );
   final pasajero = PasajeroApi(cliente);
 
+  // Administración sigue sin fuente de datos: no existe `GET /viajes`, así que
+  // Viajes del día muestra su estado de error en vez de datos simulados.
   runApp(
     SesionApp(
       controller: sesion,
@@ -40,12 +43,26 @@ void main() {
 }
 
 class VanFullApp extends StatelessWidget {
-  const VanFullApp({this.roles = const [], super.key});
+  const VanFullApp({
+    this.roles = const [],
+    this.fechaAdmin,
+    this.cargarViajesAdmin,
+    this.onViajeAdminSeleccionado,
+    super.key,
+  });
 
   final List<String> roles;
+  final DateTime? fechaAdmin;
+  final CargarViajesDelDia? cargarViajesAdmin;
+  final ValueChanged<int>? onViajeAdminSeleccionado;
 
   @override
   Widget build(BuildContext context) {
-    return RoleRouter(roles: roles);
+    return RoleRouter(
+      roles: roles,
+      fechaAdmin: fechaAdmin,
+      cargarViajesAdmin: cargarViajesAdmin,
+      onViajeAdminSeleccionado: onViajeAdminSeleccionado,
+    );
   }
 }

@@ -106,6 +106,64 @@ def test_se_puede_iniciar_sesion_con_cada_cuenta_sembrada(base):
             assert respuesta.json()["roles"] == roles
 
 
+def test_carga_los_tres_escenarios_administrativos_del_30_de_octubre(base):
+    _cargar(base)
+    filas = asyncio.run(
+        consultar(
+            base,
+            "SELECT v.id_viaje, v.horario::text, v.id_chofer, v.id_vehiculo, v.estado, "
+            "v.capacidad_planificada, ve.capacidad "
+            "FROM viaje v LEFT JOIN vehiculo ve USING (id_vehiculo) "
+            "WHERE v.fecha = DATE '2026-10-30' ORDER BY v.id_viaje",
+        )
+    )
+    assert filas == [
+        (1, "07:30:00", 3, 1, "programado", 18, 20),
+        (2, "12:30:00", None, 1, "programado", 18, 20),
+        (3, "18:00:00", 3, None, "programado", 18, None),
+    ]
+
+
+def test_el_seed_es_compatible_con_cu018_y_cu029(base):
+    _cargar(base)
+    contrasenas = seed.leer_contrasenas(seed.CONTRASENAS)
+    with cliente_api(base) as cliente:
+        sesion_chofer = cliente.post(
+            "/api/auth/login",
+            json={
+                "identificador_acceso": "chofer1@vanfull.test",
+                "password": contrasenas["chofer1@vanfull.test"],
+            },
+        )
+        viajes = cliente.get(
+            "/api/choferes/me/viajes",
+            params={"fecha": "2026-10-30"},
+            headers={"Authorization": f"Bearer {sesion_chofer.json()['access_token']}"},
+        )
+        assert viajes.status_code == 200
+        assert [viaje["id_viaje"] for viaje in viajes.json()] == [1, 3]
+
+        sesion_admin = cliente.post(
+            "/api/auth/login",
+            json={
+                "identificador_acceso": "admin1@vanfull.test",
+                "password": contrasenas["admin1@vanfull.test"],
+            },
+        )
+        creado = cliente.post(
+            "/api/viajes",
+            json={
+                "id_servicio": 1,
+                "id_recorrido": 1,
+                "fecha": "2026-10-31",
+                "sentido": "IDA",
+            },
+            headers={"Authorization": f"Bearer {sesion_admin.json()['access_token']}"},
+        )
+        assert creado.status_code == 201
+        assert creado.json()["id_viaje"] == 4
+
+
 def test_las_secuencias_siguen_despues_de_la_carga(base):
     """Con ids explícitos la secuencia quedaría en 1 y el próximo INSERT chocaría."""
     _cargar(base)

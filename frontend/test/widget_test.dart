@@ -6,6 +6,8 @@ import 'package:frontend/core/navigation/app_role.dart';
 import 'package:frontend/core/theme/app_colors.dart';
 import 'package:frontend/core/theme/app_theme.dart';
 import 'package:frontend/main.dart';
+import 'package:frontend/models/chofer/viaje_resumen.dart';
+import 'package:frontend/screens/admin/viajes_dia_admin_screen.dart';
 
 void main() {
   test('los temas respetan rol, contraste y superficies planas', () {
@@ -58,13 +60,6 @@ void main() {
       brightness: Brightness.dark,
       height: 64.0,
     ),
-    (
-      apiRole: 'administrador',
-      title: 'Viajes del día',
-      useCase: 'CU-018 · Entrada temporal',
-      brightness: Brightness.light,
-      height: 36.0,
-    ),
   ]) {
     testWidgets('abre la entrada temporal de ${scenario.apiRole}', (
       WidgetTester tester,
@@ -88,12 +83,67 @@ void main() {
     });
   }
 
+  testWidgets('administrador abre Viajes del día con dependencias inyectadas', (
+    WidgetTester tester,
+  ) async {
+    final fechas = <DateTime>[];
+    int? seleccionado;
+    final viaje = ViajeResumen(
+      idViaje: 42,
+      idServicio: 1,
+      idRecorrido: 1,
+      idVehiculo: 1,
+      idChofer: 3,
+      fecha: DateTime(2026, 10, 30),
+      horario: '07:30',
+      sentido: SentidoViaje.ida,
+      estado: EstadoViaje.programado,
+    );
+
+    await tester.pumpWidget(
+      VanFullApp(
+        roles: const ['administrador'],
+        fechaAdmin: DateTime(2026, 10, 30, 18),
+        cargarViajesAdmin: (fecha) async {
+          fechas.add(fecha);
+          return [viaje];
+        },
+        onViajeAdminSeleccionado: (id) => seleccionado = id,
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.byType(ViajesDiaAdminScreen), findsOneWidget);
+    expect(fechas, [DateTime(2026, 10, 30)]);
+    expect(find.text('CU-018 · Entrada temporal'), findsNothing);
+    expect(
+      Theme.of(tester.element(find.byType(Scaffold))).brightness,
+      Brightness.light,
+    );
+    await tester.tap(find.text('42'));
+    expect(seleccionado, 42);
+  });
+
+  testWidgets('administrador sin servicio no usa datos simulados', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(const VanFullApp(roles: ['administrador']));
+    await tester.pumpAndSettle();
+
+    expect(find.byType(ViajesDiaAdminScreen), findsOneWidget);
+    expect(
+      find.text('No pudimos cargar los viajes. Volvé a intentar.'),
+      findsOneWidget,
+    );
+  });
+
   testWidgets('sin rol espera la integración con autenticación', (
     WidgetTester tester,
   ) async {
     await tester.pumpWidget(const VanFullApp());
 
     expect(find.text('Autenticación pendiente'), findsOneWidget);
+    expect(find.byType(ViajesDiaAdminScreen), findsNothing);
     expect(find.text('Buscar servicio'), findsNothing);
     expect(find.text('Lista del viaje'), findsNothing);
     expect(find.text('Viajes del día'), findsNothing);
@@ -105,6 +155,7 @@ void main() {
     );
 
     expect(find.text('Selección de rol pendiente'), findsOneWidget);
+    expect(find.byType(ViajesDiaAdminScreen), findsNothing);
     expect(find.text('Buscar servicio'), findsNothing);
     expect(find.text('Viajes del día'), findsNothing);
   });
@@ -113,6 +164,7 @@ void main() {
     await tester.pumpWidget(const VanFullApp(roles: ['rol_inexistente']));
 
     expect(find.text('Rol no reconocido'), findsOneWidget);
+    expect(find.byType(ViajesDiaAdminScreen), findsNothing);
     expect(find.text('Buscar servicio'), findsNothing);
     expect(find.text('Lista del viaje'), findsNothing);
     expect(find.text('Viajes del día'), findsNothing);

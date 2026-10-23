@@ -7,7 +7,7 @@
 > datos de esta máquina. Los prompts de arranque por tipo de tarea, y el criterio de cuándo conviene
 > abrir un chat nuevo, están en `Documentos/Sesiones/PROMPT-INICIAL.md`.
 >
-> **Última actualización: 2026-10-15** (§11) · Reemplaza y consolida todas las versiones anteriores.
+> **Última actualización: 2026-10-23** (§13, deploy) · Reemplaza y consolida todas las versiones anteriores.
 
 ---
 
@@ -245,9 +245,9 @@ sin uso. Render, se duerme a los 15 min sin tráfico y despertar tarda cerca de 
 toca la BD, la mantiene despierta. En su lugar, **calentar con `/health` y una consulta real unos 5 minutos
 antes de cada demo**, y sacar un `pg_dump` local antes de cada punto de control.
 
-**Configuración del deploy lista (2026-10-23, Issue #116):** `render.yaml`, `.github/workflows/pages.yml` y la
-guía `DESPLIEGUE.md`, con qué variable va dónde, cómo sembrar Neon sin las contraseñas públicas y el ensayo.
-Falta crear los servicios: lo hace Martiniano, que carga los secretos.
+**Demo desplegada (2026-10-23):** app en https://vanfull.onrender.com, API en https://vanfull-api.onrender.com/api,
+base en Neon (us-east-2). Ensayada desde un celular con el flujo completo del pasajero. Cómo se despliega, qué
+variable va dónde y el ensayo: `DESPLIEGUE.md`. Render **no pide tarjeta** para el plan free.
 
 ## 14. Recursos
 

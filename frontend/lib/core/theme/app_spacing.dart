@@ -1,4 +1,3 @@
-
 /// Espaciados y dimensiones compartidas de VanFull.
 /// Fuente: 08-Brief-de-Diseno-UI.md, sección 5.3.
 abstract final class AppSpacing {

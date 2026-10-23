@@ -6,8 +6,7 @@ import 'package:frontend/core/session/sesion.dart';
 import 'package:frontend/core/session/sesion_app.dart';
 import 'package:frontend/core/session/sesion_controller.dart';
 
-Sesion sesionDe(List<String> roles) =>
-    Sesion(accessToken: 'tok', roles: roles);
+Sesion sesionDe(List<String> roles) => Sesion(accessToken: 'tok', roles: roles);
 
 Future<void> completar(WidgetTester tester, {String pass = 'clave'}) async {
   await tester.enterText(find.byType(TextField).at(0), ' ana@vanfull.test ');
@@ -66,23 +65,24 @@ void main() {
     expect(find.text('Ingresar'), findsNothing);
   });
 
-  testWidgets('credenciales inválidas muestran el motivo y siguen en el login', (
-    tester,
-  ) async {
-    final c = SesionController(
-      iniciarSesion: (_, _) async => throw const CredencialesInvalidas(),
-    );
-    await tester.pumpWidget(SesionApp(controller: c));
+  testWidgets(
+    'credenciales inválidas muestran el motivo y siguen en el login',
+    (tester) async {
+      final c = SesionController(
+        iniciarSesion: (_, _) async => throw const CredencialesInvalidas(),
+      );
+      await tester.pumpWidget(SesionApp(controller: c));
 
-    await completar(tester);
-    await tester.pump();
+      await completar(tester);
+      await tester.pump();
 
-    expect(
-      find.text('El correo o la contraseña no son correctos.'),
-      findsOneWidget,
-    );
-    expect(c.sesion, isNull);
-  });
+      expect(
+        find.text('El correo o la contraseña no son correctos.'),
+        findsOneWidget,
+      );
+      expect(c.sesion, isNull);
+    },
+  );
 
   testWidgets('un fallo de red se distingue de las credenciales', (
     tester,
@@ -136,17 +136,41 @@ void main() {
     expect(find.text('Ingresar'), findsOneWidget);
   });
 
-  testWidgets('la contraseña arranca oculta y se puede mostrar', (tester) async {
+  testWidgets('la contraseña arranca oculta y se puede mostrar', (
+    tester,
+  ) async {
     final c = SesionController(
       iniciarSesion: (_, _) async => sesionDe(['pasajero']),
     );
     await tester.pumpWidget(SesionApp(controller: c));
 
-    TextField campo() =>
-        tester.widget<TextField>(find.byType(TextField).at(1));
+    TextField campo() => tester.widget<TextField>(find.byType(TextField).at(1));
     expect(campo().obscureText, isTrue);
     await tester.tap(find.byTooltip('Mostrar contraseña'));
     await tester.pump();
     expect(campo().obscureText, isFalse);
+  });
+
+  testWidgets('el pasajero entra a su pantalla y los otros roles no', (
+    tester,
+  ) async {
+    for (final (rol, esperado) in [
+      ('pasajero', 'entrada-del-pasajero'),
+      ('chofer', 'VanFull — Chofer'),
+    ]) {
+      final c = SesionController(
+        iniciarSesion: (_, _) async => sesionDe([rol]),
+      );
+      await tester.pumpWidget(
+        SesionApp(
+          controller: c,
+          entradaPasajero: (_) => const Text('entrada-del-pasajero'),
+        ),
+      );
+      await completar(tester);
+      await tester.pumpAndSettle();
+
+      expect(find.text(esperado), findsOneWidget, reason: rol);
+    }
   });
 }

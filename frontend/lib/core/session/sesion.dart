@@ -21,8 +21,10 @@ class Sesion {
 }
 
 /// POST /auth/login. Lanza [CredencialesInvalidas] ante el 401.
-typedef IniciarSesion =
-    Future<Sesion> Function(String identificador, String password);
+typedef IniciarSesion = Future<Sesion> Function(
+  String identificador,
+  String password,
+);
 
 /// POST /auth/logout. El backend no tiene lista negra: alcanza con descartar el token.
 typedef CerrarSesion = Future<void> Function();

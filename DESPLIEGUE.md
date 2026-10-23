@@ -60,7 +60,7 @@ Remove-Item Env:DATABASE_URL
 1. Render → *New* → *Blueprint* → este repositorio. Toma `render.yaml` de la raíz.
 2. Pide `DATABASE_URL` y `OPENROUTER_API_KEY` (`sync: false`): pegarlos ahí. El primer deploy tarda
    varios minutos.
-3. El servicio arranca con `alembic upgrade head && uvicorn …`. El plan free no tiene shell ni jobs, por
+3. El servicio arranca con `backend/arrancar.sh`: `alembic upgrade head` y después uvicorn. El plan free no tiene shell ni jobs, por
    eso la migración corre en cada arranque. Si la base ya está en head no hace nada; si una migración
    falla, la API no arranca.
 4. Comprobar `https://<servicio>.onrender.com/api/health` → `{"status":"ok","database":"up"}`.

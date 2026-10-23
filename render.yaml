@@ -11,11 +11,9 @@ services:
     branch: main
     dockerfilePath: ./backend/Dockerfile
     dockerContext: ./backend
-    # Migra antes de servir (el plan free no tiene shell ni jobs). Es idempotente: si la base ya
-    # está en head no hace nada, y si una migración falla la API no arranca con el esquema viejo.
-    dockerCommand: >-
-      sh -c "alembic upgrade head && exec uvicorn app.main:app --host 0.0.0.0 --port $PORT
-      --proxy-headers --forwarded-allow-ips='*'"
+    # Migra y después sirve: ver backend/arrancar.sh. Va en un script porque Render no parte el
+    # dockerCommand como un shell (un `sh -c "…"` falló con exit 127, Issue #119).
+    dockerCommand: sh arrancar.sh
     healthCheckPath: /api/health
     # Despliega solo cuando la CI de main está en verde, y solo si cambió el backend.
     autoDeployTrigger: checksPass

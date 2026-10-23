@@ -1,5 +1,13 @@
 # Contexto vivo · Chofer y viaje en curso (Martín)
 
+## Estado al 23/10/2026 — adaptador del listado CU-029 local
+
+- Base `origin/main 4d8213a3112bc08c9794366b5d4c1a9a7314b5f1`; #87 integrada, interfaz compartida revisada. Rama `feat/chofer-adaptador-listado-cu029`, worktree `F:/dev/vanfull-cu029-adaptador`.
+- `ViajesChoferApi.cargarViajes(DateTime)` recibe ApiClient externo: base con /api/, ruta /choferes/me/viajes y fecha por year/month/day sin conversión horaria. Reutiliza ViajeResumen y conserva orden, vacío y horario omitido; propaga errores HTTP/transporte sin reintentos ni cierre del cliente.
+- Estructura/DTO inválidos: ListadoViajesInvalidoException con mensaje fijo y sin datos recibidos, sin listado parcial. Sin cambios de navegación, pantallas, sesión, dependencias, lockfile, backend, README, #103 ni GPS; sin llamadas reales. Sin commits/publicaciones por instrucción del usuario.
+- Checks locales: pub get offline con lockfile exigido correcto; formato final de dos archivos correcto (cero cambios); analyze sin issues (17,7 s). Suite Flutter: 148 aprobadas, 0 fallidas, 0 omitidas (19 nuevas, 129 de base; 58 s). Avisos preexistentes de Google Fonts sin fallas; diff de dependencias/lockfile vacío.
+- Pendiente: conectar el adaptador desde el contenedor externo en una tarea posterior; integración real y dispositivo SIN VERIFICAR. Los registros inferiores son históricos (detalle #89 ya integrado en esta base).
+
 ## Estado vigente al 21/10/2026 — detalle Flutter CU-029 local con mocks
 
 - Entrega publicada en [PR #89](https://github.com/Martiherenu1/ProyectoVanFull/pull/89), abierta y sin merge a main; Issue #88 abierto con etiqueta `chofer`. Rama `feat/chofer-detalle-flutter-cu029`, worktree `F:\dev\vanfull-flutter-cu029-detalle`. Los seis archivos revisados se preservaron en `a6f234eb107214dd0380670f368a1e0110042efc`. Base inicial: `28cfe338fde8bdcd8eb25c56b17c8911dfdb8d7e`; se reutiliza `ViajeResumen`, sin copiarlo ni modificar la rama del listado.

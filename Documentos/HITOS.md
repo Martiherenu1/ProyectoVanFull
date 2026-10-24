@@ -179,6 +179,24 @@
 - **Tecnologías:** Render (Blueprint IaC, Docker, sitio estático en CDN), Neon (PostgreSQL serverless), GitHub
   Actions (Flutter Web), FastAPI, Alembic, SQLAlchemy async/asyncpg con TLS, CORS, JWT.
 
+### [2026-10-24] Integración de tres áreas sobre un contrato común, con concurrencia y pagos verificados
+
+- **Qué:** desde el 13/10 se integraron en `main` las tres partes del sistema (pasajero, chofer y
+  administración), cada una a cargo de una persona, con **76 pull requests** mergeadas por el flujo Issue → rama →
+  PR → CI → revisión cruzada. Entraron el registro de pagos y el perfil del pasajero (backend y Flutter), el aviso
+  de ausencia, el listado de viajes del día para administración y los adaptadores HTTP del chofer. Backend y sitio
+  quedaron desplegados en Render con la CI de `main` en verde (367 pruebas de backend, 375 de Flutter).
+- **Rol de Martiniano:** dueño del área del pasajero y de la base común. Implementó el pago (CU-014) y el perfil
+  (CU-001) de punta a punta, definió con los otros dos el orden de bloqueos de la base (pasajero → viaje → reserva)
+  para evitar interbloqueos, revisó y aprobó los PR de los otros dos y resolvió los conflictos que bloqueaban la
+  integración de cuatro PR encadenadas, sin reescribir historia.
+- **Por qué importa (CV):** se coordinó un equipo de tres sobre un **contrato OpenAPI como fuente de verdad**
+  (cada cambio de contrato con YAML y JSON regenerados y una prueba que los compara), con **cambios de
+  concurrencia acordados y documentados** y validaciones de integridad en los pagos (404 explícitos en vez de
+  errores de clave foránea). La entrega se verificó contra lo publicado: el deploy del backend se comprobó por el
+  commit que registra GitHub y el sitio por el contenido del bundle compilado.
+- **Tecnologías:** FastAPI, PostgreSQL con bloqueos a nivel de fila, OpenAPI, Flutter Web, GitHub Actions, Render.
+
 <!-- Próximos hitos a documentar a medida que se implementen:
      - Esquema de datos PostgreSQL y migraciones
      - Contrato OpenAPI de las tools de AG-01

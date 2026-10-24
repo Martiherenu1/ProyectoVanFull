@@ -67,9 +67,18 @@ class PasajeroApi {
     return _lista(cuerpo).map(Reserva.fromJson).toList();
   }
 
+  /// Quien nunca reservó no tiene cliente individual y el backend responde 404
+  /// `CLIENTE_NO_ENCONTRADO`: sin cuenta corriente no hay nada que deber.
   Future<Deuda> cargarDeuda() async {
-    final cuerpo = await _cliente.get('pasajeros/me/deuda');
-    return Deuda.fromJson(cuerpo! as Map<String, dynamic>);
+    try {
+      final cuerpo = await _cliente.get('pasajeros/me/deuda');
+      return Deuda.fromJson(cuerpo! as Map<String, dynamic>);
+    } on ApiException catch (e) {
+      if (e.statusCode == 404 && e.codigo == 'CLIENTE_NO_ENCONTRADO') {
+        return const Deuda(saldo: 0, estado: EstadoDeuda.alDia);
+      }
+      rethrow;
+    }
   }
 
   Future<ResultadoCancelacion> cancelarReserva(int idReserva) async {

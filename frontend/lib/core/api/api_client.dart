@@ -7,7 +7,9 @@ typedef AccessTokenProvider = FutureOr<String?> Function();
 abstract interface class ApiClient {
   Future<Object?> get(String path, {Map<String, String>? queryParameters});
 
-  Future<Object?> post(String path, {Object? body});
+  /// [accessToken] reemplaza al del proveedor: lo usa quien actúa en nombre de
+  /// una sesión que ya no es la vigente (la saliente en el logout).
+  Future<Object?> post(String path, {Object? body, String? accessToken});
 
   Future<Object?> patch(String path, {Object? body});
 }

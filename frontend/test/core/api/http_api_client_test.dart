@@ -141,6 +141,70 @@ void main() {
     );
   });
 
+  http.Response rechazo(int estado) => http.Response(
+    jsonEncode({
+      'error': {'codigo': 'X', 'mensaje': 'Mensaje.'},
+    }),
+    estado,
+  );
+
+  test('un 401 con token avisa con el token que viajó', () async {
+    var vigente = 'A';
+    final avisos = <String>[];
+    final client = HttpApiClient(
+      baseUri: Uri.parse('https://api.vanfull.test'),
+      transport: MockClient((_) async {
+        // La sesión cambia mientras el pedido está en vuelo.
+        vigente = 'B';
+        return rechazo(401);
+      }),
+      accessTokenProvider: () => vigente,
+      onNoAutorizado: avisos.add,
+    );
+
+    await expectLater(client.get('/api/pagos'), throwsA(isA<ApiException>()));
+
+    expect(avisos, ['A']);
+  });
+
+  test('ni el 401 sin token ni el 403 avisan', () async {
+    var estado = 401;
+    final avisos = <String>[];
+    String? token;
+    final client = HttpApiClient(
+      baseUri: Uri.parse('https://api.vanfull.test'),
+      transport: MockClient((_) async => rechazo(estado)),
+      accessTokenProvider: () => token,
+      onNoAutorizado: avisos.add,
+    );
+
+    await expectLater(
+      client.post('/api/auth/login'),
+      throwsA(isA<ApiException>()),
+    );
+    token = 'A';
+    estado = 403;
+    await expectLater(client.get('/api/pagos'), throwsA(isA<ApiException>()));
+
+    expect(avisos, isEmpty);
+  });
+
+  test('un token explícito reemplaza al del proveedor', () async {
+    late http.Request sent;
+    final client = HttpApiClient(
+      baseUri: Uri.parse('https://api.vanfull.test'),
+      transport: MockClient((request) async {
+        sent = request;
+        return http.Response('', 204);
+      }),
+      accessTokenProvider: () => null,
+    );
+
+    await client.post('/api/auth/logout', accessToken: 'saliente');
+
+    expect(sent.headers['authorization'], 'Bearer saliente');
+  });
+
   test('rechaza URL base inválida y rutas absolutas', () async {
     expect(
       () => HttpApiClient(

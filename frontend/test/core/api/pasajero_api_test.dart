@@ -17,6 +17,7 @@ class ClienteFalso implements ApiClient {
   String? ultimaClave;
   Map<String, String>? ultimaConsulta;
   Object? ultimoCuerpo;
+  String? ultimoToken;
 
   Object? _atender(String clave) {
     ultimaClave = clave;
@@ -33,8 +34,9 @@ class ClienteFalso implements ApiClient {
   }
 
   @override
-  Future<Object?> post(String path, {Object? body}) async {
+  Future<Object?> post(String path, {Object? body, String? accessToken}) async {
     ultimoCuerpo = body;
+    ultimoToken = accessToken;
     return _atender('POST $path');
   }
 
@@ -106,10 +108,11 @@ void main() {
       );
     });
 
-    test('logout llama a POST auth/logout', () async {
+    test('logout llama a POST auth/logout con el token saliente', () async {
       final cliente = ClienteFalso({'POST auth/logout': () => null});
-      await AuthApi(cliente).cerrarSesion();
+      await AuthApi(cliente).cerrarSesion('saliente');
       expect(cliente.ultimaClave, 'POST auth/logout');
+      expect(cliente.ultimoToken, 'saliente');
     });
   });
 

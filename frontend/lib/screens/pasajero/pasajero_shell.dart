@@ -1,14 +1,16 @@
 import 'package:flutter/material.dart';
 
 import '../../core/api/pasajero_api.dart';
-import '../../core/theme/app_spacing.dart';
+import '../../models/pasajero/deuda.dart';
 import '../../models/pasajero/disponibilidad_viaje.dart';
 import 'asistente_screen.dart';
 import 'buscar_servicio_screen.dart';
 import 'confirmar_reserva_screen.dart';
 import 'mis_reservas_screen.dart';
+import 'pago_screen.dart';
+import 'perfil_screen.dart';
 
-/// Entrada del pasajero: une las cuatro pantallas con la API y la navegación.
+/// Entrada del pasajero: une sus pantallas con la API y la navegación.
 /// No decide reglas; solo lleva al pasajero de una pantalla a la siguiente.
 class PasajeroShell extends StatefulWidget {
   const PasajeroShell({super.key, required this.api, required this.onSalir});
@@ -53,6 +55,21 @@ class _PasajeroShellState extends State<PasajeroShell> {
     );
   }
 
+  void _registrarPago(Deuda deuda) {
+    Navigator.of(context).push(
+      MaterialPageRoute<void>(
+        builder: (contexto) => PagoScreen(
+          saldo: deuda.saldo,
+          registrarPago: widget.api.registrarPago,
+          onTerminar: (_) {
+            Navigator.of(contexto).pop();
+            _ir(_reservas);
+          },
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -70,9 +87,14 @@ class _PasajeroShellState extends State<PasajeroShell> {
             cargarDeuda: widget.api.cargarDeuda,
             cancelarReserva: widget.api.cancelarReserva,
             onBuscarServicio: () => _ir(_buscar),
+            onRegistrarPago: _registrarPago,
           ),
           AsistenteScreen(enviarMensaje: widget.api.enviarMensaje),
-          _Cuenta(onSalir: widget.onSalir),
+          PerfilScreen(
+            cargarPerfil: widget.api.cargarPerfil,
+            modificarPerfil: widget.api.modificarPerfil,
+            onSalir: widget.onSalir,
+          ),
         ],
       ),
       bottomNavigationBar: NavigationBar(
@@ -93,30 +115,6 @@ class _PasajeroShellState extends State<PasajeroShell> {
             label: 'Cuenta',
           ),
         ],
-      ),
-    );
-  }
-}
-
-class _Cuenta extends StatelessWidget {
-  const _Cuenta({required this.onSalir});
-
-  final VoidCallback onSalir;
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: const Text('Cuenta')),
-      body: Padding(
-        padding: const EdgeInsets.all(AppSpacing.xl),
-        child: SizedBox(
-          height: AppSpacing.touchTarget,
-          width: double.infinity,
-          child: OutlinedButton(
-            onPressed: onSalir,
-            child: const Text('Cerrar sesión'),
-          ),
-        ),
       ),
     );
   }

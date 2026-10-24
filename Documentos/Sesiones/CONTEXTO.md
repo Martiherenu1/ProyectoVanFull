@@ -7,7 +7,7 @@
 > datos de esta máquina. Los prompts de arranque por tipo de tarea, y el criterio de cuándo conviene
 > abrir un chat nuevo, están en `Documentos/Sesiones/PROMPT-INICIAL.md`.
 >
-> **Última actualización: 2026-10-23** (§13, deploy) · Reemplaza y consolida todas las versiones anteriores.
+> **Última actualización: 2026-10-24** (§11 endpoints; §13 estado del 24/10) · Reemplaza y consolida todas las versiones anteriores.
 
 ---
 
@@ -213,9 +213,13 @@ async + `get_db`), `routers/health.py` (**el único endpoint real**), `agent/too
   Desde el PR #38 (Issue #31) la `Reserva` informa también `fecha`, `horario`, `sentido` e `id_recorrido`
   del viaje: cambio aditivo del contrato.
 
-**No existe todavía:** todo endpoint que no sea `/health`, `/auth/*`, `/pasajeros/me` o los de CU-002 y
-CU-010. El estado de cada área y el del resto
-del desarrollo está en `Documentos/Sesiones/PC2/CONTEXTO-<área>.md`.
+**Endpoints desplegados el 2026-10-24** (OpenAPI de la API en Render; el detalle por área está en
+`Documentos/Sesiones/PC2/CONTEXTO-<área>.md`): `/auth/login` y `/auth/logout` · `/pasajeros/me`,
+`/pasajeros/me/reservas` y `/pasajeros/me/deuda` · `/servicios`, `/servicios/disponibilidad` y
+`/recorridos/{id}/paradas` · `/reservas`, `/reservas/{id}` y `/reservas/{id}/cancelacion` · `/pagos` y
+`/pagos/{id}/confirmacion` · `/viajes` (solo `POST`), `/viajes/{id}/inicio` y `/viajes/{id}/finalizacion` ·
+`/choferes/me/viajes` y `/choferes/me/viajes/{id}` · `/chat` · `/health`. Todavía sin endpoint en producción:
+`GET /viajes` (acordado, lo implementa Facundo), el aviso de ausencia (CU-008) y los abordajes (Martín).
 
 **Plan:** `services/` (reglas RN) → `routers/` (endpoints del OpenAPI) → tests. Los 37 CU entran en ~10 routers,
 no uno por CU.
@@ -248,6 +252,33 @@ antes de cada demo**, y sacar un `pg_dump` local antes de cada punto de control.
 **Demo desplegada (2026-10-23):** app en https://vanfull.onrender.com, API en https://vanfull-api.onrender.com/api,
 base en Neon (us-east-2). Ensayada desde un celular con el flujo completo del pasajero. Cómo se despliega, qué
 variable va dónde y el ensayo: `DESPLIEGUE.md`.
+
+**Estado al cierre del 2026-10-24** (freeze desde el 25/10, salvo acuerdo; REPARTO-PC2):
+
+- **Concurrencia (#131, PR #133, mergeado):** orden de locks **pasajero → viaje → reserva** en creación,
+  cancelación, ausencia y abordaje; ejecución del viaje toma solo el viaje. Escrito en
+  `backend/CONVENCIONES.md` §8. `cancelar_reserva` se adaptó y existe `reserva_propia_del_viaje` para el aviso de
+  ausencia (CU-008). El servicio de ausencias y el abordaje son de Martín; falta que agregue sus pruebas de
+  concurrencia e idempotencia (sin avisos duplicados).
+- **CU-008 cerrado entre los tres:** 201 aviso nuevo; 404 sin reserva propia; 409 reserva provisional o cancelada,
+  pasajero abordado o viaje finalizado/cancelado; 200 con la misma fila si el aviso propio ya existía, aunque
+  después cambie la reserva o el viaje. El aviso no cancela la reserva ni recupera el lugar.
+- **`GET /viajes` (CU-018):** Martín y Facundo lo acordaron y Martiniano lo confirmó: fecha obligatoria, roles
+  `administrador` y `dueno`, orden por horario (nulos al final, después `id_viaje`), todos los estados, errores
+  400/401/403. Lo implementa Facundo.
+- **Flutter:** `SesionApp` solo da entrada real al pasajero. Reparto acordado: Facundo hace en un PR chico la
+  composición compartida (entrada por rol y cliente HTTP en `main.dart`); Martín, en #123, aporta solo la entrada
+  del chofer. #113 y #121 están aprobados; #121 tiene conflicto con main desde #115. #130 (adaptador de crear
+  viaje, de Facundo) aprobado por Martiniano.
+- **CU-014 (#85):** queda con alcance limitado para PC2. El 15 % por efectivo no es del registro: RN-011 y AC9-13/14
+  lo aplican tras un pago en efectivo confirmado (CU-016). Faltan tipo/evidencia y algunos errores; Facundo abre el
+  Issue y marca `POST /pagos` con `x-cobertura: parcial`.
+- **Demo en Render:** el sitio publicado es el build `c4c10b5` (23/10 19:40) y **no tiene entrada de chofer**, así
+  que login → listado → detalle del chofer no se puede probar desde la web hasta que entren #113, #123 y se vuelva
+  a correr el workflow **Web**. La API sí expone las rutas del chofer. `chofer1@vanfull.test` (persona 3) tiene los
+  viajes 1 y 3 del 30/10/2026; el 3 no tiene vehículo. **Sin verificar:** el SHA del backend desplegado (mirar el
+  panel de Render) y que Neon tenga la fila de `chofer1` (probar el login; la contraseña está en el CSV de
+  Martiniano, fuera del repo).
 
 ## 14. Recursos
 

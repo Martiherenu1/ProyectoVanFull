@@ -69,6 +69,11 @@ async def ejecutar_sql(base: str, sql: str, *parametros) -> None:
         await conn.close()
 
 
+async def conectar(base: str) -> asyncpg.Connection:
+    """Una conexión directa, para retener una transacción abierta (bloqueos) en una prueba."""
+    return await asyncpg.connect(_dsn(base))
+
+
 async def consultar(base: str, consulta: str, *parametros) -> list[tuple]:
     conn = await asyncpg.connect(_dsn(base))
     try:

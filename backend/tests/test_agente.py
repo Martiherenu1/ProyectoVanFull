@@ -10,6 +10,7 @@ import ast
 import asyncio
 import copy
 import json
+import time
 from pathlib import Path
 
 import pytest
@@ -74,9 +75,11 @@ class Guion:
         self.pasos = list(pasos)
         self.llamadas: list[dict] = []
 
-    async def __call__(self, messages, tools=None):
+    async def __call__(self, messages, tools=None, limite=None):
         # Copia profunda: el servicio sigue agregando mensajes a las mismas listas.
-        self.llamadas.append({"messages": copy.deepcopy(messages), "tools": tools})
+        self.llamadas.append(
+            {"messages": copy.deepcopy(messages), "tools": tools, "limite": limite}
+        )
         assert self.pasos, "el servicio llamó al modelo más veces de las previstas"
         paso = self.pasos.pop(0)
         if isinstance(paso, Exception):
@@ -394,6 +397,29 @@ def test_si_el_modelo_no_responde_bien_se_deriva_a_una_persona(entorno, hablar, 
     assert cuerpo["respuesta"] == agente.MENSAJE_DERIVACION
     # Un turno fallido no deja una conversación a medias.
     assert cuerpo["conversacion_id"] not in agente._conversaciones
+
+
+def test_sin_clave_se_deriva_sin_llamar_a_openrouter(entorno, monkeypatch):
+    """La demo sin OPENROUTER_API_KEY: el cliente real, sin red, termina en derivación y no en 500."""
+    monkeypatch.setattr(openrouter_client.settings, "openrouter_api_key", "")
+
+    def sin_red(*args, **kwargs):
+        raise AssertionError("sin clave no se abre ninguna conexión")
+
+    monkeypatch.setattr(openrouter_client.httpx, "AsyncClient", sin_red)
+    respuesta = _hablar_como(entorno, "ana", "Hola")
+    assert respuesta.status_code == 200
+    assert respuesta.json()["derivar_humano"] is True
+
+
+def test_todas_las_vueltas_de_un_mensaje_comparten_un_tope(entorno, hablar):
+    """La app no corta la espera: el servicio le pone al mensaje entero un tope de tiempo."""
+    guion = hablar(_llamada(("consultar_reserva", {})), _texto("Listo."))
+    antes = time.monotonic()
+    _hablar_como(entorno, "ana", "Mis reservas")
+    limites = {llamada["limite"] for llamada in guion.llamadas}
+    assert len(limites) == 1
+    assert antes < limites.pop() <= time.monotonic() + agente.TIEMPO_MAXIMO
 
 
 def test_si_el_modelo_no_cierra_en_las_vueltas_previstas_se_deriva(entorno, hablar):

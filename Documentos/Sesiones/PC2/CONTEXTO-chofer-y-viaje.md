@@ -1,5 +1,15 @@
 # Contexto vivo · Chofer y viaje en curso (Martín)
 
+## Estado al 24/10/2026 — componente de consulta Chofer #123 (parcial)
+
+- Rama `feat/chofer-integracion-cu029-123`, base `792792c`, worktree `.worktrees/chofer-integracion-123`. Usuario autoriza únicamente componentes propios. Reparto confirmado: Facundo composición/inyección/transporte/router; Martiniano autenticación/sesión/token/roles; Martín pantallas y adaptadores Chofer. Sin commits, push ni publicaciones.
+- ChoferShell reutiliza listado y detalle por ID con fuentes externas, conserva fecha/listado al volver (incluido botón del sistema), evita apilar selecciones duplicadas y delega salida mediante callback también durante carga. Sin acciones CU-030 ni GPS. Reconstruir con fuentes iguales no recarga; reemplazarlas explícitamente actualiza las rutas y descarta resultados anteriores.
+- Interfaz y responsabilidades: `frontend/lib/screens/chofer/INTEGRACION-CONSULTA.md`. El contenedor común aporta fuentes estables, maneja/notifica 401/403, retira el shell al cambiar sesión y posee/cierra el transporte. No se implementa política de acceso propia. Archivos compartidos y dependencias intactos; otras ramas, demo y datos preservados.
+- PR #113 verificada el 24/10/2026: abierta, sin merge, HEAD `e4ac0ac`. No se copió su adaptador; dependencia HTTP del detalle explícita. Pruebas con fuentes simuladas (adaptador listado: transporte simulado), sin solicitudes reales.
+- Checks finales: formato de dos Dart, cero cambios; analyze sin issues (24,6 s); 51 pruebas pertinentes aprobadas, 0 fallidas/omitidas (6 shell + 9 listado + 17 detalle + 19 adaptador listado; 28 s), log `frontend/build/chofer-consulta-tests-final.log`. Primera ejecución de analyze detectó uso protegido del notificador y estilo de funciones, corregidos y checks repetidos sobre versión final. Dependencias/lockfile sin cambios. No se ejecutó la suite completa nueva.
+- Evidencia histórica: suite completa anterior interrumpida con Ctrl+C después de 233 aprobadas, sin resultado final y causa SIN VERIFICAR; NO acredita aprobación completa. Las 2 pruebas aisladas previas no sustituyen los checks finales indicados arriba.
+- Entrega parcial: no cierra #123 ni #64. Integración común, #113, HTTP real, dataset/cuentas/versionado de Render con Martiniano, dispositivo y demo siguen pendientes; sin login ni solicitudes operativas reales. Contexto general y de otras áreas no editados.
+
 ## Estado al 23/10/2026 — actualización de PR #109
 
 - Rama `feat/chofer-adaptador-listado-cu029`, worktree `F:/dev/vanfull-cu029-adaptador`, limpia antes de actualizar y coincidente con HEAD remoto `6eef07436aa4defed0afa961a2b717331a38df8c`. Se incorpora `origin/main 6e39d5f129ac3c9cc999594d58749ab0d11691b4` mediante merge, sin rebase ni force. #103 ya integrada y #102 cerrado; #109 continúa abierta para #104; #64 permanece independiente.

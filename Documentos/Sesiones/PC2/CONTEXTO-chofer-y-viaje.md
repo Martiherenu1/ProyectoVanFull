@@ -1,6 +1,11 @@
 # Contexto vivo · Chofer y viaje en curso (Martín)
 
-## Preparación independiente — densidad del detalle CU-029, 24/10/2026
+## Publicación independiente — densidad del detalle CU-029, 24/10/2026
+
+- Publicación autorizada por el usuario: [PR #139](https://github.com/Martiherenu1/ProyectoVanFull/pull/139) abierta hacia main; commit `f2bd16df972d54e57a4042c2039b27d7a99bd144` y push normal de `fix/chofer-densidad-detalle-main-cu029`. Base `f1f78ffbd98fd9d7601a5a50a37af9d5868316b5`, sin cambios desde los checks. No se encontró PR equivalente. Este último commit documental actualiza el estado publicado; el resultado real de CI del HEAD final se registra en la descripción de #139, separado de las 117 pruebas pertinentes locales. No se repiten checks por cambios exclusivamente documentales.
+- Solo tres archivos: pantalla, pruebas y contexto propio. Las 117 pruebas son una selección pertinente, no una suite completa; el intento completo anterior interrumpido no acredita aprobación. `Refs #123`, sin cierre de #123/#64. PR sin merge. Preview, #128, otros worktrees, demo, código compartido y dependencias intactos.
+
+## Registro previo a publicación — preparación independiente, 24/10/2026
 
 - Rama `fix/chofer-densidad-detalle-main-cu029`, worktree `.worktrees/chofer-densidad-main-cu029`, desde `origin/main f1f78ffbd98fd9d7601a5a50a37af9d5868316b5` actualizado. Cero commits propios; sin merge/cherry-pick de ramas de trabajo. Se conserva el contexto de main y solo se agrega este registro puntual. Sin commits, push, PR nueva ni publicaciones.
 - Parche compatible: la pantalla actual ya incorpora `comprobarUbicacionInicio`; se conserva íntegro. Solo cambia `_titulo` (16 px arriba / 8 px abajo) y `_fila` (altura natural, padding vertical 4 px por lado). Pasajeros, controles interactivos de 64 px, tema, sesión, ubicación y dependencias intactos. Entrega independiente hacia main, sin dependencia de #128; no se traslada su shell, interfaz ni registro de publicación.

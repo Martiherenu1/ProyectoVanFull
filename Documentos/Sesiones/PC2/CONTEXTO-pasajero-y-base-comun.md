@@ -39,6 +39,7 @@ La CI corre en cada PR. En `main` la suite da 300 pruebas; la rama de las tools 
 | Tools `crear_reserva` y `cancelar_reserva` de AG-01: `agent/ejecutor.py` las traduce a los servicios de reservas; `crear_reserva` recibe `viaje_id` y `orden_parada` | #77 | #78 |
 | Integración del pasajero: login, Buscar, Confirmar, Mis reservas y Asistente conectados a la API (detalle abajo, en «En curso», hasta limpiar esa sección) | #107 | #108 |
 | Deploy de la demo: Neon + Render (API y sitio estático) + Pages de respaldo, CORS por variable, seed sin contraseñas públicas, `DESPLIEGUE.md` | #116, #119, #122, #125 | #117, #120, #124, #126 |
+| Orden de locks pasajero → viaje → reserva en `cancelar_reserva` y helper `reserva_propia_del_viaje` para el aviso de ausencia (CU-008, de Martín); `CONVENCIONES.md` §8 | #131 | #133 |
 
 ## En curso
 
@@ -149,6 +150,7 @@ conectada (#87 y el login).
 | 2026-10-23 | **Deploy (#116):** la migración corre en el arranque del servicio de Render (`backend/arrancar.sh`: `alembic upgrade head` y después uvicorn; va en un script porque Render no parte un `sh -c "…"` como un shell, #119), porque el plan free no tiene shell ni jobs; es idempotente. Pages se publica a mano (`workflow_dispatch`); la API, cuando la CI de `main` pasa. Fuera de desarrollo, sin `CORS_ORIGINS` la API no arranca. CORS sin `allow_credentials`: el token va en `Authorization` | `render.yaml`, `DESPLIEGUE.md` |
 | 2026-10-23 | En una base remota, el seed exige `--permitir-base-remota` **y** un archivo de contraseñas fuera del repo (la bandera sola ya no alcanza); las contraseñas de la demo se generan al azar y no se imprimen | `db/seed/README.md`, `DESPLIEGUE.md` |
 | 2026-10-23 | **La URL de la demo es `vanfull.onrender.com`** (sitio estático de Render), no la de Pages, que muestra el usuario de GitHub (#122). Flutter se compila en GitHub Actions (workflow **Web**) y se publica en la rama `sitio-web`, que Render sirve sin compilar; Pages queda de respaldo | `render.yaml`, `DESPLIEGUE.md` |
+| 2026-10-24 | **Orden de locks: pasajero → viaje → reserva** en creación, cancelación, ausencia y abordaje; ejecución del viaje toma solo el viaje y no adquiere pasajero ni reserva después. Propuesta de Martín (CU-008), confirmada por Martiniano; Facundo pendiente. `cancelar_reserva` se adaptó (antes bloqueaba solo la reserva) | `services/reservas.py`, `CONVENCIONES.md` §8, #131 |
 
 ## Pendientes
 

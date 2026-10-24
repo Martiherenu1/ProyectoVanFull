@@ -11,11 +11,19 @@ from datetime import UTC, date, datetime
 from itertools import count
 from types import SimpleNamespace
 
+import asyncpg
 import pytest
+from sqlalchemy.ext.asyncio import async_sessionmaker, create_async_engine
+from sqlalchemy.pool import NullPool
 
-from app.core.security import crear_token
-from app.services.reservas import ZONA_ARGENTINA, _en_termino, _motivo
-from tests._bd import base_migrada, cliente_api, consultar, ejecutar_sql
+from app.core.security import UsuarioActual, crear_token
+from app.services.reservas import (
+    ZONA_ARGENTINA,
+    _en_termino,
+    _motivo,
+    reserva_propia_del_viaje,
+)
+from tests._bd import base_migrada, cliente_api, conectar, consultar, ejecutar_sql, url_sqlalchemy
 
 RESERVAS = "/api/reservas"
 MIS_RESERVAS = "/api/pasajeros/me/reservas"
@@ -272,6 +280,168 @@ def test_dos_cancelaciones_simultaneas_solo_una_prospera(entorno):
         id_reserva,
     )
     assert eventos == 1
+
+
+# --- Orden de locks: pasajero → viaje → reserva (CONVENCIONES §8) -------------------------
+
+
+def _cancelar_con_bloqueo_ajeno(entorno, id_persona, id_reserva, bloqueo, soltar):
+    """Cancela mientras otra transacción retiene `bloqueo`; la suelta tras 1,5 s con `soltar`.
+
+    Devuelve (si la cancelación espero, su respuesta). Una cancelación que no toma ese lock
+    termina antes de que se suelte y `espero` da False.
+    """
+
+    async def _correr():
+        conn = await conectar(entorno["base"])
+        try:
+            transaccion = conn.transaction()
+            await transaccion.start()
+            await conn.execute(bloqueo)
+            pedido = asyncio.get_running_loop().run_in_executor(
+                None, _cancelar, entorno, id_persona, id_reserva
+            )
+            terminadas, _ = await asyncio.wait({pedido}, timeout=1.5)
+            await conn.execute(soltar)
+            await transaccion.commit()
+            return not terminadas, await pedido
+        finally:
+            await conn.close()
+
+    return asyncio.run(_correr())
+
+
+def test_la_cancelacion_espera_el_lock_del_viaje(entorno):
+    """Si el viaje está tomado (por ejemplo, lo inicia el chofer), la cancelación lo ve ya iniciado."""
+    ana, viaje, id_reserva = _reserva_creada(entorno, entorno["viaje"](fecha="2026-11-23"))
+    espero, respuesta = _cancelar_con_bloqueo_ajeno(
+        entorno,
+        ana,
+        id_reserva,
+        f"SELECT 1 FROM viaje WHERE id_viaje = {viaje} FOR UPDATE",
+        f"UPDATE viaje SET estado = 'en_curso' WHERE id_viaje = {viaje}",
+    )
+    assert espero
+    assert respuesta.status_code == 409
+    assert respuesta.json()["error"]["codigo"] == "VIAJE_NO_CANCELABLE"
+    assert _estado(entorno, id_reserva) == "consolidada"
+
+
+def test_la_cancelacion_espera_el_lock_del_pasajero(entorno):
+    """Cancelar, crear (y el aviso de ausencia) del mismo pasajero se turnan: primero el pasajero."""
+    ana, _, id_reserva = _reserva_creada(entorno, entorno["viaje"](fecha="2026-11-24"))
+    espero, respuesta = _cancelar_con_bloqueo_ajeno(
+        entorno,
+        ana,
+        id_reserva,
+        f"SELECT 1 FROM pasajero WHERE id_persona = {ana} FOR UPDATE",
+        "SELECT 1",
+    )
+    assert espero
+    assert respuesta.status_code == 200
+    assert _estado(entorno, id_reserva) == "cancelada"
+
+
+def test_cancelar_y_reservar_del_mismo_pasajero_a_la_vez_no_se_traban(entorno):
+    """Ambas toman primero el pasajero: no hay ciclo de locks, las dos terminan."""
+    ana, _, id_reserva = _reserva_creada(entorno, entorno["viaje"](fecha="2026-11-25"))
+    otro_viaje = entorno["viaje"](fecha="2026-11-26")
+    with ThreadPoolExecutor(max_workers=8) as pool:
+        cancelaciones = [pool.submit(_cancelar, entorno, ana, id_reserva) for _ in range(4)]
+        reservas = [pool.submit(_reservar, entorno, ana, otro_viaje) for _ in range(4)]
+        codigos_cancelar = sorted(f.result(timeout=30).status_code for f in cancelaciones)
+        codigos_reservar = sorted(f.result(timeout=30).status_code for f in reservas)
+    assert codigos_cancelar == [200, 409, 409, 409]
+    assert codigos_reservar == [201, 409, 409, 409]
+
+
+# --- Reserva propia de un viaje (la usa el aviso de ausencia, CU-008) ---------------------
+
+
+def _con_sesion(entorno, usar):
+    """Corre `usar(db)` en una sesión nueva y la devuelve ya cerrada (sin commit propio)."""
+
+    async def _correr():
+        motor = create_async_engine(url_sqlalchemy(entorno["base"]), poolclass=NullPool)
+        try:
+            async with async_sessionmaker(motor, expire_on_commit=False)() as db:
+                return await usar(db)
+        finally:
+            await motor.dispose()
+
+    return asyncio.run(_correr())
+
+
+def _usuario(id_persona: int) -> UsuarioActual:
+    return UsuarioActual(id_cuenta_acceso=id_persona, id_persona=id_persona, roles=("pasajero",))
+
+
+def test_la_reserva_propia_del_viaje_es_la_del_llamador(entorno):
+    ana, viaje, id_reserva = _reserva_creada(entorno)
+    beto = _persona(entorno["base"])
+
+    async def _usar(db):
+        propia = await reserva_propia_del_viaje(db, _usuario(ana), viaje)
+        ajena = await reserva_propia_del_viaje(db, _usuario(beto), viaje)
+        return propia.id_reserva, propia.estado, ajena
+
+    assert _con_sesion(entorno, _usar) == (id_reserva, "consolidada", None)
+
+
+def test_sin_reserva_en_ese_viaje_no_hay_reserva_propia(entorno):
+    ana, _, _ = _reserva_creada(entorno)
+    otro_viaje = entorno["viaje"](fecha="2026-11-27")
+
+    async def _usar(db):
+        return await reserva_propia_del_viaje(db, _usuario(ana), otro_viaje)
+
+    assert _con_sesion(entorno, _usar) is None
+
+
+def test_la_reserva_propia_es_la_cancelada_si_esa_es_la_que_tiene(entorno):
+    """Devuelve la fila sea cual sea su estado: decidir qué hacer con él es del servicio llamador."""
+    ana, viaje, id_reserva = _reserva_creada(entorno)
+    assert _cancelar(entorno, ana, id_reserva).status_code == 200
+
+    async def _usar(db):
+        return (await reserva_propia_del_viaje(db, _usuario(ana), viaje)).estado
+
+    assert _con_sesion(entorno, _usar) == "cancelada"
+
+
+def test_bloquear_la_reserva_propia_la_retiene_hasta_cerrar_la_transaccion(entorno):
+    ana, viaje, id_reserva = _reserva_creada(entorno)
+
+    async def _usar(db):
+        await reserva_propia_del_viaje(db, _usuario(ana), viaje, bloquear=True)
+        conn = await conectar(entorno["base"])
+        try:
+            with pytest.raises(asyncpg.LockNotAvailableError):
+                await conn.fetch(
+                    "SELECT 1 FROM reserva WHERE id_reserva = $1 FOR UPDATE NOWAIT", id_reserva
+                )
+        finally:
+            await conn.close()
+
+    _con_sesion(entorno, _usar)
+    # Al cerrarse la sesión sin commit, la transacción se revierte y la reserva queda libre.
+    assert _estado(entorno, id_reserva) == "consolidada"
+
+
+def test_sin_bloquear_no_retiene_nada(entorno):
+    ana, viaje, id_reserva = _reserva_creada(entorno)
+
+    async def _usar(db):
+        await reserva_propia_del_viaje(db, _usuario(ana), viaje)
+        conn = await conectar(entorno["base"])
+        try:
+            await conn.fetch(
+                "SELECT 1 FROM reserva WHERE id_reserva = $1 FOR UPDATE NOWAIT", id_reserva
+            )
+        finally:
+            await conn.close()
+
+    _con_sesion(entorno, _usar)
 
 
 # --- Autenticación ------------------------------------------------------------------------

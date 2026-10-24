@@ -37,6 +37,12 @@ class ClienteFalso implements ApiClient {
     ultimoCuerpo = body;
     return _atender('POST $path');
   }
+
+  @override
+  Future<Object?> patch(String path, {Object? body}) async {
+    ultimoCuerpo = body;
+    return _atender('PATCH $path');
+  }
 }
 
 ApiException error(
@@ -186,6 +192,30 @@ void main() {
           throwsA(isA<ApiException>()),
         );
       }
+    });
+
+    test('perfil: leer y modificar manda solo los cambios', () async {
+      final json = {
+        'id_persona': 7,
+        'nombre': 'Ana',
+        'apellido': 'Gómez',
+        'dni': '30111222',
+        'telefono': '1155550000',
+        'estado_habilitacion': 'habilitado',
+      };
+      final cliente = ClienteFalso({
+        'GET pasajeros/me': () => json,
+        'PATCH pasajeros/me': () => {...json, 'telefono': '1166660000'},
+      });
+      final api = PasajeroApi(cliente);
+
+      final perfil = await api.cargarPerfil();
+      expect(perfil.nombre, 'Ana');
+      expect(perfil.email, isNull);
+
+      final nuevo = await api.modificarPerfil({'telefono': '1166660000'});
+      expect(cliente.ultimoCuerpo, {'telefono': '1166660000'});
+      expect(nuevo.telefono, '1166660000');
     });
 
     test('mis reservas y deuda', () async {

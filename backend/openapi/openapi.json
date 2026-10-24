@@ -961,7 +961,7 @@
             "$ref": "#/components/responses/SinPermiso"
           },
           "404": {
-            "description": "El pasajero no tiene cliente individual (`CLIENTE_NO_ENCONTRADO`) o su cliente no tiene cuenta corriente (`CUENTA_CORRIENTE_NO_ENCONTRADA`).",
+            "description": "El cliente no existe (`CLIENTE_NO_ENCONTRADO`; para el pasajero, no tiene cliente individual) o no tiene cuenta corriente (`CUENTA_CORRIENTE_NO_ENCONTRADA`). Vale para el `id_cliente` que indica administración y para la cuenta propia del pasajero.",
             "content": {
               "application/json": {
                 "schema": {

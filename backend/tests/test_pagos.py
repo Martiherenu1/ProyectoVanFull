@@ -277,6 +277,28 @@ def test_administracion_sin_cliente_es_400(entorno):
     assert _cantidad_pagos(base) == antes
 
 
+@pytest.mark.parametrize("rol", ["administrador", "dueno"])
+@pytest.mark.parametrize(
+    "caso, codigo",
+    [("inexistente", "CLIENTE_NO_ENCONTRADO"), ("sin_cuenta", "CUENTA_CORRIENTE_NO_ENCONTRADA")],
+)
+def test_administracion_con_cliente_sin_cuenta_es_404(entorno, pasajeros, rol, caso, codigo):
+    base, cliente, pagos = entorno
+    antes = _cantidad_pagos(base)
+    id_cliente = 2_000_000_000 if caso == "inexistente" else pasajeros["sin_cuenta"]["id_cliente"]
+
+    respuesta = cliente.post(
+        RUTA_REGISTRO,
+        json=_datos_registro(pagos, id_cliente=id_cliente),
+        headers=_con_rol(rol),
+    )
+
+    assert respuesta.status_code == 404
+    assert respuesta.json()["error"]["codigo"] == codigo
+    assert _cantidad_pagos(base) == antes
+    assert asyncio.run(consultar(base, "SELECT count(*) FROM evento_operativo")) == [(0,)]
+
+
 def test_registrar_pago_sin_token_es_401(entorno):
     _, cliente, pagos = entorno
     respuesta = cliente.post(RUTA_REGISTRO, json=_datos_registro(pagos))

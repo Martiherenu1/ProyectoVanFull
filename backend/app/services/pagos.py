@@ -7,7 +7,7 @@ from app.core.errors import ApiError
 from app.core.security import UsuarioActual
 from app.models.cuenta_corriente import Comprobante, CuentaCorriente, MovimientoCuenta
 from app.models.cuenta_corriente import Pago as PagoModelo
-from app.models.personas import ClienteIndividual
+from app.models.personas import Cliente, ClienteIndividual
 from app.schemas.pagos import Pago, PagoCreate
 from app.services.eventos import registrar_evento
 
@@ -60,14 +60,39 @@ async def _cliente_del_pasajero(
     return id_cliente
 
 
+async def _exigir_cuenta_corriente(db: AsyncSession, id_cliente: int) -> None:
+    """El cliente que indica administración existe y tiene cuenta corriente donde registrar el pago.
+
+    Sin esto el INSERT fallaría por la clave foránea de `pago` y la API respondería 500.
+    """
+    fila = (
+        await db.execute(
+            select(Cliente.id_cliente, CuentaCorriente.id_cliente)
+            .outerjoin(CuentaCorriente, CuentaCorriente.id_cliente == Cliente.id_cliente)
+            .where(Cliente.id_cliente == id_cliente)
+        )
+    ).one_or_none()
+    if fila is None:
+        raise ApiError(
+            404, "CLIENTE_NO_ENCONTRADO", "No existe un cliente con el identificador indicado."
+        )
+    if fila[1] is None:
+        raise ApiError(
+            404,
+            "CUENTA_CORRIENTE_NO_ENCONTRADA",
+            "El cliente indicado todavía no tiene cuenta corriente donde registrar el pago.",
+        )
+
+
 async def registrar_pago(db: AsyncSession, usuario: UsuarioActual, datos: PagoCreate) -> Pago:
     """Registra la parte persistible de CU-014 en una única transacción.
 
     `tipo` y `evidencia_pago` están en OpenAPI pero no tienen columnas en el modelo aprobado. Mientras
     esa contradicción siga pendiente, se rechazan explícitamente para no perder datos en silencio.
 
-    Administración indica el cliente; el pasajero solo puede registrar pagos de su propia cuenta
-    (pantalla 5 del PC1). Con ambos roles, manda el de administración.
+    Administración indica el cliente, que debe existir y tener cuenta corriente (404 si no); el
+    pasajero solo puede registrar pagos de su propia cuenta (pantalla 5 del PC1). Con ambos roles,
+    manda el de administración.
     """
     campos_sin_persistencia = [
         campo
@@ -91,6 +116,7 @@ async def registrar_pago(db: AsyncSession, usuario: UsuarioActual, datos: PagoCr
                 {"campos_faltantes": ["id_cliente"]},
             )
         id_cliente = datos.id_cliente
+        await _exigir_cuenta_corriente(db, id_cliente)
     else:
         id_cliente = await _cliente_del_pasajero(db, usuario, datos.id_cliente)
 

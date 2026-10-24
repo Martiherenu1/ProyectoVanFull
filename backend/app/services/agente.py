@@ -4,14 +4,15 @@ El modelo no decide reglas ni toca la base: elige una tool y arma los argumentos
 `agent/ejecutor.py` llama al servicio que corresponde (CONVENCIONES.md §1). Este servicio solo
 orquesta: arma el contexto, itera con el modelo y decide cuándo derivar a una persona (RF-032).
 
-Las tools habilitadas hoy son de lectura: no hay nada que confirmar ni que revertir, así que acá
-no se hace `commit`.
+Acá no se hace `commit`: las tools que escriben (crear y cancelar una reserva) confirman dentro de
+su servicio, igual que desde la app.
 
 **Las conversaciones se guardan en memoria del proceso** (Issue #42): ninguna de las 35 tablas las
 guarda. Se pierden al reiniciar y no se comparten entre procesos. PENDIENTE: persistencia.
 """
 
 import json
+import time
 from collections import OrderedDict
 from dataclasses import dataclass
 from datetime import datetime, timedelta, timezone
@@ -31,6 +32,9 @@ MAX_CARACTERES = 2000
 # Vueltas modelo → tools → modelo dentro de un mismo mensaje. Si el modelo no cierra en este
 # número de vueltas, no está resolviendo: se deriva en vez de seguir gastando.
 MAX_VUELTAS = 5
+# Tope de un mensaje entero, con todas sus vueltas y el fallback: la app no corta la espera sola.
+# Pasado este tiempo se deriva en vez de dejar al pasajero mirando la pantalla.
+TIEMPO_MAXIMO = 60.0
 # Del historial de una conversación se descartan los turnos más viejos (nunca uno a medias).
 MAX_MENSAJES = 40
 MAX_CONVERSACIONES = 500
@@ -118,12 +122,14 @@ async def responder(db: AsyncSession, usuario: UsuarioActual, datos: ChatRequest
     mensajes = [*historial, {"role": "user", "content": texto}]
     derivar = False
     tool_usada: str | None = None
+    limite = time.monotonic() + TIEMPO_MAXIMO
 
     for _ in range(MAX_VUELTAS):
         try:
             salida = await openrouter_client.chat_completion(
                 [{"role": "system", "content": _system_prompt()}, *mensajes],
                 tools=TOOLS_HABILITADAS,
+                limite=limite,
             )
             del_modelo = salida["choices"][0]["message"]
             llamadas = del_modelo.get("tool_calls") or []

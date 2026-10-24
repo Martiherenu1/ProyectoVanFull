@@ -1,4 +1,4 @@
-# Blueprint de Render: la API de la demo (Issue #116). Guía completa en DESPLIEGUE.md.
+# Blueprint de Render: la API y el sitio web de la demo (Issues #116 y #122). Guía en DESPLIEGUE.md.
 # Ningún secreto vive acá: DATABASE_URL y OPENROUTER_API_KEY se cargan en el panel de Render
 # (sync: false los pide al crear el Blueprint) y JWT_SECRET lo genera Render.
 services:
@@ -25,9 +25,10 @@ services:
         value: production
       - key: API_PREFIX
         value: /api
-      # El origen de GitHub Pages: sin la ruta del repositorio (la ruta no es parte del origen).
+      # Los orígenes del sitio: el de Render (abajo) y GitHub Pages, de respaldo. Sin ruta ni barra
+      # final: la ruta no es parte del origen. Si Render le agrega un sufijo al nombre, corregirlo acá.
       - key: CORS_ORIGINS
-        value: https://martiherenu1.github.io
+        value: https://vanfull.onrender.com,https://martiherenu1.github.io
       # Base64 de 256 bits al azar: supera los 32 bytes que exige core/security.py.
       - key: JWT_SECRET
         generateValue: true
@@ -37,3 +38,21 @@ services:
       # Opcional: sin clave, el asistente deriva a una persona de VanFull.
       - key: OPENROUTER_API_KEY
         sync: false
+
+  # Flutter Web, en una URL sin el usuario de GitHub. Se compila en GitHub Actions (workflow Web, misma
+  # versión de Flutter que la CI) y se publica en la rama `sitio-web`, que solo escribe ese workflow:
+  # Render la sirve tal cual desde su CDN, sin compilar. Sin plan ni región: los sitios estáticos no
+  # los tienen.
+  - type: web
+    name: vanfull
+    runtime: static
+    branch: sitio-web
+    buildCommand: echo "Compilado en GitHub Actions (workflow Web)"
+    staticPublishPath: ./
+    autoDeployTrigger: commit
+    # Sin esta regla, `/` daba 404 aunque index.html estaba publicado (Issue #125). Render no aplica
+    # reglas a una ruta donde existe un archivo: main.dart.js y los assets se sirven igual.
+    routes:
+      - type: rewrite
+        source: /*
+        destination: /index.html

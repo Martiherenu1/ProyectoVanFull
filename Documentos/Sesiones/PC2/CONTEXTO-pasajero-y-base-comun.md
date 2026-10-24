@@ -38,23 +38,25 @@ La CI corre en cada PR. En `main` la suite da 300 pruebas; la rama de las tools 
 | Crear la reserva del ocasional, sin tarifa (CU-003): `POST /api/reservas`, 27 pruebas; `cupo_del_viaje` como definición única | #72 | #73 |
 | Tools `crear_reserva` y `cancelar_reserva` de AG-01: `agent/ejecutor.py` las traduce a los servicios de reservas; `crear_reserva` recibe `viaje_id` y `orden_parada` | #77 | #78 |
 | Integración del pasajero: login, Buscar, Confirmar, Mis reservas y Asistente conectados a la API (detalle abajo, en «En curso», hasta limpiar esa sección) | #107 | #108 |
+| Deploy de la demo: Neon + Render (API y sitio estático) + Pages de respaldo, CORS por variable, seed sin contraseñas públicas, `DESPLIEGUE.md` | #116, #119, #122, #125 | #117, #120, #124, #126 |
+| Orden de locks pasajero → viaje → reserva en `cancelar_reserva` y helper `reserva_propia_del_viaje` para el aviso de ausencia (CU-008, de Martín); `CONVENCIONES.md` §8 | #131 | #133 |
 
 ## En curso
 
-**Deploy de la demo (Issue #116, rama `chore/comun-deploy-demo-116`).** Neon + Render + GitHub Pages; la guía,
-con qué variable va dónde y el ensayo, está en `DESPLIEGUE.md` (raíz). Cambios: `core/cors.py` (`CORS_ORIGINS`;
-sin ella, en desarrollo localhost y fuera de desarrollo la API no arranca), `normalizar_database_url` en
-`core/config.py` (la cadena de Neon se pega tal cual), `render.yaml` (migra en el arranque), workflow
-`pages.yml` (manual) y `db/seed/generar_contrasenas.py`, más la guarda del cargador. **Verificado de verdad
-(2026-10-23):** ruff y pytest en Docker; el `dockerCommand` del `render.yaml` en la imagen del Dockerfile con
-`ENV=production` y `PORT=10000` sobre una base vacía (migra, arranca, un reinicio no vuelve a migrar, health
-`up`); sin `CORS_ORIGINS` no arranca; el build web con `--base-href /ProyectoVanFull/` servido desde otro
-origen: carga, y un `fetch` del navegador hace login (200) y `GET /pasajeros/me` con token (200), mientras
-que otro origen da 400 en el preflight; el seed contra una base que cuenta como remota (la IP del contenedor)
-se niega sin archivo propio, carga con el generado, entran las contraseñas generadas y no las públicas.
-**SIN VERIFICAR:** Neon, Render y Pages reales (los crea Martiniano); el login tocando la UI en el sitio servido
-(el panel del navegador no dibujaba Flutter con la ventana minimizada: se probó con `fetch`); el `render.yaml`
-contra el validador de Render. **Pendiente:** los viajes de la demo llegan con #101 (Facundo).
+**Demo desplegada y ensayada (2026-10-23; #116, #119, #122, #125).** App en **https://vanfull.onrender.com**
+(sitio estático de Render), API en **https://vanfull-api.onrender.com/api** (Render, Docker free, Ohio) y base en
+**Neon** (Postgres 16, us-east-2, endpoint directo); Pages de respaldo. Guía, variables y ensayo: `DESPLIEGUE.md`.
+Neon se sembró con `generar_contrasenas` (las contraseñas viven solo en el CSV de Martiniano, fuera del repo) y
+trae los 3 viajes del 30/10 de #101. Tropiezos resueltos: Render no parte un `sh -c "…"` en el `dockerCommand`
+(→ `backend/arrancar.sh`, #119); la sync del Blueprint falla si la rama `sitio-web` todavía no existe (correr
+**Web** antes y aprobar la sync manual); el sitio estático daba 404 en `/` (→ rewrite `/*` → `/index.html`, #125).
+**Verificado de verdad:** contra los servicios reales, health `up`, CORS (200 desde el sitio y Pages, 400 desde
+otro origen), 401 con la contraseña pública del repo, la disponibilidad del 30/10 desde Neon, y los assets y el
+fallback del sitio; **Martiniano ensayó el flujo completo desde el celular** (login, buscar, reservar, Mis
+reservas, cancelar, asistente, cerrar sesión) y anduvo. **Antes de la demo:** resembrar Neon con `--reiniciar`
+(borra la reserva del ensayo) y despertar la API 5 min antes. **SIN VERIFICAR:** el asistente con un modelo
+real (sin `OPENROUTER_API_KEY` deriva). **Cosmético:** el `<title>` de `index.html` y el `manifest.json` dicen
+«frontend».
 
 **Integración del pasajero (Issue #107, PR de la rama `feat/pasajero-integracion-107`).** Con #87 en `main`, las cuatro
 pantallas del pasajero y el login (#106) quedan **conectadas a la API**: `core/api/auth_api.dart` y `pasajero_api.dart`
@@ -147,6 +149,8 @@ conectada (#87 y el login).
 | 2026-10-20 | Una reserva cancelada del mismo viaje no se reactiva ni se pisa: responde 409 `RESERVA_CANCELADA_PREVIA`, porque MR-R15 deja una fila por pasajero y viaje y reactivarla no está definido (AC28-08) | `services/reservas.py` |
 | 2026-10-23 | **Deploy (#116):** la migración corre en el arranque del servicio de Render (`backend/arrancar.sh`: `alembic upgrade head` y después uvicorn; va en un script porque Render no parte un `sh -c "…"` como un shell, #119), porque el plan free no tiene shell ni jobs; es idempotente. Pages se publica a mano (`workflow_dispatch`); la API, cuando la CI de `main` pasa. Fuera de desarrollo, sin `CORS_ORIGINS` la API no arranca. CORS sin `allow_credentials`: el token va en `Authorization` | `render.yaml`, `DESPLIEGUE.md` |
 | 2026-10-23 | En una base remota, el seed exige `--permitir-base-remota` **y** un archivo de contraseñas fuera del repo (la bandera sola ya no alcanza); las contraseñas de la demo se generan al azar y no se imprimen | `db/seed/README.md`, `DESPLIEGUE.md` |
+| 2026-10-23 | **La URL de la demo es `vanfull.onrender.com`** (sitio estático de Render), no la de Pages, que muestra el usuario de GitHub (#122). Flutter se compila en GitHub Actions (workflow **Web**) y se publica en la rama `sitio-web`, que Render sirve sin compilar; Pages queda de respaldo | `render.yaml`, `DESPLIEGUE.md` |
+| 2026-10-24 | **Orden de locks: pasajero → viaje → reserva** en creación, cancelación, ausencia y abordaje; ejecución del viaje toma solo el viaje y no adquiere pasajero ni reserva después. Propuesta de Martín (CU-008), confirmada por Martiniano; Facundo pendiente. `cancelar_reserva` se adaptó (antes bloqueaba solo la reserva) | `services/reservas.py`, `CONVENCIONES.md` §8, #131 |
 
 ## Pendientes
 

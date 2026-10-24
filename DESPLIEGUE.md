@@ -3,8 +3,10 @@
 Demo del 30/10/2026 (freeze el 25/10). Issue #116.
 
 ```
-Navegador ──► GitHub Pages (Flutter Web) ──HTTPS──► Render (FastAPI) ──TLS──► Neon (PostgreSQL)
-              martiherenu1.github.io/ProyectoVanFull     vanfull-api.onrender.com/api
+Navegador ──► Render, sitio estático (Flutter Web) ──HTTPS──► Render (FastAPI) ──TLS──► Neon (PostgreSQL)
+              vanfull.onrender.com                              vanfull-api.onrender.com/api
+
+Respaldo: el mismo Flutter Web en GitHub Pages (martiherenu1.github.io/ProyectoVanFull/).
 ```
 
 Nada secreto vive en el repositorio. Los secretos los carga a mano quien despliega, en cada servicio.
@@ -15,7 +17,7 @@ En la tabla, **secreto** quiere decir que no va al chat, ni a un commit, ni a un
 | Render (panel) | `DATABASE_URL` | **secreto**: la cadena **directa** de Neon, tal cual la da el panel |
 | Render (panel) | `OPENROUTER_API_KEY` | **secreto**, opcional: sin ella, el asistente deriva a una persona |
 | Render (`render.yaml`) | `JWT_SECRET` | lo genera Render (`generateValue`); nadie lo ve ni lo copia |
-| Render (`render.yaml`) | `ENV=production`, `API_PREFIX=/api`, `CORS_ORIGINS=https://martiherenu1.github.io` | públicos |
+| Render (`render.yaml`) | `ENV=production`, `API_PREFIX=/api`, `CORS_ORIGINS=https://vanfull.onrender.com,https://martiherenu1.github.io` | públicos |
 | GitHub → Settings → Secrets and variables → Actions → **Variables** | `API_BASE_URL` | `https://<servicio>.onrender.com/api` (público: queda en el JS) |
 | GitHub → Settings → Pages | Source | «GitHub Actions» |
 | Tu computadora, **fuera del repo** | `contrasenas-demo.csv` | **secreto**: las contraseñas de las cuentas de la demo |
@@ -68,13 +70,23 @@ Remove-Item Env:DATABASE_URL
 
 Si falta `CORS_ORIGINS`, o `JWT_SECRET` es corto, la API **no arranca**, y el log de Render lo dice.
 
-## 4. Flutter Web en GitHub Pages
+## 4. Flutter Web: Render (la URL de la demo) y Pages (respaldo)
+
+La URL de la demo es la de Render, que no muestra el usuario de GitHub. Flutter **no se compila en
+Render**: lo compila el workflow **Web** de GitHub Actions, con la misma versión que la CI. El sitio de
+Render sale de la rama `sitio-web`, que escribe solo ese workflow (un commit, reemplazado en cada
+corrida); Render la sirve tal cual. Pages queda de respaldo.
 
 1. Settings → Pages → Source: **GitHub Actions**.
 2. Settings → Secrets and variables → Actions → *Variables* → `API_BASE_URL` = la URL del paso 3 con `/api`.
-3. Actions → **Pages** → *Run workflow* (rama `main`). Si la variable falta o no es `https://…/api`,
-   el workflow corta antes de compilar. Al terminar, el sitio queda en
-   `https://martiherenu1.github.io/ProyectoVanFull/`.
+3. Actions → **Web** → *Run workflow* (rama `main`). Si la variable falta o no es `https://…/api`,
+   el workflow corta antes de compilar. Publica las dos cosas: la rama `sitio-web` y Pages
+   (`https://martiherenu1.github.io/ProyectoVanFull/`).
+4. **Solo la primera vez:** en Render, Blueprint `vanfull-demo` → **Manual sync**. Crea el sitio
+   estático `vanfull` (necesita que la rama `sitio-web` ya exista, por eso va después del paso 3). Si
+   Render le agrega un sufijo a la URL porque el nombre estaba tomado, corregir `CORS_ORIGINS` en
+   `render.yaml`.
+5. Después, cada corrida de **Web** redespliega el sitio de Render sola (`autoDeployTrigger: commit`).
 
 Para publicar cambios del frontend, volver a correr el workflow: no se publica solo.
 
@@ -84,7 +96,7 @@ Hacerlo con un celular **con datos móviles, no con el wifi de casa**, para que 
 
 1. Despertar la API: el plan free se duerme a los 15 minutos y tarda alrededor de un minuto en volver.
    Abrir `…/api/health` hasta que responda `"database":"up"`. **Hacerlo 5 minutos antes de la demo.**
-2. Abrir `https://martiherenu1.github.io/ProyectoVanFull/`.
+2. Abrir `https://vanfull.onrender.com` (o el respaldo, `https://martiherenu1.github.io/ProyectoVanFull/`).
 3. Entrar con una contraseña incorrecta: tiene que mostrar el mensaje. Después, con `pasajero1` y su
    contraseña del CSV.
 4. Buscar el 30/10 → elegir el viaje → marcar la parada → confirmar (necesita #101).
@@ -97,6 +109,6 @@ Hacerlo con un celular **con datos móviles, no con el wifi de casa**, para que 
 |---|---|
 | `…/api/health` no responde en más de 2 minutos | Revisar el log de Render: la migración falló o falta una variable |
 | `"database":"down"` | `DATABASE_URL` mal copiada, o es la cadena `-pooler` |
-| Health anda, pero la app dice que no pudo conectarse | CORS: `CORS_ORIGINS` tiene que ser exactamente `https://martiherenu1.github.io`, sin barra ni ruta; o `API_BASE_URL` sin `/api` (correr de nuevo el workflow) |
-| Página en blanco o 404 en los recursos | El workflow no usó `--base-href /ProyectoVanFull/`, o Pages no está en «GitHub Actions» |
+| Health anda, pero la app dice que no pudo conectarse | CORS: `CORS_ORIGINS` tiene que incluir exactamente el origen del sitio (`https://vanfull.onrender.com`), sin barra ni ruta; o `API_BASE_URL` sin `/api` (correr de nuevo el workflow) |
+| Página en blanco o 404 en los recursos | En Pages: el workflow no usó `--base-href /ProyectoVanFull/`, o Pages no está en «GitHub Actions». En Render: la rama `sitio-web` no existe o está vacía (correr **Web**) |
 | Login correcto con el CSV da 401 | La base no se sembró con ese CSV: repetir el paso 2 con `--reiniciar` |

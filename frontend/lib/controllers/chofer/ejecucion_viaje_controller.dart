@@ -2,6 +2,9 @@ import 'package:flutter/foundation.dart';
 
 import '../../models/chofer/operacion_asignada.dart';
 import '../../models/chofer/viaje_resumen.dart';
+import 'condiciones_ubicacion_inicio.dart';
+
+export 'condiciones_ubicacion_inicio.dart';
 
 /// null representa detalle no disponible, sin distinguir ajeno de inexistente.
 typedef CargarDetalleViajeChofer = Future<OperacionAsignada?> Function(
@@ -83,11 +86,15 @@ class EjecucionViajeController extends ChangeNotifier {
     required this._idViaje,
     required this._cargarDetalle,
     this._acciones,
+    this._comprobarUbicacionInicio,
   });
 
   int _idViaje;
   CargarDetalleViajeChofer _cargarDetalle;
   AccionesEjecucionViaje? _acciones;
+  ComprobarUbicacionInicio? _comprobarUbicacionInicio;
+  bool _comprobandoUbicacion = false;
+  BloqueoUbicacionInicio? _bloqueoUbicacion;
   int _generacion = 0;
   Object _contexto = Object();
   bool _activo = true;
@@ -109,25 +116,43 @@ class EjecucionViajeController extends ChangeNotifier {
   Object get contexto => _contexto;
   OperacionViaje? get operacionPendiente => _pendiente?.operacion;
 
-  bool get ocupado => switch (_fase) {
-    FaseDetalleViaje.cargando ||
-    FaseDetalleViaje.operando ||
-    FaseDetalleViaje.recargando => true,
-    _ => false,
+  bool get comprobandoUbicacion => _comprobandoUbicacion;
+  String? get mensajeUbicacion => switch (_bloqueoUbicacion) {
+    BloqueoUbicacionInicio.servicioDesactivado =>
+      'Activá la ubicación del teléfono para iniciar el viaje.',
+    BloqueoUbicacionInicio.permisoNoConcedido =>
+      'Permití que VanFull acceda a tu ubicación para iniciar el viaje.',
+    BloqueoUbicacionInicio.sinComprobador =>
+      'No se pudo comprobar la ubicación',
+    BloqueoUbicacionInicio.consultaFallida =>
+      'No pudimos comprobar la ubicación. Volvé a intentarlo.',
+    null => null,
   };
+
+  bool get ocupado =>
+      _comprobandoUbicacion ||
+      switch (_fase) {
+        FaseDetalleViaje.cargando ||
+        FaseDetalleViaje.operando ||
+        FaseDetalleViaje.recargando => true,
+        _ => false,
+      };
 
   bool get puedeIniciar =>
       _activo &&
+      !ocupado &&
       _acciones != null &&
       _fase == FaseDetalleViaje.listo &&
       _detalle?.viaje.estado == EstadoViaje.programado;
   bool get puedeFinalizar =>
       _activo &&
+      !ocupado &&
       _acciones != null &&
       _fase == FaseDetalleViaje.listo &&
       _detalle?.viaje.estado == EstadoViaje.enCurso;
   bool get puedeRepetir =>
       _activo &&
+      !ocupado &&
       _acciones != null &&
       _fase == FaseDetalleViaje.incierto &&
       _repetible;
@@ -136,6 +161,7 @@ class EjecucionViajeController extends ChangeNotifier {
     required int idViaje,
     required CargarDetalleViajeChofer cargarDetalle,
     AccionesEjecucionViaje? acciones,
+    ComprobarUbicacionInicio? comprobarUbicacionInicio,
   }) {
     if (!_activo) return;
     // En el mismo viaje, cambiar la fuente no prueba que un POST en vuelo falló.
@@ -147,6 +173,9 @@ class EjecucionViajeController extends ChangeNotifier {
     _idViaje = idViaje;
     _cargarDetalle = cargarDetalle;
     _acciones = acciones;
+    _comprobarUbicacionInicio = comprobarUbicacionInicio;
+    _comprobandoUbicacion = false;
+    _bloqueoUbicacion = null;
     _contexto = Object();
     _generacion++;
     _detalle = null;
@@ -188,6 +217,7 @@ class EjecucionViajeController extends ChangeNotifier {
     final id = _idViaje;
     final fuente = _cargarDetalle;
     _detalle = null;
+    _bloqueoUbicacion = null;
     _rechazo = null;
     _repetible = false;
     _fase = _viajeConfirmado == null
@@ -252,7 +282,7 @@ class EjecucionViajeController extends ChangeNotifier {
   }
 
   Future<void> iniciar() async {
-    if (puedeIniciar) await _ejecutar(OperacionViaje.inicio);
+    if (puedeIniciar) await _comprobarEIniciar();
   }
 
   Future<void> finalizar() async {
@@ -260,7 +290,50 @@ class EjecucionViajeController extends ChangeNotifier {
   }
 
   Future<void> repetir() async {
-    if (puedeRepetir) await _ejecutar(_pendiente!.operacion);
+    if (!puedeRepetir) return;
+    if (_pendiente!.operacion == OperacionViaje.inicio) {
+      await _comprobarEIniciar();
+    } else {
+      await _ejecutar(OperacionViaje.finalizacion);
+    }
+  }
+
+  Future<void> _comprobarEIniciar() async {
+    final generacion = ++_generacion;
+    final comprobar = _comprobarUbicacionInicio;
+    _comprobandoUbicacion =
+        true; // Antes del primer await: tambien bloquea dobles taps.
+    _bloqueoUbicacion = null;
+    _avisar();
+    if (!_vigente(generacion)) return;
+
+    CondicionesUbicacionInicio? condiciones;
+    if (comprobar == null) {
+      _bloqueoUbicacion = BloqueoUbicacionInicio.sinComprobador;
+    } else {
+      try {
+        condiciones = await comprobar();
+      } catch (_) {
+        if (!_vigente(generacion)) return;
+        _bloqueoUbicacion = BloqueoUbicacionInicio.consultaFallida;
+      }
+    }
+    if (!_vigente(generacion)) return;
+    _comprobandoUbicacion = false;
+    if (condiciones != null) {
+      if (!condiciones.servicioActivado) {
+        _bloqueoUbicacion = BloqueoUbicacionInicio.servicioDesactivado;
+      } else if (!condiciones.permisoConcedido) {
+        _bloqueoUbicacion = BloqueoUbicacionInicio.permisoNoConcedido;
+      }
+    }
+    if (_bloqueoUbicacion != null) {
+      // Sin POST nuevo: no cambiar _enviada, _pendiente ni la confirmacion.
+      _avisar();
+      return;
+    }
+    // Fuera del catch del control local: los fallos del POST conservan su semantica.
+    await _ejecutar(OperacionViaje.inicio);
   }
 
   Future<void> _ejecutar(OperacionViaje operacion) async {
@@ -273,6 +346,7 @@ class EjecucionViajeController extends ChangeNotifier {
         _pendiente ?? _OperacionEnviada(operacion, _detalle!.viaje.estado);
     _enviada = enviada;
     _detalle = null;
+    _bloqueoUbicacion = null;
     _rechazo = null;
     _repetible = false;
     _fase = FaseDetalleViaje.operando;

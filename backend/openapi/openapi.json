@@ -921,7 +921,7 @@
           "pagos"
         ],
         "summary": "Registrar un pago",
-        "description": "Registra un pago total/parcial/seña asociado a un cliente o pasajero. Puede pagar\nun tercero (RN-016). El registro NO confirma el pago (ver /confirmacion). (CU-014, RF-009)\n",
+        "description": "Registra un pago total/parcial/seña asociado a un cliente o pasajero. Puede pagar\nun tercero (RN-016). El registro NO confirma el pago (ver /confirmacion). (CU-014, RF-009)\n\nLo registran administración (indica `id_cliente`) o el propio pasajero (pantalla 5 del\nPC1): para él se usa la cuenta corriente de su cliente individual y no puede registrar\npagos de otro cliente.\n",
         "x-cu": "CU-014",
         "requestBody": {
           "required": true,
@@ -944,8 +944,31 @@
               }
             }
           },
+          "400": {
+            "description": "Cuerpo inválido, administración sin `id_cliente`, o `tipo`/`evidencia_pago`, que todavía no se pueden conservar (VALIDACION).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/NoAutenticado"
+          },
           "403": {
             "$ref": "#/components/responses/SinPermiso"
+          },
+          "404": {
+            "description": "El pasajero no tiene cliente individual (`CLIENTE_NO_ENCONTRADO`) o su cliente no tiene cuenta corriente (`CUENTA_CORRIENTE_NO_ENCONTRADA`).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
           }
         }
       }
@@ -1765,13 +1788,13 @@
       "PagoCreate": {
         "type": "object",
         "required": [
-          "id_cliente",
           "importe",
           "medio_pago"
         ],
         "properties": {
           "id_cliente": {
-            "type": "integer"
+            "type": "integer",
+            "description": "Obligatorio para administración. El pasajero lo omite (se usa su cliente individual)."
           },
           "importe": {
             "type": "number",

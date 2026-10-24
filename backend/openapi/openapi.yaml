@@ -672,6 +672,10 @@ paths:
       description: |
         Registra un pago total/parcial/seña asociado a un cliente o pasajero. Puede pagar
         un tercero (RN-016). El registro NO confirma el pago (ver /confirmacion). (CU-014, RF-009)
+
+        Lo registran administración (indica `id_cliente`) o el propio pasajero (pantalla 5 del
+        PC1): para él se usa la cuenta corriente de su cliente individual y no puede registrar
+        pagos de otro cliente.
       x-cu: CU-014
       requestBody:
         required: true
@@ -686,8 +690,26 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Pago'
+        '400':
+          description: >-
+            Cuerpo inválido, administración sin `id_cliente`, o `tipo`/`evidencia_pago`, que todavía
+            no se pueden conservar (VALIDACION).
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          $ref: '#/components/responses/NoAutenticado'
         '403':
           $ref: '#/components/responses/SinPermiso'
+        '404':
+          description: >-
+            El pasajero no tiene cliente individual (`CLIENTE_NO_ENCONTRADO`) o su cliente no tiene
+            cuenta corriente (`CUENTA_CORRIENTE_NO_ENCONTRADA`).
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
 
   /pagos/{id_pago}/confirmacion:
     post:
@@ -1180,9 +1202,11 @@ components:
 
     PagoCreate:
       type: object
-      required: [id_cliente, importe, medio_pago]
+      required: [importe, medio_pago]
       properties:
-        id_cliente: { type: integer }
+        id_cliente:
+          type: integer
+          description: Obligatorio para administración. El pasajero lo omite (se usa su cliente individual).
         importe: { type: number, format: double }
         medio_pago: { type: string, enum: [EFECTIVO, TRANSFERENCIA, BILLETERA, CUENTA_CORRIENTE, MERCADO_PAGO] }
         tipo: { type: string, enum: [total, parcial, senia], description: Tipo de pago cuando corresponda. }

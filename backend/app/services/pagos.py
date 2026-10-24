@@ -4,8 +4,10 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.errors import ApiError
-from app.models.cuenta_corriente import Comprobante, MovimientoCuenta
+from app.core.security import UsuarioActual
+from app.models.cuenta_corriente import Comprobante, CuentaCorriente, MovimientoCuenta
 from app.models.cuenta_corriente import Pago as PagoModelo
+from app.models.personas import ClienteIndividual
 from app.schemas.pagos import Pago, PagoCreate
 from app.services.eventos import registrar_evento
 
@@ -25,11 +27,47 @@ def _a_schema(pago: PagoModelo) -> Pago:
     )
 
 
-async def registrar_pago(db: AsyncSession, datos: PagoCreate) -> Pago:
+async def _cliente_del_pasajero(
+    db: AsyncSession, usuario: UsuarioActual, pedido: int | None
+) -> int:
+    """La cuenta propia del pasajero: el cliente individual de su persona, con cuenta corriente.
+
+    No se crea ninguna de las dos: qué hacer con un cliente sin cuenta sigue pendiente en #84, así
+    que se responde 404 en vez de dejar que falle la clave foránea de `pago`.
+    """
+    fila = (
+        await db.execute(
+            select(ClienteIndividual.id_cliente, CuentaCorriente.id_cliente)
+            .outerjoin(CuentaCorriente, CuentaCorriente.id_cliente == ClienteIndividual.id_cliente)
+            .where(ClienteIndividual.id_persona == usuario.id_persona)
+        )
+    ).one_or_none()
+    if fila is None:
+        raise ApiError(
+            404,
+            "CLIENTE_NO_ENCONTRADO",
+            "No hay un cliente individual asociado al pasajero autenticado.",
+        )
+    id_cliente, id_cuenta = fila
+    if pedido is not None and pedido != id_cliente:
+        raise ApiError(403, "SIN_PERMISO", "Solo podés registrar pagos de tu propia cuenta.")
+    if id_cuenta is None:
+        raise ApiError(
+            404,
+            "CUENTA_CORRIENTE_NO_ENCONTRADA",
+            "Tu cliente todavía no tiene cuenta corriente donde registrar el pago.",
+        )
+    return id_cliente
+
+
+async def registrar_pago(db: AsyncSession, usuario: UsuarioActual, datos: PagoCreate) -> Pago:
     """Registra la parte persistible de CU-014 en una única transacción.
 
     `tipo` y `evidencia_pago` están en OpenAPI pero no tienen columnas en el modelo aprobado. Mientras
     esa contradicción siga pendiente, se rechazan explícitamente para no perder datos en silencio.
+
+    Administración indica el cliente; el pasajero solo puede registrar pagos de su propia cuenta
+    (pantalla 5 del PC1). Con ambos roles, manda el de administración.
     """
     campos_sin_persistencia = [
         campo
@@ -44,8 +82,20 @@ async def registrar_pago(db: AsyncSession, datos: PagoCreate) -> Pago:
             {"campos_pendientes": campos_sin_persistencia},
         )
 
+    if set(usuario.roles) & {"administrador", "dueno"}:
+        if datos.id_cliente is None:
+            raise ApiError(
+                400,
+                "VALIDACION",
+                "Falta el cliente del pago.",
+                {"campos_faltantes": ["id_cliente"]},
+            )
+        id_cliente = datos.id_cliente
+    else:
+        id_cliente = await _cliente_del_pasajero(db, usuario, datos.id_cliente)
+
     pago = PagoModelo(
-        id_cliente=datos.id_cliente,
+        id_cliente=id_cliente,
         importe=datos.importe,
         medio_pago=datos.medio_pago,
         estado="PENDIENTE",

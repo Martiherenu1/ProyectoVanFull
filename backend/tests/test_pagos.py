@@ -7,7 +7,7 @@ from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import async_sessionmaker, create_async_engine
 from sqlalchemy.pool import NullPool
 
-from app.core.security import crear_token
+from app.core.security import UsuarioActual, crear_token
 from app.schemas.pagos import PagoCreate
 from app.services import pagos as servicio_pagos
 from app.services.pagos import decidir_pago_pendiente
@@ -130,7 +130,7 @@ def test_dueno_puede_registrar_pago(entorno):
     assert respuesta.json()["estado"] == "PENDIENTE"
 
 
-@pytest.mark.parametrize("rol", ["pasajero", "chofer", "representante_corporativo"])
+@pytest.mark.parametrize("rol", ["chofer", "representante_corporativo"])
 def test_otros_roles_no_pueden_registrar_pago(entorno, rol):
     base, cliente, pagos = entorno
     antes = asyncio.run(consultar(base, "SELECT count(*) FROM pago"))[0][0]
@@ -144,6 +144,137 @@ def test_otros_roles_no_pueden_registrar_pago(entorno, rol):
     assert respuesta.status_code == 403
     assert respuesta.json()["error"]["codigo"] == "SIN_PERMISO"
     assert asyncio.run(consultar(base, "SELECT count(*) FROM pago"))[0][0] == antes
+
+
+def _crear_pasajero(base: str, dni: str, *, cliente: bool, cuenta: bool) -> dict:
+    """Pasajero con o sin cliente individual y cuenta corriente, y su encabezado de autorización."""
+    id_persona = asyncio.run(
+        consultar(
+            base,
+            "INSERT INTO persona (nombre, apellido, dni) VALUES ('Prueba', 'Pago', $1) "
+            "RETURNING id_persona",
+            dni,
+        )
+    )[0][0]
+    asyncio.run(ejecutar_sql(base, "INSERT INTO pasajero (id_persona) VALUES ($1)", id_persona))
+    id_cliente = None
+    if cliente:
+        id_cliente = asyncio.run(
+            consultar(
+                base,
+                "INSERT INTO cliente (naturaleza_cliente) VALUES ('INDIVIDUAL') RETURNING id_cliente",
+            )
+        )[0][0]
+        asyncio.run(
+            ejecutar_sql(
+                base,
+                "INSERT INTO cliente_individual (id_cliente, id_persona) VALUES ($1, $2)",
+                id_cliente,
+                id_persona,
+            )
+        )
+    if cuenta:
+        asyncio.run(
+            ejecutar_sql(base, "INSERT INTO cuenta_corriente (id_cliente) VALUES ($1)", id_cliente)
+        )
+    token = crear_token(id_persona, id_persona, ["pasajero"])
+    return {"id_cliente": id_cliente, "headers": {"Authorization": f"Bearer {token}"}}
+
+
+@pytest.fixture(scope="module")
+def pasajeros(entorno):
+    base, _, _ = entorno
+    return {
+        "con_cuenta": _crear_pasajero(base, "90000001", cliente=True, cuenta=True),
+        "sin_cuenta": _crear_pasajero(base, "90000002", cliente=True, cuenta=False),
+        "sin_cliente": _crear_pasajero(base, "90000003", cliente=False, cuenta=False),
+    }
+
+
+def _cantidad_pagos(base: str) -> int:
+    return asyncio.run(consultar(base, "SELECT count(*) FROM pago"))[0][0]
+
+
+def test_pasajero_registra_pago_de_su_cuenta_sin_indicar_cliente(entorno, pasajeros):
+    base, cliente, _ = entorno
+    propio = pasajeros["con_cuenta"]
+
+    respuesta = cliente.post(
+        RUTA_REGISTRO,
+        json={"importe": 5800, "medio_pago": "TRANSFERENCIA"},
+        headers=propio["headers"],
+    )
+
+    assert respuesta.status_code == 201
+    cuerpo = respuesta.json()
+    assert cuerpo["id_cliente"] == propio["id_cliente"]
+    assert cuerpo["estado"] == "PENDIENTE"
+    assert asyncio.run(
+        consultar(
+            base, "SELECT tipo_evento FROM evento_operativo WHERE id_pago = $1", cuerpo["id_pago"]
+        )
+    ) == [("pago_registrado",)]
+
+
+def test_pasajero_puede_indicar_su_propio_cliente(entorno, pasajeros):
+    _, cliente, _ = entorno
+    propio = pasajeros["con_cuenta"]
+    respuesta = cliente.post(
+        RUTA_REGISTRO,
+        json={"id_cliente": propio["id_cliente"], "importe": 100, "medio_pago": "EFECTIVO"},
+        headers=propio["headers"],
+    )
+    assert respuesta.status_code == 201
+    assert respuesta.json()["id_cliente"] == propio["id_cliente"]
+
+
+def test_pasajero_no_registra_pagos_de_otro_cliente(entorno, pasajeros):
+    base, cliente, pagos = entorno
+    antes = _cantidad_pagos(base)
+
+    respuesta = cliente.post(
+        RUTA_REGISTRO,
+        json=_datos_registro(pagos),
+        headers=pasajeros["con_cuenta"]["headers"],
+    )
+
+    assert respuesta.status_code == 403
+    assert respuesta.json()["error"]["codigo"] == "SIN_PERMISO"
+    assert _cantidad_pagos(base) == antes
+
+
+@pytest.mark.parametrize(
+    "caso, codigo",
+    [("sin_cliente", "CLIENTE_NO_ENCONTRADO"), ("sin_cuenta", "CUENTA_CORRIENTE_NO_ENCONTRADA")],
+)
+def test_pasajero_sin_cuenta_corriente_es_404(entorno, pasajeros, caso, codigo):
+    base, cliente, _ = entorno
+    antes = _cantidad_pagos(base)
+
+    respuesta = cliente.post(
+        RUTA_REGISTRO,
+        json={"importe": 100, "medio_pago": "EFECTIVO"},
+        headers=pasajeros[caso]["headers"],
+    )
+
+    assert respuesta.status_code == 404
+    assert respuesta.json()["error"]["codigo"] == codigo
+    assert _cantidad_pagos(base) == antes
+
+
+def test_administracion_sin_cliente_es_400(entorno):
+    base, cliente, _ = entorno
+    antes = _cantidad_pagos(base)
+
+    respuesta = cliente.post(
+        RUTA_REGISTRO,
+        json={"importe": 100, "medio_pago": "EFECTIVO"},
+        headers=_con_rol("administrador"),
+    )
+
+    assert respuesta.status_code == 400
+    assert respuesta.json()["error"]["detalles"] == {"campos_faltantes": ["id_cliente"]}
+    assert _cantidad_pagos(base) == antes
 
 
 def test_registrar_pago_sin_token_es_401(entorno):
@@ -206,6 +337,7 @@ def test_registro_es_atomico_si_falla_el_evento(entorno, monkeypatch):
                 with pytest.raises(ValueError):
                     await servicio_pagos.registrar_pago(
                         db,
+                        UsuarioActual(1, 1, ("administrador",)),
                         PagoCreate(**_datos_registro(pagos, importe=321.45)),
                     )
         finally:

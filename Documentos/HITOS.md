@@ -161,6 +161,24 @@
 - **Tecnologías:** Python/FastAPI, PostgreSQL 16, SQLAlchemy 2.0 async, OpenAPI 3.0, Flutter, diseño de agentes
   con herramientas (tool calling), OpenRouter, Git/GitHub con flujo de ramas y revisión.
 
+### [2026-10-23] Despliegue público de la demo con costo 0 y sin secretos en un repositorio público
+
+- **Qué:** la plataforma quedó publicada en internet para la demo: **Flutter Web** como sitio estático en Render,
+  la **API FastAPI** en un contenedor Docker en Render y **PostgreSQL 16 en Neon**, todo en planes gratuitos. Se
+  ensayó de punta a punta desde un celular con datos móviles: login, búsqueda, reserva, cancelación y asistente.
+- **Rol de Martiniano:** diseñó y preparó todo el despliegue (Blueprint de Render, workflow de GitHub Actions,
+  configuración por variables de entorno, guía de despliegue y ensayo) y lo ejecutó cargando él mismo los secretos.
+- **Por qué importa (CV):** el repositorio es público y **ningún secreto vive en él**: la clave de firma de los
+  tokens la genera el proveedor, la cadena de la base y las claves se cargan solo en el panel, y los datos de demo
+  se siembran con **contraseñas aleatorias que nunca se imprimen** (el cargador se niega a usar las de prueba del
+  repo contra una base remota). **CORS acotado por variable de entorno**, con la API que **no arranca** si falta
+  esa configuración. Migraciones **idempotentes al arranque** y despliegue **solo con la CI en verde**. Cada
+  ajuste se verificó con pruebas reales (la imagen de producción levantada local, un navegador real, `curl` contra
+  los servicios publicados), y los tres tropiezos del primer despliegue se diagnosticaron por sus logs y se
+  corrigieron por issue y PR.
+- **Tecnologías:** Render (Blueprint IaC, Docker, sitio estático en CDN), Neon (PostgreSQL serverless), GitHub
+  Actions (Flutter Web), FastAPI, Alembic, SQLAlchemy async/asyncpg con TLS, CORS, JWT.
+
 <!-- Próximos hitos a documentar a medida que se implementen:
      - Esquema de datos PostgreSQL y migraciones
      - Contrato OpenAPI de las tools de AG-01
@@ -168,6 +186,5 @@
      - Integración Google Maps Routes API con optimización de paradas
      - Seguimiento GPS en tiempo real (mecanismo elegido)
      - Integración WhatsApp Cloud API
-     - Setup CI/CD y despliegue
      - Estrategia de testing (unit/integration/e2e)
 -->

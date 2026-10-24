@@ -46,6 +46,7 @@ Future<void> mostrar(
   CargarDeuda? saldo,
   CancelarReserva? cancelar,
   VoidCallback? buscar,
+  ValueChanged<Deuda>? pagar,
 }) => tester.pumpWidget(
   MaterialApp(
     home: MisReservasScreen(
@@ -53,6 +54,7 @@ Future<void> mostrar(
       cargarDeuda: saldo ?? () async => deuda(),
       cancelarReserva: cancelar ?? (id) async => cancelada(id),
       onBuscarServicio: buscar ?? () {},
+      onRegistrarPago: pagar,
     ),
   ),
 );
@@ -323,5 +325,34 @@ void main() {
         isNotNull,
       );
     });
+  });
+
+  testWidgets('con saldo cargado ofrece registrar un pago', (tester) async {
+    Deuda? recibida;
+    await mostrar(
+      tester,
+      saldo: () async => deuda(saldo: 11600, estado: 'con_deuda'),
+      pagar: (d) => recibida = d,
+    );
+    await tester.pump();
+
+    await tester.tap(find.byKey(const ValueKey('ir-a-pago')));
+    expect(recibida?.saldo, 11600);
+  });
+
+  testWidgets('sin callback o con el saldo en error no hay botón de pago', (
+    tester,
+  ) async {
+    await mostrar(tester);
+    await tester.pump();
+    expect(find.byKey(const ValueKey('ir-a-pago')), findsNothing);
+
+    await mostrar(
+      tester,
+      saldo: () async => throw Exception('caído'),
+      pagar: (_) {},
+    );
+    await tester.pump();
+    expect(find.byKey(const ValueKey('ir-a-pago')), findsNothing);
   });
 }

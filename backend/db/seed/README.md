@@ -28,10 +28,13 @@ verifica, incluido que se pueda iniciar sesión con cada cuenta.
 | Archivo | Contenido |
 |---|---|
 | `persona`, `pasajero`, `cliente`, `cliente_individual` | 4 personas: 2 pasajeros (con su cliente individual), 1 chofer y 1 administrador |
+| `chofer` | La persona 3, asociada a la cuenta `chofer1@vanfull.test`. `chofer` usa `id_persona` como PK/FK; no tiene otro identificador |
 | `cuenta_corriente` | Una cuenta corriente para cada uno de los 2 clientes individuales |
 | `cuenta_acceso`, `cuenta_rol` | Una cuenta por persona. Roles: `pasajero` ×2, `chofer`, `administrador` |
 | `servicio` | Un servicio universitario y uno laboral |
 | `recorrido`, `parada`, `parada_recorrido` | Un recorrido con 3 paradas (nombres y sin coordenadas: son de prueba) |
+| `vehiculo` | Vehículo 1, patente sintética `VF029AA`, capacidad 20 |
+| `viaje` | Viajes 1 a 3 del 30/10/2026 sobre servicio y recorrido 1; horarios 07:30, 12:30 y 18:00, capacidad planificada 18 |
 | `contrasenas-de-prueba.csv` | Contraseña de cada cuenta. **No es una tabla**: el cargador la hashea con bcrypt y la guarda en `cuenta_acceso.hash_contrasena` |
 
 Cuentas: `pasajero1@vanfull.test`, `pasajero2@vanfull.test`, `chofer1@vanfull.test` y
@@ -44,7 +47,6 @@ El REPARTO dice que cada dueño agrega los datos de sus tablas, por PR a esta ca
 
 | Tabla | De quién | Nota |
 |---|---|---|
-| `chofer`, `vehiculo`, `viaje` (alta) | Facundo | La cuenta `chofer1` existe, pero todavía no tiene fila en `chofer`: se agrega con el seed de esa área |
 | `posicion_gps`, `abordaje`, `ausencia`, `nomina_pasajeros`, `integrante_nomina` | Martín | El escenario de la demo cruzada también es suyo |
 | `pago`, `movimiento_cuenta`, `comprobante`, `abono_mensual`, `periodo_abono*` | Facundo | |
 | `tarifa`, `contratacion`, `reserva`, `registro_lista_espera` | Martiniano | No se siembran a propósito: dependen de los pendientes #7 (respaldo de la reserva) y #9 (parámetros de tarifa), y cargarlas ahora sería inventar esa regla |
@@ -52,16 +54,38 @@ El REPARTO dice que cada dueño agrega los datos de sus tablas, por PR a esta ca
 Para sumar tus tablas: agregá el `.csv` y su nombre en `ORDEN` (`cargar.py`), después de las tablas que
 referencia por FK. `tests/test_seed.py` falla si un archivo y `ORDEN` no coinciden.
 
+### Escenarios administrativos propuestos para la demo
+
+Estos datos son una **propuesta de prueba de Facundo**, pendiente de coordinación con Martín y
+Martiniano. Los tres viajes están `programado`; ADJ-03 permite planificarlos incompletos, pero impide
+iniciarlos mientras falte el chofer o el vehículo.
+
+| Viaje | Horario | Chofer | Vehículo | Escenario |
+|---|---|---|---|---|
+| 1 | 07:30 | Persona 3 | Vehículo 1 | Completamente asignado |
+| 2 | 12:30 | `NULL` | Vehículo 1 | Sin chofer |
+| 3 | 18:00 | Persona 3 | `NULL` | Sin vehículo |
+
+Martín puede reutilizar los viajes 1 y 3 en CU-029, porque ambos están asignados a la persona 3. Los
+datos de reservas y contrataciones de Martiniano, y los abordajes, ausencias, posiciones y nóminas de
+Martín, no forman parte de este seed administrativo.
+
 ## Cuidado: el repositorio es público
 
 Las contraseñas de `contrasenas-de-prueba.csv` las puede leer cualquiera. Por eso el cargador **se
 niega a correr contra una base que no sea local** (`localhost`, `127.0.0.1` o `db`).
 
-Para sembrar la base de la demo (Neon), usar un archivo de contraseñas propio, **fuera del repo**:
+Para sembrar la base de la demo (Neon) hacen falta las dos cosas: `--permitir-base-remota` y
+`--contrasenas` con un archivo **fuera del repo**. La bandera sola no alcanza: con el archivo del repo, el
+cargador se niega igual. El archivo se genera con contraseñas aleatorias, que no se imprimen:
 
 ```bash
-python -m db.seed.cargar --contrasenas /ruta/propia.csv --permitir-base-remota
+python -m db.seed.generar_contrasenas /ruta/fuera/del/repo/contrasenas-demo.csv
+python -m db.seed.cargar --permitir-base-remota --contrasenas /ruta/fuera/del/repo/contrasenas-demo.csv
 ```
+
+El comando completo, con Docker y sin escribir la cadena de Neon en ningún archivo, está en
+[`DESPLIEGUE.md`](../../../DESPLIEGUE.md).
 
 ## Detalles que conviene saber
 

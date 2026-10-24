@@ -16,12 +16,14 @@ class DetalleViajeChoferScreen extends StatefulWidget {
     required this.idViaje,
     required this.cargarDetalle,
     this.acciones,
+    this.comprobarUbicacionInicio,
     super.key,
   });
 
   final int idViaje;
   final CargarDetalleViajeChofer cargarDetalle;
   final AccionesEjecucionViaje? acciones;
+  final ComprobarUbicacionInicio? comprobarUbicacionInicio;
 
   @override
   State<DetalleViajeChoferScreen> createState() =>
@@ -38,6 +40,7 @@ class _DetalleViajeChoferScreenState extends State<DetalleViajeChoferScreen> {
       idViaje: widget.idViaje,
       cargarDetalle: widget.cargarDetalle,
       acciones: widget.acciones,
+      comprobarUbicacionInicio: widget.comprobarUbicacionInicio,
     )..addListener(_actualizar);
     _controlador.consultar();
   }
@@ -51,11 +54,13 @@ class _DetalleViajeChoferScreenState extends State<DetalleViajeChoferScreen> {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.idViaje != widget.idViaje ||
         oldWidget.cargarDetalle != widget.cargarDetalle ||
-        oldWidget.acciones != widget.acciones) {
+        oldWidget.acciones != widget.acciones ||
+        oldWidget.comprobarUbicacionInicio != widget.comprobarUbicacionInicio) {
       _controlador.actualizarContexto(
         idViaje: widget.idViaje,
         cargarDetalle: widget.cargarDetalle,
         acciones: widget.acciones,
+        comprobarUbicacionInicio: widget.comprobarUbicacionInicio,
       );
     }
   }

@@ -35,6 +35,7 @@ Cliente-servidor por capas. **La IA no accede a la base de datos**: invoca *tool
 | **Escribir un servicio o un endpoint del backend** | `backend/CONVENCIONES.md` (capas, transacción, errores, pruebas; el ejemplo a copiar es el login) |
 | **Estado de tu área** (hecho, decisiones, pendientes) | `Documentos/Sesiones/PC2/CONTEXTO-<área>.md`; cómo se mantiene: `Documentos/Sesiones/PC2/PROMPT-CONTEXTO-VIVO.md` |
 | Poner en marcha el backend y la base | `README.md` (raíz), «Puesta en marcha» |
+| Desplegar la demo (Neon, Render, Pages): qué variable va dónde | `DESPLIEGUE.md` (raíz) |
 | Línea funcional (RF/RNF/RN/CU) resumida | `Documentos/Documentacion/06-Notas-Ingesta-Drive-2026-09-08.md` |
 | Reglas de diseño de UI | `Documentos/Documentacion/08-Brief-de-Diseno-UI.md` |
 | IA y agentes (AG-01, 13 tools) | `Documentos/Documentacion/07-IA-y-Agentes-Consolidado.md` |
@@ -54,6 +55,11 @@ versionables**. Los `.docx` no se versionan en el repo.
 `openapi_spec_validator` y `jsonschema` es el **Python 3.13** de
 `~/AppData/Local/Programs/Python/Python313/python`. Antes de asumir cualquiera de los dos, comprobar con
 `python -c "import yaml"`. Esto es por máquina: en otra computadora del equipo puede ser distinto.
+
+**Git Bash convierte los argumentos que empiezan con `/`** en rutas de Windows: `--base-href /ProyectoVanFull/`
+llega como `C:/Program Files/Git/ProyectoVanFull/`, y lo mismo pasa con los `-v` y las rutas de `docker run`.
+Anteponer `MSYS_NO_PATHCONV=1` al comando, o correrlo en PowerShell. En la CI (Linux) no pasa. Flutter
+3.47.7 está en `/c/dev/flutter/bin`.
 
 **No hay:** `zip` (usar `zipfile` de Python) · LibreOffice (`soffice`) ni `pdftoppm` → **no se puede renderizar
 un .docx ni un PDF acá** · `pytest` ni `fastapi` **en el Python del shell** → la suite corre **dentro de

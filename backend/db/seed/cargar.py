@@ -23,6 +23,7 @@ from sqlalchemy.engine import make_url
 
 from app.core.config import get_settings
 from app.core.security import hash_contrasena
+from db.seed.generar_contrasenas import esta_en_el_repo
 
 CARPETA = Path(__file__).resolve().parent
 CONTRASENAS = CARPETA / "contrasenas-de-prueba.csv"
@@ -31,6 +32,7 @@ CONTRASENAS = CARPETA / "contrasenas-de-prueba.csv"
 ORDEN = (
     "persona",
     "pasajero",
+    "chofer",
     "cliente",
     "cliente_individual",
     "cuenta_corriente",
@@ -40,6 +42,8 @@ ORDEN = (
     "recorrido",
     "parada",
     "parada_recorrido",
+    "vehiculo",
+    "viaje",
 )
 
 # cuenta_rol.csv usa ids. Los fija la migración inicial, en este orden.
@@ -54,7 +58,11 @@ class ErrorSeed(Exception):
 
 def _dsn_de_settings() -> str:
     url = make_url(get_settings().database_url).set(drivername="postgresql")
-    return url.render_as_string(hide_password=False)
+    # La configuración deja `ssl` para SQLAlchemy; la DSN de asyncpg lo entiende como `sslmode`.
+    parametros = dict(url.query)
+    if "ssl" in parametros:
+        parametros.setdefault("sslmode", parametros.pop("ssl"))
+    return url.set(query=parametros).render_as_string(hide_password=False)
 
 
 def es_base_local(dsn: str) -> bool:
@@ -202,6 +210,14 @@ def main(argv: list[str] | None = None) -> int:
             f"No se carga: la base es '{host}', no local. Las contraseñas del seed están en un "
             "repositorio público; para una base compartida usar --contrasenas con un archivo "
             "propio y --permitir-base-remota.",
+            file=sys.stderr,
+        )
+        return 2
+    # La bandera sola no alcanza: con las contraseñas del repo, la base remota quedaría abierta.
+    if not es_base_local(dsn) and esta_en_el_repo(args.contrasenas):
+        print(
+            "No se carga: contra una base remota, el archivo de --contrasenas tiene que estar "
+            "fuera del repositorio (generarlo con python -m db.seed.generar_contrasenas).",
             file=sys.stderr,
         )
         return 2

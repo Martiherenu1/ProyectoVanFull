@@ -3,7 +3,7 @@
 > Lo mantiene el agente de Martiniano, en el mismo PR que cambia algo. Convención en
 > `PROMPT-CONTEXTO-VIVO.md`. Si algo de acá contradice al código, manda el código: corregir este archivo.
 >
-> **Última actualización: 2026-10-21**
+> **Última actualización: 2026-10-24**
 
 ## Estado
 
@@ -37,8 +37,69 @@ La CI corre en cada PR. En `main` la suite da 300 pruebas; la rama de las tools 
 | Cupo: capacidad del vehículo, si no la planificada, si no 19; la ausencia informada libera el lugar (#28 parcial) | #28 | #70 |
 | Crear la reserva del ocasional, sin tarifa (CU-003): `POST /api/reservas`, 27 pruebas; `cupo_del_viaje` como definición única | #72 | #73 |
 | Tools `crear_reserva` y `cancelar_reserva` de AG-01: `agent/ejecutor.py` las traduce a los servicios de reservas; `crear_reserva` recibe `viaje_id` y `orden_parada` | #77 | #78 |
+| Integración del pasajero: login, Buscar, Confirmar, Mis reservas y Asistente conectados a la API (detalle abajo, en «En curso», hasta limpiar esa sección) | #107 | #108 |
+| Deploy de la demo: Neon + Render (API y sitio estático) + Pages de respaldo, CORS por variable, seed sin contraseñas públicas, `DESPLIEGUE.md` | #116, #119, #122, #125 | #117, #120, #124, #126 |
+| Orden de locks pasajero → viaje → reserva en `cancelar_reserva` y helper `reserva_propia_del_viaje` para el aviso de ausencia (CU-008, de Martín); `CONVENCIONES.md` §8 | #131 | #133 |
 
 ## En curso
+
+**Demo desplegada y ensayada (2026-10-23; #116, #119, #122, #125).** App en **https://vanfull.onrender.com**
+(sitio estático de Render), API en **https://vanfull-api.onrender.com/api** (Render, Docker free, Ohio) y base en
+**Neon** (Postgres 16, us-east-2, endpoint directo); Pages de respaldo. Guía, variables y ensayo: `DESPLIEGUE.md`.
+Neon se sembró con `generar_contrasenas` (las contraseñas viven solo en el CSV de Martiniano, fuera del repo) y
+trae los 3 viajes del 30/10 de #101. Tropiezos resueltos: Render no parte un `sh -c "…"` en el `dockerCommand`
+(→ `backend/arrancar.sh`, #119); la sync del Blueprint falla si la rama `sitio-web` todavía no existe (correr
+**Web** antes y aprobar la sync manual); el sitio estático daba 404 en `/` (→ rewrite `/*` → `/index.html`, #125).
+**Verificado de verdad:** contra los servicios reales, health `up`, CORS (200 desde el sitio y Pages, 400 desde
+otro origen), 401 con la contraseña pública del repo, la disponibilidad del 30/10 desde Neon, y los assets y el
+fallback del sitio; **Martiniano ensayó el flujo completo desde el celular** (login, buscar, reservar, Mis
+reservas, cancelar, asistente, cerrar sesión) y anduvo. **Antes de la demo:** resembrar Neon con `--reiniciar`
+(borra la reserva del ensayo) y despertar la API 5 min antes. **SIN VERIFICAR:** el asistente con un modelo
+real (sin `OPENROUTER_API_KEY` deriva). **Cosmético:** el `<title>` de `index.html` y el `manifest.json` dicen
+«frontend».
+
+**Integración del pasajero (Issue #107, PR de la rama `feat/pasajero-integracion-107`).** Con #87 en `main`, las cuatro
+pantallas del pasajero y el login (#106) quedan **conectadas a la API**: `core/api/auth_api.dart` y `pasajero_api.dart`
+implementan los `typedef` de las pantallas sobre `ApiClient` (400/409 → `ReservaRechazada`, 401 → `CredencialesInvalidas`);
+`screens/pasajero/pasajero_shell.dart` une Buscar → Confirmar, Mis reservas, Asistente y Cuenta (cerrar sesión), y Mis
+reservas se recarga cada vez que se vuelve a ella; `main()` arma el cliente con `--dart-define=API_BASE_URL` y usa
+`SesionApp`, que da la entrada real solo al pasajero (chofer y administración siguen en la portada temporal de
+`RoleRouter`). Cómo correrla: `frontend/README.md`. **Verificado de verdad (2026-10-23):** `flutter analyze` y
+`flutter test` (143), y el flujo en Chrome contra el backend en Docker con el seed: login con contraseña incorrecta
+(mensaje) y correcta, disponibilidad y paradas reales, reserva creada en PostgreSQL (una sola fila `consolidada`),
+Mis reservas con saldo «Al día», cancelación con el motivo del backend, el chat llegando a `/chat` y cerrar sesión.
+**SIN VERIFICAR:** el asistente con un modelo real (`OPENROUTER_API_KEY` vacía: sin modelo `/chat` deriva a una
+persona), en Android/iOS, y los rechazos 409 contra el backend real (solo con pruebas). **Pendiente:** el token no
+se persiste; perfil (CU-001) y pago (CU-014) tienen su párrafo más abajo; el seed no trae viajes (se crean con `POST /viajes` o con el
+seed de la demo, #101). Si la base local de Docker viene de una versión vieja y el login da 500, recrearla con
+`docker compose down -v` y repetir migración y seed.
+
+**Pantalla Pago (pantalla 5, CU-014, Issue #140, rama `feat/pasajero-registrar-pago-cu014-140`).** El PC1 la
+asigna al pasajero, pero `POST /pagos` solo admitía administración y exigía un `id_cliente` que el pasajero no conoce.
+Acordado con Martiniano el 2026-10-24 (backend de Facundo, que lo revisa en el PR): `POST /pagos` acepta el rol
+`pasajero`, el cliente sale de su cliente individual (403 `SIN_PERMISO` si manda otro; 404 `CLIENTE_NO_ENCONTRADO`
+o `CUENTA_CORRIENTE_NO_ENCONTRADA`, sin crear nada) e `id_cliente` pasa a ser opcional en `PagoCreate` (obligatorio
+para administración, 400 si falta; y el que indica administración también debe existir y tener cuenta: mismos dos
+404, a pedido de Facundo en la revisión del PR). Flutter: `screens/pasajero/pago_screen.dart` (importe sugerido con el saldo,
+medio efectivo/transferencia/billetera; Mercado Pago y cuenta corriente no se ofrecen), `models/pasajero/pago.dart`,
+`PasajeroApi.registrarPago` y `leerImporte`/`importeEditable` en `core/format/importe.dart`; se entra con «Registrar
+un pago» bajo el saldo de Mis reservas. El pago queda `PENDIENTE` y el saldo no cambia hasta que administración lo
+confirma (CU-016). `tipo` y `evidencia_pago` siguen rechazados con 400 (#84). **Verificado:** ruff, `pytest` (367)
+y contrato; `flutter analyze` y `flutter test` (340, ya con el perfil); contra el backend en Docker con el seed: `pasajero1` sin
+`id_cliente` → 201 `PENDIENTE` con su cliente, con cliente ajeno → 403, `admin1` sin cliente → 400, y `admin1` lo
+confirma. **SIN VERIFICAR:** la pantalla en Chrome contra el backend (solo pruebas de widget). Los pasajeros 1 y 2
+del seed tienen cuenta corriente; uno que se registra y reserva después, no (recibe el 404).
+
+**Pantalla Flutter Perfil (CU-001, Issue #142), rama `feat/pasajero-perfil-cu001-142`; cubre el «falta perfil»
+del párrafo anterior.** `screens/pasajero/perfil_screen.dart` y `models/pasajero/perfil.dart` reemplazan el
+contenido de la pestaña Cuenta (conserva «Cerrar sesión»). Dos operaciones **inyectables** (`CargarPerfil`,
+`ModificarPerfil`) sobre `GET` y `PATCH /pasajeros/me`; para eso `ApiClient` y `HttpApiClient` ganaron `patch`
+(los dos fakes de las pruebas también). Nombre, apellido y DNI se muestran sin edición (RN-026); correo, teléfono y
+dirección se editan y **solo se manda lo que cambió**; un dato que quedaría vacío no se guarda (el backend no
+admite `null`: omitir deja el valor). 400 y 403 muestran el mensaje del backend; cualquier otra falla, un aviso
+genérico. **No hay verificación del contacto ni foto:** #25 sigue abierto (SMS/WhatsApp, almacenamiento de fotos), así
+que la pantalla edita sin código de verificación, como hoy el endpoint. Verificado: `flutter analyze` y
+`flutter test` (326). **SIN VERIFICAR:** contra el backend real y en un dispositivo o navegador.
 
 **Pantalla Flutter Buscar servicio (CU-002, Issue #90, PR #91), rama `feat/pasajero-buscar-servicio-cu002`.**
 `screens/pasajero/buscar_servicio_screen.dart` y `models/pasajero/` (`DisponibilidadViaje`, `Parada`). Carga
@@ -48,7 +109,7 @@ resolver #8). Estados: esqueleto, vacío, error con reintento, "Sin cupo". Verif
 `flutter test` (40/40). **SIN VERIFICAR:** contra el backend real y en un dispositivo o navegador. **No está
 conectada** al `RoleRouter`: falta el cliente común (#87) y el login (pantalla 1).
 
-Después: el login, la navegación entre las pantallas del pasajero y Pago (pantalla 5, de Facundo). El tipo de servicio no se muestra
+Después: el login y la navegación entre las pantallas del pasajero (Pago quedó en #140). El tipo de servicio no se muestra
 (la respuesta trae solo `id_servicio`; haría falta `GET /servicios`).
 
 **Pantalla Flutter Confirmar reserva (CU-003, Issue #92), rama `feat/pasajero-confirmar-reserva-cu003`, apilada
@@ -72,10 +133,10 @@ rojo) y la lista fallan y se reintentan por separado. Cancelar pide confirmació
 `VIAJE_NO_CANCELABLE` se muestran con su motivo (el adaptador debe lanzar `ReservaRechazada`), y la cancelada
 muestra el `motivo` que devuelve el backend. **No muestra la ventana de cancelación de RN-017** (“Podés cancelar hasta
 …” del brief): hoy se puede cancelar mientras el viaje esté programado y el crédito no existe (#75), así que mostrar
-una hora prometería algo que no se aplica; la `Reserva` tampoco informa el estado del viaje. **Abierto:** si el pasajero
-no tiene cliente individual todavía (no reservó nunca), `GET /pasajeros/me/deuda` responde 404
-`CLIENTE_NO_ENCONTRADO` y la pantalla muestra «No pudimos cargar tu saldo»; decidir con Facundo si ese caso es
-«Al día». Verificado: `flutter analyze` y `flutter test` (79/79). **SIN VERIFICAR:** contra el backend real y en
+una hora prometería algo que no se aplica; la `Reserva` tampoco informa el estado del viaje. **Resuelto el 2026-10-24
+(Issue #137):** si el pasajero no tiene cliente individual todavía (no reservó nunca), `GET /pasajeros/me/deuda`
+responde 404 `CLIENTE_NO_ENCONTRADO` y `PasajeroApi.cargarDeuda` lo traduce a «Al día» (sin cuenta corriente no
+hay deuda); el backend de Facundo no cambia. Verificado: `flutter analyze` y `flutter test` (79/79). **SIN VERIFICAR:** contra el backend real y en
 un dispositivo o navegador; no está conectada (#87 y el login).
 
 **Pantalla Flutter Asistente (CU-011, Issue #96), rama `feat/pasajero-asistente-cu011`, apilada sobre la de Mis reservas
@@ -113,6 +174,10 @@ conectada (#87 y el login).
 | 2026-10-20 | **CU-003 (Issue #72):** el ocasional queda `consolidada` al reservar (la aceptación es automática: AC7-02 y #33); su respaldo es **una contratación por reserva**, sin `id_tarifa` ni `importe_acordado`, y no genera deuda. Si el pasajero no tiene cliente individual se crea. Decisiones mías al implementar, a confirmar | `services/reservas.py`, Issue #72 |
 | 2026-10-20 | **CU-004 (Issue #74):** cancelar no otorga crédito ni cobra penalidad, porque ninguna de las 35 tablas guarda el crédito de RN-017. Se puede cancelar mientras el viaje esté `programado`, también fuera de las 18:00 del día anterior: esa referencia solo decide el crédito y el caso fuera de término está sin definir (CU-004 en 06-Notas §6.3), así que solo cambia el `motivo`. Un viaje cancelado, en curso o finalizado responde 409. Decisiones mías al implementar, a confirmar | `services/reservas.py`, Issue #74 |
 | 2026-10-20 | Una reserva cancelada del mismo viaje no se reactiva ni se pisa: responde 409 `RESERVA_CANCELADA_PREVIA`, porque MR-R15 deja una fila por pasajero y viaje y reactivarla no está definido (AC28-08) | `services/reservas.py` |
+| 2026-10-23 | **Deploy (#116):** la migración corre en el arranque del servicio de Render (`backend/arrancar.sh`: `alembic upgrade head` y después uvicorn; va en un script porque Render no parte un `sh -c "…"` como un shell, #119), porque el plan free no tiene shell ni jobs; es idempotente. Pages se publica a mano (`workflow_dispatch`); la API, cuando la CI de `main` pasa. Fuera de desarrollo, sin `CORS_ORIGINS` la API no arranca. CORS sin `allow_credentials`: el token va en `Authorization` | `render.yaml`, `DESPLIEGUE.md` |
+| 2026-10-23 | En una base remota, el seed exige `--permitir-base-remota` **y** un archivo de contraseñas fuera del repo (la bandera sola ya no alcanza); las contraseñas de la demo se generan al azar y no se imprimen | `db/seed/README.md`, `DESPLIEGUE.md` |
+| 2026-10-23 | **La URL de la demo es `vanfull.onrender.com`** (sitio estático de Render), no la de Pages, que muestra el usuario de GitHub (#122). Flutter se compila en GitHub Actions (workflow **Web**) y se publica en la rama `sitio-web`, que Render sirve sin compilar; Pages queda de respaldo | `render.yaml`, `DESPLIEGUE.md` |
+| 2026-10-24 | **Orden de locks: pasajero → viaje → reserva** en creación, cancelación, ausencia y abordaje; ejecución del viaje toma solo el viaje y no adquiere pasajero ni reserva después. Propuesta de Martín (CU-008), confirmada por Martiniano; Facundo pendiente. `cancelar_reserva` se adaptó (antes bloqueaba solo la reserva) | `services/reservas.py`, `CONVENCIONES.md` §8, #131 |
 
 ## Pendientes
 
@@ -129,7 +194,6 @@ superada en esos seis puntos.
 | `Reserva` también la devuelven `POST /reservas` y `ResultadoCancelacion` (CU-003 y 004, ya hechos) y `cambio-parada` (CU-005, fuera del PC2): `services/reservas.py::_a_schema(reserva, viaje)` arma los campos del viaje con el `JOIN` | #31 (cerrado) | Aviso a Martín y Facundo en el PR (CONTRIBUTING §1.8 fila 2) |
 | Crédito de RN-017: la cancelación de un ocasional en término genera un crédito para otro viaje del mismo mes, que se pierde si no se usa. Las 35 tablas no lo guardan (el DER v0.1 tenía `CREDITO_REINTEGRO`). Tampoco hay devolución de RN-018 ni reintegro de RN-019 | #75 | PENDIENTE DE VALIDACIÓN con Martín: dónde se guarda (PR de modelo, §1.9) y la cancelación del ocasional fuera de término |
 | Qué ve el pasajero de una reserva cuyo viaje se cancela: hoy `Reserva.estado` no cambia y no se informa el estado del viaje. CU-018 solo crea viajes en el contrato | — | PENDIENTE DE VALIDACIÓN con Martín; sin Issue todavía |
-| `Disponibilidad.horario` devuelve `null` si el viaje no tiene horario pero el contrato no lo declara `nullable` (`Reserva.horario` sí) | — | Corrección chica de contrato; no se tocó para no ampliar el PR de #31 |
 | Disponibilidad (#28). **En `main` (PR #70):** capacidad = vehículo asignado, si no `capacidad_planificada`, si no 19 (AC28-01 a 03); una fila de `ausencia` libera el lugar de esa reserva consolidada (AC28-06); un viaje `programado` se ofrece aunque haya pasado su hora (AC28-05). **Sigue pendiente:** reservar en viajes `en_curso` (AC28-04; el modelo no guarda qué paradas se alcanzaron y el GPS solo no alcanza, PV28-01), recuperar el lugar tras una ausencia (AC28-08, PV28-04), la sobrecapacidad al asignar un vehículo (PV28-02, Facundo) y las carreras al reservar (CU-003) | #28 | Parcial. **Confirmado por Martín el 2026-10-20 (opción a):** cada fila de `ausencia` es un aviso voluntario del pasajero (CU-008); `POST /ausencias` no registra inasistencias sin aviso (RN-022) ni se generan ausencias por falta de abordaje, así que el cálculo de #70 no necesita distinguir tipos (PT28-18 resuelto en ese sentido). Siguen pendientes la recuperación del lugar y las paradas pendientes. CU-003 valida con la misma función |
 | Persistencia de las conversaciones de `/chat`: se pierden al reiniciar y no se comparten entre procesos. Dos mensajes simultáneos de una misma conversación se pisan (gana el último en guardar) | #42 | Pendiente de diseño: hace falta una tabla, y las 35 no incluyen una |
 | Qué recibe la persona a la que se deriva (RF-032): hoy `derivar_humano` solo marca la respuesta de `/chat` | #42 | Sin definir en la línea base |
@@ -205,6 +269,6 @@ superada en esos seis puntos.
 **Qué necesito de las demás áreas:**
 - Martín: confirmar `hash_contrasena` en el DER y resolver #7, #8 y #9; el escenario de la demo cruzada y los
   CSV de sus tablas.
-- Facundo: el servicio de deuda (`GET /pasajeros/me/deuda`) que usa la tool de AG-01 y la pantalla, y el
-  backend de pagos que usa la pantalla de pago. Sumar `chofer`, `vehiculo` y `viaje` al seed: la cuenta
+- Facundo: el servicio de deuda (`GET /pasajeros/me/deuda`) que usa la tool de AG-01 y la pantalla, y revisar
+  el cambio de `POST /pagos` para el pasajero (#140). Sumar `chofer`, `vehiculo` y `viaje` al seed: la cuenta
   `chofer1` todavía no tiene fila en `chofer`.

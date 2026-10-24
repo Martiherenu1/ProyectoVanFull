@@ -115,7 +115,34 @@ async def crear(
   `docker compose run --rm backend pytest -q`.
 - Antes de commitear: `ruff check` y `ruff format --check` **solo sobre tus archivos**.
 
-## 8. Lo que no se hace
+## 8. Orden de bloqueos
+
+Las operaciones que escriben sobre un pasajero, su viaje o su reserva toman los locks
+(`with_for_update`) **siempre en este orden: pasajero → viaje → reserva**. Dos operaciones que
+toman los mismos locks en orden distinto pueden esperarse una a la otra para siempre (deadlock);
+con el mismo orden, la segunda solo espera su turno.
+
+| Operación | Locks que toma | Servicio |
+|---|---|---|
+| Crear reserva | pasajero → viaje (la reserva todavía no existe) | `reservas.crear_reserva` |
+| Cancelar reserva | pasajero → viaje → reserva | `reservas.cancelar_reserva` |
+| Aviso de ausencia (CU-008) | pasajero → viaje → reserva | por escribir |
+| Abordaje | pasajero → viaje → reserva | por escribir |
+| Inicio y finalización del viaje | **solo el viaje** | `ejecucion_viajes` |
+
+- Se toma solo lo que la operación necesita, pero **nunca uno anterior después de uno posterior**:
+  quien tiene el viaje no pide después el pasajero.
+- Ejecución del viaje toma únicamente el viaje y **no adquiere pasajero ni reserva después**. Si
+  alguna vez necesita leer o modificar reservas, hay que tomar primero el pasajero de cada una y
+  eso rompe el orden: se discute antes en un Issue.
+- Si se conoce la reserva por su id y hace falta saber su viaje, se lee sin bloquear, se toman los
+  locks en orden y se **vuelve a leer** la reserva ya bloqueada (ver `cancelar_reserva`).
+- `reserva_propia_del_viaje(..., bloquear=True)` toma el último lock del orden; el llamador ya tiene
+  que haber bloqueado pasajero y viaje.
+- Cada operación nueva que bloquee suma su prueba de concurrencia (ver
+  `tests/test_cancelar_reserva.py`).
+
+## 9. Lo que no se hace
 
 - Reglas de negocio en un router, en el frontend o en el prompt del agente.
 - `relationship()` en los modelos: los servicios consultan explícito.

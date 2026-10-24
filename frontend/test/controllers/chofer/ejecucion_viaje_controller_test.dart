@@ -23,10 +23,16 @@ AccionesEjecucionViaje fuentes({
   onRechazo: rechazo,
 );
 
+Future<CondicionesUbicacionInicio> ubicacionHabilitada() async =>
+    const CondicionesUbicacionInicio(
+      servicioActivado: true,
+      permisoConcedido: true,
+    );
 void main() {
   for (final estado in ['programado', 'en_curso', 'finalizado', 'cancelado']) {
     test('habilita únicamente la acción de $estado', () async {
       final c = EjecucionViajeController(
+        comprobarUbicacionInicio: ubicacionHabilitada,
         idViaje: 41,
         cargarDetalle: (_) async => snapshot(estado),
         acciones: fuentes(),
@@ -48,6 +54,7 @@ void main() {
       var inicios = 0;
       var fines = 0;
       final c = EjecucionViajeController(
+        comprobarUbicacionInicio: ubicacionHabilitada,
         idViaje: 41,
         cargarDetalle: (_) => ++lecturas == 1
             ? Future.value(snapshot('programado'))
@@ -67,6 +74,9 @@ void main() {
       addTearDown(c.dispose);
       await c.consultar();
       final operacion = c.iniciar();
+      await Future<void>.delayed(
+        Duration.zero,
+      ); // El POST sucede despues del control asincrono.
       await c.iniciar();
       await c.finalizar();
       await c.consultar();
@@ -92,6 +102,7 @@ void main() {
     () async {
       var lecturas = 0;
       final c = EjecucionViajeController(
+        comprobarUbicacionInicio: ubicacionHabilitada,
         idViaje: 41,
         cargarDetalle: (_) async {
           if (++lecturas > 1) throw StateError('lectura fallida');
@@ -120,6 +131,7 @@ void main() {
       viaje.remove('id_vehiculo');
       var llamados = 0;
       final c = EjecucionViajeController(
+        comprobarUbicacionInicio: ubicacionHabilitada,
         idViaje: 41,
         cargarDetalle: (_) async => OperacionAsignada.fromJson(json),
         acciones: fuentes(
@@ -147,6 +159,7 @@ void main() {
         final avisos = <RechazoOperacionViaje>[];
         var lecturas = 0;
         final c = EjecucionViajeController(
+          comprobarUbicacionInicio: ubicacionHabilitada,
           idViaje: 41,
           cargarDetalle: (_) async {
             lecturas++;
@@ -192,6 +205,7 @@ void main() {
         }
 
         final c = EjecucionViajeController(
+          comprobarUbicacionInicio: ubicacionHabilitada,
           idViaje: 41,
           cargarDetalle: (_) async {
             consultas++;
@@ -234,6 +248,7 @@ void main() {
       var n = 0;
       var fallarConsulta = false;
       final c = EjecucionViajeController(
+        comprobarUbicacionInicio: ubicacionHabilitada,
         idViaje: 41,
         cargarDetalle: (_) async {
           if (fallarConsulta) throw StateError('red');
@@ -271,6 +286,7 @@ void main() {
         var actual = 'programado';
         var posts = 0;
         final c = EjecucionViajeController(
+          comprobarUbicacionInicio: ubicacionHabilitada,
           idViaje: 41,
           cargarDetalle: (_) async => snapshot(actual),
           acciones: fuentes(
@@ -297,6 +313,7 @@ void main() {
     () async {
       var actual = 'en_curso';
       final c = EjecucionViajeController(
+        comprobarUbicacionInicio: ubicacionHabilitada,
         idViaje: 41,
         cargarDetalle: (_) async => snapshot(actual),
         acciones: fuentes(
@@ -320,6 +337,7 @@ void main() {
         var consultas = 0;
         var posts = 0;
         final c = EjecucionViajeController(
+          comprobarUbicacionInicio: ubicacionHabilitada,
           idViaje: 41,
           cargarDetalle: (_) async {
             consultas++;
@@ -355,6 +373,7 @@ void main() {
     'ID incorrecto en POST se considera incierto y no expone otro viaje',
     () async {
       final c = EjecucionViajeController(
+        comprobarUbicacionInicio: ubicacionHabilitada,
         idViaje: 41,
         cargarDetalle: (_) async => snapshot('programado'),
         acciones: fuentes(
@@ -377,6 +396,7 @@ void main() {
         () async {
           final post = Completer<ViajeResumen>();
           final c = EjecucionViajeController(
+            comprobarUbicacionInicio: ubicacionHabilitada,
             idViaje: 41,
             cargarDetalle: (_) async => snapshot('programado'),
             acciones: fuentes(inicio: (_) => post.future),
@@ -384,8 +404,12 @@ void main() {
           addTearDown(c.dispose);
           await c.consultar();
           final operacion = c.iniciar();
+          await Future<void>.delayed(
+            Duration.zero,
+          ); // El POST sucede despues del control asincrono.
           final id = mismoId ? 41 : 42;
           c.actualizarContexto(
+            comprobarUbicacionInicio: ubicacionHabilitada,
             idViaje: id,
             cargarDetalle: (_) async => snapshot('programado', id: id),
             acciones: fuentes(),
@@ -421,6 +445,7 @@ void main() {
       var lecturas = 0;
       var notificaciones = 0;
       final c = EjecucionViajeController(
+        comprobarUbicacionInicio: ubicacionHabilitada,
         idViaje: 41,
         cargarDetalle: (_) async {
           lecturas++;
@@ -430,6 +455,9 @@ void main() {
       )..addListener(() => notificaciones++);
       await c.consultar();
       final operacion = c.iniciar();
+      await Future<void>.delayed(
+        Duration.zero,
+      ); // El POST sucede despues del control asincrono.
       c.dispose();
       final anteriores = notificaciones;
       if (resultado == 'exito') {
@@ -446,12 +474,14 @@ void main() {
   test('lectura anterior no sobrescribe el viaje cambiado', () async {
     final anterior = Completer<OperacionAsignada?>();
     final c = EjecucionViajeController(
+      comprobarUbicacionInicio: ubicacionHabilitada,
       idViaje: 41,
       cargarDetalle: (_) => anterior.future,
     );
     addTearDown(c.dispose);
     final lectura = c.consultar();
     c.actualizarContexto(
+      comprobarUbicacionInicio: ubicacionHabilitada,
       idViaje: 42,
       cargarDetalle: (_) async => snapshot('finalizado', id: 42),
       acciones: fuentes(),
@@ -467,6 +497,7 @@ void main() {
     var posts = 0;
     var lecturas = 0;
     final c = EjecucionViajeController(
+      comprobarUbicacionInicio: ubicacionHabilitada,
       idViaje: 41,
       cargarDetalle: (_) async {
         lecturas++;
@@ -486,6 +517,7 @@ void main() {
     await c.repetir();
     await c.consultar();
     c.actualizarContexto(
+      comprobarUbicacionInicio: ubicacionHabilitada,
       idViaje: 42,
       cargarDetalle: (_) async {
         lecturas++;
@@ -503,6 +535,7 @@ void main() {
         final antigua = Completer<OperacionAsignada?>();
         var n = 0;
         final c = EjecucionViajeController(
+          comprobarUbicacionInicio: ubicacionHabilitada,
           idViaje: 41,
           cargarDetalle: (_) =>
               ++n == 1 ? Future.value(snapshot('programado')) : antigua.future,
@@ -514,6 +547,7 @@ void main() {
         await Future<void>.delayed(Duration.zero);
         expect(c.fase, FaseDetalleViaje.recargando);
         c.actualizarContexto(
+          comprobarUbicacionInicio: ubicacionHabilitada,
           idViaje: 41,
           cargarDetalle: (_) async => snapshot('finalizado'),
           acciones: fuentes(),
@@ -572,6 +606,7 @@ void main() {
         }
 
         final c = EjecucionViajeController(
+          comprobarUbicacionInicio: ubicacionHabilitada,
           idViaje: 41,
           cargarDetalle: (_) async {
             lecturas++;
@@ -613,6 +648,7 @@ void main() {
     var lecturas = 0;
     final actualizado = snapshot('finalizado');
     final c = EjecucionViajeController(
+      comprobarUbicacionInicio: ubicacionHabilitada,
       idViaje: 41,
       cargarDetalle: (_) async =>
           ++lecturas == 1 ? snapshot('programado') : actualizado,
@@ -660,6 +696,7 @@ void main() {
             },
           );
           final c = EjecucionViajeController(
+            comprobarUbicacionInicio: ubicacionHabilitada,
             idViaje: 41,
             cargarDetalle: cargar,
             acciones: acciones,
@@ -667,11 +704,15 @@ void main() {
           addTearDown(c.dispose);
           await c.consultar();
           final operacion = c.iniciar();
+          await Future<void>.delayed(
+            Duration.zero,
+          ); // El POST sucede despues del control asincrono.
           await Future<void>.delayed(Duration.zero);
           if (recargaFallida) await operacion;
           expect(c.viajeConfirmado, same(confirmado));
           final contextoAnterior = c.contexto;
           c.actualizarContexto(
+            comprobarUbicacionInicio: ubicacionHabilitada,
             idViaje: 41,
             cargarDetalle: cambioFuente ? (_) => nueva.future : cargar,
             acciones: cambioFuente ? acciones : fuentes(),
@@ -714,6 +755,7 @@ void main() {
   test('cambiar de viaje limpia la confirmación del viaje anterior', () async {
     var lecturas = 0;
     final c = EjecucionViajeController(
+      comprobarUbicacionInicio: ubicacionHabilitada,
       idViaje: 41,
       cargarDetalle: (_) async {
         if (++lecturas == 1) return snapshot('programado');
@@ -726,6 +768,7 @@ void main() {
     await c.iniciar();
     expect(c.viajeConfirmado!.estado, EstadoViaje.finalizado);
     c.actualizarContexto(
+      comprobarUbicacionInicio: ubicacionHabilitada,
       idViaje: 42,
       cargarDetalle: (_) async => snapshot('programado', id: 42),
       acciones: fuentes(),

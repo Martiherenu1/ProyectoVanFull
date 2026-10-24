@@ -1,0 +1,122 @@
+# Publica Flutter Web (Issues #116 y #122). Guía completa en DESPLIEGUE.md.
+# Se corre a mano (Actions → Web → Run workflow), así se elige qué sale después del freeze.
+# Compila dos veces, porque cada sitio vive en una ruta distinta:
+#   - Render (https://vanfull.onrender.com): en la raíz. Se publica en la rama `sitio-web`, que Render
+#     sirve tal cual (render.yaml). Es la URL de la demo.
+#   - GitHub Pages (https://<usuario>.github.io/<repositorio>/): de respaldo.
+# Requiere: Settings → Pages → Source «GitHub Actions», y la variable del repo API_BASE_URL
+# (Settings → Secrets and variables → Actions → Variables). No es secreta: queda en el JS publicado.
+name: Web
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+# Un despliegue a la vez; no se cancela uno a medio publicar.
+concurrency:
+  group: web
+  cancel-in-progress: false
+
+env:
+  API_BASE_URL: ${{ vars.API_BASE_URL }}
+
+jobs:
+  verificar:
+    name: Verificar API_BASE_URL
+    runs-on: ubuntu-latest
+    steps:
+      - run: |
+          case "$API_BASE_URL" in
+            https://*/api) echo "API: $API_BASE_URL" ;;
+            *) echo "::error::La variable API_BASE_URL tiene que ser https://<servicio>.onrender.com/api (está: '$API_BASE_URL')."; exit 1 ;;
+          esac
+
+  render:
+    name: Build para Render y rama sitio-web
+    needs: verificar
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    # Escribe la rama `sitio-web`.
+    permissions:
+      contents: write
+    defaults:
+      run:
+        working-directory: frontend
+    steps:
+      - uses: actions/checkout@v4
+
+      # La misma versión que la CI.
+      - name: Configurar Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          flutter-version: "3.47.7"
+          cache: true
+
+      - name: Instalar dependencias
+        run: flutter pub get --enforce-lockfile
+
+      - name: flutter build web
+        run: flutter build web --release --base-href / --dart-define=API_BASE_URL="$API_BASE_URL"
+
+      # Un solo commit, sin historia: la rama es el sitio compilado y nada más. Solo la escribe este
+      # workflow; nadie trabaja sobre ella, por eso se reemplaza con --force.
+      - name: Publicar en la rama sitio-web
+        working-directory: frontend/build/web
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          git init -q -b sitio-web
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git commit -q -m "Sitio web compilado de ${GITHUB_SHA::7}"
+          git push -q -f "https://x-access-token:${GH_TOKEN}@github.com/${GITHUB_REPOSITORY}.git" sitio-web
+
+  pages:
+    name: Build para GitHub Pages
+    needs: verificar
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    defaults:
+      run:
+        working-directory: frontend
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Configurar Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          flutter-version: "3.47.7"
+          cache: true
+
+      - name: Instalar dependencias
+        run: flutter pub get --enforce-lockfile
+
+      # Pages sirve el sitio en /<repositorio>/, no en la raíz del dominio.
+      - name: flutter build web
+        run: >-
+          flutter build web --release
+          --base-href "/${{ github.event.repository.name }}/"
+          --dart-define=API_BASE_URL="$API_BASE_URL"
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: frontend/build/web
+
+  publicar-pages:
+    name: Publicar en Pages
+    needs: pages
+    runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.publicacion.outputs.page_url }}
+    steps:
+      - id: publicacion
+        uses: actions/deploy-pages@v4

@@ -82,6 +82,26 @@ async def obtener_reserva_del_pasajero(
     return _a_schema(*fila)
 
 
+async def reserva_propia_del_viaje(
+    db: AsyncSession, usuario: UsuarioActual, id_viaje: int, *, bloquear: bool = False
+) -> ReservaModelo | None:
+    """La reserva del llamador en un viaje, sea cual sea su estado; `None` si no tiene.
+
+    Es para otros servicios de esta área (el aviso de ausencia, CU-008): usa la sesión del llamador
+    y no hace `commit`, así la lectura y lo que el llamador escriba después son una sola
+    transacción. No decide nada sobre el estado: eso es de quien la llama.
+
+    `bloquear=True` toma el lock de la fila, que es el **último** del orden pasajero → viaje →
+    reserva (CONVENCIONES.md §8): el llamador ya tiene que haber bloqueado los dos primeros.
+    """
+    consulta = select(ReservaModelo).where(
+        ReservaModelo.id_pasajero == usuario.id_persona, ReservaModelo.id_viaje == id_viaje
+    )
+    if bloquear:
+        consulta = consulta.with_for_update()
+    return await db.scalar(consulta)
+
+
 async def _cliente_individual_del_pasajero(db: AsyncSession, id_persona: int) -> int:
     """El cliente que contrata en nombre del pasajero; si todavía no existe, se crea.
 
@@ -237,22 +257,30 @@ async def cancelar_reserva(
     solo. Se puede cancelar mientras el viaje está `programado`, fuera del término de RN-017 también:
     esa ventana solo decide el crédito, que todavía no se otorga (Issue #74).
 
-    Se bloquea la fila de la reserva: dos cancelaciones simultáneas no pueden pasar las dos.
+    Se bloquean, en este orden, el pasajero, el viaje y la reserva (CONVENCIONES.md §8): dos
+    cancelaciones simultáneas no pasan las dos, y una cancelación no se cruza con el inicio del
+    viaje (que bloquea el viaje) ni con una reserva o un aviso de ausencia del mismo pasajero.
     """
-    fila = (
-        await db.execute(
-            select(ReservaModelo, Viaje)
-            .join(Viaje, Viaje.id_viaje == ReservaModelo.id_viaje)
-            .where(
-                ReservaModelo.id_reserva == id_reserva,
-                ReservaModelo.id_pasajero == usuario.id_persona,
-            )
-            .with_for_update(of=ReservaModelo)
-        )
-    ).one_or_none()
-    if fila is None:
+    de_la_reserva = (
+        ReservaModelo.id_reserva == id_reserva,
+        ReservaModelo.id_pasajero == usuario.id_persona,
+    )
+    # El viaje se conoce por la reserva: se lee sin bloquear solo para saber cuál bloquear. Ajena e
+    # inexistente responden igual (404), antes de tomar ningún lock.
+    id_viaje = await db.scalar(select(ReservaModelo.id_viaje).where(*de_la_reserva))
+    if id_viaje is None:
         raise ApiError(404, "RESERVA_NO_ENCONTRADA", "La reserva no existe.")
-    reserva, viaje = fila
+
+    await db.scalar(
+        select(Pasajero.id_persona)
+        .where(Pasajero.id_persona == usuario.id_persona)
+        .with_for_update()
+    )
+    viaje = await db.scalar(select(Viaje).where(Viaje.id_viaje == id_viaje).with_for_update())
+    # Se vuelve a leer con el lock: lo anterior pudo cambiar mientras se esperaba el turno.
+    reserva = await db.scalar(select(ReservaModelo).where(*de_la_reserva).with_for_update())
+    if reserva is None:
+        raise ApiError(404, "RESERVA_NO_ENCONTRADA", "La reserva no existe.")
 
     if reserva.estado == "cancelada":
         raise ApiError(409, "RESERVA_NO_CANCELABLE", "La reserva ya estaba cancelada.")

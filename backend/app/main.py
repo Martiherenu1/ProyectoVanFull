@@ -4,6 +4,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.core.config import get_settings
+from app.core.cors import opciones_cors
 from app.core.errors import registrar_manejadores
 from app.routers import (
     auth,
@@ -28,11 +29,11 @@ app = FastAPI(
     "el backend gobierna reglas de negocio, cupos, permisos y pagos.",
 )
 
-# CORS: Flutter Web consume esta API. Ajustar orígenes al desplegar.
+# CORS: Flutter Web consume esta API desde otro origen (GitHub Pages en la demo). Sin credenciales
+# del navegador: el token viaja en `Authorization`, no en cookies.
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
-    allow_credentials=True,
+    **opciones_cors(settings),
     allow_methods=["*"],
     allow_headers=["*"],
 )

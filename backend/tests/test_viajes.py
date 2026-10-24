@@ -88,6 +88,89 @@ def _datos_validos(entorno) -> dict:
     }
 
 
+def _viaje_para_listado(
+    entorno,
+    *,
+    fecha="2026-10-30",
+    horario="07:30",
+    estado="programado",
+    asignado=False,
+) -> int:
+    return _uno(
+        entorno["base"],
+        "INSERT INTO viaje (id_servicio, id_recorrido, id_vehiculo, id_chofer, fecha, "
+        "horario, sentido, estado) VALUES ($1, $2, $3, $4, $5::text::date, $6::text::time, "
+        "'IDA', $7) RETURNING id_viaje",
+        entorno["id_servicio"],
+        entorno["id_recorrido"],
+        entorno["id_vehiculo"] if asignado else None,
+        entorno["id_chofer"] if asignado else None,
+        fecha,
+        horario,
+        estado,
+    )
+
+
+def test_administrador_lista_todos_los_estados_en_orden(entorno):
+    sin_horario = _viaje_para_listado(entorno, horario=None, estado="cancelado")
+    tarde = _viaje_para_listado(entorno, horario="18:00", estado="finalizado")
+    temprano_1 = _viaje_para_listado(entorno, estado="programado", asignado=True)
+    temprano_2 = _viaje_para_listado(entorno, estado="en_curso")
+    _viaje_para_listado(entorno, fecha="2026-10-31")
+
+    respuesta = entorno["http"].get(f"{RUTA}?fecha=2026-10-30", headers=_con(["administrador"]))
+
+    assert respuesta.status_code == 200
+    filas = respuesta.json()
+    assert [fila["id_viaje"] for fila in filas] == [temprano_1, temprano_2, tarde, sin_horario]
+    assert {fila["estado"] for fila in filas} == {
+        "programado",
+        "en_curso",
+        "finalizado",
+        "cancelado",
+    }
+    assert filas[0]["id_vehiculo"] == entorno["id_vehiculo"]
+    assert filas[0]["id_chofer"] == entorno["id_chofer"]
+    assert "id_vehiculo" not in filas[1]
+    assert "id_chofer" not in filas[1]
+    assert "horario" not in filas[-1]
+
+
+def test_dueno_recibe_lista_vacia_si_no_hay_viajes(entorno):
+    respuesta = entorno["http"].get(f"{RUTA}?fecha=2026-10-30", headers=_con(["dueno"]))
+
+    assert respuesta.status_code == 200
+    assert respuesta.json() == []
+
+
+@pytest.mark.parametrize(
+    "consulta",
+    [
+        "",
+        "?fecha=",
+        "?fecha=2026-02-30",
+        "?fecha=30-10-2026",
+        "?fecha=2026-10-30T00:00:00",
+    ],
+)
+def test_fecha_obligatoria_y_valida_para_listar(entorno, consulta):
+    respuesta = entorno["http"].get(f"{RUTA}{consulta}", headers=_con(["administrador"]))
+
+    assert respuesta.status_code == 400
+    assert respuesta.json()["error"]["codigo"] == "VALIDACION"
+
+
+@pytest.mark.parametrize(
+    ("headers", "estado", "codigo"),
+    [({}, 401, "NO_AUTENTICADO"), (_con(["pasajero"]), 403, "SIN_PERMISO")],
+)
+def test_solo_administrador_o_dueno_pueden_listar(entorno, headers, estado, codigo):
+    respuesta = entorno["http"].get(f"{RUTA}?fecha=2026-10-30", headers=headers)
+
+    assert respuesta.status_code == estado
+    assert respuesta.json()["error"]["codigo"] == codigo
+
+
 def test_el_servicio_crea_el_viaje_programado_y_su_evento(entorno):
     async def operacion(db):
         return await crear_viaje(

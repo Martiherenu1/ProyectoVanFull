@@ -13,6 +13,62 @@
 - Se trasladan únicamente el ajuste visual y sus pruebas: altura de texto + 8 px y crecimiento con nombres largos al 200 %, sin recorte y con desplazamiento hasta nómina. Verificaciones nuevas sobre esta combinación: pub get offline con lockfile exigido correcto; formato final de dos Dart sin cambios; analyze sin issues (119,6 s); 117 pruebas pertinentes aprobadas, 0 fallidas/omitidas (detalle, acciones y coordinador; 30 s). Log local: frontend/build-densidad-main-tests.log. Git diff --check correcto; dependencias/lockfile iguales a main. No se presenta la evidencia anterior de 51 como ejecución sobre main actual. La suite completa local anterior interrumpida no acredita aprobación completa.
 - Propuesta con `Refs #123`, sin cerrar #123/#64; borrador local conforme a plantilla. Preview, trabajos previos y PR abiertas preservados. Sin backend/HTTP real, instalación en teléfono, demo ni mensajes a terceros.
 
+## Actualización de PR #121 — 24/10/2026
+
+- Worktree de #118 limpio y coincidente con HEAD remoto `0c98c1afbebdd55459894ca6be8696d3bd85434c`
+  antes del merge. Se incorpora origin/main `f1f78ffbd98fd9d7601a5a50a37af9d5868316b5`
+  mediante merge, sin rebase ni force. Único conflicto: contexto; ambos historiales conservados.
+- #115 ya integrada en main, al igual que #87/#103/#109. Sus cambios de control previo y
+  dependencias se incorporan sin modificaciones propias. Adaptador HTTP y sus pruebas intactos;
+  el diff revisado de #121 contra main contiene solo servicio, pruebas y contexto de #118.
+- Combinación actualizada: pub get offline con lockfile exigido correcto; formato de 14 Dart,
+  cero cambios; analyze sin problemas (38,6 s); 403 pruebas aprobadas, 0 fallidas/omitidas
+  (87 propias + 316 de base; 104 s). Avisos preexistentes de Google Fonts sin fallas.
+  Primer intento de test falló al limpiar build/unit_test_assets, antes de ejecutar casos;
+  directorio preservado en .dart_tool y suite repetida correctamente. Logs ignorados
+  frontend/cu030-121-merge-{analyze,test,test-preparacion-fallida}.log.
+- Las 349 pruebas y la CI de `0c98c1a` son evidencia histórica. La CI remota del nuevo HEAD
+  y la conservación de la aprobación se registran tras el push en la descripción de PR #121.
+- Aprobación de Facundo observada antes de actualizar: APPROVED sobre `0c98c1a`, 24/10/2026;
+  se comprobará su conservación en GitHub después del push, sin atribuirla al nuevo código/base.
+- PR #121 abierta con cierre exclusivo de #118, sin merge autorizado. Sin POST reales, demo,
+  integración productiva ni dispositivo; CU-030 sigue parcial. Otros worktrees preservados.
+- Los registros inferiores son históricos: referencias a PR abiertas, bases anteriores y
+  publicaciones pendientes describen sus fechas y no sustituyen este resumen vigente.
+
+## Registro histórico — adaptador HTTP CU-030 / #118, 23/10/2026
+
+- Entrega revisada, con commits y publicación autorizados el 23/10/2026 por Martín.
+  Rama `feat/chofer-http-ejecucion-cu030-118`, worktree `.worktrees/cu030-http-118`,
+  desde main remoto `792792cdb35cf861b116e8907cdfe9d9ec1929ac`. #87/#103 ya integradas.
+- `EjecucionViajeApi.iniciar/finalizar` compatibles con CambiarEstadoViajeChofer: ApiClient externo
+  con base /api/, POST sin body, ViajeResumen e ID comprobado. Inicio admite en_curso/finalizado;
+  finalizar admite finalizado. Conserva el estado recibido, sin inferir una transición nueva.
+- ApiException contractual 400/401/403/404/409 se traduce a RechazoOperacionViaje con motivo/código;
+  transporte, timeout, 5xx, protocolo o respuesta incompatible son ResultadoViajeIncierto.
+  Sin reenvíos automáticos, sesión propia ni cierre de transporte; reconciliación de #103 intacta.
+- Verificación: formato correcto (2 Dart, cero cambios finales); analyze sin problemas (30,4 s).
+  Suite Flutter: 349 aprobadas, 0 fallidas/omitidas (87 nuevas + 262 de base; 89 s).
+  Pub get offline con lockfile exigido y diff --check correctos; dependencias/lockfile intactos.
+  Avisos preexistentes de Google Fonts sin fallas. Logs ignorados frontend/cu030-118-{analyze,test}.log.
+- Main y código coinciden con la verificación local anterior; no se repitieron los checks al publicar.
+  Estado de publicación y CI remota del HEAD publicado: consultar la PR vinculada en #118;
+  sus resultados se registran separados de las 349 pruebas locales. Cierre exclusivo de #118, sin merge.
+- Sin POST reales, demo, integración productiva ni dispositivo. Navegación y GPS fuera de alcance;
+  sin modificaciones de #113/#115 ni otros trabajos. CU-030 sigue parcial.
+  Los registros inferiores son históricos y conservan el estado de sus fechas.
+
+## Registro histórico — control previo de ubicación, 2026-10-23
+## Estado vigente al 23/10/2026 — adaptador HTTP del detalle CU-029
+
+- Integración vigente del 23/10/2026: pendiente documental preservado en `a754fc890a61776eea977bb9b9d2b434749461f3`; main verificado `fa2264c4347655e20ab70a9c689c4e99fe06e15b` (#109 integrada) incorporado por merge `e5f6057536cca86fa668ec52be2092386eb0b42e`. Único conflicto documental resuelto conservando el registro local y el contexto de main completo; sin cambios de comportamiento, rebase ni force. Adaptador y sus 19 pruebas intactos; diff propio limitado a esos dos archivos y este contexto. Interfaz CargarDetalleViajeChofer compatible mediante exportación de la pantalla. Formato: dos archivos, cero cambios; analyze sin issues (14,8 s); suite secuencial: **265 aprobadas, 0 fallidas/omitidas** (19 propias + 246 de main; aproximadamente 98 s). Dependencias/lockfile iguales a main, sin pub get adicional; avisos preexistentes de Google Fonts sin fallas. Sin conexión de pantallas, HTTP real, dispositivo, demo, cambios GPS/control de ubicación u otros worktrees. Publicación autorizada por el usuario el 23/10/2026: se reutiliza #110 y se prepara PR con cierre exclusivo de #110, sin merge autorizado; #64 permanece independiente. CI del HEAD publicado pendiente de verificar y registrar en la PR. Los registros siguientes son históricos.
+- Issue [#110](https://github.com/Martiherenu1/ProyectoVanFull/issues/110), rama `feat/chofer-http-detalle-cu029`, base inicial `4d8213a3112bc08c9794366b5d4c1a9a7314b5f1`. #110 ya existía al retomar; se reutiliza el worktree separado sin duplicar tarea ni publicar cambios. Cliente común #87 y detalle #89 presentes en esta base; los registros inferiores son históricos.
+- `DetalleViajeChoferApi.cargarDetalle(int)` usa `ApiClient` externo con base `/api/`, devuelve `OperacionAsignada` y traduce exclusivamente `ApiException` 404 a null. Otros errores se propagan sin reintentos; DTO inválido o ID distinto produce `DetalleViajeInvalidoException` con mensaje fijo y sin datos recibidos.
+- Pruebas con transporte simulado: ruta GET, token externo vigente, callback compatible, orden/listas/cantidades, horario omitido y nullable, 404 y demás errores, JSON/DTO inválidos, ID distinto y comprobación explícita de transporte externo abierto tras éxito/error.
+- Sin cambios en backend, contrato, modelo, dependencias, sesión o navegación. Sin fotografías descargadas, HTTP real ni prueba en dispositivo; CU-029 no se declara completo. Conexión de pantallas sigue pendiente; listado HTTP #104 es una entrega independiente.
+- Evidencia previa a la integración: formato correcto (dos archivos, cero cambios); `flutter pub get --enforce-lockfile` correcto y lockfile intacto; `flutter analyze --no-pub` sin issues; `flutter test --no-pub --concurrency=1 --reporter expanded`: 148 aprobadas (19 nuevas y 129 de base), sin fallidas/omitidas; 19 del adaptador también aprobadas aisladamente. Primer intento concurrente interrumpido tras demorarse sin progreso, sin resultado completo. Avisos preexistentes de Google Fonts sin fallas. Ese cierre previo no agregó commits ni publicaciones. Sin CI remota de esta entrega.
+
+- Actualización local del 23/10/2026: tres archivos revisados preservados en `2c4acf1b801843052705b59b64032fc54392db11`; `origin/main 9d635a5f43431d5c7005050f1a2c22edf37d6e6c` incorporado por merge `13b1f6a26d0a6e4895b0e837e695661b03ca2cbf`, sin conflictos, rebase ni force. Ambos historiales conservados. #99 agrega únicamente pantalla/pruebas/contexto administrativos. Adaptador y pruebas propios intactos; dependencias y lockfile iguales a main. Verificación sobre la combinación: formato correcto y analyze sin issues; `flutter test --no-pub --concurrency=1 --reporter expanded`: 154 aprobadas (19 propias y 135 de main, incluidas 6 de #99), 0 fallidas/omitidas, en aproximadamente 100 s. Avisos preexistentes de Google Fonts sin fallas. Sin push, actualización de #110, PR, merge remoto ni intervención en #103, #109, GPS, otros worktrees o demo.
 ## Actualización con main — PR #128, 24/10/2026 (sin merge de la PR)
 
 - Desde HEAD publicado `7ffca530eba2eae2505202a41d1d0d3946da190d`, se incorpora `origin/main f1f78ffbd98fd9d7601a5a50a37af9d5868316b5` mediante merge `7d8304c359144c1ea925afd671dac31582aca3f7`, sin rebase ni force push. Único conflicto: contexto documental; se conservaron ambos bloques e historiales, comprobando que todos sus renglones no vacíos permanecieran. Sin conflictos productivos ni adaptaciones propias de código.
@@ -85,7 +141,7 @@
 - Dependencias y lockfile intactos; configuración local del nuevo worktree generada con pub get --offline --enforce-lockfile usando caché existente, sin descargas de paquetes. Logs externos F:\dev\vanfull-cu030-ubicacion-analyze.log y F:\dev\vanfull-cu030-ubicacion-test.log. Sin contrato, modelos, backend, Manifest, MainActivity, navegación o demo modificados.
 - Pendientes: coordinar integración posterior de #103 y este cambio; adaptador de condiciones reales del teléfono e integración HTTP/autenticación comunes, pruebas físicas y armonización documental de CU-030/GPS (#39/#63 y prompt). Estas pruebas con dobles no verifican GPS real ni seguimiento. No se atribuyen permisos Android ni resultados físicos al comprobador simulado.
 
-## Estado vigente al 22/10/2026 — CU-030 actualizado sobre main
+## Registro histórico al 22/10/2026 — CU-030 actualizado sobre main
 
 ## Estado al 23/10/2026 — actualización de PR #109
 

@@ -1,6 +1,7 @@
 import '../../models/chofer/viaje_resumen.dart' show SentidoViaje;
 import '../../models/pasajero/deuda.dart';
 import '../../models/pasajero/disponibilidad_viaje.dart';
+import '../../models/pasajero/pago.dart';
 import '../../models/pasajero/parada.dart';
 import '../../models/pasajero/perfil.dart';
 import '../../models/pasajero/reserva.dart';
@@ -80,6 +81,16 @@ class PasajeroApi {
       }
       rethrow;
     }
+  }
+
+  /// Sin `id_cliente`: el backend usa la cuenta del pasajero autenticado. Los
+  /// rechazos (400, 404) suben como [ApiException] y los traduce la pantalla.
+  Future<Pago> registrarPago(double importe, MedioPago medio) async {
+    final cuerpo = await _cliente.post(
+      'pagos',
+      body: {'importe': importe, 'medio_pago': medio.valorApi},
+    );
+    return Pago.fromJson(cuerpo! as Map<String, dynamic>);
   }
 
   Future<Perfil> cargarPerfil() async {

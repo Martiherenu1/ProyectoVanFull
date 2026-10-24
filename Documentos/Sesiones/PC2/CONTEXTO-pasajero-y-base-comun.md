@@ -70,9 +70,25 @@ reservas se recarga cada vez que se vuelve a ella; `main()` arma el cliente con 
 Mis reservas con saldo «Al día», cancelación con el motivo del backend, el chat llegando a `/chat` y cerrar sesión.
 **SIN VERIFICAR:** el asistente con un modelo real (`OPENROUTER_API_KEY` vacía: sin modelo `/chat` deriva a una
 persona), en Android/iOS, y los rechazos 409 contra el backend real (solo con pruebas). **Pendiente:** el token no
-se persiste; faltan perfil (CU-001) y pago (de Facundo); el seed no trae viajes (se crean con `POST /viajes` o con el
+se persiste; perfil (CU-001) y pago (CU-014) tienen su párrafo más abajo; el seed no trae viajes (se crean con `POST /viajes` o con el
 seed de la demo, #101). Si la base local de Docker viene de una versión vieja y el login da 500, recrearla con
 `docker compose down -v` y repetir migración y seed.
+
+**Pantalla Pago (pantalla 5, CU-014, Issue #140, rama `feat/pasajero-registrar-pago-cu014-140`).** El PC1 la
+asigna al pasajero, pero `POST /pagos` solo admitía administración y exigía un `id_cliente` que el pasajero no conoce.
+Acordado con Martiniano el 2026-10-24 (backend de Facundo, que lo revisa en el PR): `POST /pagos` acepta el rol
+`pasajero`, el cliente sale de su cliente individual (403 `SIN_PERMISO` si manda otro; 404 `CLIENTE_NO_ENCONTRADO`
+o `CUENTA_CORRIENTE_NO_ENCONTRADA`, sin crear nada) e `id_cliente` pasa a ser opcional en `PagoCreate` (obligatorio
+para administración, 400 si falta; y el que indica administración también debe existir y tener cuenta: mismos dos
+404, a pedido de Facundo en la revisión del PR). Flutter: `screens/pasajero/pago_screen.dart` (importe sugerido con el saldo,
+medio efectivo/transferencia/billetera; Mercado Pago y cuenta corriente no se ofrecen), `models/pasajero/pago.dart`,
+`PasajeroApi.registrarPago` y `leerImporte`/`importeEditable` en `core/format/importe.dart`; se entra con «Registrar
+un pago» bajo el saldo de Mis reservas. El pago queda `PENDIENTE` y el saldo no cambia hasta que administración lo
+confirma (CU-016). `tipo` y `evidencia_pago` siguen rechazados con 400 (#84). **Verificado:** ruff, `pytest` (367)
+y contrato; `flutter analyze` y `flutter test` (340, ya con el perfil); contra el backend en Docker con el seed: `pasajero1` sin
+`id_cliente` → 201 `PENDIENTE` con su cliente, con cliente ajeno → 403, `admin1` sin cliente → 400, y `admin1` lo
+confirma. **SIN VERIFICAR:** la pantalla en Chrome contra el backend (solo pruebas de widget). Los pasajeros 1 y 2
+del seed tienen cuenta corriente; uno que se registra y reserva después, no (recibe el 404).
 
 **Pantalla Flutter Perfil (CU-001, Issue #142), rama `feat/pasajero-perfil-cu001-142`; cubre el «falta perfil»
 del párrafo anterior.** `screens/pasajero/perfil_screen.dart` y `models/pasajero/perfil.dart` reemplazan el
@@ -93,7 +109,7 @@ resolver #8). Estados: esqueleto, vacío, error con reintento, "Sin cupo". Verif
 `flutter test` (40/40). **SIN VERIFICAR:** contra el backend real y en un dispositivo o navegador. **No está
 conectada** al `RoleRouter`: falta el cliente común (#87) y el login (pantalla 1).
 
-Después: el login, la navegación entre las pantallas del pasajero y Pago (pantalla 5, de Facundo). El tipo de servicio no se muestra
+Después: el login y la navegación entre las pantallas del pasajero (Pago quedó en #140). El tipo de servicio no se muestra
 (la respuesta trae solo `id_servicio`; haría falta `GET /servicios`).
 
 **Pantalla Flutter Confirmar reserva (CU-003, Issue #92), rama `feat/pasajero-confirmar-reserva-cu003`, apilada
@@ -254,6 +270,6 @@ superada en esos seis puntos.
 **Qué necesito de las demás áreas:**
 - Martín: confirmar `hash_contrasena` en el DER y resolver #7, #8 y #9; el escenario de la demo cruzada y los
   CSV de sus tablas.
-- Facundo: el servicio de deuda (`GET /pasajeros/me/deuda`) que usa la tool de AG-01 y la pantalla, y el
-  backend de pagos que usa la pantalla de pago. Sumar `chofer`, `vehiculo` y `viaje` al seed: la cuenta
+- Facundo: el servicio de deuda (`GET /pasajeros/me/deuda`) que usa la tool de AG-01 y la pantalla, y revisar
+  el cambio de `POST /pagos` para el pasajero (#140). Sumar `chofer`, `vehiculo` y `viaje` al seed: la cuenta
   `chofer1` todavía no tiene fila en `chofer`.

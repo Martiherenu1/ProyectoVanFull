@@ -7,7 +7,7 @@
 > datos de esta máquina. Los prompts de arranque por tipo de tarea, y el criterio de cuándo conviene
 > abrir un chat nuevo, están en `Documentos/Sesiones/PROMPT-INICIAL.md`.
 >
-> **Última actualización: 2026-10-24** (§11 endpoints; §13 estado del 24/10) · Reemplaza y consolida todas las versiones anteriores.
+> **Última actualización: 2026-10-24, cierre de la tarde** (§11 endpoints; §13 estado del 24/10) · Reemplaza y consolida todas las versiones anteriores.
 
 ---
 
@@ -217,9 +217,10 @@ async + `get_db`), `routers/health.py` (**el único endpoint real**), `agent/too
 `Documentos/Sesiones/PC2/CONTEXTO-<área>.md`): `/auth/login` y `/auth/logout` · `/pasajeros/me`,
 `/pasajeros/me/reservas` y `/pasajeros/me/deuda` · `/servicios`, `/servicios/disponibilidad` y
 `/recorridos/{id}/paradas` · `/reservas`, `/reservas/{id}` y `/reservas/{id}/cancelacion` · `/pagos` y
-`/pagos/{id}/confirmacion` · `/viajes` (solo `POST`), `/viajes/{id}/inicio` y `/viajes/{id}/finalizacion` ·
-`/choferes/me/viajes` y `/choferes/me/viajes/{id}` · `/chat` · `/health`. Todavía sin endpoint en producción:
-`GET /viajes` (acordado, lo implementa Facundo), el aviso de ausencia (CU-008) y los abordajes (Martín).
+`/pagos/{id}/confirmacion` · `/viajes` (`POST` y, desde #145, `GET ?fecha=`), `/viajes/{id}/inicio` y
+`/viajes/{id}/finalizacion` · `/choferes/me/viajes` y `/choferes/me/viajes/{id}` · `/ausencias` (CU-008, #147) ·
+`/chat` · `/health`. El backend en Render está en `0ee54a0` (deploy 18:18 UTC, incluye #145 y #147; GitHub lo
+registra en Deployments). Todavía sin endpoint: los abordajes (Martín).
 
 **Plan:** `services/` (reglas RN) → `routers/` (endpoints del OpenAPI) → tests. Los 37 CU entran en ~10 routers,
 no uno por CU.
@@ -253,7 +254,8 @@ antes de cada demo**, y sacar un `pg_dump` local antes de cada punto de control.
 base en Neon (us-east-2). Ensayada desde un celular con el flujo completo del pasajero. Cómo se despliega, qué
 variable va dónde y el ensayo: `DESPLIEGUE.md`.
 
-**Estado al cierre del 2026-10-24** (freeze desde el 25/10, salvo acuerdo; REPARTO-PC2):
+**Estado al cierre del 2026-10-24.** Plazo real: **viernes 30/10/2026**; el equipo trabaja hasta ahí (el «freeze desde
+el 25/10, salvo acuerdo» de REPARTO-PC2 no rige, por decisión de Martiniano):
 
 - **Concurrencia (#131, PR #133, mergeado):** orden de locks **pasajero → viaje → reserva** en creación,
   cancelación, ausencia y abordaje; ejecución del viaje toma solo el viaje. Escrito en
@@ -263,22 +265,32 @@ variable va dónde y el ensayo: `DESPLIEGUE.md`.
 - **CU-008 cerrado entre los tres:** 201 aviso nuevo; 404 sin reserva propia; 409 reserva provisional o cancelada,
   pasajero abordado o viaje finalizado/cancelado; 200 con la misma fila si el aviso propio ya existía, aunque
   después cambie la reserva o el viaje. El aviso no cancela la reserva ni recupera el lugar.
-- **`GET /viajes` (CU-018):** Martín y Facundo lo acordaron y Martiniano lo confirmó: fecha obligatoria, roles
-  `administrador` y `dueno`, orden por horario (nulos al final, después `id_viaje`), todos los estados, errores
-  400/401/403. Lo implementa Facundo.
+- **`GET /viajes` (CU-018): hecho (#145, Facundo, revisado por Martiniano).** Fecha obligatoria y estricta
+  (`YYYY-MM-DD`), roles `administrador` y `dueno`, orden por horario (nulos al final, después `id_viaje`), todos los
+  estados, errores 400/401/403. El adaptador Flutter es #150 (mergeado); falta la pantalla.
+- **CU-008 (#147, Martín): mergeado.** `POST /ausencias` en producción.
 - **Flutter:** `SesionApp` solo da entrada real al pasajero. Reparto acordado: Facundo hace en un PR chico la
   composición compartida (entrada por rol y cliente HTTP en `main.dart`); Martín, en #123, aporta solo la entrada
-  del chofer. #113 y #121 están aprobados; #121 tiene conflicto con main desde #115. #130 (adaptador de crear
-  viaje, de Facundo) aprobado por Martiniano.
+  del chofer. Mergeados hoy: #113, #121, #128, #130, #134, #139 y #150 (los conflictos de #113, #121, #139 y #147
+  eran solo del documento de contexto de Martín y los resolvió Martiniano con Claude, con las ramas encadenadas).
+  Abierto: #123 (sesión, listado y detalle del chofer).
+- **Pasajero (Martiniano):** Pago (CU-014, #141) y Perfil (CU-001, #144) mergeados. Con #141 administración y dueño
+  reciben 404 `CLIENTE_NO_ENCONTRADO` o `CUENTA_CORRIENTE_NO_ENCONTRADA`; **sigue pendiente #84 de Facundo: nadie
+  crea la `cuenta_corriente` de un pasajero nuevo**, que recibe 404 al pagar (los pasajeros 1 y 2 del seed andan).
 - **CU-014 (#85):** queda con alcance limitado para PC2. El 15 % por efectivo no es del registro: RN-011 y AC9-13/14
   lo aplican tras un pago en efectivo confirmado (CU-016). Faltan tipo/evidencia y algunos errores; Facundo abre el
   Issue y marca `POST /pagos` con `x-cobertura: parcial`.
-- **Demo en Render:** el sitio publicado es el build `c4c10b5` (23/10 19:40) y **no tiene entrada de chofer**, así
-  que login → listado → detalle del chofer no se puede probar desde la web hasta que entren #113, #123 y se vuelva
-  a correr el workflow **Web**. La API sí expone las rutas del chofer. `chofer1@vanfull.test` (persona 3) tiene los
-  viajes 1 y 3 del 30/10/2026; el 3 no tiene vehículo. **Sin verificar:** el SHA del backend desplegado (mirar el
-  panel de Render) y que Neon tenga la fila de `chofer1` (probar el login; la contraseña está en el CSV de
+- **Demo en Render:** el sitio publicado es el build `8380d19` (24/10 18:24 UTC, workflow **Web** corrido a mano), que
+  trae Pasajero con Pago y Perfil (comprobado en el bundle compilado; **no** se abrió la app ni se probó el flujo
+  con sesión). El sitio **no tiene entrada de chofer** hasta que entre #123 y se vuelva a correr **Web**: no se
+  publica solo. Un navegador con la versión vieja abierta puede mostrarla por su caché: recarga forzada o ventana
+  privada. La API sí expone las rutas del chofer. `chofer1@vanfull.test` (persona 3) tiene los
+  viajes 1 y 3 del 30/10/2026; el 3 no tiene vehículo. **Sin verificar:** que Neon tenga la fila de `chofer1` (probar el login; la contraseña está en el CSV de
   Martiniano, fuera del repo).
+- **Falta para la demo (a cargo de Martiniano, REPARTO-PC2):** `OPENROUTER_API_KEY` en el panel de Render
+  (`vanfull-api` → Environment); sin ella `/chat` deriva a una persona y **nunca se probó con un modelo real**.
+  También: despertar la API 5 minutos antes (`/api/health`) y re-sembrar Neon con `--reiniciar` si se quiere el
+  estado inicial (borra las reservas de prueba).
 
 ## 14. Recursos
 

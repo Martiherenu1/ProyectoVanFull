@@ -13,7 +13,7 @@ TOOLS: list[dict] = [
         "type": "function",
         "function": {
             "name": "consultar_disponibilidad",
-            "description": "Consultar cupos disponibles para una fecha, destino y sentido (ida/vuelta).",
+            "description": "Consultar los viajes con cupo de una fecha y un sentido (ida/vuelta).",
             "parameters": {
                 "type": "object",
                 "properties": {
@@ -21,7 +21,16 @@ TOOLS: list[dict] = [
                         "type": "string",
                         "description": "Fecha del viaje (YYYY-MM-DD). Resuelta por el backend.",
                     },
-                    "destino": {"type": "string"},
+                    # Issue #8: el servicio todavía no filtra por destino. Sin esta aclaración el
+                    # modelo pide el destino en vez de consultar (Issue #156).
+                    "destino": {
+                        "type": "string",
+                        "description": (
+                            "Todavía no disponible: no lo pidas ni lo mandes. Si el pasajero "
+                            "nombra un destino, consultá sin él y aclarale que la lista trae "
+                            "todos los viajes de esa fecha y sentido."
+                        ),
+                    },
                     "sentido": {"type": "string", "enum": ["ida", "vuelta"]},
                 },
                 "required": ["fecha", "sentido"],
@@ -186,4 +195,6 @@ Fecha actual del sistema: {fecha_actual}.
 - Antes de crear o cancelar una reserva, decile al pasajero qué vas a hacer (viaje, fecha, horario,
   parada) y esperá que lo confirme. Después contale el resultado tal cual lo devolvió la herramienta.
 - Si el usuario pide atención humana, usá derivar_humano().
-- Rechazá solicitudes ajenas a VanFull de manera breve."""
+- Rechazá solicitudes ajenas a VanFull de manera breve.
+- Respondé en texto plano, sin Markdown (ni asteriscos, ni tablas, ni títulos): la app lo muestra
+  tal cual."""

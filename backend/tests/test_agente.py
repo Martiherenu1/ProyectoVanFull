@@ -540,3 +540,24 @@ def test_el_servicio_no_importa_modelos():
             modulos.update(alias.name for alias in nodo.names)
     assert not {m for m in modulos if m.startswith("app.models")}
     assert {m for m in modulos if m.startswith("sqlalchemy")} <= {"sqlalchemy.ext.asyncio"}
+
+
+def test_al_modelo_no_se_le_pide_un_destino_que_no_se_puede_filtrar(entorno, hablar):
+    """Issue #156: si la tool sugiere el destino, el modelo lo pide en vez de consultar (#8)."""
+    guion = hablar(_texto("Hola"))
+    _hablar_como(entorno, "ana", "Hola")
+    (disponibilidad,) = [
+        t["function"]
+        for t in guion.llamadas[0]["tools"]
+        if t["function"]["name"] == "consultar_disponibilidad"
+    ]
+    assert "destino" not in disponibilidad["description"]
+    assert "destino" not in disponibilidad["parameters"]["required"]
+    assert "no lo pidas" in disponibilidad["parameters"]["properties"]["destino"]["description"]
+
+
+def test_el_modelo_recibe_que_responda_sin_markdown(entorno, hablar):
+    """Issue #156: la pantalla del asistente muestra el texto tal cual, sin formato."""
+    guion = hablar(_texto("Hola"))
+    _hablar_como(entorno, "ana", "Hola")
+    assert "sin Markdown" in guion.llamadas[0]["messages"][0]["content"]

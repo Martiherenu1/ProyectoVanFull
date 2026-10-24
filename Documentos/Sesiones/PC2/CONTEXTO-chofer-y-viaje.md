@@ -1,6 +1,12 @@
 # Contexto vivo · Chofer y viaje en curso (Martín)
 
-## Estado al 24/10/2026 — ChoferShell publicado en PR #128 (parcial, sin merge)
+## Actualización con main — PR #128, 24/10/2026 (sin merge de la PR)
+
+- Desde HEAD publicado `7ffca530eba2eae2505202a41d1d0d3946da190d`, se incorpora `origin/main f1f78ffbd98fd9d7601a5a50a37af9d5868316b5` mediante merge `7d8304c359144c1ea925afd671dac31582aca3f7`, sin rebase ni force push. Único conflicto: contexto documental; se conservaron ambos bloques e historiales, comprobando que todos sus renglones no vacíos permanecieran. Sin conflictos productivos ni adaptaciones propias de código.
+- Sobre esta combinación: pub get offline con lockfile exigido correcto; formato de los dos Dart propios, cero cambios; analyze sin issues (22,8 s); **85 pruebas pertinentes aprobadas**, 0 fallidas/omitidas (41 s): pantallas Chofer y adaptador del listado, con fuentes/transporte simulados. Log `frontend/build/chofer-consulta-main-actualizado-tests-final.log`. Primer intento sin ejecución por carpeta generada unit_test_assets de solo lectura; preservada mediante renombrado dentro de este worktree y repetición correcta. No se acredita suite completa local; la evidencia histórica de 51 corresponde a bases anteriores.
+- Diff propio contra main: shell, pruebas del shell, interfaz y contexto. Shell/pruebas/interfaz intactos respecto del HEAD previo; archivos compartidos, control de ubicación, dependencias y lockfile coinciden con main. Sin cambios de preview, #139, otros worktrees o demo. Sin login/solicitudes reales ni merge de #128. Actualización y push normal autorizados; CI del nuevo HEAD se registra en la descripción de la misma PR, separada de estos resultados locales. #123/#64 no se cierran.
+
+## Registro histórico al 24/10/2026 — publicación inicial de ChoferShell en PR #128
 
 - Publicación autorizada por el usuario: cuatro archivos revisados preservados en `918a213`; main remoto `51b1b4da8a1cbd35c2e07271cbf7c71f95faeb62` incorporado mediante merge `8bfa1bd763aa03656a225ed8c79ee779215d4868`, sin conflictos, rebase ni force. Push normal realizado y [PR #128](https://github.com/Martiherenu1/ProyectoVanFull/pull/128) abierta hacia main, con `Refs #123` y sin cierre automático. El último commit documental actualiza este estado; CI del HEAD final se registra en la PR, separada de las pruebas locales.
 - Sobre la combinación con main: formato de dos Dart, cero cambios; analyze sin issues (28,4 s); 51 pruebas pertinentes aprobadas, 0 fallidas/omitidas (31 s), log `frontend/build/chofer-consulta-tests-main.log`. Se conserva debajo la evidencia de 51 sobre base `792792c`; la suite completa anterior interrumpida NO acredita aprobación completa. No se repiten pruebas por esta actualización exclusivamente documental.

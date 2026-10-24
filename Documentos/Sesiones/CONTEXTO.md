@@ -7,7 +7,7 @@
 > datos de esta máquina. Los prompts de arranque por tipo de tarea, y el criterio de cuándo conviene
 > abrir un chat nuevo, están en `Documentos/Sesiones/PROMPT-INICIAL.md`.
 >
-> **Última actualización: 2026-10-24, cierre de la tarde** (§11 endpoints; §13 estado del 24/10) · Reemplaza y consolida todas las versiones anteriores.
+> **Última actualización: 2026-10-24, noche** (§11 backend en Render; §13 asistente AG-01 con modelo real) · Reemplaza y consolida todas las versiones anteriores.
 
 ---
 
@@ -219,8 +219,11 @@ async + `get_db`), `routers/health.py` (**el único endpoint real**), `agent/too
 `/recorridos/{id}/paradas` · `/reservas`, `/reservas/{id}` y `/reservas/{id}/cancelacion` · `/pagos` y
 `/pagos/{id}/confirmacion` · `/viajes` (`POST` y, desde #145, `GET ?fecha=`), `/viajes/{id}/inicio` y
 `/viajes/{id}/finalizacion` · `/choferes/me/viajes` y `/choferes/me/viajes/{id}` · `/ausencias` (CU-008, #147) ·
-`/chat` · `/health`. El backend en Render está en `0ee54a0` (deploy 18:18 UTC, incluye #145 y #147; GitHub lo
+`/chat` · `/health`. El backend en Render está en `f511d3c` (deploy 20:32 UTC, incluye #155 y #157; GitHub lo
 registra en Deployments). Todavía sin endpoint: los abordajes (Martín).
+
+**`/chat` (AG-01) responde con un modelo real en Render desde el 24/10** (#155, #157): qué se verificó, con qué
+modelos y qué falta, en §13.
 
 **Plan:** `services/` (reglas RN) → `routers/` (endpoints del OpenAPI) → tests. Los 37 CU entran en ~10 routers,
 no uno por CU.
@@ -287,10 +290,35 @@ el 25/10, salvo acuerdo» de REPARTO-PC2 no rige, por decisión de Martiniano):
   privada. La API sí expone las rutas del chofer. `chofer1@vanfull.test` (persona 3) tiene los
   viajes 1 y 3 del 30/10/2026; el 3 no tiene vehículo. **Sin verificar:** que Neon tenga la fila de `chofer1` (probar el login; la contraseña está en el CSV de
   Martiniano, fuera del repo).
-- **Falta para la demo (a cargo de Martiniano, REPARTO-PC2):** `OPENROUTER_API_KEY` en el panel de Render
-  (`vanfull-api` → Environment); sin ella `/chat` deriva a una persona y **nunca se probó con un modelo real**.
-  También: despertar la API 5 minutos antes (`/api/health`) y re-sembrar Neon con `--reiniciar` si se quiere el
-  estado inicial (borra las reservas de prueba).
+- **Asistente AG-01 en Render con un modelo real (24/10, Martiniano).** `OPENROUTER_API_KEY` cargada en el panel
+  (clave de cuenta free tier, límite de crédito 1 USD, vence el 22/01/2027). **Los dos modelos aprobados (07 §3) hoy
+  no funcionan gratis:** `minimax/minimax-m3:free` ya no existe (OpenRouter: «unavailable for free»; queda
+  `minimax/minimax-m3`, pago) y `nvidia/nemotron-3-super-120b-a12b:free` figura en el listado pero NVIDIA responde
+  404. **Configuración provisoria de la demo, solo en el panel de Render:**
+  `OPENROUTER_MODEL_PRIMARY=nvidia/nemotron-3-ultra-550b-a55b:free` y
+  `OPENROUTER_MODEL_FALLBACK=nvidia/nemotron-3.5-lightning:free` (Martiniano eligió seguir gratis; los dos
+  devolvieron una tool call correcta en un diagnóstico directo). El repo (`config.py`, `.env.example`) sigue con los
+  aprobados.
+  - **Verificado contra Render con `pasajero1`:** consultar disponibilidad (los 3 viajes de ida del 30/10), paradas,
+    crear reserva previa confirmación (reserva 3, viaje 3), el rechazo `RESERVA_CANCELADA_PREVIA` explicado sin
+    inventar, consultar reservas y cancelar previa confirmación (en término, sin penalidad). Respuestas de 1,8 a
+    24 s; la conversación sigue con su id.
+  - **Código:** #155 (ninguna falla de OpenRouter termina en 500 ni tarda más de 60 s por mensaje; cada falla deja
+    `AG-01: <modelo> …` en el log de Render, sin la clave) y #157 (la tool de disponibilidad ya no pide destino, que
+    el servicio no filtra, #8; el prompt pide texto plano).
+  - **No verificado:** `derivar_humano` con el modelo real; el paso al fallback con modelos reales (solo con
+    pruebas); los 10 casos de la PoC con estos modelos; la pantalla de Flutter con respuestas reales (se probó la
+    API); si los 404 cuentan para la cuota. **El modelo a veces sigue usando negritas (`**`)** pese al prompt, y en
+    la app se ven.
+  - **Límites de OpenRouter (plan gratis):** 20 pedidos por minuto y **50 por día** (1000 si la cuenta compró al
+    menos 10 USD de créditos). Cada mensaje usa 2 o 3 pedidos: unos 20 mensajes por día entre ensayo y demo. Los dos
+    modelos son del mismo proveedor (NVIDIA): si se cae, el asistente deriva.
+  - **Antes de la demo, obligatorio:** re-sembrar Neon con `--reiniciar`. `pasajero1` tiene canceladas reservas en
+    los tres viajes de ida del 30/10 y, por MR-R15, no puede volver a reservar en ninguno. Y despertar la API 5
+    minutos antes (`/api/health`).
+  - **Pendientes del equipo (no se resolvieron acá):** cambiar el modelo aprobado en 07 §3 y los valores por
+    defecto del repo (#154); actualizar 07 §5 (system prompt) y re-ejecutar la PoC, como pide 07 §9 (#156); qué
+    recibe la persona cuando el agente deriva (#42).
 
 ## 14. Recursos
 

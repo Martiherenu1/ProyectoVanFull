@@ -1,4 +1,5 @@
-"""Endpoints de administración de pagos (CU-014 y CU-016)."""
+"""Endpoints de pagos: el registro lo hace administración o el propio pasajero (CU-014); la
+confirmación, solo administración (CU-016)."""
 
 from fastapi import APIRouter, Depends
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -14,10 +15,10 @@ router = APIRouter(prefix="/pagos", tags=["pagos"])
 @router.post("", response_model=Pago, status_code=201)
 async def registrar_pago(
     datos: PagoCreate,
-    _: UsuarioActual = Depends(requiere_rol("administrador", "dueno")),
+    usuario: UsuarioActual = Depends(requiere_rol("administrador", "dueno", "pasajero")),
     db: AsyncSession = Depends(get_db),
 ):
-    return await servicio.registrar_pago(db, datos)
+    return await servicio.registrar_pago(db, usuario, datos)
 
 
 @router.post("/{id_pago}/confirmacion", response_model=Pago)

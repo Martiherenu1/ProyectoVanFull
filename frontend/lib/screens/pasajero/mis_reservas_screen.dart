@@ -30,6 +30,7 @@ class MisReservasScreen extends StatefulWidget {
     required this.cargarDeuda,
     required this.cancelarReserva,
     required this.onBuscarServicio,
+    this.onRegistrarPago,
   });
 
   final CargarReservas cargarReservas;
@@ -38,6 +39,9 @@ class MisReservasScreen extends StatefulWidget {
 
   /// Sin reservas, el pasajero sigue a Buscar servicio.
   final VoidCallback onBuscarServicio;
+
+  /// Lleva a la pantalla de Pago con el saldo cargado. Sin él no hay botón.
+  final ValueChanged<Deuda>? onRegistrarPago;
 
   @override
   State<MisReservasScreen> createState() => _MisReservasScreenState();
@@ -250,6 +254,14 @@ class _MisReservasScreenState extends State<MisReservasScreen> {
         children: [
           Text('SALDO', style: textTheme.labelSmall),
           dato,
+          if (widget.onRegistrarPago != null && deuda != null && !_errorDeuda)
+            TextButton(
+              key: const ValueKey('ir-a-pago'),
+              onPressed: _cargandoDeuda
+                  ? null
+                  : () => widget.onRegistrarPago!(deuda),
+              child: const Text('Registrar un pago'),
+            ),
         ],
       ),
     );

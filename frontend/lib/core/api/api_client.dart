@@ -8,4 +8,6 @@ abstract interface class ApiClient {
   Future<Object?> get(String path, {Map<String, String>? queryParameters});
 
   Future<Object?> post(String path, {Object? body});
+
+  Future<Object?> patch(String path, {Object? body});
 }

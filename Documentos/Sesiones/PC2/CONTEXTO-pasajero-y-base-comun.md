@@ -74,6 +74,17 @@ se persiste; faltan perfil (CU-001) y pago (de Facundo); el seed no trae viajes 
 seed de la demo, #101). Si la base local de Docker viene de una versión vieja y el login da 500, recrearla con
 `docker compose down -v` y repetir migración y seed.
 
+**Pantalla Flutter Perfil (CU-001, Issue #142), rama `feat/pasajero-perfil-cu001-142`; cubre el «falta perfil»
+del párrafo anterior.** `screens/pasajero/perfil_screen.dart` y `models/pasajero/perfil.dart` reemplazan el
+contenido de la pestaña Cuenta (conserva «Cerrar sesión»). Dos operaciones **inyectables** (`CargarPerfil`,
+`ModificarPerfil`) sobre `GET` y `PATCH /pasajeros/me`; para eso `ApiClient` y `HttpApiClient` ganaron `patch`
+(los dos fakes de las pruebas también). Nombre, apellido y DNI se muestran sin edición (RN-026); correo, teléfono y
+dirección se editan y **solo se manda lo que cambió**; un dato que quedaría vacío no se guarda (el backend no
+admite `null`: omitir deja el valor). 400 y 403 muestran el mensaje del backend; cualquier otra falla, un aviso
+genérico. **No hay verificación del contacto ni foto:** #25 sigue abierto (SMS/WhatsApp, almacenamiento de fotos), así
+que la pantalla edita sin código de verificación, como hoy el endpoint. Verificado: `flutter analyze` y
+`flutter test` (326). **SIN VERIFICAR:** contra el backend real y en un dispositivo o navegador.
+
 **Pantalla Flutter Buscar servicio (CU-002, Issue #90, PR #91), rama `feat/pasajero-buscar-servicio-cu002`.**
 `screens/pasajero/buscar_servicio_screen.dart` y `models/pasajero/` (`DisponibilidadViaje`, `Parada`). Carga
 **inyectable** (`CargarDisponibilidad`, `CargarParadas`), igual que el listado del chofer: no crea clientes HTTP.

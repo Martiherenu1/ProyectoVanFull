@@ -39,6 +39,16 @@ final class HttpApiClient implements ApiClient {
     return _decode(response);
   }
 
+  @override
+  Future<Object?> patch(String path, {Object? body}) async {
+    final response = await transport.patch(
+      _resolve(path),
+      headers: await _headers(jsonBody: body != null),
+      body: body == null ? null : jsonEncode(body),
+    );
+    return _decode(response);
+  }
+
   Future<Map<String, String>> _headers({bool jsonBody = false}) async {
     final headers = <String, String>{'Accept': 'application/json'};
     if (jsonBody) headers['Content-Type'] = 'application/json';

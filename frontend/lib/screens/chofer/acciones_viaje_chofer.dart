@@ -73,6 +73,8 @@ class _AccionesViajeChoferState extends State<AccionesViajeChofer> {
         if (confirmado != null)
           Text('Estado confirmado: ${confirmado.estado.etiqueta}'),
         if (mensaje != null) Text(mensaje),
+        if (c.comprobandoUbicacion) const Text('Comprobando ubicación.'),
+        if (c.mensajeUbicacion != null) Text(c.mensajeUbicacion!),
         if (c.fase == FaseDetalleViaje.incierto && c.estadoConsultado != null)
           Text('Último estado consultado: ${c.estadoConsultado!.etiqueta}'),
         if (c.fase == FaseDetalleViaje.incierto && rechazo != null)

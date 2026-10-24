@@ -16,17 +16,24 @@ OperacionAsignada snapshot(String estado, {int id = 41}) {
   return OperacionAsignada.fromJson(json);
 }
 
+Future<CondicionesUbicacionInicio> ubicacionHabilitada() async =>
+    const CondicionesUbicacionInicio(
+      servicioActivado: true,
+      permisoConcedido: true,
+    );
 Future<void> mostrar(
   WidgetTester tester,
   CargarDetalleViajeChofer cargar,
   AccionesEjecucionViaje acciones, {
   int id = 41,
+  ComprobarUbicacionInicio? comprobar = ubicacionHabilitada,
 }) => tester.pumpWidget(
   MaterialApp(
     home: DetalleViajeChoferScreen(
       idViaje: id,
       cargarDetalle: cargar,
       acciones: acciones,
+      comprobarUbicacionInicio: comprobar,
     ),
   ),
 );
@@ -595,4 +602,145 @@ void main() {
       },
     );
   }
+
+  final bloqueosUbicacion = <String, ComprobarUbicacionInicio?>{
+    'No se pudo comprobar la ubicación': null,
+    'Activá la ubicación del teléfono para iniciar el viaje.': () async =>
+        const CondicionesUbicacionInicio(
+          servicioActivado: false,
+          permisoConcedido: true,
+        ),
+    'Permití que VanFull acceda a tu ubicación para iniciar el viaje.':
+        () async => const CondicionesUbicacionInicio(
+          servicioActivado: true,
+          permisoConcedido: false,
+        ),
+    'No pudimos comprobar la ubicación. Volvé a intentarlo.': () async =>
+        throw StateError('consulta'),
+  };
+  for (final entrada in bloqueosUbicacion.entries) {
+    testWidgets('muestra bloqueo local: ${entrada.key}', (tester) async {
+      var inicios = 0;
+      await mostrar(
+        tester,
+        (_) async => snapshot('programado'),
+        fuentes(
+          inicio: (_) async {
+            inicios++;
+            return snapshot('en_curso').viaje;
+          },
+        ),
+        comprobar: entrada.value,
+      );
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Iniciar viaje'));
+      await tester.pumpAndSettle();
+      expect(inicios, 0);
+      expect(find.text(entrada.key), findsOneWidget);
+      expect(find.text('Iniciar viaje'), findsOneWidget);
+      expect(find.text('Consultar estado'), findsNothing);
+      expect(
+        find.text(
+          'No pudimos confirmar el resultado. Consultá el estado antes de continuar.',
+        ),
+        findsNothing,
+      );
+    });
+  }
+
+  testWidgets(
+    'comprobacion pendiente bloquea dobles pulsaciones antes del POST',
+    (tester) async {
+      final gate = Completer<CondicionesUbicacionInicio>();
+      var consultas = 0;
+      var inicios = 0;
+      await mostrar(
+        tester,
+        (_) async => snapshot('programado'),
+        fuentes(
+          inicio: (_) async {
+            inicios++;
+            return snapshot('en_curso').viaje;
+          },
+        ),
+        comprobar: () {
+          consultas++;
+          return gate.future;
+        },
+      );
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Iniciar viaje'));
+      await tester.tap(find.text('Iniciar viaje'));
+      await tester.pump();
+      expect(find.text('Comprobando ubicación.'), findsOneWidget);
+      expect(find.text('Iniciar viaje'), findsNothing);
+      expect(consultas, 1);
+      expect(inicios, 0);
+      gate.complete(
+        const CondicionesUbicacionInicio(
+          servicioActivado: true,
+          permisoConcedido: true,
+        ),
+      );
+      await tester.pumpAndSettle();
+      expect(inicios, 1);
+    },
+  );
+
+  testWidgets(
+    'cambiar comprobador invalida su resultado sin iniciar automaticamente',
+    (tester) async {
+      final gate = Completer<CondicionesUbicacionInicio>();
+      Future<OperacionAsignada?> cargar(int _) async => snapshot('programado');
+      var inicios = 0;
+      final acciones = fuentes(
+        inicio: (_) async {
+          inicios++;
+          return snapshot('en_curso').viaje;
+        },
+      );
+      await mostrar(tester, cargar, acciones, comprobar: () => gate.future);
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Iniciar viaje'));
+      await tester.pump();
+      await mostrar(tester, cargar, acciones, comprobar: ubicacionHabilitada);
+      await tester.pumpAndSettle();
+      gate.complete(
+        const CondicionesUbicacionInicio(
+          servicioActivado: true,
+          permisoConcedido: true,
+        ),
+      );
+      await tester.pumpAndSettle();
+      expect(inicios, 0);
+      expect(find.text('Iniciar viaje'), findsOneWidget);
+      await tester.tap(find.text('Iniciar viaje'));
+      await tester.pumpAndSettle();
+      expect(inicios, 1);
+    },
+  );
+
+  testWidgets('finalizacion disponible con comprobador ausente', (
+    tester,
+  ) async {
+    var estado = 'en_curso';
+    var finales = 0;
+    await mostrar(
+      tester,
+      (_) async => snapshot(estado),
+      fuentes(
+        fin: (_) async {
+          finales++;
+          estado = 'finalizado';
+          return snapshot(estado).viaje;
+        },
+      ),
+      comprobar: null,
+    );
+    await tester.pumpAndSettle();
+    await confirmar(tester);
+    await tester.pumpAndSettle();
+    expect(finales, 1);
+    expect(find.text('No se pudo comprobar la ubicación'), findsNothing);
+  });
 }

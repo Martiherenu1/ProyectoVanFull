@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 
 import '../../core/api/pasajero_api.dart';
-import '../../core/theme/app_spacing.dart';
 import '../../models/pasajero/disponibilidad_viaje.dart';
 import 'asistente_screen.dart';
 import 'buscar_servicio_screen.dart';
 import 'confirmar_reserva_screen.dart';
 import 'mis_reservas_screen.dart';
+import 'perfil_screen.dart';
 
 /// Entrada del pasajero: une las cuatro pantallas con la API y la navegación.
 /// No decide reglas; solo lleva al pasajero de una pantalla a la siguiente.
@@ -72,7 +72,11 @@ class _PasajeroShellState extends State<PasajeroShell> {
             onBuscarServicio: () => _ir(_buscar),
           ),
           AsistenteScreen(enviarMensaje: widget.api.enviarMensaje),
-          _Cuenta(onSalir: widget.onSalir),
+          PerfilScreen(
+            cargarPerfil: widget.api.cargarPerfil,
+            modificarPerfil: widget.api.modificarPerfil,
+            onSalir: widget.onSalir,
+          ),
         ],
       ),
       bottomNavigationBar: NavigationBar(
@@ -93,30 +97,6 @@ class _PasajeroShellState extends State<PasajeroShell> {
             label: 'Cuenta',
           ),
         ],
-      ),
-    );
-  }
-}
-
-class _Cuenta extends StatelessWidget {
-  const _Cuenta({required this.onSalir});
-
-  final VoidCallback onSalir;
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: const Text('Cuenta')),
-      body: Padding(
-        padding: const EdgeInsets.all(AppSpacing.xl),
-        child: SizedBox(
-          height: AppSpacing.touchTarget,
-          width: double.infinity,
-          child: OutlinedButton(
-            onPressed: onSalir,
-            child: const Text('Cerrar sesión'),
-          ),
-        ),
       ),
     );
   }

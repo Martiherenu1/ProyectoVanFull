@@ -3,11 +3,21 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:frontend/core/api/api_client.dart';
 import 'package:frontend/core/api/pasajero_api.dart';
 import 'package:frontend/screens/pasajero/pasajero_shell.dart';
+import 'package:frontend/screens/pasajero/perfil_screen.dart';
 
 /// Servidor falso con un viaje y una parada; guarda las reservas que se crean.
 class ServidorFalso implements ApiClient {
   final reservas = <Map<String, dynamic>>[];
   int pedidosDeReservas = 0;
+  final perfil = <String, dynamic>{
+    'id_persona': 7,
+    'nombre': 'Ana',
+    'apellido': 'Gómez',
+    'dni': '30111222',
+    'email': 'ana@vanfull.test',
+    'telefono': '1155550000',
+    'estado_habilitacion': 'habilitado',
+  };
 
   @override
   Future<Object?> get(
@@ -41,6 +51,8 @@ class ServidorFalso implements ApiClient {
         return reservas;
       case 'pasajeros/me/deuda':
         return {'saldo': 0, 'estado': 'al_dia'};
+      case 'pasajeros/me':
+        return perfil;
     }
     throw StateError('GET inesperado: $path');
   }
@@ -63,6 +75,15 @@ class ServidorFalso implements ApiClient {
       return reserva;
     }
     throw StateError('POST inesperado: $path');
+  }
+
+  @override
+  Future<Object?> patch(String path, {Object? body}) async {
+    if (path == 'pasajeros/me') {
+      perfil.addAll(body! as Map<String, dynamic>);
+      return perfil;
+    }
+    throw StateError('PATCH inesperado: $path');
   }
 }
 
@@ -105,7 +126,17 @@ void main() {
     // Cuenta: cerrar sesión.
     await tester.tap(find.text('Cuenta'));
     await tester.pumpAndSettle();
-    await tester.tap(find.text('Cerrar sesión'));
+    expect(find.text('Ana Gómez'), findsOneWidget);
+    // El botón queda bajo el pliegue de la lista: se desplaza hasta verlo.
+    await tester.drag(
+      find.descendant(
+        of: find.byType(PerfilScreen),
+        matching: find.byType(ListView),
+      ),
+      const Offset(0, -200),
+    );
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const ValueKey('cerrar-sesion')));
     expect(salio, isTrue);
   });
 

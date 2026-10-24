@@ -30,8 +30,11 @@ siendo trabajos independientes.
 
 ## En curso
 
-- Issue #111: navegación hacia Viajes del día con dependencias inyectables; el endpoint administrativo todavía
-  no está contratado.
+- Issue #149: adaptador Flutter independiente para `GET /viajes`, reutilizando `ApiClient` y `ViajeResumen`.
+  No modifica el adaptador de creación del PR #130 ni conecta todavía pantalla, sesión o navegación. Depende
+  de la integración del contrato/backend del PR #145 para el circuito real.
+- Issue #111: navegación hacia Viajes del día con dependencias inyectables; el contrato/backend de consulta está
+  publicado en el PR #145 y la conexión real con sesión y adaptador sigue pendiente.
 - PR #54 (CU-006) y PR #52 (CU-016): integrar `main` y mergear.
 
 ## Decisiones
@@ -64,10 +67,13 @@ siendo trabajos independientes.
 
 ## Pendientes
 
+- Issue #149: antes de la conexión real, alinear que OpenAPI `Viaje` no declara propiedades obligatorias,
+  mientras el backend y el `ViajeResumen` ya usado por la pantalla requieren los campos públicos base. El
+  adaptador no inventa valores: rechaza una respuesta incompleta.
 - CU-014: Draft PR #85 pausado; no declarar completo hasta resolver persistencia de tipo/evidencia, descuento y
   respuestas para clientes inexistentes o sin cuenta corriente.
-- Issue #111: la consulta real queda pendiente del endpoint administrativo para listar viajes y de la
-  autenticación; el cliente compartido ya está integrado, pero esta tarea no inventa un adaptador sin contrato.
+- Issue #111: la consulta real queda pendiente de integrar el backend de #145 y el adaptador de #149 con la
+  autenticación; el cliente compartido ya está integrado.
 - #53 y #51: cerrar mediante la revisión e integración de los PR #54 y #52.
 - CU-006 devuelve `404 CLIENTE_NO_ENCONTRADO` si no existe el cliente individual. Esa respuesta no
   figura en OpenAPI y agregarla al contrato requiere el acuerdo de los tres integrantes.

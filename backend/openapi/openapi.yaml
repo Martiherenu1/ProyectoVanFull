@@ -545,8 +545,21 @@ paths:
       tags: [abordaje]
       summary: Informar ausencia
       description: |
-        El pasajero avisa que no usará un viaje; puede liberar temporalmente el cupo
-        (RN-024/025). El aviso no es obligatorio. (CU-008, RF-016)
+        CU-008 / RF-016 / RN-024/025. Solo pasajero autenticado; la identidad sale
+        de la sesión, nunca del cuerpo. Cada ausencia es un aviso voluntario:
+        no se genera por falta de abordaje ni representa una inasistencia inferida.
+
+        Un aviso nuevo exige reserva propia consolidada, viaje programado o en_curso
+        y ningún abordaje registrado del pasajero en ese viaje. Devuelve 201.
+        Tras autenticar y verificar pertenencia, un aviso propio existente tiene
+        prioridad sobre esas condiciones: devuelve 200 con la misma fila, incluso
+        si luego se canceló la reserva o el viaje, o se finalizó el viaje.
+        No duplica eventos ni otros efectos. Los avisos concurrentes se serializan.
+
+        No modifica la reserva ni aplica efectos económicos. La disponibilidad ya
+        excluye reservas consolidadas con ausencia; no se incrementa un contador.
+        Recuperar el lugar queda fuera de alcance y escanear no lo recupera automáticamente.
+        El aviso no es obligatorio.
       x-cu: CU-008
       requestBody:
         required: true
@@ -558,12 +571,49 @@ paths:
               properties:
                 id_viaje: { type: integer }
       responses:
-        '201':
-          description: Ausencia registrada
+        '200':
+          description: Aviso propio existente, sin nuevos efectos.
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/Ausencia'
+        '201':
+          description: Ausencia voluntaria registrada
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Ausencia'
+
+        '400':
+          description: 'VALIDACION: cuerpo invalido.'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: 'NO_AUTENTICADO: token ausente o invalido.'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '403':
+          description: 'SIN_PERMISO: requiere rol pasajero.'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: 'RESERVA_NO_ENCONTRADA: sin reserva propia, tambien ante viaje inexistente. No revela reservas ajenas.'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '409':
+          description: 'Solo sin aviso previo, en este orden: RESERVA_NO_CONSOLIDADA (provisional o cancelada), VIAJE_NO_ADMITE_AUSENCIA (finalizado o cancelado), PASAJERO_YA_ABORDADO (existe abordaje propio en el viaje).'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
 
   # ---------------------------------------------------------------------------
   # GPS

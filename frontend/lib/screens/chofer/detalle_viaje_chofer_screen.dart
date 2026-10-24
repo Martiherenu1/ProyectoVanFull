@@ -183,13 +183,14 @@ class _DetalleViajeChoferScreenState extends State<DetalleViajeChoferScreen> {
   }
 
   Widget _titulo(BuildContext context, String texto) => Padding(
-    padding: const EdgeInsets.symmetric(vertical: AppSpacing.lg),
+    padding: const EdgeInsets.only(top: AppSpacing.lg, bottom: AppSpacing.sm),
     child: Text(texto, style: Theme.of(context).textTheme.headlineSmall),
   );
 
-  Widget _fila(String texto, {Key? key}) => ConstrainedBox(
+  Widget _fila(String texto, {Key? key}) => Padding(
     key: key,
-    constraints: const BoxConstraints(minHeight: AppSpacing.driverRowHeight),
+    // Solo datos de lectura; los controles conservan sus targets de 64 px.
+    padding: const EdgeInsets.symmetric(vertical: AppSpacing.xs),
     child: Align(alignment: Alignment.centerLeft, child: Text(texto)),
   );
 

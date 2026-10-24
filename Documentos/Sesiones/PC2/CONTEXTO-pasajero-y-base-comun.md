@@ -3,7 +3,7 @@
 > Lo mantiene el agente de Martiniano, en el mismo PR que cambia algo. Convención en
 > `PROMPT-CONTEXTO-VIVO.md`. Si algo de acá contradice al código, manda el código: corregir este archivo.
 >
-> **Última actualización: 2026-10-23**
+> **Última actualización: 2026-10-24**
 
 ## Estado
 
@@ -121,10 +121,10 @@ rojo) y la lista fallan y se reintentan por separado. Cancelar pide confirmació
 `VIAJE_NO_CANCELABLE` se muestran con su motivo (el adaptador debe lanzar `ReservaRechazada`), y la cancelada
 muestra el `motivo` que devuelve el backend. **No muestra la ventana de cancelación de RN-017** (“Podés cancelar hasta
 …” del brief): hoy se puede cancelar mientras el viaje esté programado y el crédito no existe (#75), así que mostrar
-una hora prometería algo que no se aplica; la `Reserva` tampoco informa el estado del viaje. **Abierto:** si el pasajero
-no tiene cliente individual todavía (no reservó nunca), `GET /pasajeros/me/deuda` responde 404
-`CLIENTE_NO_ENCONTRADO` y la pantalla muestra «No pudimos cargar tu saldo»; decidir con Facundo si ese caso es
-«Al día». Verificado: `flutter analyze` y `flutter test` (79/79). **SIN VERIFICAR:** contra el backend real y en
+una hora prometería algo que no se aplica; la `Reserva` tampoco informa el estado del viaje. **Resuelto el 2026-10-24
+(Issue #137):** si el pasajero no tiene cliente individual todavía (no reservó nunca), `GET /pasajeros/me/deuda`
+responde 404 `CLIENTE_NO_ENCONTRADO` y `PasajeroApi.cargarDeuda` lo traduce a «Al día» (sin cuenta corriente no
+hay deuda); el backend de Facundo no cambia. Verificado: `flutter analyze` y `flutter test` (79/79). **SIN VERIFICAR:** contra el backend real y en
 un dispositivo o navegador; no está conectada (#87 y el login).
 
 **Pantalla Flutter Asistente (CU-011, Issue #96), rama `feat/pasajero-asistente-cu011`, apilada sobre la de Mis reservas

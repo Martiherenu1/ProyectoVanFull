@@ -1,5 +1,13 @@
 # Contexto vivo · Chofer y viaje en curso (Martín)
 
+## Preparación independiente — densidad del detalle CU-029, 24/10/2026
+
+- Rama `fix/chofer-densidad-detalle-main-cu029`, worktree `.worktrees/chofer-densidad-main-cu029`, desde `origin/main f1f78ffbd98fd9d7601a5a50a37af9d5868316b5` actualizado. Cero commits propios; sin merge/cherry-pick de ramas de trabajo. Se conserva el contexto de main y solo se agrega este registro puntual. Sin commits, push, PR nueva ni publicaciones.
+- Parche compatible: la pantalla actual ya incorpora `comprobarUbicacionInicio`; se conserva íntegro. Solo cambia `_titulo` (16 px arriba / 8 px abajo) y `_fila` (altura natural, padding vertical 4 px por lado). Pasajeros, controles interactivos de 64 px, tema, sesión, ubicación y dependencias intactos. Entrega independiente hacia main, sin dependencia de #128; no se traslada su shell, interfaz ni registro de publicación.
+- Mejora de usabilidad, sin falla funcional: el usuario confirmó «los datos quedan más juntos y cómodos de leer» en la preview anterior. No acredita manualmente anchos, escalas, otros escenarios ni el circuito completo. No se atribuye una revisión visual nueva a esta combinación.
+- Se trasladan únicamente el ajuste visual y sus pruebas: altura de texto + 8 px y crecimiento con nombres largos al 200 %, sin recorte y con desplazamiento hasta nómina. Verificaciones nuevas sobre esta combinación: pub get offline con lockfile exigido correcto; formato final de dos Dart sin cambios; analyze sin issues (119,6 s); 117 pruebas pertinentes aprobadas, 0 fallidas/omitidas (detalle, acciones y coordinador; 30 s). Log local: frontend/build-densidad-main-tests.log. Git diff --check correcto; dependencias/lockfile iguales a main. No se presenta la evidencia anterior de 51 como ejecución sobre main actual. La suite completa local anterior interrumpida no acredita aprobación completa.
+- Propuesta con `Refs #123`, sin cerrar #123/#64; borrador local conforme a plantilla. Preview, trabajos previos y PR abiertas preservados. Sin backend/HTTP real, instalación en teléfono, demo ni mensajes a terceros.
+
 ## Resumen vigente — control previo de ubicación, 2026-10-23
 
 - Entrega de revisión vinculada a [Issue #114](https://github.com/Martiherenu1/ProyectoVanFull/issues/114), rama feat/chofer-control-ubicacion-cu030; PR hacia main con cierre exclusivo de #114. #64 permanece independiente; CU-030/GPS no completos. Publicación autorizada mediante push normal, sin merge. Vínculo de PR, HEAD publicado y resultado real de CI se registran en la descripción de la PR vinculada al Issue.

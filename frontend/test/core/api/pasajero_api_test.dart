@@ -5,6 +5,7 @@ import 'package:frontend/core/api/auth_api.dart';
 import 'package:frontend/core/api/pasajero_api.dart';
 import 'package:frontend/core/session/sesion.dart';
 import 'package:frontend/models/chofer/viaje_resumen.dart';
+import 'package:frontend/models/pasajero/deuda.dart';
 import 'package:frontend/models/pasajero/reserva.dart';
 
 /// Responde por "METODO ruta" y guarda lo último que recibió.
@@ -196,6 +197,29 @@ void main() {
       expect((await api.cargarReservas()).single.idReserva, 41);
       expect((await api.cargarDeuda()).saldo, 11600.0);
     });
+
+    test(
+      'sin cliente individual la deuda es "al día"; otros errores siguen',
+      () async {
+        final sinCliente = PasajeroApi(
+          ClienteFalso({
+            'GET pasajeros/me/deuda': () =>
+                throw error(404, 'CLIENTE_NO_ENCONTRADO'),
+          }),
+        );
+        final deuda = await sinCliente.cargarDeuda();
+        expect(deuda.estado, EstadoDeuda.alDia);
+        expect(deuda.saldo, 0);
+
+        final otroError = PasajeroApi(
+          ClienteFalso({
+            'GET pasajeros/me/deuda': () =>
+                throw error(403, 'ROL_NO_AUTORIZADO'),
+          }),
+        );
+        expect(otroError.cargarDeuda(), throwsA(isA<ApiException>()));
+      },
+    );
 
     test('cancelar usa la ruta de la reserva y traduce el 409', () async {
       final cliente = ClienteFalso({

@@ -8,7 +8,8 @@ from pydantic import BaseModel, Field
 
 
 class PagoCreate(BaseModel):
-    id_cliente: int
+    # Administración lo indica; el pasajero lo omite y se usa su cliente individual.
+    id_cliente: int | None = None
     importe: Decimal = Field(ge=0)
     medio_pago: Literal[
         "EFECTIVO", "TRANSFERENCIA", "BILLETERA", "CUENTA_CORRIENTE", "MERCADO_PAGO"

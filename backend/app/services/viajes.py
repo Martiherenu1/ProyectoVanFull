@@ -1,5 +1,7 @@
 """Creación y planificación de viajes del área de administración (CU-018)."""
 
+from datetime import date
+
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -12,6 +14,17 @@ from app.schemas.viajes import Viaje, ViajeCreate
 from app.services.eventos import registrar_evento
 
 TIPO_VIAJE_CREADO = "viaje_creado"
+
+
+async def listar_viajes(db: AsyncSession, fecha: date) -> list[Viaje]:
+    """Devuelve todos los viajes del día en el orden operativo acordado para administración."""
+    consulta = (
+        select(ViajeModelo)
+        .where(ViajeModelo.fecha == fecha)
+        .order_by(ViajeModelo.horario.asc().nulls_last(), ViajeModelo.id_viaje.asc())
+    )
+    viajes = (await db.scalars(consulta)).all()
+    return [_a_schema(viaje) for viaje in viajes]
 
 
 async def _validar_referencias(db: AsyncSession, datos: ViajeCreate) -> None:

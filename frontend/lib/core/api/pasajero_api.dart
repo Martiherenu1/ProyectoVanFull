@@ -1,7 +1,9 @@
 import '../../models/chofer/viaje_resumen.dart' show SentidoViaje;
 import '../../models/pasajero/deuda.dart';
 import '../../models/pasajero/disponibilidad_viaje.dart';
+import '../../models/pasajero/pago.dart';
 import '../../models/pasajero/parada.dart';
+import '../../models/pasajero/perfil.dart';
 import '../../models/pasajero/reserva.dart';
 import '../../models/pasajero/respuesta_chat.dart';
 import 'api_client.dart';
@@ -67,9 +69,40 @@ class PasajeroApi {
     return _lista(cuerpo).map(Reserva.fromJson).toList();
   }
 
+  /// Quien nunca reservó no tiene cliente individual y el backend responde 404
+  /// `CLIENTE_NO_ENCONTRADO`: sin cuenta corriente no hay nada que deber.
   Future<Deuda> cargarDeuda() async {
-    final cuerpo = await _cliente.get('pasajeros/me/deuda');
-    return Deuda.fromJson(cuerpo! as Map<String, dynamic>);
+    try {
+      final cuerpo = await _cliente.get('pasajeros/me/deuda');
+      return Deuda.fromJson(cuerpo! as Map<String, dynamic>);
+    } on ApiException catch (e) {
+      if (e.statusCode == 404 && e.codigo == 'CLIENTE_NO_ENCONTRADO') {
+        return const Deuda(saldo: 0, estado: EstadoDeuda.alDia);
+      }
+      rethrow;
+    }
+  }
+
+  /// Sin `id_cliente`: el backend usa la cuenta del pasajero autenticado. Los
+  /// rechazos (400, 404) suben como [ApiException] y los traduce la pantalla.
+  Future<Pago> registrarPago(double importe, MedioPago medio) async {
+    final cuerpo = await _cliente.post(
+      'pagos',
+      body: {'importe': importe, 'medio_pago': medio.valorApi},
+    );
+    return Pago.fromJson(cuerpo! as Map<String, dynamic>);
+  }
+
+  Future<Perfil> cargarPerfil() async {
+    final cuerpo = await _cliente.get('pasajeros/me');
+    return Perfil.fromJson(cuerpo! as Map<String, dynamic>);
+  }
+
+  /// Manda solo los campos que cambiaron. Un dato no editable (403) o un valor
+  /// inválido (400) suben como [ApiException] y los traduce la pantalla.
+  Future<Perfil> modificarPerfil(Map<String, String> cambios) async {
+    final cuerpo = await _cliente.patch('pasajeros/me', body: cambios);
+    return Perfil.fromJson(cuerpo! as Map<String, dynamic>);
   }
 
   Future<ResultadoCancelacion> cancelarReserva(int idReserva) async {

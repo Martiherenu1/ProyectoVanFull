@@ -56,6 +56,30 @@ void main() {
     expect(result, {'id_pago': 8});
   });
 
+  test('PATCH codifica JSON y manda el token', () async {
+    late http.Request sent;
+    final client = HttpApiClient(
+      baseUri: Uri.parse('https://api.vanfull.test/api/'),
+      transport: MockClient((request) async {
+        sent = request;
+        return http.Response(jsonEncode({'telefono': '1155550000'}), 200);
+      }),
+      accessTokenProvider: () async => 'tok',
+    );
+
+    final result = await client.patch(
+      'pasajeros/me',
+      body: {'telefono': '1155550000'},
+    );
+
+    expect(sent.method, 'PATCH');
+    expect(sent.url, Uri.parse('https://api.vanfull.test/api/pasajeros/me'));
+    expect(sent.headers['content-type'], 'application/json');
+    expect(sent.headers['authorization'], 'Bearer tok');
+    expect(jsonDecode(sent.body), {'telefono': '1155550000'});
+    expect(result, {'telefono': '1155550000'});
+  });
+
   test('una respuesta exitosa sin cuerpo devuelve null', () async {
     final client = HttpApiClient(
       baseUri: Uri.parse('https://api.vanfull.test'),

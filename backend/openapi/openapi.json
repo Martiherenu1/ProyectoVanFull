@@ -1029,6 +1029,58 @@
       }
     },
     "/viajes": {
+      "get": {
+        "tags": [
+          "viajes"
+        ],
+        "summary": "Consultar viajes del día",
+        "description": "Lista para administración todos los viajes de la fecha indicada, incluidos los estados\nprogramado, en_curso, finalizado y cancelado. Las asignaciones de vehículo o chofer pueden\nestar pendientes durante la planificación (ADJ-03). El resultado se ordena por horario\nascendente, con los viajes sin horario al final, y luego por id_viaje ascendente. (CU-018)\n",
+        "x-cu": "CU-018",
+        "x-cobertura": "parcial",
+        "parameters": [
+          {
+            "name": "fecha",
+            "in": "query",
+            "required": true,
+            "description": "Fecha de los viajes.",
+            "schema": {
+              "type": "string",
+              "format": "date"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Viajes del día; lista vacía si no hay resultados.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Viaje"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Fecha ausente, vacía, imposible o con formato incorrecto (VALIDACION).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/NoAutenticado"
+          },
+          "403": {
+            "$ref": "#/components/responses/SinPermiso"
+          }
+        }
+      },
       "post": {
         "tags": [
           "viajes"

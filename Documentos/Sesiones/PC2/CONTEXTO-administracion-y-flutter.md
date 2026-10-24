@@ -30,8 +30,11 @@ siendo trabajos independientes.
 
 ## En curso
 
-- Issue #111: navegación hacia Viajes del día con dependencias inyectables; el endpoint administrativo todavía
-  no está contratado.
+- Issue #143: implementar `GET /viajes?fecha=YYYY-MM-DD` para la pantalla administrativa de Viajes del día.
+  Contrato confirmado por Facundo, Martín y Martiniano: fecha obligatoria, todos los estados, orden por horario
+  con nulos al final e identificador, y asignaciones incompletas permitidas por ADJ-03.
+- Issue #111: navegación hacia Viajes del día con dependencias inyectables; la conexión HTTP queda fuera de
+  #143 y debe integrar posteriormente el nuevo `GET /viajes`.
 - PR #54 (CU-006) y PR #52 (CU-016): integrar `main` y mergear.
 
 ## Decisiones
@@ -66,8 +69,8 @@ siendo trabajos independientes.
 
 - CU-014: Draft PR #85 pausado; no declarar completo hasta resolver persistencia de tipo/evidencia, descuento y
   respuestas para clientes inexistentes o sin cuenta corriente.
-- Issue #111: la consulta real queda pendiente del endpoint administrativo para listar viajes y de la
-  autenticación; el cliente compartido ya está integrado, pero esta tarea no inventa un adaptador sin contrato.
+- Issue #111: la consulta real queda pendiente de integrar en Flutter el contrato de `GET /viajes` de #143 y de
+  la autenticación; el cliente compartido ya está integrado.
 - #53 y #51: cerrar mediante la revisión e integración de los PR #54 y #52.
 - CU-006 devuelve `404 CLIENTE_NO_ENCONTRADO` si no existe el cliente individual. Esa respuesta no
   figura en OpenAPI y agregarla al contrato requiere el acuerdo de los tres integrantes.

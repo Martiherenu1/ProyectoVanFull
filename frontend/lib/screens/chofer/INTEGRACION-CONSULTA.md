@@ -50,8 +50,10 @@ clientes. Tampoco hacen login, reintentos HTTP automáticos o llamadas de logout
 - Listado: reutilizar ViajesChoferApi existente al conectar HTTP.
 - Detalle: PR #113 sigue abierta al verificar el 24/10/2026, HEAD e4ac0ac.
   No se copia su implementación; la conexión HTTP espera esa integración.
+  No es una dependencia para publicar o probar este shell con fuentes inyectables.
 - Las pruebas de este componente usan fuentes simuladas. No acreditan HTTP real,
   dataset, cuentas, dispositivo ni circuito autenticado.
 - Sin acciones de inicio/finalización, control de ubicación ni GPS.
-- Entrega parcial: no cierra #123. La suite completa anterior fue interrumpida
+- Entrega parcial publicada en PR #128, sin merge; no cierra #123 ni #64.
+  La suite completa anterior fue interrumpida
   después de 233 aprobadas y no acredita aprobación completa.

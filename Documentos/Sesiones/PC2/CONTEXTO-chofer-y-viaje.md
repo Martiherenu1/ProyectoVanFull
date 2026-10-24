@@ -1,6 +1,12 @@
 # Contexto vivo · Chofer y viaje en curso (Martín)
 
-## Estado al 24/10/2026 — componente de consulta Chofer #123 (parcial)
+## Estado al 24/10/2026 — ChoferShell publicado en PR #128 (parcial, sin merge)
+
+- Publicación autorizada por el usuario: cuatro archivos revisados preservados en `918a213`; main remoto `51b1b4da8a1cbd35c2e07271cbf7c71f95faeb62` incorporado mediante merge `8bfa1bd763aa03656a225ed8c79ee779215d4868`, sin conflictos, rebase ni force. Push normal realizado y [PR #128](https://github.com/Martiherenu1/ProyectoVanFull/pull/128) abierta hacia main, con `Refs #123` y sin cierre automático. El último commit documental actualiza este estado; CI del HEAD final se registra en la PR, separada de las pruebas locales.
+- Sobre la combinación con main: formato de dos Dart, cero cambios; analyze sin issues (28,4 s); 51 pruebas pertinentes aprobadas, 0 fallidas/omitidas (31 s), log `frontend/build/chofer-consulta-tests-main.log`. Se conserva debajo la evidencia de 51 sobre base `792792c`; la suite completa anterior interrumpida NO acredita aprobación completa. No se repiten pruebas por esta actualización exclusivamente documental.
+- Diff propio limitado a shell, sus pruebas, interfaz y contexto. Código compartido/dependencias/lockfile iguales a main; sin llamadas reales, cambios de otras PR/worktrees o demo, ni mensajes a terceros. #113 sigue abierta al verificar: condiciona solo la futura conexión HTTP, no esta publicación. #123 y #64 continúan abiertos; integración común pendiente. No se mergea esta PR.
+
+## Registro previo a publicación — componente de consulta Chofer #123 (parcial)
 
 - Rama `feat/chofer-integracion-cu029-123`, base `792792c`, worktree `.worktrees/chofer-integracion-123`. Usuario autoriza únicamente componentes propios. Reparto confirmado: Facundo composición/inyección/transporte/router; Martiniano autenticación/sesión/token/roles; Martín pantallas y adaptadores Chofer. Sin commits, push ni publicaciones.
 - ChoferShell reutiliza listado y detalle por ID con fuentes externas, conserva fecha/listado al volver (incluido botón del sistema), evita apilar selecciones duplicadas y delega salida mediante callback también durante carga. Sin acciones CU-030 ni GPS. Reconstruir con fuentes iguales no recarga; reemplazarlas explícitamente actualiza las rutas y descarta resultados anteriores.

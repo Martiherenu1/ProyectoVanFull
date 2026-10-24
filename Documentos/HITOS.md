@@ -181,8 +181,8 @@
 
 ### [2026-10-24] Integración de tres áreas sobre un contrato común, con concurrencia y pagos verificados
 
-- **Qué:** en la última semana del desarrollo se integraron en `main` las tres partes del sistema (pasajero, chofer y
-  administración), cada una a cargo de una persona, con **~20 pull requests** mergeadas por el flujo Issue → rama →
+- **Qué:** desde el 13/10 se integraron en `main` las tres partes del sistema (pasajero, chofer y
+  administración), cada una a cargo de una persona, con **76 pull requests** mergeadas por el flujo Issue → rama →
   PR → CI → revisión cruzada. Entraron el registro de pagos y el perfil del pasajero (backend y Flutter), el aviso
   de ausencia, el listado de viajes del día para administración y los adaptadores HTTP del chofer. Backend y sitio
   quedaron desplegados en Render con la CI de `main` en verde (367 pruebas de backend, 375 de Flutter).

@@ -197,6 +197,19 @@
   commit que registra GitHub y el sitio por el contenido del bundle compilado.
 - **Tecnologías:** FastAPI, PostgreSQL con bloqueos a nivel de fila, OpenAPI, Flutter Web, GitHub Actions, Render.
 
+### [2026-10-24] Asistente con IA funcionando en producción contra un modelo real
+
+- **Qué:** el asistente del pasajero (AG-01) quedó respondiendo en la API desplegada con un modelo real vía
+  OpenRouter: consulta disponibilidad, crea y cancela reservas por el chat, siempre a través de los mismos servicios
+  y reglas que la app, y pidiendo confirmación antes de escribir.
+- **Rol de Martiniano:** cargó la clave y verificó el flujo con un pasajero real. Al probar, descubrió que los dos
+  modelos elegidos en la PoC habían dejado de estar disponibles gratis, diagnosticó la causa directamente contra el
+  gateway (sin exponer la clave ni la contraseña) y eligió reemplazos que demostraron elegir bien la herramienta.
+- **Por qué importa (CV):** la integración se endureció antes de exponerla: ninguna falla del proveedor (clave
+  inválida, límite, modelo inexistente, timeout, respuesta mal formada) termina en error 500 ni deja al usuario
+  esperando, todas quedan registradas, y cada una tiene su prueba automática contra un gateway simulado.
+- **Tecnologías:** FastAPI, OpenRouter (function calling), httpx, pytest, Render.
+
 <!-- Próximos hitos a documentar a medida que se implementen:
      - Esquema de datos PostgreSQL y migraciones
      - Contrato OpenAPI de las tools de AG-01

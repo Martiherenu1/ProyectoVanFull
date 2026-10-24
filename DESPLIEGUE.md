@@ -16,6 +16,7 @@ En la tabla, **secreto** quiere decir que no va al chat, ni a un commit, ni a un
 |---|---|---|
 | Render (panel) | `DATABASE_URL` | **secreto**: la cadena **directa** de Neon, tal cual la da el panel |
 | Render (panel) | `OPENROUTER_API_KEY` | **secreto**, opcional: sin ella, el asistente deriva a una persona |
+| Render (panel) | `OPENROUTER_MODEL_PRIMARY`, `OPENROUTER_MODEL_FALLBACK` | públicos. Los valores por defecto del repo hoy no funcionan gratis: los de la demo están en `CONTEXTO.md` §13 |
 | Render (`render.yaml`) | `JWT_SECRET` | lo genera Render (`generateValue`); nadie lo ve ni lo copia |
 | Render (`render.yaml`) | `ENV=production`, `API_PREFIX=/api`, `CORS_ORIGINS=https://vanfull.onrender.com,https://martiherenu1.github.io` | públicos |
 | GitHub → Settings → Secrets and variables → Actions → **Variables** | `API_BASE_URL` | `https://<servicio>.onrender.com/api` (público: queda en el JS) |
@@ -101,7 +102,8 @@ Hacerlo con un celular **con datos móviles, no con el wifi de casa**, para que 
    contraseña del CSV.
 4. Buscar el 30/10 → elegir el viaje → marcar la parada → confirmar (necesita #101).
 5. Mis reservas: aparece la reserva y el saldo. Cancelar: aparece cancelada, con su motivo.
-6. Asistente: escribir algo. Sin `OPENROUTER_API_KEY`, la respuesta es «Derivado a una persona».
+6. Asistente: «¿Hay lugar para ir el viernes 30/10 a la ida?». Tiene que listar los viajes. Si responde que te
+   deriva a una persona, ver la tabla de abajo. Cada mensaje gasta 2 o 3 de los 50 pedidos diarios del plan gratis.
 7. Cerrar sesión. Recargar la página: vuelve al login (el token no se persiste).
 8. Al terminar, resembrar con `--reiniciar` (paso 2) para que la demo arranque limpia.
 
@@ -112,3 +114,4 @@ Hacerlo con un celular **con datos móviles, no con el wifi de casa**, para que 
 | Health anda, pero la app dice que no pudo conectarse | CORS: `CORS_ORIGINS` tiene que incluir exactamente el origen del sitio (`https://vanfull.onrender.com`), sin barra ni ruta; o `API_BASE_URL` sin `/api` (correr de nuevo el workflow) |
 | Página en blanco o 404 en los recursos | En Pages: el workflow no usó `--base-href /ProyectoVanFull/`, o Pages no está en «GitHub Actions». En Render: la rama `sitio-web` no existe o está vacía (correr **Web**) |
 | Login correcto con el CSV da 401 | La base no se sembró con ese CSV: repetir el paso 2 con `--reiniciar` |
+| El asistente siempre deriva a una persona | Buscar `AG-01:` en el log de Render: dice qué modelo falló y por qué (falta la clave, 401, 404 del modelo, 429 por el límite diario) |

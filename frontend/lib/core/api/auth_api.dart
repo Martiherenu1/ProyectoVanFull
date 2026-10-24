@@ -23,8 +23,9 @@ class AuthApi {
     }
   }
 
-  /// POST /auth/logout (204).
-  Future<void> cerrarSesion() async {
-    await _cliente.post('auth/logout');
+  /// POST /auth/logout (204). Va con el token de la sesión que sale, que el
+  /// controlador ya no tiene como vigente.
+  Future<void> cerrarSesion(String accessToken) async {
+    await _cliente.post('auth/logout', accessToken: accessToken);
   }
 }

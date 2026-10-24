@@ -23,6 +23,7 @@ void main() {
     baseUri: Uri.parse(_apiBaseUrl),
     transport: http.Client(),
     accessTokenProvider: () => sesion.token,
+    onNoAutorizado: (token) => sesion.invalidar(token),
   );
   final auth = AuthApi(cliente);
   sesion = SesionController(

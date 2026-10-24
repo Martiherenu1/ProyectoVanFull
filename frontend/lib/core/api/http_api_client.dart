@@ -11,56 +11,73 @@ final class HttpApiClient implements ApiClient {
     required Uri baseUri,
     required this.transport,
     this.accessTokenProvider,
+    this.onNoAutorizado,
   }) : _baseUri = _normalizeBaseUri(baseUri);
 
   final Uri _baseUri;
   final http.Client transport;
   final AccessTokenProvider? accessTokenProvider;
 
+  /// Se llama con el token que viajó cuando el servidor responde 401. Quien lo
+  /// recibe decide si ese token sigue siendo el de la sesión vigente: un pedido
+  /// de una sesión anterior no debe cerrar la actual. Un 401 sin token (login)
+  /// no lo dispara.
+  final void Function(String token)? onNoAutorizado;
+
   @override
-  Future<Object?> get(
-    String path, {
-    Map<String, String>? queryParameters,
+  Future<Object?> get(String path, {Map<String, String>? queryParameters}) =>
+      _enviar(
+        (headers) =>
+            transport.get(_resolve(path, queryParameters), headers: headers),
+      );
+
+  @override
+  Future<Object?> post(String path, {Object? body, String? accessToken}) =>
+      _enviar(
+        (headers) => transport.post(
+          _resolve(path),
+          headers: headers,
+          body: body == null ? null : jsonEncode(body),
+        ),
+        jsonBody: body != null,
+        accessToken: accessToken,
+      );
+
+  @override
+  Future<Object?> patch(String path, {Object? body}) => _enviar(
+    (headers) => transport.patch(
+      _resolve(path),
+      headers: headers,
+      body: body == null ? null : jsonEncode(body),
+    ),
+    jsonBody: body != null,
+  );
+
+  /// El token se fija antes de enviar: si la sesión cambia mientras el pedido
+  /// está en vuelo, el 401 se informa con el token con el que salió.
+  Future<Object?> _enviar(
+    Future<http.Response> Function(Map<String, String> headers) enviar, {
+    bool jsonBody = false,
+    String? accessToken,
   }) async {
-    final response = await transport.get(
-      _resolve(path, queryParameters),
-      headers: await _headers(),
-    );
-    return _decode(response);
-  }
-
-  @override
-  Future<Object?> post(String path, {Object? body}) async {
-    final response = await transport.post(
-      _resolve(path),
-      headers: await _headers(jsonBody: body != null),
-      body: body == null ? null : jsonEncode(body),
-    );
-    return _decode(response);
-  }
-
-  @override
-  Future<Object?> patch(String path, {Object? body}) async {
-    final response = await transport.patch(
-      _resolve(path),
-      headers: await _headers(jsonBody: body != null),
-      body: body == null ? null : jsonEncode(body),
-    );
-    return _decode(response);
-  }
-
-  Future<Map<String, String>> _headers({bool jsonBody = false}) async {
+    final token = await _token(accessToken);
     final headers = <String, String>{'Accept': 'application/json'};
     if (jsonBody) headers['Content-Type'] = 'application/json';
+    if (token != null) headers['Authorization'] = 'Bearer $token';
 
-    final provider = accessTokenProvider;
-    if (provider != null) {
-      final token = (await provider())?.trim();
-      if (token != null && token.isNotEmpty) {
-        headers['Authorization'] = 'Bearer $token';
-      }
+    final response = await enviar(headers);
+    try {
+      return _decode(response);
+    } on ApiException catch (e) {
+      if (e.statusCode == 401 && token != null) onNoAutorizado?.call(token);
+      rethrow;
     }
-    return headers;
+  }
+
+  Future<String?> _token(String? explicito) async {
+    final valor = explicito ?? await accessTokenProvider?.call();
+    final token = valor?.trim();
+    return token == null || token.isEmpty ? null : token;
   }
 
   Uri _resolve(String path, [Map<String, String>? queryParameters]) {

@@ -14,8 +14,14 @@ class SesionController extends ChangeNotifier {
   Sesion? _sesion;
   bool _ingresando = false;
   ErrorLogin? _error;
+  int _generacion = 0;
 
   Sesion? get sesion => _sesion;
+
+  /// Cambia con cada ingreso, salida o invalidación. Quien monta pantallas con
+  /// fuentes de datos de la sesión la usa como key para no mezclar una cuenta
+  /// con la siguiente.
+  int get generacion => _generacion;
   bool get ingresando => _ingresando;
   ErrorLogin? get error => _error;
 
@@ -29,6 +35,7 @@ class SesionController extends ChangeNotifier {
     notifyListeners();
     try {
       _sesion = await iniciarSesion(identificador.trim(), password);
+      _generacion++;
     } on CredencialesInvalidas {
       _error = ErrorLogin.credenciales;
     } catch (_) {
@@ -39,15 +46,27 @@ class SesionController extends ChangeNotifier {
     }
   }
 
-  /// El token se descarta aunque el servidor no responda.
+  /// El servidor rechazó [token]. Solo cierra la sesión si ese token sigue
+  /// siendo el vigente: un 401 tardío de una cuenta anterior no toca la actual.
+  void invalidar(String token) {
+    if (_sesion?.accessToken != token) return;
+    _sesion = null;
+    _generacion++;
+    notifyListeners();
+  }
+
+  /// La salida local es inmediata y no depende de la red: el logout viaja con
+  /// el token de la sesión saliente y su falla se ignora.
   Future<void> salir() async {
-    final cerrar = cerrarSesion;
+    final saliente = _sesion;
     _sesion = null;
     _error = null;
+    _generacion++;
     notifyListeners();
-    if (cerrar == null) return;
+    final cerrar = cerrarSesion;
+    if (saliente == null || cerrar == null) return;
     try {
-      await cerrar();
+      await cerrar(saliente.accessToken);
     } catch (_) {}
   }
 }

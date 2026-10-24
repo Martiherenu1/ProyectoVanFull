@@ -123,7 +123,7 @@ void main() {
   testWidgets('salir vuelve al login aunque el logout falle', (tester) async {
     final c = SesionController(
       iniciarSesion: (_, _) async => sesionDe(['pasajero']),
-      cerrarSesion: () async => throw Exception('sin red'),
+      cerrarSesion: (_) async => throw Exception('sin red'),
     );
     await tester.pumpWidget(SesionApp(controller: c));
     await completar(tester);

@@ -26,5 +26,6 @@ typedef IniciarSesion = Future<Sesion> Function(
   String password,
 );
 
-/// POST /auth/logout. El backend no tiene lista negra: alcanza con descartar el token.
-typedef CerrarSesion = Future<void> Function();
+/// POST /auth/logout con el token de la sesión saliente. El backend no tiene
+/// lista negra: alcanza con descartar el token; el pedido es de cortesía.
+typedef CerrarSesion = Future<void> Function(String accessToken);

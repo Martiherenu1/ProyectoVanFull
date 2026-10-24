@@ -22,6 +22,53 @@ Future<void> mostrar(
 );
 
 void main() {
+  testWidgets('los datos crecen con nombres largos y texto al 200 %', (
+    tester,
+  ) async {
+    await tester.binding.setSurfaceSize(const Size(360, 640));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+    final json = detalleJson();
+    const nombre =
+        'Parada ficticia de nombre muy extenso para comprobar '
+        'que el texto ampliado se ajuste completo en varias líneas';
+    (json['paradas'] as List).first['nombre_descripcion'] = nombre;
+    await tester.pumpWidget(
+      MaterialApp(
+        builder: (context, child) => MediaQuery(
+          data: MediaQuery.of(context)
+              .copyWith(textScaler: TextScaler.linear(2)),
+          child: child!,
+        ),
+        home: DetalleViajeChoferScreen(
+          idViaje: 41,
+          cargarDetalle: (_) async => OperacionAsignada.fromJson(json),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+    await tester.scrollUntilVisible(
+      find.byKey(const ValueKey('parada-11')),
+      200,
+    );
+    final fila = find.byKey(const ValueKey('parada-11'));
+    final texto = find.text('Parada 1: $nombre');
+    expect(tester.getSize(fila).height, greaterThan(64));
+    expect(
+      tester.getRect(fila).contains(tester.getRect(texto).topLeft),
+      isTrue,
+    );
+    expect(
+      tester.getRect(fila).bottom,
+      greaterThanOrEqualTo(tester.getRect(texto).bottom),
+    );
+    await tester.scrollUntilVisible(
+      find.byKey(const ValueKey('integrante-71')),
+      200,
+    );
+    expect(find.textContaining('Invitada Nómina'), findsOneWidget);
+    expect(tester.takeException(), isNull);
+  });
+
   setUp(() {
     // El detalle largo cabe completo para comprobar secciones, sin scroll implícito.
   });
@@ -73,7 +120,10 @@ void main() {
       );
       expect(
         tester.getSize(primera).height,
-        greaterThanOrEqualTo(AppSpacing.driverRowHeight),
+        closeTo(
+          tester.getSize(find.text('Parada 1: Primera parada')).height + 8,
+          0.01,
+        ),
       );
       expect(find.text('Parada 1: Primera parada'), findsOneWidget);
       expect(find.text('Parada 2: Sin descripción'), findsOneWidget);

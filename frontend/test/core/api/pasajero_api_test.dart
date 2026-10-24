@@ -5,6 +5,7 @@ import 'package:frontend/core/api/auth_api.dart';
 import 'package:frontend/core/api/pasajero_api.dart';
 import 'package:frontend/core/session/sesion.dart';
 import 'package:frontend/models/chofer/viaje_resumen.dart';
+import 'package:frontend/models/pasajero/pago.dart';
 import 'package:frontend/models/pasajero/reserva.dart';
 
 /// Responde por "METODO ruta" y guarda lo último que recibió.
@@ -195,6 +196,35 @@ void main() {
 
       expect((await api.cargarReservas()).single.idReserva, 41);
       expect((await api.cargarDeuda()).saldo, 11600.0);
+    });
+
+    test('registrar pago manda importe y medio, sin id_cliente', () async {
+      final cliente = ClienteFalso({
+        'POST pagos': () => {
+          'id_pago': 5,
+          'id_cliente': 1,
+          'importe': 5800,
+          'medio_pago': 'TRANSFERENCIA',
+          'estado': 'PENDIENTE',
+          'fecha_hora': '2026-10-24T18:00:00Z',
+        },
+      });
+      final pago = await PasajeroApi(cliente)
+          .registrarPago(5800, MedioPago.transferencia);
+
+      expect(cliente.ultimoCuerpo, {
+        'importe': 5800,
+        'medio_pago': 'TRANSFERENCIA',
+      });
+      expect(pago.estado, EstadoPago.pendiente);
+
+      final sinCuenta = ClienteFalso({
+        'POST pagos': () => throw error(404, 'CUENTA_CORRIENTE_NO_ENCONTRADA'),
+      });
+      await expectLater(
+        PasajeroApi(sinCuenta).registrarPago(1, MedioPago.efectivo),
+        throwsA(isA<ApiException>()),
+      );
     });
 
     test('cancelar usa la ruta de la reserva y traduce el 409', () async {

@@ -7,6 +7,7 @@ import 'package:frontend/screens/pasajero/pasajero_shell.dart';
 /// Servidor falso con un viaje y una parada; guarda las reservas que se crean.
 class ServidorFalso implements ApiClient {
   final reservas = <Map<String, dynamic>>[];
+  final pagos = <Object?>[];
   int pedidosDeReservas = 0;
 
   @override
@@ -40,7 +41,7 @@ class ServidorFalso implements ApiClient {
         pedidosDeReservas++;
         return reservas;
       case 'pasajeros/me/deuda':
-        return {'saldo': 0, 'estado': 'al_dia'};
+        return {'saldo': 11600, 'estado': 'con_deuda'};
     }
     throw StateError('GET inesperado: $path');
   }
@@ -61,6 +62,17 @@ class ServidorFalso implements ApiClient {
       };
       reservas.add(reserva);
       return reserva;
+    }
+    if (path == 'pagos') {
+      pagos.add(body);
+      return {
+        'id_pago': 5,
+        'id_cliente': 1,
+        'importe': 11600,
+        'medio_pago': 'TRANSFERENCIA',
+        'estado': 'PENDIENTE',
+        'fecha_hora': '2026-10-24T18:00:00Z',
+      };
     }
     throw StateError('POST inesperado: $path');
   }
@@ -128,5 +140,38 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(servidor.pedidosDeReservas, greaterThan(primeras));
+  });
+
+  testWidgets('desde Mis reservas se registra un pago y se vuelve', (
+    tester,
+  ) async {
+    final servidor = ServidorFalso();
+    await tester.pumpWidget(
+      MaterialApp(
+        home: PasajeroShell(api: PasajeroApi(servidor), onSalir: () {}),
+      ),
+    );
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Mis reservas'));
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.byKey(const ValueKey('ir-a-pago')));
+    await tester.pumpAndSettle();
+    // El saldo se sugiere como importe.
+    expect(find.text('11600'), findsOneWidget);
+
+    await tester.tap(find.byKey(const ValueKey('medio-TRANSFERENCIA')));
+    await tester.pump();
+    await tester.tap(find.byKey(const ValueKey('registrar-pago')));
+    await tester.pumpAndSettle();
+    expect(servidor.pagos, [
+      {'importe': 11600.0, 'medio_pago': 'TRANSFERENCIA'},
+    ]);
+
+    final antes = servidor.pedidosDeReservas;
+    await tester.tap(find.byKey(const ValueKey('terminar-pago')));
+    await tester.pumpAndSettle();
+    expect(find.byKey(const ValueKey('ir-a-pago')), findsOneWidget);
+    expect(servidor.pedidosDeReservas, greaterThan(antes));
   });
 }

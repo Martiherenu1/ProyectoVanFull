@@ -2,6 +2,10 @@
 
 ## Estado
 
+2026-10-25: Issue #152 integra la navegación compartida sobre la sesión de #153 y su único `HttpApiClient`.
+Administración reutiliza los adaptadores de listado y creación; Chofer recibe su `ChoferShell` y adaptadores
+existentes sin modificar código de Martín. Las entradas usan `SesionController.generacion` para aislar cuentas.
+
 2026-10-23: #87 y #99 integrados en `main`. Issue #111 conecta la entrada del rol administrador con
 `ViajesDiaAdminScreen` mediante fecha, consulta y selección inyectables, sin login, sesión, HTTP ni datos
 simulados en producción. Sin rol, múltiples roles y rol desconocido conservan el comportamiento de #48.
@@ -30,12 +34,8 @@ siendo trabajos independientes.
 
 ## En curso
 
-- Issue #149: adaptador Flutter independiente para `GET /viajes`, reutilizando `ApiClient` y `ViajeResumen`.
-  No modifica el adaptador de creación del PR #130 ni conecta todavía pantalla, sesión o navegación. El
-  contrato/backend de consulta del Issue #143 ya está integrado en `main`.
-- Issue #111: navegación hacia Viajes del día con dependencias inyectables; la conexión real con sesión y el
-  adaptador de #149 sigue pendiente.
-- PR #54 (CU-006) y PR #52 (CU-016): integrar `main` y mergear.
+- Issue #152: composición compartida de sesión, entradas por rol, ciclo de vida del transporte y política de
+  errores autenticados. No agrega contratos ni modifica pantallas propias de pasajero o chofer.
 
 ## Decisiones
 
@@ -53,6 +53,11 @@ siendo trabajos independientes.
   con varios roles o con un rol desconocido no selecciona una portada y muestra un estado pendiente explícito.
 - 2026-10-20, #48: las entradas temporales son Buscar servicio (CU-002), Lista del viaje (CU-029) y Viajes del
   día (CU-018), con sus temas y alturas 48/64/36; no implementan todavía funcionalidad ni permisos.
+- 2026-10-24, Martiniano (#153) y Facundo (#152): mantener un único `HttpApiClient`; un `401` invalida solamente
+  la sesión cuyo token originó la solicitud, un `403` conserva la sesión y las respuestas tardías no cruzan
+  entre cuentas. #152 reutiliza esa política y cierra el transporte al desmontar la composición, no al logout.
+- 2026-10-24, Martiniano y Facundo, #152: múltiples roles, roles desconocidos y `dueno` permanecen bloqueados
+  en Flutter. No se selecciona automáticamente un rol ni se inventa una interfaz de dueño.
 - 2026-10-18, Facundo: CU-006 calcula el saldo sin persistirlo; los movimientos `DEUDOR` suman y los
   `ACREEDOR` restan según MR-R30. Un saldo neto acreedor se informa como cero.
 - 2026-10-18, Facundo: si existe el cliente individual pero no su cuenta corriente, CU-006 responde
@@ -72,8 +77,8 @@ siendo trabajos independientes.
   adaptador no inventa valores: rechaza una respuesta incompleta.
 - CU-014: Draft PR #85 pausado; no declarar completo hasta resolver persistencia de tipo/evidencia, descuento y
   respuestas para clientes inexistentes o sin cuenta corriente.
-- Issue #111: la consulta real queda pendiente de conectar el adaptador de #149 y la autenticación; el cliente
-  compartido y el backend de `GET /viajes` ya están integrados.
+- Issue #152 no conecta detalle administrativo. La selección de un viaje continúa sin destino porque no hay una
+  interfaz aprobada para ese detalle.
 - #53 y #51: cerrar mediante la revisión e integración de los PR #54 y #52.
 - CU-006 devuelve `404 CLIENTE_NO_ENCONTRADO` si no existe el cliente individual. Esa respuesta no
   figura en OpenAPI y agregarla al contrato requiere el acuerdo de los tres integrantes.
@@ -90,8 +95,8 @@ siendo trabajos independientes.
 - #47: Martiniano debe confirmar Archivo + IBM Plex Mono antes de incorporar archivos de fuentes y desactivar
   la descarga en ejecución. No se descargaron ni agregaron fuentes en esta corrección.
 - #47: completar la plantilla del cuerpo del PR requiere una autorización remota separada.
-- #48: integrar los roles de la autenticación cuando esté disponible y reemplazar las portadas temporales por
-  las definitivas; la resolución de cuentas con múltiples roles continúa PENDIENTE DE VALIDACIÓN.
+- #48/#152: las entradas de pasajero, chofer y administración se inyectan desde la sesión. Las cuentas con
+  múltiples roles, roles desconocidos y `dueno` quedan bloqueadas por decisión confirmada.
 - #48: `AppTheme.admin` es sólo el fallback visual temporal de los estados sin rol; no selecciona el rol de
   administración y debe revisarse al integrar autenticación.
 

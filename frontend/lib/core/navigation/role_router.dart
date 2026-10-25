@@ -10,6 +10,9 @@ import 'app_role.dart';
 class RoleRouter extends StatelessWidget {
   const RoleRouter({
     required this.roles,
+    this.entradaPasajero,
+    this.entradaChofer,
+    this.entradaAdministrador,
     this.fechaAdmin,
     this.cargarViajesAdmin,
     this.onViajeAdminSeleccionado,
@@ -17,6 +20,9 @@ class RoleRouter extends StatelessWidget {
   });
 
   final List<String> roles;
+  final WidgetBuilder? entradaPasajero;
+  final WidgetBuilder? entradaChofer;
+  final WidgetBuilder? entradaAdministrador;
   final DateTime? fechaAdmin;
   final CargarViajesDelDia? cargarViajesAdmin;
   final ValueChanged<int>? onViajeAdminSeleccionado;
@@ -29,11 +35,11 @@ class RoleRouter extends StatelessWidget {
       title: 'VanFull',
       debugShowCheckedModeBanner: false,
       theme: resolution.role?.theme ?? AppTheme.admin,
-      home: _destination(resolution),
+      home: _destination(context, resolution),
     );
   }
 
-  Widget _destination(_RoleResolution resolution) {
+  Widget _destination(BuildContext context, _RoleResolution resolution) {
     final role = resolution.role;
     if (role == null) {
       return _PendingRoleScreen(
@@ -41,6 +47,12 @@ class RoleRouter extends StatelessWidget {
         message: resolution.message,
       );
     }
+    final entrada = switch (role) {
+      AppRole.passenger => entradaPasajero,
+      AppRole.driver => entradaChofer,
+      AppRole.admin => entradaAdministrador,
+    };
+    if (entrada != null) return entrada(context);
     if (role == AppRole.admin) {
       return ViajesDiaAdminScreen(
         fecha: fechaAdmin ?? DateTime.now(),

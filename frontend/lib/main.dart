@@ -92,13 +92,15 @@ class _VanFullBootstrapState extends State<VanFullBootstrap> {
     entradaPasajero: (controller) =>
         PasajeroShell(api: _pasajero, onSalir: controller.salir),
     entradaAdministrador: (controller) => _EntradaAdministracion(
+      controller: controller,
       listar: _viajesDiaAdmin,
       crear: _viajesAdmin,
       onSalir: controller.salir,
     ),
-    entradaChofer: (controller) => ChoferShell(
-      cargarViajes: _viajesChofer.cargarViajes,
-      cargarDetalle: _detalleChofer.cargarDetalle,
+    entradaChofer: (controller) => _EntradaChofer(
+      controller: controller,
+      listar: _viajesChofer,
+      detalle: _detalleChofer,
       onSalir: controller.salir,
     ),
   );
@@ -106,11 +108,13 @@ class _VanFullBootstrapState extends State<VanFullBootstrap> {
 
 class _EntradaAdministracion extends StatefulWidget {
   const _EntradaAdministracion({
+    required this.controller,
     required this.listar,
     required this.crear,
     required this.onSalir,
   });
 
+  final SesionController controller;
   final ViajesDiaAdminApi listar;
   final ViajesAdminApi crear;
   final VoidCallback onSalir;
@@ -124,21 +128,9 @@ class _EntradaAdministracionState extends State<_EntradaAdministracion> {
 
   @override
   Widget build(BuildContext context) => _accesoDenegado
-      ? Scaffold(
-          body: Center(
-            child: Column(
-              key: const Key('admin-acceso-denegado'),
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                const Text('Acceso denegado.'),
-                const SizedBox(height: AppSpacing.lg),
-                OutlinedButton(
-                  onPressed: widget.onSalir,
-                  child: const Text('Cerrar sesión'),
-                ),
-              ],
-            ),
-          ),
+      ? _AccesoDenegado(
+          key: const Key('admin-acceso-denegado'),
+          onSalir: widget.onSalir,
         )
       : Stack(
           children: [
@@ -178,14 +170,11 @@ class _EntradaAdministracionState extends State<_EntradaAdministracion> {
         );
 
   Future<List<ViajeResumen>> _cargarViajes(DateTime fecha) async {
-    try {
-      return await widget.listar.cargarViajes(fecha);
-    } on ApiException catch (error) {
-      if (error.statusCode == 403 && mounted) {
-        setState(() => _accesoDenegado = true);
-      }
-      rethrow;
-    }
+    return _protegerAcceso(
+      controller: widget.controller,
+      solicitud: () => widget.listar.cargarViajes(fecha),
+      onAccesoDenegado: _denegarAcceso,
+    );
   }
 
   Future<void> _crearViaje({
@@ -201,18 +190,116 @@ class _EntradaAdministracionState extends State<_EntradaAdministracion> {
     final sentidoViaje = SentidoViaje.values.singleWhere(
       (valor) => valor.valorApi == sentido,
     );
-    await widget.crear.crearViaje(
-      ViajeCreate(
-        idServicio: idServicio,
-        idRecorrido: idRecorrido,
-        idVehiculo: idVehiculo,
-        idChofer: idChofer,
-        fecha: fecha,
-        horario: horario,
-        sentido: sentidoViaje,
-        capacidadPlanificada: capacidadPlanificada,
+    await _protegerAcceso(
+      controller: widget.controller,
+      solicitud: () => widget.crear.crearViaje(
+        ViajeCreate(
+          idServicio: idServicio,
+          idRecorrido: idRecorrido,
+          idVehiculo: idVehiculo,
+          idChofer: idChofer,
+          fecha: fecha,
+          horario: horario,
+          sentido: sentidoViaje,
+          capacidadPlanificada: capacidadPlanificada,
+        ),
       ),
+      onAccesoDenegado: _denegarAcceso,
     );
+  }
+
+  void _denegarAcceso() {
+    if (!mounted || _accesoDenegado) return;
+    Navigator.of(context).popUntil((route) => route.isFirst);
+    setState(() => _accesoDenegado = true);
+  }
+}
+
+class _EntradaChofer extends StatefulWidget {
+  const _EntradaChofer({
+    required this.controller,
+    required this.listar,
+    required this.detalle,
+    required this.onSalir,
+  });
+
+  final SesionController controller;
+  final ViajesChoferApi listar;
+  final DetalleViajeChoferApi detalle;
+  final VoidCallback onSalir;
+
+  @override
+  State<_EntradaChofer> createState() => _EntradaChoferState();
+}
+
+class _EntradaChoferState extends State<_EntradaChofer> {
+  bool _accesoDenegado = false;
+
+  @override
+  Widget build(BuildContext context) => _accesoDenegado
+      ? _AccesoDenegado(
+          key: const Key('chofer-acceso-denegado'),
+          onSalir: widget.onSalir,
+        )
+      : ChoferShell(
+          cargarViajes: (fecha) => _protegerAcceso(
+            controller: widget.controller,
+            solicitud: () => widget.listar.cargarViajes(fecha),
+            onAccesoDenegado: _denegarAcceso,
+          ),
+          cargarDetalle: (idViaje) => _protegerAcceso(
+            controller: widget.controller,
+            solicitud: () => widget.detalle.cargarDetalle(idViaje),
+            onAccesoDenegado: _denegarAcceso,
+          ),
+          onSalir: widget.onSalir,
+        );
+
+  void _denegarAcceso() {
+    if (!mounted || _accesoDenegado) return;
+    setState(() => _accesoDenegado = true);
+  }
+}
+
+class _AccesoDenegado extends StatelessWidget {
+  const _AccesoDenegado({required this.onSalir, super.key});
+
+  final VoidCallback onSalir;
+
+  @override
+  Widget build(BuildContext context) => Scaffold(
+    body: Center(
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          const Text('Acceso denegado.'),
+          const SizedBox(height: AppSpacing.lg),
+          OutlinedButton(
+            onPressed: onSalir,
+            child: const Text('Cerrar sesión'),
+          ),
+        ],
+      ),
+    ),
+  );
+}
+
+Future<T> _protegerAcceso<T>({
+  required SesionController controller,
+  required Future<T> Function() solicitud,
+  required VoidCallback onAccesoDenegado,
+}) async {
+  final generacion = controller.generacion;
+  final token = controller.token;
+  try {
+    return await solicitud();
+  } on ApiException catch (error) {
+    if (error.statusCode == 403 &&
+        controller.generacion == generacion &&
+        controller.token == token) {
+      onAccesoDenegado();
+    }
+    rethrow;
   }
 }
 

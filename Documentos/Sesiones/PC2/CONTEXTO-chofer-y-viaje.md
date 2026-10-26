@@ -1,5 +1,28 @@
 # Contexto vivo · Chofer y viaje en curso (Martín)
 
+## Revalidación local de #163 tras integrar #164 en main — 26/10/2026
+
+- HEAD publicado preservado `c9d28a40f90897c534a44ca3a9f02ade4d40c8b6`; worktree inicialmente limpio.
+  Merge local de origin/main `d19c22ae70887eb98a4ac905bbebec107d4ac68b`, sin rebase ni push.
+  Único conflicto documental en este contexto: conservados íntegros ambos historiales del 25/10,
+  tanto preparación CU-030 como consulta #123/#164. Sin conflictos funcionales ni cambios de alcance.
+- #161 y #164 quedan incorporadas; el registro inferior de PR #164 abierta/sin merge es histórico:
+  #164 ya integrada en `d19c22a`. Callbacks corregidos por #161; #123 sigue pendiente de prueba real.
+  La CI anterior de #163 aprobó el merge sintético con #161 (527 Flutter, 438 backend), sin #164;
+  las 526 pruebas locales anteriores corresponden a su combinación histórica, no a esta base.
+- Aprobación de Facundo conservada en GitHub sobre `c9d28a4` al verificar, sin atribuirla al nuevo
+  merge local. CI de este nuevo HEAD no ejecutada: no se publica ni se actualiza la PR remota aquí.
+- Nueva combinación: formato de los cuatro Dart propios correcto, cero cambios; analyze sin
+  observaciones (196,8 s); suite Flutter completa: 548 aprobadas, 0 fallidas/omitidas (241 s),
+  incluidas las 21 pruebas de consulta #164 y las 24 de retención/ejecución. Avisos de fuentes
+  Google Fonts sin fallas. Launcher demorado/error de PATH de sesión: verificación completada
+  con el snapshot y package config del SDK existente, sin instalaciones ni cambios persistentes.
+  Log ignorado frontend/preparacion-main-164-test.log; diff --check correcto.
+- Diff contra main limitado a los cinco archivos
+  propios; consulta de #164 incorporada sin modificar sus pruebas. Sin acciones productivas,
+  cambios propios en composición/sesión/cliente, POST reales, Render, preview u otros worktrees.
+  No se cierra #123 ni se declaran completos CU-030 o GPS.
+
 ## Publicación autorizada — preparación de shell CU-030, 25/10/2026
 
 - Issue específico [#162](https://github.com/Martiherenu1/ProyectoVanFull/issues/162), etiqueta chofer,
@@ -92,6 +115,35 @@
   adaptadores. Sin cambios de dependencias/lockfile ni instalaciones; pub get offline con lockfile exigido.
   Sin POST reales, demo/Render, dispositivo o cambios en otros trabajos. No acredita aislamiento
   completo entre cuentas: depende de la composición #152 y la consulta #123. CU-030 sigue parcial.
+
+## Validación local de #123 sobre #161 — 25/10/2026
+
+- #159/#161 integradas, #152 cerrado; origin/main y base local `bd4ec6fc6b36a50f4e715ed8489ecf832359f414`.
+  CI remota [40252289955](https://github.com/Martiherenu1/ProyectoVanFull/actions/runs/40252289955)
+  completada con éxito, verificada por SHA. Composición de sesión/listado/detalle reutilizada, sin duplicación.
+- Rama `docs/chofer-integracion-consulta-123`, worktree `.worktrees/chofer-integracion-doc-123`, actualizada
+  mediante merge fast-forward, sin rebase ni reescritura. Los tres archivos locales se conservaron y
+  respaldaron en Temp antes del merge, con hashes iguales. #163 abierta y no incorporada; otros worktrees intactos.
+- Nueva prueba de circuito con VanFullBootstrap y transporte simulado: fecha/ID/token, retorno, 401/403/404,
+  reintento, cambio de cuenta, respuestas tardías, generación, logout lento y cierre del transporte.
+  Primero pasó la regresión original (1 prueba, 6 s); después el archivo completo: 21 aprobadas, 0 fallidas
+  y 0 omitidas (19 s), incluida esa regresión. Callbacks iguales y 0 GET adicionales al reconstruir con
+  detalle abierto y listado en la navegación. Archivo de pruebas preservado sin cambios ni expectativas rebajadas.
+- Analyze nuevo sin observaciones (36,9 s), formato del test correcto y diff --check correcto.
+  Logs ignorados frontend/cu123-161-{estabilidad,consulta,analyze}.log. Dependencias/lockfile intactos.
+  No se repite ni se acredita suite completa local sobre bd4ec6f.
+- Evidencia histórica de e9a1030: 20/21 de consulta; suite completa 522 aprobadas/1 fallida por callbacks
+  (124 s), y 3 archivos de tema preexistentes señalados por formato global. No son resultados de la base nueva.
+- Pendiente de callbacks de Facundo resuelto por #161; código compartido local intacto.
+  SesionController/HttpApiClient siguen a cargo de Martiniano (#153). El usuario revisó el diff y autorizó
+  publicar solo test/interfaz/contexto, sin merge. Esta entrega no cierra #123 ni declara CU-029 completo.
+- Render SIN EJECUTAR: confirmar versión, cuenta y dataset con Martiniano antes de una prueba local de
+  consulta/retorno/salida. Sin inicio/finalización ni GPS ni cierres de Issues.
+- Entrega publicada mediante commit/push normal: [PR #164](https://github.com/Martiherenu1/ProyectoVanFull/pull/164)
+  abierta hacia main, sin merge y con Refs #123. Commit de pruebas/documentación `fb8d220c934d7faf72280a4e6bed39a29a4665a4`;
+  el último commit documental actualiza este estado. HEAD final y resultado real de CI se registran en la
+  descripción de la PR, separados de las 21 pruebas locales sobre bd4ec6f. Solo tres archivos publicados.
+  CU-030, CU-008, #163, preview, demo y otros worktrees preservados. Evidencia histórica no se cuenta como nueva.
 
 ## Estado de publicación — CU-008, 2026-10-24
 

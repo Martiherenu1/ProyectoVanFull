@@ -1,5 +1,21 @@
 # Contexto vivo · Chofer y viaje en curso (Martín)
 
+## Publicación autorizada — preparación de shell CU-030, 25/10/2026
+
+- Issue específico [#162](https://github.com/Martiherenu1/ProyectoVanFull/issues/162), etiqueta chofer,
+  creado tras revalidar Issues y PR sin equivalente. Publicación autorizada, sin merge.
+  La PR hacia main cerrará únicamente #162; #123, CU-030 y GPS siguen separados e incompletos.
+- Main remoto verificado: `e9a10306c66419f22fbbdd4ba0f13ae968b08350`, sin avance respecto de la
+  combinación probada `2da1eea0d1f332eda43ab970b11eadb7ca8b49ba`. Código y pruebas sin cambios;
+  se agrega únicamente este registro documental. No se repiten checks locales: 526 pruebas
+  aprobadas sobre aquella combinación, con dobles/transporte simulado, sin dispositivo ni POST reales.
+- #161 de Facundo publicada, abierta y sin integrar al verificarla (HEAD `a48c884b1ec3fa3953e208951833c082cab81ccf`).
+  No incluida en las 526 pruebas; integración y validación posterior pendientes. No acredita resolver #123.
+- Push normal y apertura de PR en curso al escribir este registro. La descripción de la PR registra
+  el HEAD publicado y el resultado real de su CI, separado de las 526 pruebas locales; aquí no se presume
+  aprobado. Sin composición, sesión, cliente compartidos, otros worktrees, preview, demo ni Render modificados.
+  Los registros inferiores documentan etapas históricas locales y no describen el estado de publicación actual.
+
 ## Preparación CU-030 actualizada con main / #159 — 25/10/2026
 
 - Cinco archivos revisados preservados en commit local `d2bc414169cf0dd1970e42b2fb96aadc649e7782`,

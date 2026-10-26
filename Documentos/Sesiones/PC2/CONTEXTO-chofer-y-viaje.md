@@ -1,5 +1,34 @@
 # Contexto vivo · Chofer y viaje en curso (Martín)
 
+## Validación local de #123 sobre #161 — 25/10/2026
+
+- #159/#161 integradas, #152 cerrado; origin/main y base local `bd4ec6fc6b36a50f4e715ed8489ecf832359f414`.
+  CI remota [40252289955](https://github.com/Martiherenu1/ProyectoVanFull/actions/runs/40252289955)
+  completada con éxito, verificada por SHA. Composición de sesión/listado/detalle reutilizada, sin duplicación.
+- Rama `docs/chofer-integracion-consulta-123`, worktree `.worktrees/chofer-integracion-doc-123`, actualizada
+  mediante merge fast-forward, sin rebase ni reescritura. Los tres archivos locales se conservaron y
+  respaldaron en Temp antes del merge, con hashes iguales. #163 abierta y no incorporada; otros worktrees intactos.
+- Nueva prueba de circuito con VanFullBootstrap y transporte simulado: fecha/ID/token, retorno, 401/403/404,
+  reintento, cambio de cuenta, respuestas tardías, generación, logout lento y cierre del transporte.
+  Primero pasó la regresión original (1 prueba, 6 s); después el archivo completo: 21 aprobadas, 0 fallidas
+  y 0 omitidas (19 s), incluida esa regresión. Callbacks iguales y 0 GET adicionales al reconstruir con
+  detalle abierto y listado en la navegación. Archivo de pruebas preservado sin cambios ni expectativas rebajadas.
+- Analyze nuevo sin observaciones (36,9 s), formato del test correcto y diff --check correcto.
+  Logs ignorados frontend/cu123-161-{estabilidad,consulta,analyze}.log. Dependencias/lockfile intactos.
+  No se repite ni se acredita suite completa local sobre bd4ec6f.
+- Evidencia histórica de e9a1030: 20/21 de consulta; suite completa 522 aprobadas/1 fallida por callbacks
+  (124 s), y 3 archivos de tema preexistentes señalados por formato global. No son resultados de la base nueva.
+- Pendiente de callbacks de Facundo resuelto por #161; código compartido local intacto.
+  SesionController/HttpApiClient siguen a cargo de Martiniano (#153). El usuario revisó el diff y autorizó
+  publicar solo test/interfaz/contexto, sin merge. Esta entrega no cierra #123 ni declara CU-029 completo.
+- Render SIN EJECUTAR: confirmar versión, cuenta y dataset con Martiniano antes de una prueba local de
+  consulta/retorno/salida. Sin inicio/finalización ni GPS ni cierres de Issues.
+- Entrega publicada mediante commit/push normal: [PR #164](https://github.com/Martiherenu1/ProyectoVanFull/pull/164)
+  abierta hacia main, sin merge y con Refs #123. Commit de pruebas/documentación `fb8d220c934d7faf72280a4e6bed39a29a4665a4`;
+  el último commit documental actualiza este estado. HEAD final y resultado real de CI se registran en la
+  descripción de la PR, separados de las 21 pruebas locales sobre bd4ec6f. Solo tres archivos publicados.
+  CU-030, CU-008, #163, preview, demo y otros worktrees preservados. Evidencia histórica no se cuenta como nueva.
+
 ## Estado de publicación — CU-008, 2026-10-24
 
 - Publicación autorizada por el usuario después de revisar el diff: creado [Issue #146](https://github.com/Martiherenu1/ProyectoVanFull/issues/146) tras buscar Issues/PR equivalentes; [PR #147](https://github.com/Martiherenu1/ProyectoVanFull/pull/147) abierta hacia main. Único cierre automático: `Closes #146`; #28 y los demás seguimientos permanecen independientes. Sin merge autorizado.

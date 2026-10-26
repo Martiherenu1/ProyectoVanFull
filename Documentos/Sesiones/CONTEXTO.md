@@ -342,14 +342,18 @@ el 25/10, salvo acuerdo» de REPARTO-PC2 no rige, por decisión de Martiniano):
   - **No verificado:** el flujo en la app de Flutter (solo se probó la API); `GET /choferes/me/viajes` sin
     autenticación o con otro rol; que el SHA desplegado siga siendo `f511d3c` el día de la demo (hay que
     re-mirarlo); y, antes del 30/10, sigue obligatorio re-sembrar Neon con `--reiniciar` (ver arriba).
-  - ⚠️ **Origen CORS temporal en Render (26/10, retirar).** Al probar #123, Martín recibió `400 Disallowed CORS
-    origin` en el preflight del login desde `http://127.0.0.1:8140` (Flutter Web local). Martiniano agregó **solo ese
-    origen exacto** a `CORS_ORIGINS` **en el panel de Render** (no en `render.yaml`), conservando los anteriores:
-    `https://vanfull.onrender.com,https://martiherenu1.github.io,http://127.0.0.1:8140`. Verificado después del
-    redeploy: preflight 200 con `access-control-allow-origin` desde ese origen y desde el de Render; un origen no
-    listado (`:9999`) sigue en 400. **Al terminar la prueba de Martín, volver a dejar solo los dos primeros en el
-    panel** (un cambio de `render.yaml` o una sincronización del Blueprint también lo revierte). No se verificó el
-    login real desde el navegador de Martín.
+  - **Origen CORS temporal en Render (26/10): usado y retirado.** Al probar #123, Martín recibió `400 Disallowed
+    CORS origin` en el preflight del login desde `http://127.0.0.1:8140` (Flutter Web local). Martiniano agregó
+    **solo ese origen exacto** a `CORS_ORIGINS` **en el panel de Render** (no en `render.yaml`), conservando los
+    anteriores; el preflight pasó a 200 desde ese origen y un origen no listado siguió en 400. Con el origen
+    habilitado, **Martín completó la prueba** (Flutter `4ce3e52`: login → listado del 30/10 → detalles de los
+    viajes 1 y 3 → volver conservando fecha y listado → cerrar sesión sin viajes visibles; sin operaciones sobre
+    viajes ni cambios de datos; evidencia saneada, según su informe: no la revisamos). **Retirado el mismo día:**
+    `CORS_ORIGINS` volvió a `https://vanfull.onrender.com,https://martiherenu1.github.io`. Verificado después:
+    preflight desde `http://127.0.0.1:8140` → 400; desde `https://vanfull.onrender.com` y
+    `https://martiherenu1.github.io` → 200 con su `access-control-allow-origin`. **Si hace falta probar otra vez
+    desde Flutter Web local, hay que repetir el mismo procedimiento** (agregar el origen exacto en el panel y
+    retirarlo al terminar).
 
 ## 14. Recursos
 

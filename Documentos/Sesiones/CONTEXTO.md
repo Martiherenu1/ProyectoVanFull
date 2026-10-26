@@ -342,6 +342,14 @@ el 25/10, salvo acuerdo» de REPARTO-PC2 no rige, por decisión de Martiniano):
   - **No verificado:** el flujo en la app de Flutter (solo se probó la API); `GET /choferes/me/viajes` sin
     autenticación o con otro rol; que el SHA desplegado siga siendo `f511d3c` el día de la demo (hay que
     re-mirarlo); y, antes del 30/10, sigue obligatorio re-sembrar Neon con `--reiniciar` (ver arriba).
+  - ⚠️ **Origen CORS temporal en Render (26/10, retirar).** Al probar #123, Martín recibió `400 Disallowed CORS
+    origin` en el preflight del login desde `http://127.0.0.1:8140` (Flutter Web local). Martiniano agregó **solo ese
+    origen exacto** a `CORS_ORIGINS` **en el panel de Render** (no en `render.yaml`), conservando los anteriores:
+    `https://vanfull.onrender.com,https://martiherenu1.github.io,http://127.0.0.1:8140`. Verificado después del
+    redeploy: preflight 200 con `access-control-allow-origin` desde ese origen y desde el de Render; un origen no
+    listado (`:9999`) sigue en 400. **Al terminar la prueba de Martín, volver a dejar solo los dos primeros en el
+    panel** (un cambio de `render.yaml` o una sincronización del Blueprint también lo revierte). No se verificó el
+    login real desde el navegador de Martín.
 
 ## 14. Recursos
 

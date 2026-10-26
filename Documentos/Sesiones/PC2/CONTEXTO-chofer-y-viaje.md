@@ -11,7 +11,12 @@
   aprobadas sobre aquella combinación, con dobles/transporte simulado, sin dispositivo ni POST reales.
 - #161 de Facundo publicada, abierta y sin integrar al verificarla (HEAD `a48c884b1ec3fa3953e208951833c082cab81ccf`).
   No incluida en las 526 pruebas; integración y validación posterior pendientes. No acredita resolver #123.
-- Push normal y apertura de PR en curso al escribir este registro. La descripción de la PR registra
+- Publicada por push normal y abierta [PR #163](https://github.com/Martiherenu1/ProyectoVanFull/pull/163),
+  con cierre exclusivo de #162, sin merge. Durante la publicación main avanzó a `bd4ec6fc6b36a50f4e715ed8489ecf832359f414`
+  al integrar #161. Revisados sus dos archivos: callbacks de main.dart y prueba de composición;
+  no modifica los cinco archivos propios. No se incorpora a esta rama ni se atribuyen las 526 pruebas
+  a esa combinación; validación posterior separada, sin declarar resuelto #123.
+  La descripción de la PR registra
   el HEAD publicado y el resultado real de su CI, separado de las 526 pruebas locales; aquí no se presume
   aprobado. Sin composición, sesión, cliente compartidos, otros worktrees, preview, demo ni Render modificados.
   Los registros inferiores documentan etapas históricas locales y no describen el estado de publicación actual.

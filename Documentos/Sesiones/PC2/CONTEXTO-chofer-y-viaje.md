@@ -1,6 +1,133 @@
 # Contexto vivo · Chofer y viaje en curso (Martín)
 
-## Validación local de #123 sobre #161 — 25/10/2026
+## Revalidación local de #163 tras integrar #164 en main — 26/10/2026
+
+- Combinación local actual: HEAD `094b51a790e4face981b5e06b9eecbf73e85401e` sobre main
+  `d19c22ae70887eb98a4ac905bbebec107d4ac68b`, con las 548 pruebas completas aprobadas indicadas abajo.
+  Ajustes posteriores exclusivamente editoriales, autorizados para commit/push sin repetición de suite;
+  código/base intactos. Antes de publicar se verificó main `c7bf1965f60ccb5c8528475e9019a293da74b6a6`:
+  avance solo documental de #167 en CONTEXTO.md, informado al usuario; se conserva la base probada d19c22a.
+- HEAD publicado preservado `c9d28a40f90897c534a44ca3a9f02ade4d40c8b6`; worktree inicialmente limpio.
+  Merge local de origin/main `d19c22ae70887eb98a4ac905bbebec107d4ac68b`, sin rebase ni push.
+  Único conflicto documental en este contexto: conservados íntegros ambos historiales del 25/10,
+  tanto preparación CU-030 como consulta #123/#164. Sin conflictos funcionales ni cambios de alcance.
+- #161 y #164 quedan incorporadas; el registro inferior de PR #164 abierta/sin merge es histórico:
+  #164 ya integrada en `d19c22a`. Callbacks corregidos por #161.
+  La CI anterior de #163 aprobó el merge sintético con #161 (527 Flutter, 438 backend), sin #164;
+  las 526 pruebas locales anteriores corresponden a su combinación histórica, no a esta base.
+- Aprobación de Facundo conservada en GitHub sobre `c9d28a4` al verificar, sin atribuirla al nuevo
+  merge local. Publicación de esta actualización autorizada; la descripción de #163 registra el resultado
+  real de CI del HEAD final por separado de las 548 pruebas locales. No se presume aprobada al escribir esto.
+- Nueva combinación: formato de los cuatro Dart propios correcto, cero cambios; analyze sin
+  observaciones (196,8 s); suite Flutter completa: 548 aprobadas, 0 fallidas/omitidas (241 s),
+  incluidas las 21 pruebas de consulta #164 y las 24 de retención/ejecución. Avisos de fuentes
+  Google Fonts sin fallas. Launcher demorado/error de PATH de sesión: verificación completada
+  con el snapshot y package config del SDK existente, sin instalaciones ni cambios persistentes.
+  Log ignorado frontend/preparacion-main-164-test.log; diff --check correcto.
+- Diff contra main limitado a los cinco archivos
+  propios; consulta de #164 incorporada sin modificar sus pruebas. Sin acciones productivas,
+  cambios propios en composición/sesión/cliente, POST reales, Render, preview u otros worktrees.
+  No se cierra #123 ni se declaran completos CU-030 o GPS.
+- Estado de #123 comunicado por el usuario: la prueba real de consulta y salida ya se completó;
+  falta incorporar su evidencia y evaluar el cierre. No se atribuye a esta rama ni al código posterior.
+  Martiniano confirmó el retiro del origen CORS temporal; se registra su confirmación, sin comprobación
+  técnica propia ni solicitudes reales en esta entrega. CI del nuevo HEAD pendiente hasta publicarlo
+  y verificarla; bases, HEAD y CI inferiores son evidencia histórica, no validación remota de 094b51a.
+
+## Historial de publicación autorizada — preparación de shell CU-030, 25/10/2026
+
+- Issue específico [#162](https://github.com/Martiherenu1/ProyectoVanFull/issues/162), etiqueta chofer,
+  creado tras revalidar Issues y PR sin equivalente. Publicación autorizada, sin merge.
+  La PR hacia main cerrará únicamente #162; #123, CU-030 y GPS siguen separados e incompletos.
+- Main remoto verificado: `e9a10306c66419f22fbbdd4ba0f13ae968b08350`, sin avance respecto de la
+  combinación probada `2da1eea0d1f332eda43ab970b11eadb7ca8b49ba`. Código y pruebas sin cambios;
+  se agrega únicamente este registro documental. No se repiten checks locales: 526 pruebas
+  aprobadas sobre aquella combinación, con dobles/transporte simulado, sin dispositivo ni POST reales.
+- En aquella verificación histórica, #161 estaba abierta (HEAD `a48c884b1ec3fa3953e208951833c082cab81ccf`).
+  No incluida en las 526 pruebas. Hoy está incorporada a la combinación local actual; no acredita resolver #123.
+- Publicada por push normal y abierta [PR #163](https://github.com/Martiherenu1/ProyectoVanFull/pull/163),
+  con cierre exclusivo de #162, sin merge. Durante la publicación main avanzó a `bd4ec6fc6b36a50f4e715ed8489ecf832359f414`
+  al integrar #161. Revisados sus dos archivos: callbacks de main.dart y prueba de composición;
+  no modifica los cinco archivos propios. En esa etapa no se incorporó a la rama ni se atribuyeron las 526 pruebas
+  a esa combinación; ahora está incorporada mediante el merge local de main descrito arriba.
+  La descripción de la PR registra
+  el HEAD publicado y el resultado real de su CI, separado de las 526 pruebas locales; aquí no se presume
+  aprobado. Sin composición, sesión, cliente compartidos, otros worktrees, preview, demo ni Render modificados.
+  Los registros inferiores documentan etapas históricas locales y no describen el estado de publicación actual.
+
+## Historial de preparación CU-030 actualizada con main / #159 — 25/10/2026
+
+- Cinco archivos revisados preservados en commit local `d2bc414169cf0dd1970e42b2fb96aadc649e7782`,
+  desde base original `6b88f98673cbf2003086f1ae0023edb69d8acd87`. Merge local de origin/main
+  `e9a10306c66419f22fbbdd4ba0f13ae968b08350`, sin rebase ni publicación; ningún conflicto.
+  Ambos historiales documentales conservados. #159 ya integrada; sus seis archivos se incorporan
+  sin modificaciones propias. Diff de la entrega contra main conserva los cinco archivos de Chofer.
+- Sin conectar acciones desde main.dart ni modificar composición, sesión o cliente compartidos.
+  Pendiente conocido de #123: la composición recrea callbacks y causa GET adicionales al reconstruir;
+  corrección asignada a Facundo. No se corrige aquí ni se declara validado ese caso.
+- Combinación: formato de nueve Dart correcto, cero cambios; analyze sin problemas (27,7 s).
+  Suite Flutter completa: 526 aprobadas, 0 fallidas/omitidas (24 propias + 502 de main; 137 s).
+  Sin fallas nuevas ni de main en esta ejecución; avisos preexistentes de Google Fonts sin fallas.
+  No acredita el pendiente de callbacks de #123. Logs ignorados frontend/preparacion-main-159-
+  {analyze,test}.log. Dependencias/lockfile intactos respecto de main; diff --check correcto.
+- Sigue siendo preparación local: sin push, Issue/PR nuevos, merge remoto, POST reales, demo/Render,
+  instalaciones ni cambios en otros worktrees o preview. CU-030 no conectado productivamente.
+  Los registros inferiores conservan las bases y resultados históricos anteriores al merge.
+
+## Historial de corrección local autorizada de reapertura CU-030 — 25/10/2026
+
+- Misma rama/worktree y base `6b88f98673cbf2003086f1ae0023edb69d8acd87`, sin incorporar #159.
+  El shell conserva un coordinador por viaje visitado y es su único propietario; el detalle lo
+  recibe prestado, agrega/retira su listener y no lo dispone. El detalle autónomo sin préstamo
+  conserva su propiedad local. La consulta sin acciones sigue disponible.
+- Reabrir reutiliza operación pendiente, incertidumbre y confirmación. El shell consulta una vez,
+  o conserva la lectura en vuelo, y sincroniza fuentes reemplazadas sin duplicar consultas.
+  Algoritmo del coordinador y adaptadores intactos: estado previo y rechazo posterior no resuelven
+  incertidumbre; no hay reenvíos automáticos ni mezcla de listas anteriores con confirmaciones nuevas.
+- Cerrar durante un control local de ubicación invalida esa comprobación mediante actualizarContexto;
+  su respuesta tardía no inicia un POST y conserva una eventual incertidumbre previa. No cancela
+  escrituras ya enviadas ni cambia la reconciliación. Propiedad/listeners del préstamo verificados.
+- Pruebas pertinentes finales de Chofer: 334 aprobadas, 0 fallidas/omitidas (24 del archivo nuevo + 310
+  de base; 46 s). Cubren regresiones de inicio/finalización, reaperturas sucesivas, viajes distintos,
+  confirmación sin detalle, disposición, nueva instancia y lecturas tardías/fuentes reemplazadas.
+  No es la suite completa. Analyze final sin problemas (19,1 s); formato de 4 Dart correcto,
+  cero cambios finales; diff --check correcto. Logs ignorados frontend/preparacion-retencion-
+  {analyze-final,pertinentes-cierre}.log. Avisos iniciales del código de pruebas corregidos.
+- Estado en memoria por instancia: se libera al desmontar el shell y no persiste entre sesiones.
+  La composición pendiente debe montar una instancia/key nueva al cambiar de cuenta; estas pruebas
+  no acreditan aislamiento completo de la aplicación. Sin composición/sesión compartida, cliente,
+  dependencias o instalaciones modificadas; sin POST reales, demo, commits ni publicaciones.
+  Los resultados fallidos siguientes son evidencia histórica previa a esta corrección autorizada.
+
+## Historial de preparación independiente de shell CU-030 — 25/10/2026
+
+- Comprobación focal posterior: inicio/finalización inciertos → listado → reapertura del mismo viaje.
+  El controlador nuevo queda listo y habilita la acción normal del estado previo: se pierde la
+  incertidumbre al destruir la ruta. No hay reenvío automático. Regresiones agregadas examinan
+  el controlador y los botones montados al reabrir, no la instancia descartada.
+  Solo archivo afectado ejecutado: 12 aprobadas y 2 fallidas (14 s); entrega NO validada para publicar.
+  Mock corregido: viajes/listado/detalle usan la fecha consultada, incluido 31/10/2026.
+- Hallazgo y propuesta comunicados antes de cambiar producción: conservar el coordinador pendiente
+  por viaje en el shell y prestarlo al detalle al reabrir, sin duplicar reconciliación. Corrección
+  propuesta, NO aplicada; pendiente de revisión. Sin incorporar la rama de #159 ni publicaciones.
+- Rama `feat/chofer-preparacion-shell-cu030`, worktree `.worktrees/chofer-preparacion-cu030`,
+  desde main `6b88f98673cbf2003086f1ae0023edb69d8acd87`. Solo trabajo local, sin commits/publicación.
+- ChoferShell recibe acciones/comprobador opcionales y los propaga al detalle existente con
+  acciones estables. Sin acciones conserva la consulta. Invalida filas y consultas del listado
+  al invocar una escritura; bloqueo local o cancelar confirmación no invocan ni invalidan.
+- Al volver recarga la fecha seleccionada sin remontar el listado; si hay POST en vuelo espera
+  su final antes de leer. Fallo de recarga muestra error/reintento sin restaurar filas previas.
+  La lectura del listado no interviene en la reconciliación del coordinador ni resuelve incertidumbre.
+- Verificación anterior a la comprobación de reapertura: formato de 3 Dart correcto; analyze sin problemas (116,0 s).
+  322 pruebas pertinentes de Chofer aprobadas, 0 fallidas/omitidas (12 nuevas + 310 de base; 40 s),
+  no suite completa del proyecto. Las 12 nuevas también pasaron por separado (9 s), con transporte
+  simulado. No acredita el recorrido ahora fallido. Logs ignorados frontend/preparacion-{analyze,nuevas,pertinentes,reapertura}.log.
+- Sin entrada_chofer ni cambios en composición, sesión, autenticación, cliente, coordinador o
+  adaptadores. Sin cambios de dependencias/lockfile ni instalaciones; pub get offline con lockfile exigido.
+  Sin POST reales, demo/Render, dispositivo o cambios en otros trabajos. No acredita aislamiento
+  completo entre cuentas: depende de la composición #152 y la consulta #123. CU-030 sigue parcial.
+
+## Historial de validación local de #123 sobre #161 — 25/10/2026
 
 - #159/#161 integradas, #152 cerrado; origin/main y base local `bd4ec6fc6b36a50f4e715ed8489ecf832359f414`.
   CI remota [40252289955](https://github.com/Martiherenu1/ProyectoVanFull/actions/runs/40252289955)

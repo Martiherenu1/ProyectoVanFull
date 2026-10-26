@@ -7,7 +7,7 @@
 > datos de esta máquina. Los prompts de arranque por tipo de tarea, y el criterio de cuándo conviene
 > abrir un chat nuevo, están en `Documentos/Sesiones/PROMPT-INICIAL.md`.
 >
-> **Última actualización: 2026-10-24, noche** (§11 backend en Render; §13 asistente AG-01 con modelo real) · Reemplaza y consolida todas las versiones anteriores.
+> **Última actualización: 2026-10-26** (§13 composición compartida de Flutter integrada y chofer1 verificado contra Render; antes, 24/10: backend en Render y asistente AG-01 con modelo real) · Reemplaza y consolida todas las versiones anteriores.
 
 ---
 
@@ -272,11 +272,18 @@ el 25/10, salvo acuerdo» de REPARTO-PC2 no rige, por decisión de Martiniano):
   (`YYYY-MM-DD`), roles `administrador` y `dueno`, orden por horario (nulos al final, después `id_viaje`), todos los
   estados, errores 400/401/403. El adaptador Flutter es #150 (mergeado); falta la pantalla.
 - **CU-008 (#147, Martín): mergeado.** `POST /ausencias` en producción.
-- **Flutter:** `SesionApp` solo da entrada real al pasajero. Reparto acordado: Facundo hace en un PR chico la
-  composición compartida (entrada por rol y cliente HTTP en `main.dart`); Martín, en #123, aporta solo la entrada
-  del chofer. Mergeados hoy: #113, #121, #128, #130, #134, #139 y #150 (los conflictos de #113, #121, #139 y #147
+- **Flutter (actualizado 26/10):** la composición compartida **ya está en `main`**. #153 (Martiniano: generación de
+  sesión, 401 asociado al token de la petición, logout con el token saliente y salida local si falla la red) y
+  **#159 (Facundo, Issue #152; revisado por Martiniano sobre `9cd69a5`)**: `main.dart` pasa a `VanFullBootstrap`
+  (un solo `http.Client`, un solo `HttpApiClient` y una sola `SesionController` para las tres áreas),
+  `SesionApp`/`RoleRouter` reciben `entradaPasajero`, `entradaChofer` y `entradaAdministrador`, un
+  `KeyedSubtree(ValueKey(generacion))` aísla las pantallas entre cuentas y el 403 muestra «Acceso denegado» solo si
+  la generación y el token siguen siendo los de la petición. #159 no tocó `SesionController` ni `HttpApiClient`.
+  Luego **#161** (Issue #160) estabilizó los callbacks de chofer. Administración queda conectada con Viajes del día
+  y Crear viaje; el detalle del viaje del admin no (`onViajeSeleccionado` vacío; CU-014 parcial en #84).
+  **Abierto: #123** (Martín): actualizar sobre `main` y conectar la entrada del chofer a `ChoferShell`.
+  Mergeados el 24/10: #113, #121, #128, #130, #134, #139 y #150 (los conflictos de #113, #121, #139 y #147
   eran solo del documento de contexto de Martín y los resolvió Martiniano con Claude, con las ramas encadenadas).
-  Abierto: #123 (sesión, listado y detalle del chofer).
 - **Pasajero (Martiniano):** Pago (CU-014, #141) y Perfil (CU-001, #144) mergeados. Con #141 administración y dueño
   reciben 404 `CLIENTE_NO_ENCONTRADO` o `CUENTA_CORRIENTE_NO_ENCONTRADA`; **sigue pendiente #84 de Facundo: nadie
   crea la `cuenta_corriente` de un pasajero nuevo**, que recibe 404 al pagar (los pasajeros 1 y 2 del seed andan).
@@ -288,8 +295,8 @@ el 25/10, salvo acuerdo» de REPARTO-PC2 no rige, por decisión de Martiniano):
   con sesión). El sitio **no tiene entrada de chofer** hasta que entre #123 y se vuelva a correr **Web**: no se
   publica solo. Un navegador con la versión vieja abierta puede mostrarla por su caché: recarga forzada o ventana
   privada. La API sí expone las rutas del chofer. `chofer1@vanfull.test` (persona 3) tiene los
-  viajes 1 y 3 del 30/10/2026; el 3 no tiene vehículo. **Sin verificar:** que Neon tenga la fila de `chofer1` (probar el login; la contraseña está en el CSV de
-  Martiniano, fuera del repo).
+  viajes 1 y 3 del 30/10/2026; el 3 no tiene vehículo. **Verificado el 26/10 contra Render** (ver el bloque
+  «Prueba de chofer contra Render» más abajo).
 - **Asistente AG-01 en Render con un modelo real (24/10, Martiniano).** `OPENROUTER_API_KEY` cargada en el panel
   (clave de cuenta free tier, límite de crédito 1 USD, vence el 22/01/2027). **Los dos modelos aprobados (07 §3) hoy
   no funcionan gratis:** `minimax/minimax-m3:free` ya no existe (OpenRouter: «unavailable for free»; queda
@@ -319,6 +326,22 @@ el 25/10, salvo acuerdo» de REPARTO-PC2 no rige, por decisión de Martiniano):
   - **Pendientes del equipo (no se resolvieron acá):** cambiar el modelo aprobado en 07 §3 y los valores por
     defecto del repo (#154); actualizar 07 §5 (system prompt) y re-ejecutar la PoC, como pide 07 §9 (#156); qué
     recibe la persona cuando el agente deriva (#42).
+- **Prueba de chofer contra Render (26/10, Martiniano; para la prueba real de Martín sobre #123).** Martín pidió
+  confirmar backend, usuario y dataset antes de probar con su Flutter local: login → listado por fecha → detalle por
+  ID → volver → cerrar sesión, **solo lectura** (sin iniciar/finalizar viajes, ausencias, abordajes, GPS ni cambios
+  al dataset; sin guardar credenciales ni tokens en la evidencia).
+  - **Panel de Render:** `vanfull-api` desplegado en **`f511d3c`** (merge del PR #157), Live; el SHA no se ve desde
+    la API (solo `version: 0.1.0`), hay que mirarlo en Events. El sitio `vanfull` sigue en `c3d72aa` (rama
+    `sitio-web`, compilado de `8380d19`): **sin entrada de chofer**, por eso la prueba va con Flutter local.
+  - **Verificado con `chofer1@vanfull.test`** (contraseña por `getpass` en la terminal, fuera del chat): login 200 con
+    `roles: ['chofer']`. `GET /choferes/me/viajes?fecha=2026-10-30` → 200 con los viajes **1** (07:30, IDA,
+    programado, vehículo 1) y **3** (18:00, IDA, programado, sin vehículo), ambos `id_chofer` 3. Los detalles de 1 y
+    3 → 200: capacidad 18, 3 paradas de prueba sin comprometer y **todas las cantidades en 0** (sin reservas,
+    nómina ni abordajes). El detalle del viaje **2** (existe, sin chofer) → **404 `VIAJE_NO_ENCONTRADO`**, no 403:
+    un viaje ajeno se trata como inexistente.
+  - **No verificado:** el flujo en la app de Flutter (solo se probó la API); `GET /choferes/me/viajes` sin
+    autenticación o con otro rol; que el SHA desplegado siga siendo `f511d3c` el día de la demo (hay que
+    re-mirarlo); y, antes del 30/10, sigue obligatorio re-sembrar Neon con `--reiniciar` (ver arriba).
 
 ## 14. Recursos
 

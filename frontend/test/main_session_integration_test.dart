@@ -53,6 +53,11 @@ final class _TransporteControlado extends http.BaseClient {
     }
     if (path.endsWith('/choferes/me/viajes')) {
       if (estadoViajesChofer == 403) return _sinPermiso();
+      if (estadoViajesChofer != 200) {
+        return _json(estadoViajesChofer, {
+          'error': {'codigo': 'ERROR', 'mensaje': 'Error de prueba'},
+        });
+      }
       return _json(200, incluirViajeChofer ? [_viajeChofer] : const []);
     }
     if (path.endsWith('/viajes')) {
@@ -207,6 +212,62 @@ void main() {
     );
     await tester.pumpWidget(const SizedBox.shrink());
   });
+
+  testWidgets(
+    'reconstruir entrada chofer conserva fuentes y el reintento consulta',
+    (tester) async {
+      final transporte = _TransporteControlado(
+        rol: 'chofer',
+        estadoViajesChofer: 500,
+      );
+      http.Client crearTransporte() => transporte;
+      int consultas() => transporte.pedidos
+          .where(
+            (pedido) =>
+                pedido.method == 'GET' &&
+                pedido.url.path.endsWith('/choferes/me/viajes'),
+          )
+          .length;
+
+      await tester.pumpWidget(
+        VanFullBootstrap(
+          apiBaseUrl: 'https://vanfull.test/api/',
+          crearTransporte: crearTransporte,
+        ),
+      );
+      await _login(tester);
+      expect(consultas(), 1);
+
+      await tester.pumpWidget(
+        VanFullBootstrap(
+          apiBaseUrl: 'https://vanfull.test/api/',
+          crearTransporte: crearTransporte,
+        ),
+      );
+      await tester.pumpAndSettle();
+      expect(consultas(), 1);
+
+      await tester.tap(find.text('Reintentar'));
+      await tester.pumpAndSettle();
+      expect(consultas(), 2);
+
+      await tester.tap(find.text('Cerrar sesión'));
+      await tester.pumpAndSettle();
+      await _login(tester);
+      expect(consultas(), 3);
+      expect(
+        transporte.pedidos
+            .where(
+              (pedido) =>
+                  pedido.method == 'GET' &&
+                  pedido.url.path.endsWith('/choferes/me/viajes'),
+            )
+            .map((pedido) => pedido.headers['authorization']),
+        ['Bearer token-1', 'Bearer token-1', 'Bearer token-2'],
+      );
+      await tester.pumpWidget(const SizedBox.shrink());
+    },
+  );
 
   testWidgets('403 muestra acceso denegado y conserva la sesión', (
     tester,

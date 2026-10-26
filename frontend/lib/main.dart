@@ -10,6 +10,7 @@ import 'core/session/sesion_app.dart';
 import 'core/session/sesion_controller.dart';
 import 'core/theme/app_spacing.dart';
 import 'models/admin/viaje_create.dart';
+import 'models/chofer/operacion_asignada.dart';
 import 'models/chofer/viaje_resumen.dart';
 import 'screens/admin/crear_viaje_admin_screen.dart';
 import 'screens/admin/viajes_dia_admin_screen.dart';
@@ -242,18 +243,22 @@ class _EntradaChoferState extends State<_EntradaChofer> {
           onSalir: widget.onSalir,
         )
       : ChoferShell(
-          cargarViajes: (fecha) => _protegerAcceso(
-            controller: widget.controller,
-            solicitud: () => widget.listar.cargarViajes(fecha),
-            onAccesoDenegado: _denegarAcceso,
-          ),
-          cargarDetalle: (idViaje) => _protegerAcceso(
-            controller: widget.controller,
-            solicitud: () => widget.detalle.cargarDetalle(idViaje),
-            onAccesoDenegado: _denegarAcceso,
-          ),
+          cargarViajes: _cargarViajes,
+          cargarDetalle: _cargarDetalle,
           onSalir: widget.onSalir,
         );
+
+  Future<List<ViajeResumen>> _cargarViajes(DateTime fecha) => _protegerAcceso(
+    controller: widget.controller,
+    solicitud: () => widget.listar.cargarViajes(fecha),
+    onAccesoDenegado: _denegarAcceso,
+  );
+
+  Future<OperacionAsignada?> _cargarDetalle(int idViaje) => _protegerAcceso(
+    controller: widget.controller,
+    solicitud: () => widget.detalle.cargarDetalle(idViaje),
+    onAccesoDenegado: _denegarAcceso,
+  );
 
   void _denegarAcceso() {
     if (!mounted || _accesoDenegado) return;

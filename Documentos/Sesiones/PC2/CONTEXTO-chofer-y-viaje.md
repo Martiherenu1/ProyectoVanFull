@@ -6,7 +6,7 @@
   CI remota [40252289955](https://github.com/Martiherenu1/ProyectoVanFull/actions/runs/40252289955)
   completada con éxito, verificada por SHA. Composición de sesión/listado/detalle reutilizada, sin duplicación.
 - Rama `docs/chofer-integracion-consulta-123`, worktree `.worktrees/chofer-integracion-doc-123`, actualizada
-  mediante merge fast-forward, sin commits nuevos ni rebase. Los tres archivos locales se conservaron y
+  mediante merge fast-forward, sin rebase ni reescritura. Los tres archivos locales se conservaron y
   respaldaron en Temp antes del merge, con hashes iguales. #163 abierta y no incorporada; otros worktrees intactos.
 - Nueva prueba de circuito con VanFullBootstrap y transporte simulado: fecha/ID/token, retorno, 401/403/404,
   reintento, cambio de cuenta, respuestas tardías, generación, logout lento y cierre del transporte.
@@ -22,8 +22,11 @@
   SesionController/HttpApiClient siguen a cargo de Martiniano (#153). El usuario revisó el diff y autorizó
   publicar solo test/interfaz/contexto, sin merge. Esta entrega no cierra #123 ni declara CU-029 completo.
 - Render SIN EJECUTAR: confirmar versión, cuenta y dataset con Martiniano antes de una prueba local de
-  consulta/retorno/salida. Sin inicio/finalización ni GPS ni cierres de Issues. Publicación autorizada,
-  pendiente de commit/push y PR al preparar este registro; CI del HEAD publicado se registrará en su descripción.
+  consulta/retorno/salida. Sin inicio/finalización ni GPS ni cierres de Issues.
+- Entrega publicada mediante commit/push normal: [PR #164](https://github.com/Martiherenu1/ProyectoVanFull/pull/164)
+  abierta hacia main, sin merge y con Refs #123. Commit de pruebas/documentación `fb8d220c934d7faf72280a4e6bed39a29a4665a4`;
+  el último commit documental actualiza este estado. HEAD final y resultado real de CI se registran en la
+  descripción de la PR, separados de las 21 pruebas locales sobre bd4ec6f. Solo tres archivos publicados.
   CU-030, CU-008, #163, preview, demo y otros worktrees preservados. Evidencia histórica no se cuenta como nueva.
 
 ## Estado de publicación — CU-008, 2026-10-24

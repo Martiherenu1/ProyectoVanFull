@@ -3,7 +3,7 @@
 ## Estado comprobado al 25/10/2026
 
 - Base local actualizada mediante `git merge --ff-only origin/main` a
-  `bd4ec6fc6b36a50f4e715ed8489ecf832359f414` (#161), sin commits nuevos ni rebase.
+  `bd4ec6fc6b36a50f4e715ed8489ecf832359f414` (#161), sin rebase ni reescritura.
   Los tres archivos locales se conservaron y respaldaron antes del merge.
   #163 sigue abierta y no está incorporada en esta base.
 - #159 integrada y #152 cerrado: la composición autenticada ya conecta sesión,
@@ -116,7 +116,9 @@ ChoferShell(
 - Esta entrega no cierra #123 ni declara CU-029 completo. No se acredita HTTP
   real, dataset, cuentas o dispositivo. Inicio/finalización, ubicación, captura
   GPS y ausencias quedan fuera. CU-030, preview, demo y otros worktrees se preservan.
-- Publicación autorizada, pendiente de commit/push y apertura de PR al preparar
-  este registro. La CI del HEAD publicado se verificará y registrará por separado
-  en la descripción de la PR. El documento previo a #159 quedó respaldado fuera
-  del worktree; sus pendientes obsoletos no se trasladan.
+- Entrega publicada mediante commit y push normal en la
+  [PR #164](https://github.com/Martiherenu1/ProyectoVanFull/pull/164), abierta hacia
+  main, sin merge y con Refs #123. El resultado real de la CI del HEAD final se
+  registra en su descripción, separado de las 21 pruebas locales sobre bd4ec6f.
+  El documento previo a #159 quedó respaldado fuera del worktree; sus pendientes
+  obsoletos no se trasladan.

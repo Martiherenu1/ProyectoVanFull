@@ -1,5 +1,58 @@
 # Contexto vivo · Chofer y viaje en curso (Martín)
 
+## Corrección local autorizada de reapertura CU-030 — 25/10/2026
+
+- Misma rama/worktree y base `6b88f98673cbf2003086f1ae0023edb69d8acd87`, sin incorporar #159.
+  El shell conserva un coordinador por viaje visitado y es su único propietario; el detalle lo
+  recibe prestado, agrega/retira su listener y no lo dispone. El detalle autónomo sin préstamo
+  conserva su propiedad local. La consulta sin acciones sigue disponible.
+- Reabrir reutiliza operación pendiente, incertidumbre y confirmación. El shell consulta una vez,
+  o conserva la lectura en vuelo, y sincroniza fuentes reemplazadas sin duplicar consultas.
+  Algoritmo del coordinador y adaptadores intactos: estado previo y rechazo posterior no resuelven
+  incertidumbre; no hay reenvíos automáticos ni mezcla de listas anteriores con confirmaciones nuevas.
+- Cerrar durante un control local de ubicación invalida esa comprobación mediante actualizarContexto;
+  su respuesta tardía no inicia un POST y conserva una eventual incertidumbre previa. No cancela
+  escrituras ya enviadas ni cambia la reconciliación. Propiedad/listeners del préstamo verificados.
+- Pruebas pertinentes finales de Chofer: 334 aprobadas, 0 fallidas/omitidas (24 del archivo nuevo + 310
+  de base; 46 s). Cubren regresiones de inicio/finalización, reaperturas sucesivas, viajes distintos,
+  confirmación sin detalle, disposición, nueva instancia y lecturas tardías/fuentes reemplazadas.
+  No es la suite completa. Analyze final sin problemas (19,1 s); formato de 4 Dart correcto,
+  cero cambios finales; diff --check correcto. Logs ignorados frontend/preparacion-retencion-
+  {analyze-final,pertinentes-cierre}.log. Avisos iniciales del código de pruebas corregidos.
+- Estado en memoria por instancia: se libera al desmontar el shell y no persiste entre sesiones.
+  La composición pendiente debe montar una instancia/key nueva al cambiar de cuenta; estas pruebas
+  no acreditan aislamiento completo de la aplicación. Sin composición/sesión compartida, cliente,
+  dependencias o instalaciones modificadas; sin POST reales, demo, commits ni publicaciones.
+  Los resultados fallidos siguientes son evidencia histórica previa a esta corrección autorizada.
+
+## Historial de preparación independiente de shell CU-030 — 25/10/2026
+
+- Comprobación focal posterior: inicio/finalización inciertos → listado → reapertura del mismo viaje.
+  El controlador nuevo queda listo y habilita la acción normal del estado previo: se pierde la
+  incertidumbre al destruir la ruta. No hay reenvío automático. Regresiones agregadas examinan
+  el controlador y los botones montados al reabrir, no la instancia descartada.
+  Solo archivo afectado ejecutado: 12 aprobadas y 2 fallidas (14 s); entrega NO validada para publicar.
+  Mock corregido: viajes/listado/detalle usan la fecha consultada, incluido 31/10/2026.
+- Hallazgo y propuesta comunicados antes de cambiar producción: conservar el coordinador pendiente
+  por viaje en el shell y prestarlo al detalle al reabrir, sin duplicar reconciliación. Corrección
+  propuesta, NO aplicada; pendiente de revisión. Sin incorporar la rama de #159 ni publicaciones.
+- Rama `feat/chofer-preparacion-shell-cu030`, worktree `.worktrees/chofer-preparacion-cu030`,
+  desde main `6b88f98673cbf2003086f1ae0023edb69d8acd87`. Solo trabajo local, sin commits/publicación.
+- ChoferShell recibe acciones/comprobador opcionales y los propaga al detalle existente con
+  acciones estables. Sin acciones conserva la consulta. Invalida filas y consultas del listado
+  al invocar una escritura; bloqueo local o cancelar confirmación no invocan ni invalidan.
+- Al volver recarga la fecha seleccionada sin remontar el listado; si hay POST en vuelo espera
+  su final antes de leer. Fallo de recarga muestra error/reintento sin restaurar filas previas.
+  La lectura del listado no interviene en la reconciliación del coordinador ni resuelve incertidumbre.
+- Verificación anterior a la comprobación de reapertura: formato de 3 Dart correcto; analyze sin problemas (116,0 s).
+  322 pruebas pertinentes de Chofer aprobadas, 0 fallidas/omitidas (12 nuevas + 310 de base; 40 s),
+  no suite completa del proyecto. Las 12 nuevas también pasaron por separado (9 s), con transporte
+  simulado. No acredita el recorrido ahora fallido. Logs ignorados frontend/preparacion-{analyze,nuevas,pertinentes,reapertura}.log.
+- Sin entrada_chofer ni cambios en composición, sesión, autenticación, cliente, coordinador o
+  adaptadores. Sin cambios de dependencias/lockfile ni instalaciones; pub get offline con lockfile exigido.
+  Sin POST reales, demo/Render, dispositivo o cambios en otros trabajos. No acredita aislamiento
+  completo entre cuentas: depende de la composición #152 y la consulta #123. CU-030 sigue parcial.
+
 ## Estado de publicación — CU-008, 2026-10-24
 
 - Publicación autorizada por el usuario después de revisar el diff: creado [Issue #146](https://github.com/Martiherenu1/ProyectoVanFull/issues/146) tras buscar Issues/PR equivalentes; [PR #147](https://github.com/Martiherenu1/ProyectoVanFull/pull/147) abierta hacia main. Único cierre automático: `Closes #146`; #28 y los demás seguimientos permanecen independientes. Sin merge autorizado.

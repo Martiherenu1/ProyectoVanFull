@@ -17,6 +17,7 @@ class DetalleViajeChoferScreen extends StatefulWidget {
     required this.cargarDetalle,
     this.acciones,
     this.comprobarUbicacionInicio,
+    this.controlador,
     super.key,
   });
 
@@ -25,24 +26,42 @@ class DetalleViajeChoferScreen extends StatefulWidget {
   final AccionesEjecucionViaje? acciones;
   final ComprobarUbicacionInicio? comprobarUbicacionInicio;
 
+  /// Prestado: su propietario inicia consultas, actualiza fuentes y lo dispone.
+  /// Debe corresponder a idViaje. Sin él, el detalle conserva la propiedad local.
+  final EjecucionViajeController? controlador;
+
   @override
   State<DetalleViajeChoferScreen> createState() =>
       _DetalleViajeChoferScreenState();
 }
 
 class _DetalleViajeChoferScreenState extends State<DetalleViajeChoferScreen> {
-  late final EjecucionViajeController _controlador;
+  late EjecucionViajeController _controlador;
+  late bool _propio;
 
   @override
   void initState() {
     super.initState();
-    _controlador = EjecucionViajeController(
-      idViaje: widget.idViaje,
-      cargarDetalle: widget.cargarDetalle,
-      acciones: widget.acciones,
-      comprobarUbicacionInicio: widget.comprobarUbicacionInicio,
-    )..addListener(_actualizar);
-    _controlador.consultar();
+    _vincular();
+  }
+
+  void _vincular() {
+    _propio = widget.controlador == null;
+    _controlador =
+        widget.controlador ??
+        EjecucionViajeController(
+          idViaje: widget.idViaje,
+          cargarDetalle: widget.cargarDetalle,
+          acciones: widget.acciones,
+          comprobarUbicacionInicio: widget.comprobarUbicacionInicio,
+        );
+    _controlador.addListener(_actualizar);
+    if (_propio) _controlador.consultar();
+  }
+
+  void _desvincular() {
+    _controlador.removeListener(_actualizar);
+    if (_propio) _controlador.dispose();
   }
 
   void _actualizar() {
@@ -52,6 +71,12 @@ class _DetalleViajeChoferScreenState extends State<DetalleViajeChoferScreen> {
   @override
   void didUpdateWidget(covariant DetalleViajeChoferScreen oldWidget) {
     super.didUpdateWidget(oldWidget);
+    if (oldWidget.controlador != widget.controlador) {
+      _desvincular();
+      _vincular();
+      return;
+    }
+    if (!_propio) return;
     if (oldWidget.idViaje != widget.idViaje ||
         oldWidget.cargarDetalle != widget.cargarDetalle ||
         oldWidget.acciones != widget.acciones ||
@@ -67,8 +92,7 @@ class _DetalleViajeChoferScreenState extends State<DetalleViajeChoferScreen> {
 
   @override
   void dispose() {
-    _controlador.removeListener(_actualizar);
-    _controlador.dispose();
+    _desvincular();
     super.dispose();
   }
 

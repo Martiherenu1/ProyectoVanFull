@@ -16,6 +16,8 @@ class ViajesChoferScreen extends StatefulWidget {
     required this.cargarViajes,
     required this.onViajeSeleccionado,
     this.fechaInicial,
+    this.invalidado = false,
+    this.revisionRecarga = 0,
   });
 
   final CargarViajesChofer cargarViajes;
@@ -24,6 +26,12 @@ class ViajesChoferScreen extends StatefulWidget {
   /// Solo inicializa la selección. Por defecto, el día local del dispositivo;
   /// se envía explícitamente, sin asumir la fecha por defecto del servidor.
   final DateTime? fechaInicial;
+
+  /// Retira filas y descarta consultas previas sin iniciar otra consulta.
+  final bool invalidado;
+
+  /// Solicita otra lectura sin remontar la pantalla ni cambiar la fecha.
+  final int revisionRecarga;
 
   @override
   State<ViajesChoferScreen> createState() => _ViajesChoferScreenState();
@@ -40,18 +48,30 @@ class _ViajesChoferScreenState extends State<ViajesChoferScreen> {
   void initState() {
     super.initState();
     _fecha = DateUtils.dateOnly(widget.fechaInicial ?? DateTime.now());
-    _cargar();
+    if (widget.invalidado) {
+      _cargando = false;
+    } else {
+      _cargar();
+    }
   }
 
   @override
   void didUpdateWidget(covariant ViajesChoferScreen oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (oldWidget.cargarViajes != widget.cargarViajes) {
+    if (widget.invalidado) {
+      _solicitud++;
+      _viajes = const [];
+      _cargando = false;
+      _error = false;
+    } else if (oldWidget.invalidado ||
+        oldWidget.revisionRecarga != widget.revisionRecarga ||
+        oldWidget.cargarViajes != widget.cargarViajes) {
       _cargar();
     }
   }
 
   Future<void> _cargar() async {
+    if (widget.invalidado) return;
     final solicitud = ++_solicitud;
     final fecha = _fecha;
     setState(() {
@@ -125,6 +145,9 @@ class _ViajesChoferScreenState extends State<ViajesChoferScreen> {
   }
 
   Widget _contenido() {
+    if (widget.invalidado) {
+      return const Center(child: Text('El listado necesita actualizarse.'));
+    }
     if (_cargando) {
       return const Center(
         child: CircularProgressIndicator(semanticsLabel: 'Cargando viajes'),

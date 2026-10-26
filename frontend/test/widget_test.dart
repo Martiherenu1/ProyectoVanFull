@@ -197,6 +197,15 @@ void main() {
     expect(find.text('Lista del viaje'), findsNothing);
     expect(find.text('Viajes del día'), findsNothing);
   });
+
+  testWidgets('dueno permanece bloqueado sin una interfaz inventada', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(const VanFullApp(roles: ['dueno']));
+
+    expect(find.text('Rol no reconocido'), findsOneWidget);
+    expect(find.byType(ViajesDiaAdminScreen), findsNothing);
+  });
 }
 
 double _contrastRatio(Color first, Color second) {

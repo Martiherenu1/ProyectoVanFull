@@ -1,6 +1,25 @@
 # Contexto vivo · Chofer y viaje en curso (Martín)
 
-## Corrección local autorizada de reapertura CU-030 — 25/10/2026
+## Preparación CU-030 actualizada con main / #159 — 25/10/2026
+
+- Cinco archivos revisados preservados en commit local `d2bc414169cf0dd1970e42b2fb96aadc649e7782`,
+  desde base original `6b88f98673cbf2003086f1ae0023edb69d8acd87`. Merge local de origin/main
+  `e9a10306c66419f22fbbdd4ba0f13ae968b08350`, sin rebase ni publicación; ningún conflicto.
+  Ambos historiales documentales conservados. #159 ya integrada; sus seis archivos se incorporan
+  sin modificaciones propias. Diff de la entrega contra main conserva los cinco archivos de Chofer.
+- Sin conectar acciones desde main.dart ni modificar composición, sesión o cliente compartidos.
+  Pendiente conocido de #123: la composición recrea callbacks y causa GET adicionales al reconstruir;
+  corrección asignada a Facundo. No se corrige aquí ni se declara validado ese caso.
+- Combinación: formato de nueve Dart correcto, cero cambios; analyze sin problemas (27,7 s).
+  Suite Flutter completa: 526 aprobadas, 0 fallidas/omitidas (24 propias + 502 de main; 137 s).
+  Sin fallas nuevas ni de main en esta ejecución; avisos preexistentes de Google Fonts sin fallas.
+  No acredita el pendiente de callbacks de #123. Logs ignorados frontend/preparacion-main-159-
+  {analyze,test}.log. Dependencias/lockfile intactos respecto de main; diff --check correcto.
+- Sigue siendo preparación local: sin push, Issue/PR nuevos, merge remoto, POST reales, demo/Render,
+  instalaciones ni cambios en otros worktrees o preview. CU-030 no conectado productivamente.
+  Los registros inferiores conservan las bases y resultados históricos anteriores al merge.
+
+## Historial de corrección local autorizada de reapertura CU-030 — 25/10/2026
 
 - Misma rama/worktree y base `6b88f98673cbf2003086f1ae0023edb69d8acd87`, sin incorporar #159.
   El shell conserva un coordinador por viaje visitado y es su único propietario; el detalle lo

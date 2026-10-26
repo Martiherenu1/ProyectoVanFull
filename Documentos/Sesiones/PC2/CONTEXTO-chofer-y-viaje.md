@@ -1,6 +1,33 @@
 # Contexto vivo · Chofer y viaje en curso (Martín)
 
-## Revalidación local de #163 tras integrar #164 en main — 26/10/2026
+## Estado vigente — consulta #123 y prueba real, 26/10/2026
+
+- [#123 cerrado con criterios, evidencia y límites](https://github.com/Martiherenu1/ProyectoVanFull/issues/123#issuecomment-6429266113).
+  Cierre de la integración de consulta/salida; no declara CU-029 completo.
+- #164 integrada en `d19c22ae70887eb98a4ac905bbebec107d4ac68b`; #163 integrada después en
+  `db62e5e017ad5061ff37ad60cafdedf2151dfaa0`, main remoto verificado y base de esta rama documental.
+  Los registros inferiores de PR abiertas, publicación pendiente o cierre por evaluar son históricos.
+- Prueba real del 26/10 exclusivamente sobre Flutter `4ce3e52bc2f45b304bdfe31bb08008831580463c`,
+  entrega #164 sin #163, con API de proceso https://vanfull-api.onrender.com/api. No se atribuye a main
+  posterior ni a la preparación de ejecución/retención integrada por #163; no se repitió aquí.
+- Backend `f511d3c`: confirmado por Martiniano mediante el usuario; no verificado por nosotros desde
+  el panel de Render ni deducido de main. El redespliegue por CORS no permite atribuir un nuevo SHA.
+- Observaciones manuales confirmadas: login → listado 30/10/2026 con viajes 1 (07:30) y 3 (18:00),
+  IDA/programados → detalle de ambos → retornos conservando fecha/listado → salida al login sin viajes visibles.
+  Viaje 1 con vehículo 1; viaje 3 sin vehículo. Ambos chofer 3, capacidad 18, tres paradas y cantidades cero.
+- Herramientas por separado: checkout/SHA, API efectiva del bundle, health 200/ok y preflight sin credenciales.
+  Bloqueo CORS inicial: OPTIONS 400 Disallowed CORS origin para http://127.0.0.1:8140; tras el ajuste temporal,
+  OPTIONS 200 con permiso para ese origen exacto. No se confirmó arranque frío efectivo ni rendimiento.
+- Martiniano confirmó el retiro del origen temporal, conservando los demás orígenes, según el comentario
+  de cierre y CONTEXTO.md. Es confirmación externa, sin comprobación técnica propia ni llamadas nuevas a Render.
+- No se inspeccionó tráfico autenticado ni se comprobó respuesta HTTP del logout o revocación del token.
+  Sin validación Android, inicio/finalización, GPS, ausencias o abordajes; cantidades cero no acreditan C12 de nómina.
+  Viaje 2/404 real, 401/403, cambio de cuenta y respuestas tardías no se provocaron en Render; evidencia
+  simulada separada. La salida visible y los retornos no miden red ni ausencia de GET adicionales.
+- Esta actualización afecta solo INTEGRACION-CONSULTA.md y este contexto. No cambia código/datos,
+  no reejecuta pruebas ni modifica Issues. Se conservan íntegros los historiales de consulta y CU-030.
+
+## Historial de revalidación local de #163 tras integrar #164 — 26/10/2026
 
 - Combinación local actual: HEAD `094b51a790e4face981b5e06b9eecbf73e85401e` sobre main
   `d19c22ae70887eb98a4ac905bbebec107d4ac68b`, con las 548 pruebas completas aprobadas indicadas abajo.

@@ -1,5 +1,51 @@
 # Contexto vivo · Chofer y viaje en curso (Martín)
 
+## Estado de coordinación documental — 27/10/2026
+
+- #168 actualizada mediante merge de origin/main `c24efdbc86b0fe7a0ac212eeafdf0609e573b499`,
+  que integra #182. La base inicial `db62e5e` y `533fc78` de #182 son referencias históricas.
+- #163/#164 y #171 integradas; #123 cerrado. #171 conecta las acciones productivas de inicio/finalización
+  y asistencia de ubicación Android. No se atribuyen a la consulta histórica de Flutter `4ce3e52`.
+- #182 integrada: se conserva íntegro su registro del viaje 5 del 27/10, separado de la consulta del 26/10.
+  La falta de entrada Chofer en el sitio correspondía al momento de la consulta del 26/10;
+  la observación Web posterior de Martín confirma viaje 5 Finalizado, sin SHA frontend identificado.
+- Evidencia externa separada, respaldo `Documentos/Sesiones/CONTEXTO.md`, apartado CORS temporal:
+  Martiniano confirmó el retiro y verificó después origen `http://127.0.0.1:8140` rechazado con 400;
+  `https://vanfull.onrender.com` y `https://martiherenu1.github.io` admitidos con 200 y su
+  Access-Control-Allow-Origin. No se repitieron preflights ni se atribuye esta comprobación a nuestras herramientas.
+- El mismo contexto general respalda la comprobación API de Martiniano con chofer1: detalle del viaje 2
+  → 404 `VIAJE_NO_ENCONTRADO`, no 403. No fue un caso provocado en la prueba manual Flutter.
+- Actualización exclusivamente documental, conservando ambos historiales; commit y push normal en #168,
+  sin merge de la PR. HEAD y CI efectiva se registran en su descripción. Aprobación formal de Martiniano pendiente.
+
+## Registro de consulta #123 y prueba real — 26/10/2026
+
+- [#123 cerrado con criterios, evidencia y límites](https://github.com/Martiherenu1/ProyectoVanFull/issues/123#issuecomment-6429266113).
+  Cierre de la integración de consulta/salida; no declara CU-029 completo.
+- #164 integrada en `d19c22ae70887eb98a4ac905bbebec107d4ac68b`; #163 integrada después en
+  `db62e5e017ad5061ff37ad60cafdedf2151dfaa0`, base histórica de publicación inicial; no es main vigente.
+  Los registros inferiores de PR abiertas, publicación pendiente o cierre por evaluar son históricos.
+- Prueba real del 26/10 exclusivamente sobre Flutter `4ce3e52bc2f45b304bdfe31bb08008831580463c`,
+  entrega #164 sin #163, con API de proceso https://vanfull-api.onrender.com/api. No se atribuye a main
+  posterior ni a la preparación de ejecución/retención integrada por #163; no se repitió aquí.
+- Backend `f511d3c`: confirmado por Martiniano mediante el usuario; no verificado por nosotros desde
+  el panel de Render ni deducido de main. El redespliegue por CORS no permite atribuir un nuevo SHA.
+- Observaciones manuales confirmadas: login → listado 30/10/2026 con viajes 1 (07:30) y 3 (18:00),
+  IDA/programados → detalle de ambos → retornos conservando fecha/listado → salida al login sin viajes visibles.
+  Viaje 1 con vehículo 1; viaje 3 sin vehículo. Ambos chofer 3, capacidad 18, tres paradas y cantidades cero.
+- Herramientas por separado: checkout/SHA, API efectiva del bundle, health 200/ok y preflight sin credenciales.
+  Bloqueo CORS inicial: OPTIONS 400 Disallowed CORS origin para http://127.0.0.1:8140; tras el ajuste temporal,
+  OPTIONS 200 con permiso para ese origen exacto. No se confirmó arranque frío efectivo ni rendimiento.
+- Martiniano confirmó el retiro del origen temporal, conservando los demás orígenes, según el comentario
+  de cierre y CONTEXTO.md. Es confirmación externa, sin comprobación técnica propia ni llamadas nuevas a Render.
+- No se inspeccionó tráfico autenticado ni se comprobó respuesta HTTP del logout o revocación del token.
+  Sin validación Android, inicio/finalización, GPS, ausencias o abordajes; cantidades cero no acreditan C12 de nómina.
+  Viaje 2/404, 401/403, cambio de cuenta y respuestas tardías no se provocaron en esta prueba manual Flutter;
+  evidencia simulada separada. La comprobación API de Martiniano se registra por separado arriba.
+  La salida visible y los retornos no miden red ni ausencia de GET adicionales.
+- Esta actualización afecta solo INTEGRACION-CONSULTA.md y este contexto. No cambia código/datos,
+  no reejecuta pruebas ni modifica Issues. Se conservan íntegros los historiales de consulta y CU-030.
+
 ## Prueba real acotada CU-030 — 27/10/2026
 
 - Entrega documental en rama `docs/chofer-prueba-real-cu030-20261027`, base identificada

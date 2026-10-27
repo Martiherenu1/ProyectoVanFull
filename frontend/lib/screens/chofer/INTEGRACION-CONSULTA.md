@@ -1,6 +1,81 @@
 # Integración de consulta Chofer — validación de #123
 
-## Estado comprobado al 25/10/2026
+## Estado vigente — 27/10/2026
+
+- [#123 cerrado con evidencia y límites](https://github.com/Martiherenu1/ProyectoVanFull/issues/123#issuecomment-6429266113):
+  se cierra la integración de consulta y salida, sin declarar CU-029 completo.
+- #164 integrada en `d19c22ae70887eb98a4ac905bbebec107d4ac68b`; #163 integrada
+  después en `db62e5e017ad5061ff37ad60cafdedf2151dfaa0`, base histórica inicial.
+  Esta rama incorpora por merge origin/main `c24efdbc86b0fe7a0ac212eeafdf0609e573b499`
+  (#182 integrada); db62e5e no es main vigente. No se modifican esas entregas.
+- #171 integrada: acciones productivas de inicio/finalización y asistencia de ubicación
+  Android disponibles. Su evidencia posterior permanece separada de la consulta histórica.
+  El contexto propio conserva completo el registro de viaje 5 del 27/10 incorporado por #182.
+- La ausencia de entrada Chofer en el sitio era histórica al 26/10. La observación Web
+  posterior de Martín registrada en #182 confirma viaje 5 Finalizado en el sitio publicado,
+  sin SHA frontend identificado ni inspección HTTP. No acredita acciones Web.
+- La prueba real corresponde exclusivamente a Flutter `4ce3e52`, anterior a
+  #163. No se repitió sobre main posterior ni se extiende a la preparación de
+  ejecución/retención de coordinadores incorporada por #163.
+- Martiniano confirmó el retiro del origen CORS temporal, conservando los
+  demás orígenes, según el comentario de cierre y el contexto general. Es una
+  confirmación externa; esta tarea no comprobó su retiro mediante solicitudes.
+
+## Prueba real local de consulta y salida — 26/10/2026
+
+- Flutter ejecutado: `4ce3e52bc2f45b304bdfe31bb08008831580463c` (#164),
+  sin #163; API configurada para ese proceso: https://vanfull-api.onrender.com/api.
+- Backend `f511d3c`: confirmado por Martiniano y comunicado por el usuario.
+  No se verificó desde el panel de Render ni se dedujo de main. El redespliegue
+  posterior para CORS no informa ni permite deducir un nuevo SHA del backend.
+- Observaciones manuales confirmadas por el usuario: login correcto; listado
+  del 30/10/2026 con viajes 1 (07:30) y 3 (18:00), IDA/programados; detalle de ambos;
+  retornos conservando fecha/listado; salida al login sin viajes visibles.
+- Detalle 1: vehículo 1, chofer 3; detalle 3: sin vehículo, chofer 3. En ambos:
+  capacidad 18, tres paradas y reservas, nómina y abordajes en cero. Son datos
+  visibles confirmados por el usuario, no capturas de respuestas autenticadas.
+- Comprobaciones de herramientas separadas: checkout limpio/SHA, API presente
+  en el bundle local, health 200 con status ok y preflight sin credenciales.
+  No se inspeccionó tráfico autenticado, cuerpos de login/logout o tokens.
+- Bloqueo inicial: el usuario vio el mensaje de conexión; OPTIONS de login
+  rechazó el origen local con 400 Disallowed CORS origin. Tras el ajuste y
+  redespliegue confirmados por Martiniano mediante el usuario, OPTIONS devolvió
+  200 con Access-Control-Allow-Origin exacto para http://127.0.0.1:8140. Después
+  se completó el recorrido manual. No se cambió código/configuración desde esta tarea.
+- Retiro del origen temporal http://127.0.0.1:8140: confirmado por Martiniano,
+  conservando los demás orígenes. No se presenta como comprobación técnica propia.
+- Los accesos de preparación para despertar Render se registraron aparte;
+  no se confirmó un arranque frío efectivo ni se evaluaron tiempos de respuesta.
+- Límites: la salida visible no comprueba la respuesta HTTP del logout ni
+  revocación del token. Sin validación de Android, inicio/finalización, GPS,
+  ausencias o abordajes. Cantidades en cero no validan registrar esas acciones.
+  Viaje 2/404, 401/403, cambio de cuenta y respuestas tardías no se provocaron
+  en esta prueba manual Flutter; conservan su evidencia simulada anterior.
+  La comprobación API de Martiniano del viaje 2 se registra aparte a continuación.
+- #164 ya integrada; #123 cerrado tras verificar los criterios de su alcance,
+  según el comentario de cierre enlazado arriba. Esta actualización incorpora
+  el registro documental, sin nuevas pruebas, llamadas a Render o cambios de estado.
+
+## Comprobaciones posteriores atribuidas a Martiniano
+
+Respaldo: `Documentos/Sesiones/CONTEXTO.md`, registro de API y origen CORS temporal.
+No se repiten solicitudes ni se amplía el recorrido manual de Flutter `4ce3e52`.
+
+- Retirado el origen temporal, Martiniano verificó preflight desde
+  `http://127.0.0.1:8140` → 400; desde `https://vanfull.onrender.com` y
+  `https://martiherenu1.github.io` → 200 con su Access-Control-Allow-Origin.
+  Es evidencia de Martiniano, separada de las herramientas usadas durante la consulta.
+- Martiniano comprobó por API con chofer1 el detalle del viaje 2:
+  404 `VIAJE_NO_ENCONTRADO`, no 403. No se provocó ese caso desde Flutter
+  durante la prueba manual documentada; no se inventan fecha ni método adicionales.
+- #168 se actualiza mediante merge y push normal, sin merge de la PR.
+  Su HEAD y resultado real de CI se registran en la descripción; aprobación formal
+  de Martiniano pendiente. No se ejecutan nuevas pruebas reales ni suites locales.
+
+## Registro histórico de base y comprobaciones — 25/10/2026
+
+Los estados de ramas/PR y resultados siguientes describen aquella etapa; el
+estado vigente y la prueba real posterior están registrados al inicio.
 
 - Base local actualizada mediante `git merge --ff-only origin/main` a
   `bd4ec6fc6b36a50f4e715ed8489ecf832359f414` (#161), sin rebase ni reescritura.
@@ -75,7 +150,7 @@ ChoferShell(
   HttpApiClient a su cargo, con los mecanismos integrados por #153.
 - Martín: componentes/adaptadores de Chofer y validación de #123 sobre esa base.
 
-## Verificación y pendientes de #123
+## Evidencia automatizada histórica y registro posterior
 
 - Las pruebas nuevas montan VanFullBootstrap con transporte simulado y usan las
   pantallas/adaptadores existentes: fecha/ID/token, retorno, errores 401/403/404,
@@ -100,25 +175,25 @@ ChoferShell(
   preexistentes e intactos (app_colors.dart, app_spacing.dart, app_typography.dart).
   Estos resultados no describen una ejecución completa sobre bd4ec6f.
 - El usuario revisó el diff y autorizó publicar únicamente estas pruebas y su
-  documentación, sin merge. La prueba real de consulta continúa pendiente,
-  según el plan siguiente; la publicación no la acredita.
+  documentación, sin merge. Esa publicación no acreditaba la prueba real;
+  la ejecución posterior del 26/10 se registra por separado al inicio.
 - Evidencia histórica: las 51 y 117 pruebas de entregas anteriores no son una
   ejecución sobre esta combinación. La suite antigua interrumpida después de
   233 aprobadas no acredita aprobación completa. Las 502 informadas en #159
   corresponden a esa entrega, separadas de los resultados locales nuevos.
-- Prueba real propuesta, todavía SIN EJECUTAR: confirmar con Martiniano la versión
-  desplegada, cuenta de Chofer y dataset/fecha/ID disponibles; usar una ejecución
-  local identificada por SHA contra la API de Render, ingresar, consultar fecha,
-  abrir el ID, volver conservando fecha/listado y cerrar sesión. No publicar la
-  demo ni modificar viajes/datos. No registrar credenciales ni tokens en evidencia.
+- El recorrido real del 26/10 se documenta por separado al inicio. #164 ya está
+  integrada y #123 cerrado con criterios/evidencia registrados en su comentario
+  de cierre; Martiniano confirmó el retiro del origen CORS temporal.
 - Los escenarios de rechazo/cambio de cuenta se verifican con transporte simulado;
   no se fuerza una situación de permisos ni se altera el dataset real.
-- Esta entrega no cierra #123 ni declara CU-029 completo. No se acredita HTTP
-  real, dataset, cuentas o dispositivo. Inicio/finalización, ubicación, captura
-  GPS y ausencias quedan fuera. CU-030, preview, demo y otros worktrees se preservan.
+- #123 está cerrado por su alcance de integración; no declara CU-029 completo.
+  La ejecución real acredita solo las observaciones manuales consignadas, sin inspección del
+  tráfico autenticado ni validación de Android. Inicio/finalización, ubicación,
+  captura GPS y ausencias quedan fuera; otros trabajos se preservan.
 - Entrega publicada mediante commit y push normal en la
-  [PR #164](https://github.com/Martiherenu1/ProyectoVanFull/pull/164), abierta hacia
-  main, sin merge y con Refs #123. El resultado real de la CI del HEAD final se
-  registra en su descripción, separado de las 21 pruebas locales sobre bd4ec6f.
+  [PR #164](https://github.com/Martiherenu1/ProyectoVanFull/pull/164), luego integrada
+  en main mediante d19c22a; su publicación original llevaba Refs #123. El resultado
+  real de la CI del HEAD final se registra en su descripción, separado de las
+  21 pruebas locales sobre bd4ec6f.
   El documento previo a #159 quedó respaldado fuera del worktree; sus pendientes
   obsoletos no se trasladan.

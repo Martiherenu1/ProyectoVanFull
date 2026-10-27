@@ -281,7 +281,13 @@ el 25/10, salvo acuerdo» de REPARTO-PC2 no rige, por decisión de Martiniano):
   la generación y el token siguen siendo los de la petición. #159 no tocó `SesionController` ni `HttpApiClient`.
   Luego **#161** (Issue #160) estabilizó los callbacks de chofer. Administración queda conectada con Viajes del día
   y Crear viaje; el detalle del viaje del admin no (`onViajeSeleccionado` vacío; CU-014 parcial en #84).
-  **Abierto: #123** (Martín): actualizar sobre `main` y conectar la entrada del chofer a `ChoferShell`.
+  **#123 cerrado (Martín, 26/10):** la entrada del chofer ya está conectada a `ChoferShell` en `main` (#164, y #163
+  con el shell y la conservación de operaciones inciertas de CU-030). Cierra la consulta y la salida, **no** declara
+  CU-029 completo. El registro de la prueba real está en el PR #168 (solo documentos; a la espera de revisión).
+  **Falta conectar las acciones productivas** (iniciar y finalizar, comprobación de ubicación) desde `main.dart`:
+  `ChoferShell` ya acepta `acciones` y `comprobarUbicacionInicio`, pero `_EntradaChofer` no se los pasa. Martín
+  propone encargarse de esa conexión, sin GPS ni POST reales en esa etapa, y Facundo revisaría el cambio compartido.
+  Sin acuerdo cerrado todavía. Ojo: sin los POST reales el sitio desplegado no puede iniciar un viaje.
   Mergeados el 24/10: #113, #121, #128, #130, #134, #139 y #150 (los conflictos de #113, #121, #139 y #147
   eran solo del documento de contexto de Martín y los resolvió Martiniano con Claude, con las ramas encadenadas).
 - **Pasajero (Martiniano):** Pago (CU-014, #141) y Perfil (CU-001, #144) mergeados. Con #141 administración y dueño
@@ -292,8 +298,8 @@ el 25/10, salvo acuerdo» de REPARTO-PC2 no rige, por decisión de Martiniano):
   Issue y marca `POST /pagos` con `x-cobertura: parcial`.
 - **Demo en Render:** el sitio publicado es el build `8380d19` (24/10 18:24 UTC, workflow **Web** corrido a mano), que
   trae Pasajero con Pago y Perfil (comprobado en el bundle compilado; **no** se abrió la app ni se probó el flujo
-  con sesión). El sitio **no tiene entrada de chofer** hasta que entre #123 y se vuelva a correr **Web**: no se
-  publica solo. Un navegador con la versión vieja abierta puede mostrarla por su caché: recarga forzada o ventana
+  con sesión). El sitio **no tiene entrada de chofer** hasta que se vuelva a correr **Web** (la entrada ya está en
+  `main` desde #164): no se publica solo. Un navegador con la versión vieja abierta puede mostrarla por su caché: recarga forzada o ventana
   privada. La API sí expone las rutas del chofer. `chofer1@vanfull.test` (persona 3) tiene los
   viajes 1 y 3 del 30/10/2026; el 3 no tiene vehículo. **Verificado el 26/10 contra Render** (ver el bloque
   «Prueba de chofer contra Render» más abajo).

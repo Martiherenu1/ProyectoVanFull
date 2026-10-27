@@ -27,7 +27,8 @@ La línea funcional vigente es la especificación de Casos de Uso v1.3. Según e
 
 **Implementado**
 
-- Backend: `POST /viajes` (#50) y `GET /viajes?fecha=YYYY-MM-DD` (#145).
+- Backend: `POST /viajes` (#50), `GET /viajes?fecha=YYYY-MM-DD` (#145) y actualización segura de
+  viajes programados mediante `PATCH /viajes/{id_viaje}` (#178).
 - Flutter: pantalla Viajes del día (#99), adaptador de consulta (#150), adaptador de creación (#130), formulario
   de creación (#134), navegación y composición autenticada (#159).
 - Dataset sintético de demostración para 2026-10-30 (#101).
@@ -35,7 +36,8 @@ La línea funcional vigente es la especificación de Casos de Uso v1.3. Según e
 
 **Probado automáticamente**
 
-- Backend: permisos, validación de fecha, lista vacía, estados, orden, asignaciones nulas y creación.
+- Backend: permisos, validación de fecha, lista vacía, estados, orden, asignaciones nulas, creación y
+  actualización programada con protección de capacidad y concurrencia con CU-030.
 - Flutter: carga, vacío, error/reintento, selección, serialización, formulario, navegación, sesión y 401/403.
 
 **Probado realmente en Render**
@@ -55,8 +57,9 @@ La línea funcional vigente es la especificación de Casos de Uso v1.3. Según e
 
 - La persistencia de esa creación en Neon está **NO VERIFICADA**: no hubo una conexión autorizada de solo lectura
   disponible. Tampoco quedó confirmada mediante un GET autenticado.
-- No están implementadas modificación, cancelación, asignación ni reasignación de chofer/vehículo. El contrato
-  marca GET y POST como cobertura parcial.
+- No están implementadas la cancelación ni la modificación de servicio/recorrido. Estos dos últimos campos se
+  excluyen del update porque no está definido cómo migrar contrataciones, paradas y reservas vinculadas.
+- El contrato marca GET, POST y PATCH como cobertura parcial de CU-018.
 - Las reglas detalladas de conflictos o solapamientos de asignaciones siguen PENDIENTES DE VALIDACIÓN.
 - OpenAPI `Viaje` no declara propiedades obligatorias, mientras el backend y `ViajeResumen` esperan los campos
   públicos base. El adaptador rechaza respuestas incompletas y no inventa valores.

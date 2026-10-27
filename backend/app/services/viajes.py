@@ -10,10 +10,15 @@ from app.models.personas import Chofer
 from app.models.servicios import Servicio
 from app.models.viajes import Recorrido, Vehiculo
 from app.models.viajes import Viaje as ViajeModelo
-from app.schemas.viajes import Viaje, ViajeCreate
+from app.schemas.viajes import Viaje, ViajeCreate, ViajeUpdate
+from app.services.disponibilidad import (
+    CAPACIDAD_PREDETERMINADA,
+    lugares_ocupados_del_viaje,
+)
 from app.services.eventos import registrar_evento
 
 TIPO_VIAJE_CREADO = "viaje_creado"
+TIPO_VIAJE_ACTUALIZADO = "viaje_actualizado"
 
 
 async def listar_viajes(db: AsyncSession, fecha: date) -> list[Viaje]:
@@ -41,19 +46,27 @@ async def _validar_referencias(db: AsyncSession, datos: ViajeCreate) -> None:
     if recorrido is None:
         raise ApiError(404, "RECORRIDO_NO_ENCONTRADO", "El recorrido no existe.")
 
-    if datos.id_vehiculo is not None:
-        vehiculo = await db.scalar(
-            select(Vehiculo.id_vehiculo).where(Vehiculo.id_vehiculo == datos.id_vehiculo)
-        )
-        if vehiculo is None:
-            raise ApiError(404, "VEHICULO_NO_ENCONTRADO", "El vehículo no existe.")
+    await _capacidad_vehiculo(db, datos.id_vehiculo)
+    await _validar_chofer(db, datos.id_chofer)
 
-    if datos.id_chofer is not None:
-        chofer = await db.scalar(
-            select(Chofer.id_persona).where(Chofer.id_persona == datos.id_chofer)
-        )
-        if chofer is None:
-            raise ApiError(404, "CHOFER_NO_ENCONTRADO", "El chofer no existe.")
+
+async def _capacidad_vehiculo(db: AsyncSession, id_vehiculo: int | None) -> int | None:
+    if id_vehiculo is None:
+        return None
+    capacidad = await db.scalar(
+        select(Vehiculo.capacidad).where(Vehiculo.id_vehiculo == id_vehiculo)
+    )
+    if capacidad is None:
+        raise ApiError(404, "VEHICULO_NO_ENCONTRADO", "El vehículo no existe.")
+    return capacidad
+
+
+async def _validar_chofer(db: AsyncSession, id_chofer: int | None) -> None:
+    if id_chofer is None:
+        return
+    chofer = await db.scalar(select(Chofer.id_persona).where(Chofer.id_persona == id_chofer))
+    if chofer is None:
+        raise ApiError(404, "CHOFER_NO_ENCONTRADO", "El chofer no existe.")
 
 
 def _a_schema(viaje: ViajeModelo) -> Viaje:
@@ -67,6 +80,7 @@ def _a_schema(viaje: ViajeModelo) -> Viaje:
         horario=viaje.horario.strftime("%H:%M") if viaje.horario else None,
         sentido=viaje.sentido,
         estado=viaje.estado,
+        capacidad_planificada=viaje.capacidad_planificada,
     )
 
 
@@ -96,3 +110,66 @@ async def crear_viaje(db: AsyncSession, datos: ViajeCreate) -> Viaje:
     await registrar_evento(db, tipo_evento=TIPO_VIAJE_CREADO, id_viaje=viaje.id_viaje)
     await db.commit()
     return _a_schema(viaje)
+
+
+async def actualizar_viaje(db: AsyncSession, id_viaje: int, datos: ViajeUpdate) -> Viaje:
+    """Actualiza únicamente un viaje programado y preserva el cupo confirmado (CU-018/RN-001)."""
+    viaje = await db.scalar(
+        select(ViajeModelo).where(ViajeModelo.id_viaje == id_viaje).with_for_update()
+    )
+    if viaje is None:
+        raise ApiError(404, "VIAJE_NO_ENCONTRADO", "El viaje no existe.")
+    if viaje.estado != "programado":
+        raise ApiError(
+            409,
+            "ESTADO_VIAJE_INVALIDO",
+            "Solo se puede modificar un viaje programado.",
+        )
+
+    campos = datos.model_fields_set
+    id_vehiculo = datos.id_vehiculo if "id_vehiculo" in campos else viaje.id_vehiculo
+    id_chofer = datos.id_chofer if "id_chofer" in campos else viaje.id_chofer
+    planificada = (
+        datos.capacidad_planificada
+        if "capacidad_planificada" in campos
+        else viaje.capacidad_planificada
+    )
+
+    capacidad_vehiculo = await _capacidad_vehiculo(db, id_vehiculo)
+    await _validar_chofer(db, id_chofer)
+    if {"id_vehiculo", "capacidad_planificada"} & campos:
+        ocupados = await lugares_ocupados_del_viaje(db, viaje.id_viaje)
+        capacidad = (
+            capacidad_vehiculo
+            if capacidad_vehiculo is not None
+            else planificada
+            if planificada is not None
+            else CAPACIDAD_PREDETERMINADA
+        )
+        if ocupados > capacidad:
+            raise ApiError(
+                409,
+                "CAPACIDAD_INSUFICIENTE",
+                "La capacidad no alcanza para las reservas existentes.",
+                {"ocupados": ocupados, "capacidad": capacidad},
+            )
+
+    for campo in (
+        "id_vehiculo",
+        "id_chofer",
+        "fecha",
+        "horario",
+        "sentido",
+        "capacidad_planificada",
+    ):
+        if campo in campos:
+            setattr(viaje, campo, getattr(datos, campo))
+
+    await registrar_evento(
+        db,
+        tipo_evento=TIPO_VIAJE_ACTUALIZADO,
+        id_viaje=viaje.id_viaje,
+    )
+    resultado = _a_schema(viaje)
+    await db.commit()
+    return resultado

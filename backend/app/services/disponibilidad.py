@@ -81,6 +81,14 @@ def _lugares_ocupados():
     )
 
 
+async def lugares_ocupados_del_viaje(db: AsyncSession, id_viaje: int) -> int:
+    """Cuenta lugares ocupados con la misma definición usada por consulta y reserva."""
+    cantidad = await db.scalar(
+        select(_lugares_ocupados()).select_from(Viaje).where(Viaje.id_viaje == id_viaje)
+    )
+    return int(cantidad or 0)
+
+
 async def cupo_del_viaje(db: AsyncSession, id_viaje: int) -> int:
     """Lugares libres de un viaje concreto, con la misma regla que `consultar_disponibilidad`."""
     capacidad_vehiculo, planificada, ocupados = (

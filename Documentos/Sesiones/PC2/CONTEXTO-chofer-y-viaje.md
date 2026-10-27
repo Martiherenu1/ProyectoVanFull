@@ -1,11 +1,29 @@
 # Contexto vivo · Chofer y viaje en curso (Martín)
 
-## Estado vigente — consulta #123 y prueba real, 26/10/2026
+## Estado de coordinación documental — 27/10/2026
+
+- #168 actualizada mediante merge de origin/main `c24efdbc86b0fe7a0ac212eeafdf0609e573b499`,
+  que integra #182. La base inicial `db62e5e` y `533fc78` de #182 son referencias históricas.
+- #163/#164 y #171 integradas; #123 cerrado. #171 conecta las acciones productivas de inicio/finalización
+  y asistencia de ubicación Android. No se atribuyen a la consulta histórica de Flutter `4ce3e52`.
+- #182 integrada: se conserva íntegro su registro del viaje 5 del 27/10, separado de la consulta del 26/10.
+  La falta de entrada Chofer en el sitio correspondía al momento de la consulta del 26/10;
+  la observación Web posterior de Martín confirma viaje 5 Finalizado, sin SHA frontend identificado.
+- Evidencia externa separada, respaldo `Documentos/Sesiones/CONTEXTO.md`, apartado CORS temporal:
+  Martiniano confirmó el retiro y verificó después origen `http://127.0.0.1:8140` rechazado con 400;
+  `https://vanfull.onrender.com` y `https://martiherenu1.github.io` admitidos con 200 y su
+  Access-Control-Allow-Origin. No se repitieron preflights ni se atribuye esta comprobación a nuestras herramientas.
+- El mismo contexto general respalda la comprobación API de Martiniano con chofer1: detalle del viaje 2
+  → 404 `VIAJE_NO_ENCONTRADO`, no 403. No fue un caso provocado en la prueba manual Flutter.
+- Actualización exclusivamente documental, conservando ambos historiales; commit y push normal en #168,
+  sin merge de la PR. HEAD y CI efectiva se registran en su descripción. Aprobación formal de Martiniano pendiente.
+
+## Registro de consulta #123 y prueba real — 26/10/2026
 
 - [#123 cerrado con criterios, evidencia y límites](https://github.com/Martiherenu1/ProyectoVanFull/issues/123#issuecomment-6429266113).
   Cierre de la integración de consulta/salida; no declara CU-029 completo.
 - #164 integrada en `d19c22ae70887eb98a4ac905bbebec107d4ac68b`; #163 integrada después en
-  `db62e5e017ad5061ff37ad60cafdedf2151dfaa0`, main remoto verificado y base de esta rama documental.
+  `db62e5e017ad5061ff37ad60cafdedf2151dfaa0`, base histórica de publicación inicial; no es main vigente.
   Los registros inferiores de PR abiertas, publicación pendiente o cierre por evaluar son históricos.
 - Prueba real del 26/10 exclusivamente sobre Flutter `4ce3e52bc2f45b304bdfe31bb08008831580463c`,
   entrega #164 sin #163, con API de proceso https://vanfull-api.onrender.com/api. No se atribuye a main
@@ -22,12 +40,128 @@
   de cierre y CONTEXTO.md. Es confirmación externa, sin comprobación técnica propia ni llamadas nuevas a Render.
 - No se inspeccionó tráfico autenticado ni se comprobó respuesta HTTP del logout o revocación del token.
   Sin validación Android, inicio/finalización, GPS, ausencias o abordajes; cantidades cero no acreditan C12 de nómina.
-  Viaje 2/404 real, 401/403, cambio de cuenta y respuestas tardías no se provocaron en Render; evidencia
-  simulada separada. La salida visible y los retornos no miden red ni ausencia de GET adicionales.
+  Viaje 2/404, 401/403, cambio de cuenta y respuestas tardías no se provocaron en esta prueba manual Flutter;
+  evidencia simulada separada. La comprobación API de Martiniano se registra por separado arriba.
+  La salida visible y los retornos no miden red ni ausencia de GET adicionales.
 - Esta actualización afecta solo INTEGRACION-CONSULTA.md y este contexto. No cambia código/datos,
   no reejecuta pruebas ni modifica Issues. Se conservan íntegros los historiales de consulta y CU-030.
 
-## Historial de revalidación local de #163 tras integrar #164 — 26/10/2026
+## Prueba real acotada CU-030 — 27/10/2026
+
+- Entrega documental en rama `docs/chofer-prueba-real-cu030-20261027`, base identificada
+  inicial `14b83dd29d7cef5110bc5814315f360dbbbbd78c` (#171 integrada). Actualizada con origin/main
+  `533fc78e0ffad9a4ab9becfc2969f50e63926bf8` mediante merge fast-forward, sin conflictos ni rebase;
+  cambios preservados sin necesitar commit de preservación. Publicación mediante commit documental,
+  push normal y PR hacia main, sin merge; HEAD y resultado real de CI registrados en su descripción.
+  Los apartados inferiores conservan el estado histórico de preparación y publicación.
+- Martín confirmó recorrido UI en Samsung Galaxy S20+ 5G / Android 13, APK debug target ARM64
+  instalada por actualización conservando datos. Código Flutter 14b83dd; SHA-256 APK:
+  `37AFCA60589D946075EBFD92F399B4EA20AD6EA66DFE4F3C86C9612AE086C641`.
+- API Android `https://vanfull-api.onrender.com/api`; backend histórico Samsung `3296de3`, informado
+  por Martiniano desde Render para esa prueba. Él informó equivalencia de backend/ y render.yaml con
+  f511d3c; no verificación propia ni identificación del despliegue vigente.
+- Cuenta chofer1@vanfull.test, persona/chofer 3. Martiniano creó viaje 5 (informó POST administrativo
+  201) y autorizó una sola secuencia inicio → finalización, sin reintentos: 29/10/2026 10:00, IDA,
+  servicio/recorrido/vehículo 1, chofer 3, capacidad 18. No autoriza repetir ni modificar viajes 1/3.
+- Observaciones de Martín: login/consulta 29/10 Programado; Ubicación activa y permiso concedido
+  de antemano (precisión no comprobada), sin cambios de permisos, solicitud ni Ajustes durante el recorrido;
+  una pulsación mostró En curso; diálogo y confirmación mostraron
+  Finalizado sin acciones; retorno listado Finalizado; salida a login sin viajes. Sin errores ni
+  reintentos informados. No se confirmó fecha conservada en retorno ni bloqueo visual.
+- Observación Web posterior de Martín, separada de Samsung y API: ingresó con chofer1 en
+  https://vanfull.onrender.com/ y vio viaje 5 del 29/10 Finalizado. SHA frontend Web no identificado;
+  sin inspección HTTP. No acredita otra ejecución, acciones Web ni comparte por inferencia SHA/API con Android.
+- Guion único local sin seguimiento Git: `Documentos/Sesiones/PC2/PRUEBA-MANUAL-CU029.md` en el
+  checkout principal, §10; conserva §7–9 e IDs IF-CH-E2. No se copia a este worktree ni se aprueban
+  variantes por analogía. Martín consultó viajes 1/3 solo antes; la comprobación posterior es de Martiniano.
+- Martiniano confirmó después por API como admin1, solo lectura: viaje 5 finalizado, chofer 3/vehículo 1;
+  viajes 1/2/3 del 30/10 idénticos al seed según su comparación. Respaldo #181, HEAD
+  `57e765e800c199d6519be68f217c0b0d8c32916b`, CONTEXTO.md; publicada e integrada mediante merge
+  `533fc78e0ffad9a4ab9becfc2969f50e63926bf8`. Consulta atribuida a él, no a nuestra herramienta ni SQL.
+  Estado intermedio En curso por API y eventos viaje_iniciado/viaje_finalizado NO VERIFICADOS.
+  Sin inspección HTTP de las operaciones, conteos/cuerpos/códigos,
+  persistencia SQL ni respuesta/revocación del logout. Sin horarios ni duraciones inventados.
+- Denegación/permanente, concesión inicial, Ubicación apagada, aproximada, Ajustes, cancelación, incertidumbre,
+  fallos y concurrencia NO EJECUTADOS. Sin captura/envío GPS, seguimiento, QR, ausencias o abordajes.
+  Viaje 5 permanece finalizado según la confirmación; cualquier reinicio del dataset lo coordina Martiniano
+  por separado. CU-030/GPS/RNF-008 no completos. Solo comprobaciones documentales, sin repetir operaciones.
+
+- Integraciones verificadas en solo lectura: #175/#177/#179/#181. #179 agrega PATCH de viajes y cambia
+  backend después de la prueba; no se incorpora PATCH al alcance. Cualquier ensayo nuevo requiere
+  identificar backend nuevamente y avisar a Martiniano; main no demuestra el SHA desplegado.
+  #168 permanece separada, sin modificar/aprobar/integrar. #181 ya respalda la confirmación API;
+  sin seguimiento abierto equivalente encontrado y sin proponer duplicado ni cierres de #170/#123.
+
+## Conexión y asistencia CU-030: publicación autorizada — 26/10/2026
+
+- Activo: `F:/dev/vanfull-cu030-conexion`, rama `feat/chofer-conexion-autenticada-cu030-corta`,
+  base revisada `db62e5e017ad5061ff37ad60cafdedf2151dfaa0`, igual a main remoto al publicar.
+  Original y respaldos preservados; no se compila ni regenera build en OneDrive.
+- Ampliación autorizada con Martiniano: solicitar permiso mediante acción explícita, Ajustes de app
+  ante denegación permanente y Ajustes de ubicación para servicio apagado. comprobar() sigue siendo
+  solo lectura; solicitar/abrir Ajustes son métodos separados. Permiso aproximado válido, sin posición.
+- Conceder permiso o regresar de Ajustes exige otra pulsación de inicio/reintento y comprobación nueva;
+  no hay autoenvío ni acción al reanudar. Ayuda local no invalida listado ni resuelve incertidumbre.
+  Guardia de generación/token antes y después de acciones locales; respuestas tardías descartadas.
+  Finalizar/reintentar finalización no usan comprobación ni asistencia. Reconciliación sin cambios;
+  el controlador solo expone/distinge el bloqueo local permanente para orientar la presentación.
+- Comprobador/asistencia reales solo Android; Web no omite el control ni finge permisos.
+  INTERNET agregado únicamente al Manifest principal, separado en un commit exclusivo.
+- Configuración local regenerada en ruta corta: pub get offline con lockfile exigido, wrapper Gradle
+  desde SDK existente y local.properties ignorado. Dependencias/lockfile sin cambios.
+- Formato final: 12 Dart, cero cambios; analyze sin observaciones (33,3 s). Primera validación:
+  83 afectadas aprobadas; regresión final de Chofer y composición: 394 aprobadas, 0 fallidas/omitidas
+  (115 s), incluidas 13 pruebas nuevas de permiso/Ajustes y 7 de adaptador. No es suite completa.
+  Las 569 completas del registro inferior son evidencia histórica anterior a esta ampliación.
+- Web release compilado (406 s, dry run Wasm correcto); Android debug offline compilado
+  (BUILD SUCCESSFUL, 4 min 50 s, 182 tareas). Salidas en frontend/build/web y
+  frontend/build/app/outputs/apk/debug/app-debug.apk; sin instalar ni ejecutar en teléfono.
+  Logs ignorados frontend/ampliacion-{analyze-final,pertinentes-final,build-web,build-android}.log.
+  Configuración inicial sin wrapper regenerada desde el SDK existente; sin cambios de Gradle versionado.
+- Original: 336 fuentes verificadas sin cambios; frontend/build sigue ausente. Sin solicitudes a
+  Render, POST reales, captura/envío GPS, seed, cambios en otros trabajos ni prueba real en dispositivo.
+  Quedan revisión y circuito Android con viajes autorizados; no se declaran completos CU-030/GPS.
+
+- Issue específico #170 creado con etiqueta chofer; publicación de esta rama autorizada sin merge.
+  Commits, push normal y PR hacia main en curso al registrar esta etapa. El HEAD publicado y el
+  resultado real de su CI se registran en la descripción de la PR, separados de las 394 locales
+  y las 569 completas históricas. Sin repetir checks locales: código y base no cambiaron.
+  Revisión de Martiniano pendiente; esta entrega no completa CU-030, GPS ni RNF-008 ni cierra #123.
+  Los registros inferiores de trabajo sin publicación se conservan como historial.
+
+## Historial de conexión autenticada CU-030 — 26/10/2026
+
+- Base remota `db62e5e017ad5061ff37ad60cafdedf2151dfaa0`, #163 integrada y reutilizada.
+  Rama `feat/chofer-conexion-autenticada-cu030`, worktree `.worktrees/chofer-conexion-cu030`.
+  PR abiertas al iniciar: #168/#169 documentales; ninguna de composición. Trabajos anteriores preservados.
+- Facundo aún no confirmó si tiene cambios locales de main.dart. El usuario autorizó expresamente
+  el cambio acotado en este worktree, con Martiniano como interlocutor de coordinación/revisión;
+  no equivale a confirmación ni revisión de Facundo. Sin commits/publicaciones ni merge.
+- Composición existente conecta EjecucionViajeApi con cliente externo y acciones estables por sesión.
+  Antes de escribir verifica generación/token/montaje; vuelve a comprobar tras ubicación. El 401 sigue
+  en HttpApiClient/SesionController; 403 tipado muestra acceso denegado sin logout y descarta efectos
+  sobre otra cuenta. Shell/coordinador/adaptadores y su reconciliación permanecen intactos.
+- Primer circuito real propuesto: Android con permiso concedido (aproximado válido) y servicio activo.
+  Comprobador existente solo consulta: no solicita permisos, abre Ajustes ni captura posición/streams.
+  Inicio no Android/Web bloqueado localmente, sin fingir permiso; finalización no consulta ubicación.
+  Permiso en instalación nueva requiere habilitación previa o una adaptación posterior explícita.
+  INTERNET existe en debug/profile, no en manifest principal: release requiere evaluar esa adaptación.
+- Formato final de tres Dart: cero cambios; analyze final sin observaciones (16,9 s).
+  Pruebas afectadas: 42 aprobadas; suite Flutter completa final: 569 aprobadas, 0 fallidas/omitidas
+  (164 s), incluidas 21 nuevas de ejecución autenticada y las 21 de consulta con expectativas
+  actualizadas para acciones/reintento del detalle. Primera suite: 565 aprobadas/4 fallidas por
+  dobles/expectativas de tests; corregidas sin cambiar código productivo ni reconciliación.
+  Logs ignorados frontend/conexion-{analyze-final,afectadas-final,suite-final}.log. Pub get offline
+  con lockfile exigido, sin cambiar dependencias/lockfile. Android debug compilado con Gradle offline:
+  BUILD SUCCESSFUL (6 min 58 s), build/app/outputs/apk/debug/app-debug.apk. Intentos previos demorados,
+  argumento PowerShell corregido y directorio generado bloqueado limpiado solo en este worktree.
+  Advertencias preexistentes SDK XML/Gradle/Kotlin. No acredita release ni funcionamiento en dispositivo;
+  no se instala el APK. Log ignorado frontend/conexion-build-offline-reintento.log.
+- Transporte simulado;
+  sin solicitudes a Render ni POST reales, dispositivo, GPS, cambios backend/contrato/dependencias.
+  Prueba real posterior requiere plataforma y viajes autorizados; no tocar viajes 1 y 3 de consulta.
+
+## Revalidación local de #163 tras integrar #164 en main — 26/10/2026
 
 - Combinación local actual: HEAD `094b51a790e4face981b5e06b9eecbf73e85401e` sobre main
   `d19c22ae70887eb98a4ac905bbebec107d4ac68b`, con las 548 pruebas completas aprobadas indicadas abajo.

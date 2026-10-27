@@ -25,7 +25,7 @@ python -c "import yaml,json,io; io.open('backend/openapi/openapi.json','w',encod
 - `redocly preview-docs backend/openapi/openapi.yaml`, o
 - al implementar el backend: `http://localhost:8000/docs` (Swagger UI de FastAPI).
 
-Validado con `openapi-spec-validator`: **OpenAPI 3.0.3 · 25 rutas · 27 operaciones HTTP · 28 schemas**.
+Validado con `openapi-spec-validator`: **OpenAPI 3.0.3 · 26 rutas · 28 operaciones HTTP · 29 schemas**.
 
 ## Cobertura de esta versión (v0.1)
 
@@ -41,7 +41,7 @@ Se cuentan las rutas distintas de `paths`, los métodos HTTP de cada ruta, los s
 | CU | Qué cubre v0.1 | Qué falta |
 |---|---|---|
 | **CU-003** Crear reserva | La creación y el rechazo por falta de cupo | La incorporación y gestión de la **lista de espera** que anuncia el `409` |
-| **CU-018** Gestionar viajes | Únicamente la **creación** del viaje | Modificar, cancelar y reasignar vehículo o chofer |
+| **CU-018** Gestionar viajes | Creación y actualización segura del viaje programado | Cancelar; cambiar servicio/recorrido; reglas de solapamiento |
 | **CU-030** Ejecutar viaje | Inicio, finalización y recepción de posiciones GPS | Avisos de demora y problemas, pendientes para otra tarea |
 
 La cobertura parcial queda marcada con `x-cobertura: parcial` o aclarada en la descripción del endpoint.
@@ -78,7 +78,7 @@ y frontend continúa pendiente; documentar el contrato no implementa los servici
 | CU-012 Sesión | `POST /auth/login`, `POST /auth/logout` | RF-045 |
 | CU-014 Registrar pago | `POST /pagos` | RF-009, RN-016 |
 | CU-016 Confirmar/rechazar pago | `POST /pagos/{id}/confirmacion` | RF-011, RN-015 — validación administrativa cuando el medio no acredita automáticamente |
-| CU-018 Gestionar viajes ⚠️ *parcial* | `POST /viajes` | RF-017/018, RN-001 |
+| CU-018 Gestionar viajes ⚠️ *parcial* | `POST /viajes`, `PATCH /viajes/{id_viaje}` | RF-017/018, RN-001 |
 | CU-029 Consultar operación asignada | `GET /choferes/me/viajes` | RF-024, RN-029 |
 | CU-029 Consultar operación asignada | `GET /choferes/me/viajes/{id_viaje}` | RF-024, RN-029 |
 | CU-030 Ejecutar viaje ⚠️ *parcial* | `POST /viajes/{id_viaje}/inicio` | RF-025, ADJ-03 |

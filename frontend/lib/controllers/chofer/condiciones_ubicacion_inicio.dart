@@ -4,12 +4,14 @@ class CondicionesUbicacionInicio {
   const CondicionesUbicacionInicio({
     required this.servicioActivado,
     required this.permisoConcedido,
+    this.permisoDenegadoPermanentemente = false,
   });
 
   final bool servicioActivado;
 
   /// Incluye permiso aproximado: no se exige ubicacion precisa.
   final bool permisoConcedido;
+  final bool permisoDenegadoPermanentemente;
 }
 
 typedef ComprobarUbicacionInicio =
@@ -18,6 +20,7 @@ typedef ComprobarUbicacionInicio =
 enum BloqueoUbicacionInicio {
   servicioDesactivado,
   permisoNoConcedido,
+  permisoDenegadoPermanentemente,
   sinComprobador,
   consultaFallida,
 }

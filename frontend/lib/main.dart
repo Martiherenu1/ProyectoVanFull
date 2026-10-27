@@ -1,6 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 
+import 'adapters/chofer/comprobador_ubicacion_android.dart';
+import 'controllers/chofer/ejecucion_viaje_controller.dart';
+import 'controllers/chofer/asistencia_ubicacion_inicio.dart';
 import 'core/api/api_error.dart';
 import 'core/api/auth_api.dart';
 import 'core/api/http_api_client.dart';
@@ -19,6 +23,7 @@ import 'screens/pasajero/pasajero_shell.dart';
 import 'services/admin/viajes_admin_api.dart';
 import 'services/admin/viajes_dia_admin_api.dart';
 import 'services/chofer/detalle_viaje_chofer_api.dart';
+import 'services/chofer/ejecucion_viaje_api.dart';
 import 'services/chofer/viajes_chofer_api.dart';
 
 /// URL base de la API, con el prefijo `/api`. En el emulador de Android el
@@ -37,11 +42,15 @@ class VanFullBootstrap extends StatefulWidget {
   const VanFullBootstrap({
     this.apiBaseUrl = _apiBaseUrl,
     this.crearTransporte,
+    this.comprobarUbicacionInicio,
+    this.asistenciaUbicacionInicio,
     super.key,
   });
 
   final String apiBaseUrl;
   final CrearTransporteHttp? crearTransporte;
+  final ComprobarUbicacionInicio? comprobarUbicacionInicio;
+  final AsistenciaUbicacionInicio? asistenciaUbicacionInicio;
 
   @override
   State<VanFullBootstrap> createState() => _VanFullBootstrapState();
@@ -55,6 +64,9 @@ class _VanFullBootstrapState extends State<VanFullBootstrap> {
   late final ViajesAdminApi _viajesAdmin;
   late final ViajesChoferApi _viajesChofer;
   late final DetalleViajeChoferApi _detalleChofer;
+  late final EjecucionViajeApi _ejecucionChofer;
+  late final ComprobarUbicacionInicio _comprobarUbicacion;
+  late final AsistenciaUbicacionInicio? _asistenciaUbicacion;
 
   @override
   void initState() {
@@ -78,6 +90,29 @@ class _VanFullBootstrapState extends State<VanFullBootstrap> {
     _viajesAdmin = ViajesAdminApi(httpClient);
     _viajesChofer = ViajesChoferApi(httpClient);
     _detalleChofer = DetalleViajeChoferApi(httpClient);
+    _ejecucionChofer = EjecucionViajeApi(httpClient);
+    final comprobador = ComprobadorUbicacionAndroid();
+    _comprobarUbicacion =
+        widget.comprobarUbicacionInicio ??
+        () {
+          if (kIsWeb || defaultTargetPlatform != TargetPlatform.android) {
+            throw UnsupportedError(
+              'El inicio requiere comprobar ubicación en Android.',
+            );
+          }
+          return comprobador.comprobar();
+        };
+    // Comprobar no solicita permisos ni abre Ajustes. Esas acciones solo se
+    // invocan desde botones explícitos, y nunca desencadenan la escritura.
+    _asistenciaUbicacion =
+        widget.asistenciaUbicacionInicio ??
+        (!kIsWeb && defaultTargetPlatform == TargetPlatform.android
+            ? AsistenciaUbicacionInicio(
+                solicitarPermiso: comprobador.solicitarPermiso,
+                abrirAjustesApp: comprobador.abrirAjustesApp,
+                abrirAjustesUbicacion: comprobador.abrirAjustesUbicacion,
+              )
+            : null);
   }
 
   @override
@@ -102,6 +137,9 @@ class _VanFullBootstrapState extends State<VanFullBootstrap> {
       controller: controller,
       listar: _viajesChofer,
       detalle: _detalleChofer,
+      ejecucion: _ejecucionChofer,
+      comprobarUbicacion: _comprobarUbicacion,
+      asistenciaUbicacion: _asistenciaUbicacion,
       onSalir: controller.salir,
     ),
   );
@@ -221,12 +259,18 @@ class _EntradaChofer extends StatefulWidget {
     required this.controller,
     required this.listar,
     required this.detalle,
+    required this.ejecucion,
+    required this.comprobarUbicacion,
+    required this.asistenciaUbicacion,
     required this.onSalir,
   });
 
   final SesionController controller;
   final ViajesChoferApi listar;
   final DetalleViajeChoferApi detalle;
+  final EjecucionViajeApi ejecucion;
+  final ComprobarUbicacionInicio comprobarUbicacion;
+  final AsistenciaUbicacionInicio? asistenciaUbicacion;
   final VoidCallback onSalir;
 
   @override
@@ -235,6 +279,69 @@ class _EntradaChofer extends StatefulWidget {
 
 class _EntradaChoferState extends State<_EntradaChofer> {
   bool _accesoDenegado = false;
+  late final int _generacion;
+  late final String? _token;
+  late final AccionesEjecucionViaje _acciones;
+  late final AsistenciaUbicacionInicio? _asistencia;
+
+  @override
+  void initState() {
+    super.initState();
+    _generacion = widget.controller.generacion;
+    _token = widget.controller.token;
+    _acciones = AccionesEjecucionViaje(
+      iniciar: (id) => _ejecutar(widget.ejecucion.iniciar, id),
+      finalizar: (id) => _ejecutar(widget.ejecucion.finalizar, id),
+    );
+    final asistencia = widget.asistenciaUbicacion;
+    _asistencia = asistencia == null
+        ? null
+        : AsistenciaUbicacionInicio(
+            solicitarPermiso: () => _accionLocal(asistencia.solicitarPermiso),
+            abrirAjustesApp: () => _accionLocal(asistencia.abrirAjustesApp),
+            abrirAjustesUbicacion: () =>
+                _accionLocal(asistencia.abrirAjustesUbicacion),
+          );
+  }
+
+  bool get _vigente =>
+      mounted &&
+      _token != null &&
+      widget.controller.generacion == _generacion &&
+      widget.controller.token == _token;
+
+  void _exigirSesion() {
+    if (!_vigente || _accesoDenegado) {
+      throw const RechazoOperacionViaje(MotivoRechazoViaje.noAutenticado);
+    }
+  }
+
+  Future<CondicionesUbicacionInicio> _comprobarUbicacion() async {
+    _exigirSesion();
+    final condiciones = await widget.comprobarUbicacion();
+    _exigirSesion();
+    return condiciones;
+  }
+
+  Future<T> _accionLocal<T>(Future<T> Function() accion) async {
+    _exigirSesion();
+    final resultado = await accion();
+    _exigirSesion();
+    return resultado;
+  }
+
+  Future<ViajeResumen> _ejecutar(
+    CambiarEstadoViajeChofer enviar,
+    int id,
+  ) async {
+    _exigirSesion();
+    try {
+      return await enviar(id);
+    } on RechazoOperacionViaje catch (error) {
+      if (error.motivo == MotivoRechazoViaje.sinPermiso) _denegarAcceso();
+      rethrow;
+    }
+  }
 
   @override
   Widget build(BuildContext context) => _accesoDenegado
@@ -245,23 +352,32 @@ class _EntradaChoferState extends State<_EntradaChofer> {
       : ChoferShell(
           cargarViajes: _cargarViajes,
           cargarDetalle: _cargarDetalle,
+          acciones: _acciones,
+          comprobarUbicacionInicio: _comprobarUbicacion,
+          asistenciaUbicacionInicio: _asistencia,
           onSalir: widget.onSalir,
         );
 
-  Future<List<ViajeResumen>> _cargarViajes(DateTime fecha) => _protegerAcceso(
-    controller: widget.controller,
-    solicitud: () => widget.listar.cargarViajes(fecha),
-    onAccesoDenegado: _denegarAcceso,
-  );
+  Future<List<ViajeResumen>> _cargarViajes(DateTime fecha) {
+    _exigirSesion();
+    return _protegerAcceso(
+      controller: widget.controller,
+      solicitud: () => widget.listar.cargarViajes(fecha),
+      onAccesoDenegado: _denegarAcceso,
+    );
+  }
 
-  Future<OperacionAsignada?> _cargarDetalle(int idViaje) => _protegerAcceso(
-    controller: widget.controller,
-    solicitud: () => widget.detalle.cargarDetalle(idViaje),
-    onAccesoDenegado: _denegarAcceso,
-  );
+  Future<OperacionAsignada?> _cargarDetalle(int idViaje) {
+    _exigirSesion();
+    return _protegerAcceso(
+      controller: widget.controller,
+      solicitud: () => widget.detalle.cargarDetalle(idViaje),
+      onAccesoDenegado: _denegarAcceso,
+    );
+  }
 
   void _denegarAcceso() {
-    if (!mounted || _accesoDenegado) return;
+    if (!_vigente || _accesoDenegado) return;
     setState(() => _accesoDenegado = true);
   }
 }

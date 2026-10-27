@@ -1,12 +1,19 @@
 # Integración de consulta Chofer — validación de #123
 
-## Estado vigente — 26/10/2026
+## Estado vigente — 27/10/2026
 
 - [#123 cerrado con evidencia y límites](https://github.com/Martiherenu1/ProyectoVanFull/issues/123#issuecomment-6429266113):
   se cierra la integración de consulta y salida, sin declarar CU-029 completo.
 - #164 integrada en `d19c22ae70887eb98a4ac905bbebec107d4ac68b`; #163 integrada
-  después en `db62e5e017ad5061ff37ad60cafdedf2151dfaa0`, main remoto verificado
-  y base de esta actualización documental. No se modifican esas entregas.
+  después en `db62e5e017ad5061ff37ad60cafdedf2151dfaa0`, base histórica inicial.
+  Esta rama incorpora por merge origin/main `c24efdbc86b0fe7a0ac212eeafdf0609e573b499`
+  (#182 integrada); db62e5e no es main vigente. No se modifican esas entregas.
+- #171 integrada: acciones productivas de inicio/finalización y asistencia de ubicación
+  Android disponibles. Su evidencia posterior permanece separada de la consulta histórica.
+  El contexto propio conserva completo el registro de viaje 5 del 27/10 incorporado por #182.
+- La ausencia de entrada Chofer en el sitio era histórica al 26/10. La observación Web
+  posterior de Martín registrada en #182 confirma viaje 5 Finalizado en el sitio publicado,
+  sin SHA frontend identificado ni inspección HTTP. No acredita acciones Web.
 - La prueba real corresponde exclusivamente a Flutter `4ce3e52`, anterior a
   #163. No se repitió sobre main posterior ni se extiende a la preparación de
   ejecución/retención de coordinadores incorporada por #163.
@@ -42,11 +49,28 @@
 - Límites: la salida visible no comprueba la respuesta HTTP del logout ni
   revocación del token. Sin validación de Android, inicio/finalización, GPS,
   ausencias o abordajes. Cantidades en cero no validan registrar esas acciones.
-  Viaje 2/404 real, 401/403, cambio de cuenta y respuestas tardías no se provocaron
-  en el entorno real; mantienen únicamente la evidencia simulada anterior.
+  Viaje 2/404, 401/403, cambio de cuenta y respuestas tardías no se provocaron
+  en esta prueba manual Flutter; conservan su evidencia simulada anterior.
+  La comprobación API de Martiniano del viaje 2 se registra aparte a continuación.
 - #164 ya integrada; #123 cerrado tras verificar los criterios de su alcance,
   según el comentario de cierre enlazado arriba. Esta actualización incorpora
   el registro documental, sin nuevas pruebas, llamadas a Render o cambios de estado.
+
+## Comprobaciones posteriores atribuidas a Martiniano
+
+Respaldo: `Documentos/Sesiones/CONTEXTO.md`, registro de API y origen CORS temporal.
+No se repiten solicitudes ni se amplía el recorrido manual de Flutter `4ce3e52`.
+
+- Retirado el origen temporal, Martiniano verificó preflight desde
+  `http://127.0.0.1:8140` → 400; desde `https://vanfull.onrender.com` y
+  `https://martiherenu1.github.io` → 200 con su Access-Control-Allow-Origin.
+  Es evidencia de Martiniano, separada de las herramientas usadas durante la consulta.
+- Martiniano comprobó por API con chofer1 el detalle del viaje 2:
+  404 `VIAJE_NO_ENCONTRADO`, no 403. No se provocó ese caso desde Flutter
+  durante la prueba manual documentada; no se inventan fecha ni método adicionales.
+- #168 se actualiza mediante merge y push normal, sin merge de la PR.
+  Su HEAD y resultado real de CI se registran en la descripción; aprobación formal
+  de Martiniano pendiente. No se ejecutan nuevas pruebas reales ni suites locales.
 
 ## Registro histórico de base y comprobaciones — 25/10/2026
 

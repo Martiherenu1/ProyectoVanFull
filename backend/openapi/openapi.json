@@ -1146,7 +1146,7 @@
           "viajes"
         ],
         "summary": "Crear un viaje",
-        "description": "Crea un viaje con fecha, horario, recorrido y capacidad. Durante la planificación,\nvehículo y/o chofer pueden quedar pendientes; ambos deben estar asignados antes de\niniciar la ejecución. Verifica capacidad vs pasajeros cuando exista un vehículo\nasignado (RN-001). (CU-018, RF-017/018)\n\nCOBERTURA PARCIAL de CU-018: esta versión del contrato cubre únicamente la creación.\nLa modificación, la cancelación y la reasignación de vehículo o chofer quedan para v0.2.\n",
+        "description": "Crea un viaje con fecha, horario, recorrido y capacidad. Durante la planificación,\nvehículo y/o chofer pueden quedar pendientes; ambos deben estar asignados antes de\niniciar la ejecución. Verifica capacidad vs pasajeros cuando exista un vehículo\nasignado (RN-001). (CU-018, RF-017/018)\n\nCOBERTURA PARCIAL de CU-018: esta versión del contrato cubre la creación y la\nactualización de los campos que no alteran las reservas. La cancelación queda pendiente.\n",
         "x-cu": "CU-018",
         "x-cobertura": "parcial",
         "requestBody": {
@@ -1172,6 +1172,73 @@
           },
           "403": {
             "$ref": "#/components/responses/SinPermiso"
+          }
+        }
+      }
+    },
+    "/viajes/{id_viaje}": {
+      "patch": {
+        "tags": [
+          "viajes"
+        ],
+        "summary": "Actualizar un viaje programado",
+        "description": "Solo administrador o dueño. Modifica fecha, horario, sentido, capacidad planificada y\nasignaciones de vehículo o chofer mientras el viaje permanezca programado. Vehículo y\nchofer pueden volver a quedar pendientes durante la planificación (ADJ-03). La capacidad\nefectiva no puede ser menor que los lugares ocupados por reservas vigentes (RN-001).\n\nServicio y recorrido no se aceptan: el contrato vigente no define cómo migrar las\ncontrataciones, paradas y reservas vinculadas. No detecta solapamientos de vehículo o\nchofer porque esas reglas continúan pendientes de definición. (CU-018, RF-017/018)\n",
+        "x-cu": "CU-018",
+        "x-cobertura": "parcial",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/IdViaje"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ViajeUpdate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Viaje actualizado.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Viaje"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Cuerpo vacío, campo desconocido o valor inválido (VALIDACION).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/NoAutenticado"
+          },
+          "403": {
+            "$ref": "#/components/responses/SinPermiso"
+          },
+          "404": {
+            "$ref": "#/components/responses/NoEncontrado"
+          },
+          "409": {
+            "description": "Estado del viaje inválido o capacidad insuficiente para sus reservas.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
           }
         }
       }
@@ -2177,6 +2244,42 @@
           }
         }
       },
+      "ViajeUpdate": {
+        "type": "object",
+        "additionalProperties": false,
+        "minProperties": 1,
+        "properties": {
+          "id_vehiculo": {
+            "type": "integer",
+            "nullable": true
+          },
+          "id_chofer": {
+            "type": "integer",
+            "nullable": true
+          },
+          "fecha": {
+            "type": "string",
+            "format": "date"
+          },
+          "horario": {
+            "type": "string",
+            "nullable": true,
+            "example": "07:30"
+          },
+          "sentido": {
+            "type": "string",
+            "enum": [
+              "IDA",
+              "VUELTA"
+            ]
+          },
+          "capacidad_planificada": {
+            "type": "integer",
+            "nullable": true,
+            "minimum": 0
+          }
+        }
+      },
       "Viaje": {
         "type": "object",
         "properties": {
@@ -2219,6 +2322,11 @@
               "finalizado",
               "cancelado"
             ]
+          },
+          "capacidad_planificada": {
+            "type": "integer",
+            "nullable": true,
+            "minimum": 0
           }
         }
       },

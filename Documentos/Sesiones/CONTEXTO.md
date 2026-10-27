@@ -284,10 +284,10 @@ el 25/10, salvo acuerdo» de REPARTO-PC2 no rige, por decisión de Martiniano):
   **#123 cerrado (Martín, 26/10):** la entrada del chofer ya está conectada a `ChoferShell` en `main` (#164, y #163
   con el shell y la conservación de operaciones inciertas de CU-030). Cierra la consulta y la salida, **no** declara
   CU-029 completo. El registro de la prueba real está en el PR #168 (solo documentos; a la espera de revisión).
-  **Falta conectar las acciones productivas** (iniciar y finalizar, comprobación de ubicación) desde `main.dart`:
-  `ChoferShell` ya acepta `acciones` y `comprobarUbicacionInicio`, pero `_EntradaChofer` no se los pasa. Martín
-  propone encargarse de esa conexión, sin GPS ni POST reales en esa etapa, y Facundo revisaría el cambio compartido.
-  Sin acuerdo cerrado todavía. Ojo: sin los POST reales el sitio desplegado no puede iniciar un viaje.
+  **Acciones productivas conectadas (#171, Martín, aprobado por Facundo, mergeado el 27/10 como `14b83dd`):**
+  iniciar y finalizar desde `main.dart`, permiso de ubicación explícito con acceso a Ajustes e `INTERNET` en el
+  Manifest principal. Sin captura ni envío de GPS. La prueba real está en el bloque «Prueba de inicio y fin del
+  viaje 5» más abajo.
   Mergeados el 24/10: #113, #121, #128, #130, #134, #139 y #150 (los conflictos de #113, #121, #139 y #147
   eran solo del documento de contexto de Martín y los resolvió Martiniano con Claude, con las ramas encadenadas).
 - **Pasajero (Martiniano):** Pago (CU-014, #141) y Perfil (CU-001, #144) mergeados. Con #141 administración y dueño
@@ -360,6 +360,27 @@ el 25/10, salvo acuerdo» de REPARTO-PC2 no rige, por decisión de Martiniano):
     `https://martiherenu1.github.io` → 200 con su `access-control-allow-origin`. **Si hace falta probar otra vez
     desde Flutter Web local, hay que repetir el mismo procedimiento** (agregar el origen exacto en el panel y
     retirarlo al terminar).
+- **Prueba de inicio y fin del viaje 5 contra Render (27/10; Martín en el Samsung, Martiniano por API).** Primera
+  escritura real del chofer, con la APK debug de `14b83dd` apuntando a `https://vanfull-api.onrender.com/api`.
+  - **Backend desplegado:** `3296de3` (merge de documentación del PR #166). Entre `f511d3c`, `3296de3` y `main` no
+    hay cambios en `backend/` ni en `render.yaml` (comprobado con `git diff`): el código es el mismo.
+  - **Por qué un viaje nuevo:** con el seed solo el viaje 1 es iniciable por `chofer1`; el 3 no tiene vehículo
+    (409 `VEHICULO_NO_ASIGNADO`) y el 2 no tiene chofer (404). Para no tocar el 1 ni el 3 se creó el **viaje 5** con
+    `POST /viajes` como `admin1` (servicio 1, recorrido 1, vehículo 1, chofer 3, 2026-10-29 10:00, IDA,
+    `programado`); el formulario no se usó porque el sitio publicado es anterior a la entrada de administración.
+    Antes y después del `POST`, los viajes 1, 2 y 3 del 30/10 quedaron idénticos al seed.
+  - **Verificado por API (Martiniano, solo lectura, después de la prueba):** el viaje 5 figura **`finalizado`** (chofer 3,
+    vehículo 1) y los viajes del 30/10 siguen sin cambios. El **viaje 4** existe: 2026-10-31 09:15, IDA,
+    `programado`, sin chofer ni vehículo; coincide con la creación que Facundo informó en el PR #175, así que
+    **queda verificada su persistencia** (es una inferencia que el ID 4 sea ese viaje, no hay otro dato que lo ate).
+  - **Informado por Martín, no verificado por nosotros:** en el Samsung vio el viaje 5 el 29/10 con sus datos, pulsó
+    Iniciar una vez (apareció «En curso»), confirmó Finalizar una vez (apareció «Finalizado», sin botones), sin
+    errores ni reintentos; antes de iniciar solo hizo consultas.
+  - **No verificado:** los eventos `viaje_iniciado` y `viaje_finalizado` (ninguna ruta los expone: solo se ven en la
+    tabla `evento_operativo` de Neon); el flujo de permiso de ubicación y Ajustes en el Samsung (no detallado);
+    captura y envío de GPS (fuera de alcance); la web publicada (sigue sin la entrada de chofer hasta correr **Web**).
+  - **Estado de la base:** el viaje 5 queda `finalizado` en Neon hasta el próximo `--reiniciar`, que sigue siendo
+    obligatorio antes de la demo (reservas de `pasajero1`), y lo coordina Martiniano.
 
 ## 14. Recursos
 

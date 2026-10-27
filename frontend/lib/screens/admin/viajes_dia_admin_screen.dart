@@ -76,6 +76,29 @@ class _ViajesDiaAdminScreenState extends State<ViajesDiaAdminScreen> {
     }
   }
 
+  Future<void> _seleccionarFecha() async {
+    final fecha = await showDatePicker(
+      context: context,
+      initialDate: _fecha,
+      firstDate: DateTime(1),
+      lastDate: DateTime(9999, 12, 31),
+      helpText: 'Seleccionar fecha de viajes',
+    );
+    if (!mounted || fecha == null || DateUtils.isSameDay(fecha, _fecha)) {
+      return;
+    }
+    _fecha = DateUtils.dateOnly(fecha);
+    await _cargar();
+  }
+
+  void _seleccionarViaje(ViajeResumen viaje) {
+    widget.onViajeSeleccionado(viaje.idViaje);
+    showDialog<void>(
+      context: context,
+      builder: (context) => _DetalleViajeAdminDialog(viaje: viaje),
+    );
+  }
+
   @override
   Widget build(BuildContext context) => Theme(
     data: AppTheme.admin,
@@ -93,9 +116,27 @@ class _ViajesDiaAdminScreenState extends State<ViajesDiaAdminScreen> {
                   AppSpacing.lg,
                   AppSpacing.sm,
                 ),
-                child: Text(
-                  'Fecha: ${fechaLegible(_fecha)}',
-                  style: Theme.of(context).textTheme.headlineSmall,
+                child: Wrap(
+                  alignment: WrapAlignment.spaceBetween,
+                  crossAxisAlignment: WrapCrossAlignment.center,
+                  spacing: AppSpacing.lg,
+                  runSpacing: AppSpacing.sm,
+                  children: [
+                    Text(
+                      'Fecha: ${fechaLegible(_fecha)}',
+                      style: Theme.of(context).textTheme.headlineSmall,
+                    ),
+                    OutlinedButton.icon(
+                      key: const ValueKey('seleccionar-fecha-viajes'),
+                      onPressed: _seleccionarFecha,
+                      style: OutlinedButton.styleFrom(
+                        minimumSize: const Size(0, AppSpacing.adminRowHeight),
+                        tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                      ),
+                      icon: const Icon(Icons.calendar_month_outlined),
+                      label: const Text('Cambiar fecha'),
+                    ),
+                  ],
                 ),
               ),
               Expanded(child: _contenido()),
@@ -167,8 +208,7 @@ class _ViajesDiaAdminScreenState extends State<ViajesDiaAdminScreen> {
               for (final viaje in _viajes)
                 DataRow(
                   key: ValueKey('viaje-${viaje.idViaje}'),
-                  onSelectChanged: (_) =>
-                      widget.onViajeSeleccionado(viaje.idViaje),
+                  onSelectChanged: (_) => _seleccionarViaje(viaje),
                   cells: [
                     DataCell(Text(viaje.horario ?? 'Sin horario')),
                     DataCell(Text(viaje.idViaje.toString())),
@@ -218,4 +258,49 @@ class _ViajesDiaAdminScreenState extends State<ViajesDiaAdminScreen> {
       ),
     );
   }
+}
+
+class _DetalleViajeAdminDialog extends StatelessWidget {
+  const _DetalleViajeAdminDialog({required this.viaje});
+
+  final ViajeResumen viaje;
+
+  @override
+  Widget build(BuildContext context) => AlertDialog(
+    title: Text('Viaje ${viaje.idViaje}'),
+    content: SingleChildScrollView(
+      child: Column(
+        key: ValueKey('detalle-viaje-${viaje.idViaje}'),
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          _dato('Fecha', fechaLegible(viaje.fecha)),
+          _dato('Horario', viaje.horario ?? 'Sin horario'),
+          _dato('Estado', viaje.estado.etiqueta),
+          _dato('Sentido', viaje.sentido.etiqueta),
+          _dato('Servicio', 'ID ${viaje.idServicio}'),
+          _dato('Recorrido', 'ID ${viaje.idRecorrido}'),
+          _dato(
+            'Vehículo',
+            viaje.idVehiculo == null ? 'Sin asignar' : 'ID ${viaje.idVehiculo}',
+          ),
+          _dato(
+            'Chofer',
+            viaje.idChofer == null ? 'Sin asignar' : 'ID ${viaje.idChofer}',
+          ),
+        ],
+      ),
+    ),
+    actions: [
+      TextButton(
+        onPressed: () => Navigator.of(context).pop(),
+        child: const Text('Cerrar'),
+      ),
+    ],
+  );
+
+  Widget _dato(String etiqueta, String valor) => Padding(
+    padding: const EdgeInsets.only(bottom: AppSpacing.sm),
+    child: Text('$etiqueta: $valor'),
+  );
 }

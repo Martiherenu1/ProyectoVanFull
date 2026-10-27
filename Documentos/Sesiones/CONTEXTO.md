@@ -377,8 +377,13 @@ el 25/10, salvo acuerdo» de REPARTO-PC2 no rige, por decisión de Martiniano):
     Iniciar una vez (apareció «En curso»), confirmó Finalizar una vez (apareció «Finalizado», sin botones), sin
     errores ni reintentos; antes de iniciar solo hizo consultas.
   - **No verificado:** los eventos `viaje_iniciado` y `viaje_finalizado` (ninguna ruta los expone: solo se ven en la
-    tabla `evento_operativo` de Neon); el flujo de permiso de ubicación y Ajustes en el Samsung (no detallado);
-    captura y envío de GPS (fuera de alcance); la web publicada (sigue sin la entrada de chofer hasta correr **Web**).
+    tabla `evento_operativo` de Neon); captura y envío de GPS (fuera de alcance); la web publicada (sigue sin la
+    entrada de chofer hasta correr **Web**).
+  - **Permisos de ubicación: no se probó el flujo nuevo.** Según Martín, antes de pulsar Iniciar el teléfono ya tenía
+    Ubicación activada y VanFull ya tenía el permiso (la APK se actualizó conservando datos y permisos). No se
+    observó ninguna solicitud de permiso ni se usaron los botones de Ajustes: **sin comprobar** la concesión inicial,
+    la denegación, el regreso de Ajustes ni la exigencia de otra pulsación de Iniciar tras conceder. Tampoco se
+    registró si el permiso era preciso o aproximado. Esa lógica de #171 solo tiene cobertura de pruebas automáticas.
   - **Estado de la base:** el viaje 5 queda `finalizado` en Neon hasta el próximo `--reiniciar`, que sigue siendo
     obligatorio antes de la demo (reservas de `pasajero1`), y lo coordina Martiniano.
 

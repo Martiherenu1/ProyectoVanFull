@@ -4,7 +4,7 @@
 
 Última verificación: **2026-10-27**.
 
-- `main`: `db62e5e017ad5061ff37ad60cafdedf2151dfaa0`.
+- `main`: `63da29ee1153256366b5380f0d953a55df97728e`.
 - CI de `main`: verde; **438 pruebas backend** y **548 pruebas Flutter** aprobadas.
 - PR abiertos de Facundo: ninguno.
 - Issue abierto de Facundo: **#84**, porque CU-014 continúa parcial.
@@ -40,10 +40,16 @@ La línea funcional vigente es la especificación de Casos de Uso v1.3. Según e
 
 **Probado realmente en Render**
 
-- Login con una cuenta administrativa de rol único.
-- Acceso al módulo administrativo y al formulario Crear viaje.
-- El 2026-10-27 se envió una única creación para 2026-10-31 09:15, servicio 1, recorrido 1, sentido IDA,
-  capacidad planificada 18, sin chofer ni vehículo. La interfaz mostró éxito.
+- Prueba manual realizada por Facundo el 2026-10-27 en `https://vanfull.onrender.com`:
+  - inicio de sesión administrativo: APROBADO;
+  - acceso a «Viajes del día»: APROBADO;
+  - carga del listado sin errores, incluso con resultado vacío: APROBADO;
+  - navegación a «Crear viaje» y regreso sin enviar datos: APROBADO;
+  - logout con regreso al login: APROBADO;
+  - recarga posterior sin exponer contenido protegido: APROBADO.
+- En una comprobación separada se envió una única creación para 2026-10-31 09:15, servicio 1, recorrido 1,
+  sentido IDA, capacidad planificada 18, sin chofer ni vehículo. La interfaz mostró un mensaje de éxito, pero
+  ese resultado visual no demuestra por sí solo la persistencia.
 
 **Pendiente**
 
@@ -130,10 +136,12 @@ cuenta: es la integración de Mercado Pago que extiende CU-014.
 ## Frontend administrativo y despliegue — PARCIALMENTE VALIDADO
 
 - Render y GitHub Pages sirven el frontend que contiene administración.
-- En navegador real se comprobaron login administrativo, entrada al módulo, apertura del formulario y respuesta
-  visual exitosa de una creación.
-- No se verificaron todavía en el entorno publicado: persistencia del viaje, listado autenticado con ese viaje,
-  pagos, confirmación/rechazo, reservas administrativas, deuda administrativa ni Mercado Pago.
+- La evidencia manual de Render está separada de las pruebas automatizadas: cubre login, entrada a Viajes del
+  día, carga correcta de una lista incluso vacía, navegación al formulario y regreso, logout y protección tras
+  recargar. También hubo un resultado visual exitoso al crear un viaje, sin verificación de persistencia.
+- No se probaron desde Flutter consultas de otras fechas, ni se confirmó la creación mediante GET autenticado o
+  SELECT en Neon. Tampoco se probaron un CRUD completo, pagos, confirmación/rechazo, reservas administrativas,
+  deuda administrativa ni Mercado Pago.
 - El selector de fecha para el listado es una propuesta de mejora, no un requisito confirmado; no se incorpora
   durante el freeze por inferencia.
 - Antes de la entrega corresponde coordinar un despliegue final desde el `main` definitivo, sin interferir con
@@ -164,10 +172,9 @@ confirmar; no se los declara fuera del PC2 sin una decisión explícita.
 Prioridades documentales y de validación antes del viernes:
 
 1. Verificar por SELECT autorizado o GET autenticado la persistencia del viaje de prueba y registrar su ID/estado.
-2. Probar en Render el listado administrativo y logout sin efectuar nuevas escrituras.
-3. Validar con el equipo el recorte de CU-018, CU-027, CU-014, CU-015 y CU-036.
-4. Mantener abierto #84 hasta resolver o aceptar formalmente los límites de CU-014.
-5. Coordinar el despliegue final solo cuando el `main` compartido quede estable.
+2. Validar con el equipo el recorte de CU-018, CU-027, CU-014, CU-015 y CU-036.
+3. Mantener abierto #84 hasta resolver o aceptar formalmente los límites de CU-014.
+4. Coordinar el despliegue final solo cuando el `main` compartido quede estable.
 
 ## Fuera del alcance confirmado del PC2
 

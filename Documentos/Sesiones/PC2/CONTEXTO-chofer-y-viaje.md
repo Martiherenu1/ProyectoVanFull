@@ -1,5 +1,74 @@
 # Contexto vivo · Chofer y viaje en curso (Martín)
 
+## Conexión y asistencia CU-030: publicación autorizada — 26/10/2026
+
+- Activo: `F:/dev/vanfull-cu030-conexion`, rama `feat/chofer-conexion-autenticada-cu030-corta`,
+  base revisada `db62e5e017ad5061ff37ad60cafdedf2151dfaa0`, igual a main remoto al publicar.
+  Original y respaldos preservados; no se compila ni regenera build en OneDrive.
+- Ampliación autorizada con Martiniano: solicitar permiso mediante acción explícita, Ajustes de app
+  ante denegación permanente y Ajustes de ubicación para servicio apagado. comprobar() sigue siendo
+  solo lectura; solicitar/abrir Ajustes son métodos separados. Permiso aproximado válido, sin posición.
+- Conceder permiso o regresar de Ajustes exige otra pulsación de inicio/reintento y comprobación nueva;
+  no hay autoenvío ni acción al reanudar. Ayuda local no invalida listado ni resuelve incertidumbre.
+  Guardia de generación/token antes y después de acciones locales; respuestas tardías descartadas.
+  Finalizar/reintentar finalización no usan comprobación ni asistencia. Reconciliación sin cambios;
+  el controlador solo expone/distinge el bloqueo local permanente para orientar la presentación.
+- Comprobador/asistencia reales solo Android; Web no omite el control ni finge permisos.
+  INTERNET agregado únicamente al Manifest principal, separado en un commit exclusivo.
+- Configuración local regenerada en ruta corta: pub get offline con lockfile exigido, wrapper Gradle
+  desde SDK existente y local.properties ignorado. Dependencias/lockfile sin cambios.
+- Formato final: 12 Dart, cero cambios; analyze sin observaciones (33,3 s). Primera validación:
+  83 afectadas aprobadas; regresión final de Chofer y composición: 394 aprobadas, 0 fallidas/omitidas
+  (115 s), incluidas 13 pruebas nuevas de permiso/Ajustes y 7 de adaptador. No es suite completa.
+  Las 569 completas del registro inferior son evidencia histórica anterior a esta ampliación.
+- Web release compilado (406 s, dry run Wasm correcto); Android debug offline compilado
+  (BUILD SUCCESSFUL, 4 min 50 s, 182 tareas). Salidas en frontend/build/web y
+  frontend/build/app/outputs/apk/debug/app-debug.apk; sin instalar ni ejecutar en teléfono.
+  Logs ignorados frontend/ampliacion-{analyze-final,pertinentes-final,build-web,build-android}.log.
+  Configuración inicial sin wrapper regenerada desde el SDK existente; sin cambios de Gradle versionado.
+- Original: 336 fuentes verificadas sin cambios; frontend/build sigue ausente. Sin solicitudes a
+  Render, POST reales, captura/envío GPS, seed, cambios en otros trabajos ni prueba real en dispositivo.
+  Quedan revisión y circuito Android con viajes autorizados; no se declaran completos CU-030/GPS.
+
+- Issue específico #170 creado con etiqueta chofer; publicación de esta rama autorizada sin merge.
+  Commits, push normal y PR hacia main en curso al registrar esta etapa. El HEAD publicado y el
+  resultado real de su CI se registran en la descripción de la PR, separados de las 394 locales
+  y las 569 completas históricas. Sin repetir checks locales: código y base no cambiaron.
+  Revisión de Martiniano pendiente; esta entrega no completa CU-030, GPS ni RNF-008 ni cierra #123.
+  Los registros inferiores de trabajo sin publicación se conservan como historial.
+
+## Historial de conexión autenticada CU-030 — 26/10/2026
+
+- Base remota `db62e5e017ad5061ff37ad60cafdedf2151dfaa0`, #163 integrada y reutilizada.
+  Rama `feat/chofer-conexion-autenticada-cu030`, worktree `.worktrees/chofer-conexion-cu030`.
+  PR abiertas al iniciar: #168/#169 documentales; ninguna de composición. Trabajos anteriores preservados.
+- Facundo aún no confirmó si tiene cambios locales de main.dart. El usuario autorizó expresamente
+  el cambio acotado en este worktree, con Martiniano como interlocutor de coordinación/revisión;
+  no equivale a confirmación ni revisión de Facundo. Sin commits/publicaciones ni merge.
+- Composición existente conecta EjecucionViajeApi con cliente externo y acciones estables por sesión.
+  Antes de escribir verifica generación/token/montaje; vuelve a comprobar tras ubicación. El 401 sigue
+  en HttpApiClient/SesionController; 403 tipado muestra acceso denegado sin logout y descarta efectos
+  sobre otra cuenta. Shell/coordinador/adaptadores y su reconciliación permanecen intactos.
+- Primer circuito real propuesto: Android con permiso concedido (aproximado válido) y servicio activo.
+  Comprobador existente solo consulta: no solicita permisos, abre Ajustes ni captura posición/streams.
+  Inicio no Android/Web bloqueado localmente, sin fingir permiso; finalización no consulta ubicación.
+  Permiso en instalación nueva requiere habilitación previa o una adaptación posterior explícita.
+  INTERNET existe en debug/profile, no en manifest principal: release requiere evaluar esa adaptación.
+- Formato final de tres Dart: cero cambios; analyze final sin observaciones (16,9 s).
+  Pruebas afectadas: 42 aprobadas; suite Flutter completa final: 569 aprobadas, 0 fallidas/omitidas
+  (164 s), incluidas 21 nuevas de ejecución autenticada y las 21 de consulta con expectativas
+  actualizadas para acciones/reintento del detalle. Primera suite: 565 aprobadas/4 fallidas por
+  dobles/expectativas de tests; corregidas sin cambiar código productivo ni reconciliación.
+  Logs ignorados frontend/conexion-{analyze-final,afectadas-final,suite-final}.log. Pub get offline
+  con lockfile exigido, sin cambiar dependencias/lockfile. Android debug compilado con Gradle offline:
+  BUILD SUCCESSFUL (6 min 58 s), build/app/outputs/apk/debug/app-debug.apk. Intentos previos demorados,
+  argumento PowerShell corregido y directorio generado bloqueado limpiado solo en este worktree.
+  Advertencias preexistentes SDK XML/Gradle/Kotlin. No acredita release ni funcionamiento en dispositivo;
+  no se instala el APK. Log ignorado frontend/conexion-build-offline-reintento.log.
+- Transporte simulado;
+  sin solicitudes a Render ni POST reales, dispositivo, GPS, cambios backend/contrato/dependencias.
+  Prueba real posterior requiere plataforma y viajes autorizados; no tocar viajes 1 y 3 de consulta.
+
 ## Revalidación local de #163 tras integrar #164 en main — 26/10/2026
 
 - Combinación local actual: HEAD `094b51a790e4face981b5e06b9eecbf73e85401e` sobre main

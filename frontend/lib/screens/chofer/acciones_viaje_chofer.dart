@@ -1,14 +1,20 @@
 import 'package:flutter/material.dart';
 
 import '../../controllers/chofer/ejecucion_viaje_controller.dart';
+import '../../controllers/chofer/asistencia_ubicacion_inicio.dart';
 import '../../core/theme/app_spacing.dart';
 
-/// Presentación de acciones; toda solicitud y reconciliación usa el coordinador
-/// del detalle. No crea navegación de aplicación, HTTP ni sesión.
+/// Escrituras/reconciliación usan el coordinador; permisos y Ajustes son acciones
+/// locales separadas. Su retorno nunca inicia ni reintenta un viaje.
 class AccionesViajeChofer extends StatefulWidget {
-  const AccionesViajeChofer({required this.controlador, super.key});
+  const AccionesViajeChofer({
+    required this.controlador,
+    this.asistenciaUbicacion,
+    super.key,
+  });
 
   final EjecucionViajeController controlador;
+  final AsistenciaUbicacionInicio? asistenciaUbicacion;
 
   @override
   State<AccionesViajeChofer> createState() => _AccionesViajeChoferState();
@@ -16,6 +22,81 @@ class AccionesViajeChofer extends StatefulWidget {
 
 class _AccionesViajeChoferState extends State<AccionesViajeChofer> {
   bool _confirmando = false;
+  bool _gestionandoUbicacion = false;
+  String? _mensajeAyuda;
+  ResultadoPermisoUbicacion? _permisoSolicitado;
+
+  Future<void> _ayudar(
+    Future<(String, ResultadoPermisoUbicacion?)> Function() accion,
+  ) async {
+    if (_gestionandoUbicacion || _confirmando || widget.controlador.ocupado) {
+      return;
+    }
+    final controlador = widget.controlador;
+    final contexto = controlador.contexto;
+    final asistencia = widget.asistenciaUbicacion;
+    bool vigente() =>
+        mounted &&
+        widget.controlador == controlador &&
+        controlador.contexto == contexto &&
+        widget.asistenciaUbicacion == asistencia;
+    setState(() {
+      _gestionandoUbicacion = true;
+      _mensajeAyuda = null;
+    });
+    try {
+      final (mensaje, permiso) = await accion();
+      if (!vigente()) return;
+      setState(() {
+        _mensajeAyuda = mensaje;
+        if (permiso != null) _permisoSolicitado = permiso;
+      });
+    } catch (_) {
+      if (vigente()) {
+        setState(
+          () => _mensajeAyuda = 'No se pudo completar la acción de ubicación.',
+        );
+      }
+    } finally {
+      if (mounted) setState(() => _gestionandoUbicacion = false);
+    }
+  }
+
+  Future<void> _solicitarPermiso() => _ayudar(() async {
+    final permiso = await widget.asistenciaUbicacion!.solicitarPermiso();
+    final mensaje = switch (permiso) {
+      ResultadoPermisoUbicacion.concedido => 'Permiso concedido. Pulsá Iniciar nuevamente para comprobar la ubicación.',
+      ResultadoPermisoUbicacion.denegado =>
+        'Permiso no concedido. Podés solicitarlo nuevamente.',
+      ResultadoPermisoUbicacion.denegadoPermanentemente => 'Habilitá el permiso desde Ajustes de la app y pulsá Iniciar nuevamente.',
+    };
+    return (mensaje, permiso);
+  });
+
+  Future<void> _abrirAjustes({required bool app}) => _ayudar(() async {
+    final asistencia = widget.asistenciaUbicacion!;
+    final abierto = await (app
+        ? asistencia.abrirAjustesApp()
+        : asistencia.abrirAjustesUbicacion());
+    return (
+      abierto
+          ? 'Al volver de Ajustes, pulsá Iniciar nuevamente para comprobar la ubicación.'
+          : 'No se pudieron abrir los Ajustes.',
+      null,
+    );
+  });
+
+  Future<void> _iniciar({bool reintento = false}) async {
+    setState(() {
+      _mensajeAyuda = null;
+      _permisoSolicitado = null;
+    });
+    if (reintento) {
+      await widget.controlador.repetir();
+    } else {
+      await widget.controlador.iniciar();
+    }
+  }
 
   Future<void> _confirmarFinalizacion({bool reintento = false}) async {
     if (_confirmando) return;
@@ -75,6 +156,24 @@ class _AccionesViajeChoferState extends State<AccionesViajeChofer> {
         if (mensaje != null) Text(mensaje),
         if (c.comprobandoUbicacion) const Text('Comprobando ubicación.'),
         if (c.mensajeUbicacion != null) Text(c.mensajeUbicacion!),
+        if (_gestionandoUbicacion) const Text('Gestionando ubicación.'),
+        if (_mensajeAyuda != null) Text(_mensajeAyuda!),
+        if (widget.asistenciaUbicacion != null &&
+            !c.ocupado &&
+            (c.puedeIniciar ||
+                c.puedeRepetir &&
+                    c.operacionPendiente == OperacionViaje.inicio)) ...[
+          if (c.bloqueoUbicacion == BloqueoUbicacionInicio.servicioDesactivado)
+            _boton('Ajustes de ubicación', () => _abrirAjustes(app: false)),
+          if (c.bloqueoUbicacion ==
+                  BloqueoUbicacionInicio.permisoDenegadoPermanentemente ||
+              _permisoSolicitado ==
+                  ResultadoPermisoUbicacion.denegadoPermanentemente)
+            _boton('Ajustes de la app', () => _abrirAjustes(app: true))
+          else if (c.bloqueoUbicacion ==
+              BloqueoUbicacionInicio.permisoNoConcedido)
+            _boton('Solicitar permiso de ubicación', _solicitarPermiso),
+        ],
         if (c.fase == FaseDetalleViaje.incierto && c.estadoConsultado != null)
           Text('Último estado consultado: ${c.estadoConsultado!.etiqueta}'),
         if (c.fase == FaseDetalleViaje.incierto && rechazo != null)
@@ -86,7 +185,7 @@ class _AccionesViajeChoferState extends State<AccionesViajeChofer> {
             ),
           ),
         if (c.puedeIniciar)
-          _boton('Iniciar viaje', _confirmando ? null : c.iniciar),
+          _boton('Iniciar viaje', _confirmando ? null : () => _iniciar()),
         if (c.puedeFinalizar)
           _boton(
             'Finalizar viaje',
@@ -102,7 +201,7 @@ class _AccionesViajeChoferState extends State<AccionesViajeChofer> {
             _confirmando
                 ? null
                 : c.operacionPendiente == OperacionViaje.inicio
-                ? c.repetir
+                ? () => _iniciar(reintento: true)
                 : () => _confirmarFinalizacion(reintento: true),
           ),
         if (c.fase == FaseDetalleViaje.confirmadoSinDetalle ||
@@ -117,7 +216,7 @@ class _AccionesViajeChoferState extends State<AccionesViajeChofer> {
   Widget _boton(String texto, VoidCallback? accion) => Padding(
     padding: const EdgeInsets.symmetric(vertical: AppSpacing.sm),
     child: ElevatedButton(
-      onPressed: accion,
+      onPressed: _gestionandoUbicacion ? null : accion,
       style: ElevatedButton.styleFrom(
         minimumSize: const Size(0, AppSpacing.driverTouchTarget),
       ),

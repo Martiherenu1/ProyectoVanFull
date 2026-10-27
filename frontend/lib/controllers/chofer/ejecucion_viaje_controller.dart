@@ -117,11 +117,14 @@ class EjecucionViajeController extends ChangeNotifier {
   OperacionViaje? get operacionPendiente => _pendiente?.operacion;
 
   bool get comprobandoUbicacion => _comprobandoUbicacion;
+  BloqueoUbicacionInicio? get bloqueoUbicacion => _bloqueoUbicacion;
   String? get mensajeUbicacion => switch (_bloqueoUbicacion) {
     BloqueoUbicacionInicio.servicioDesactivado =>
       'Activá la ubicación del teléfono para iniciar el viaje.',
     BloqueoUbicacionInicio.permisoNoConcedido =>
       'Permití que VanFull acceda a tu ubicación para iniciar el viaje.',
+    BloqueoUbicacionInicio.permisoDenegadoPermanentemente =>
+      'Habilitá el permiso de ubicación desde Ajustes de la app.',
     BloqueoUbicacionInicio.sinComprobador =>
       'No se pudo comprobar la ubicación',
     BloqueoUbicacionInicio.consultaFallida =>
@@ -324,7 +327,9 @@ class EjecucionViajeController extends ChangeNotifier {
       if (!condiciones.servicioActivado) {
         _bloqueoUbicacion = BloqueoUbicacionInicio.servicioDesactivado;
       } else if (!condiciones.permisoConcedido) {
-        _bloqueoUbicacion = BloqueoUbicacionInicio.permisoNoConcedido;
+        _bloqueoUbicacion = condiciones.permisoDenegadoPermanentemente
+            ? BloqueoUbicacionInicio.permisoDenegadoPermanentemente
+            : BloqueoUbicacionInicio.permisoNoConcedido;
       }
     }
     if (_bloqueoUbicacion != null) {

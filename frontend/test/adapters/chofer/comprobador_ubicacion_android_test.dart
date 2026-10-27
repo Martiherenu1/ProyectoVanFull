@@ -2,10 +2,20 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:frontend/adapters/chofer/comprobador_ubicacion_android.dart';
 import 'package:frontend/controllers/chofer/ejecucion_viaje_controller.dart';
+import 'package:frontend/controllers/chofer/asistencia_ubicacion_inicio.dart';
 import 'package:frontend/models/chofer/operacion_asignada.dart';
 
 import '../../fixtures/chofer/operacion_asignada_fixture.dart';
 import '../../fixtures/chofer/plataforma_ubicacion_fake.dart';
+
+class _PlataformaSolicitud extends PlataformaUbicacionFake {
+  LocationPermission respuesta = LocationPermission.denied;
+  @override
+  Future<LocationPermission> requestPermission() async {
+    llamadas.add('solicitarPermiso');
+    return respuesta;
+  }
+}
 
 void main() {
   for (final permiso in LocationPermission.values) {
@@ -19,6 +29,10 @@ void main() {
         ).comprobar();
         expect(resultado.servicioActivado, servicio);
         expect(
+          resultado.permisoDenegadoPermanentemente,
+          permiso == LocationPermission.deniedForever,
+        );
+        expect(
           resultado.permisoConcedido,
           permiso == LocationPermission.whileInUse ||
               permiso == LocationPermission.always,
@@ -27,6 +41,38 @@ void main() {
         expect(plataforma.llamadas, ['servicio', 'permiso']);
       });
     }
+  }
+
+  for (final permiso in LocationPermission.values) {
+    test(
+      'solicitud explícita ${permiso.name} no consulta ni obtiene posición',
+      () async {
+        final plataforma = _PlataformaSolicitud()..respuesta = permiso;
+        final resultado = await ComprobadorUbicacionAndroid(
+          plataforma: plataforma,
+        ).solicitarPermiso();
+        expect(
+          resultado,
+          permiso == LocationPermission.whileInUse ||
+                  permiso == LocationPermission.always
+              ? ResultadoPermisoUbicacion.concedido
+              : permiso == LocationPermission.deniedForever
+              ? ResultadoPermisoUbicacion.denegadoPermanentemente
+              : ResultadoPermisoUbicacion.denegado,
+        );
+        expect(plataforma.llamadas, ['solicitarPermiso']);
+      },
+    );
+  }
+
+  for (final abierto in [false, true]) {
+    test('Ajustes independientes, resultado $abierto', () async {
+      final plataforma = PlataformaUbicacionFake()..ajustesAbiertos = abierto;
+      final adaptador = ComprobadorUbicacionAndroid(plataforma: plataforma);
+      expect(await adaptador.abrirAjustesApp(), abierto);
+      expect(await adaptador.abrirAjustesUbicacion(), abierto);
+      expect(plataforma.llamadas, ['ajustesApp', 'ajustesUbicacion']);
+    });
   }
 
   test('consulta cada vez sin conservar un permiso anterior', () async {

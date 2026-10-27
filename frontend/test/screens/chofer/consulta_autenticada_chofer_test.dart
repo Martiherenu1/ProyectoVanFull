@@ -139,7 +139,7 @@ void main() {
     expect(transporte.consultas.last.url.path, '$_listado/41');
     expect(transporte.consultas.last.url.queryParameters, isEmpty);
     expect(find.text('Iniciar viaje'), findsNothing);
-    expect(find.text('Finalizar viaje'), findsNothing);
+    expect(find.text('Finalizar viaje'), findsOneWidget);
     final cantidad = transporte.consultas.length;
     await tester.binding.handlePopRoute();
     await tester.pumpAndSettle();
@@ -197,10 +197,11 @@ void main() {
           if (enDetalle && estado == 404) {
             expect(find.text('Detalle no disponible.'), findsOneWidget);
           } else {
-            expect(find.text('Reintentar'), findsOneWidget);
+            final reintentar = enDetalle ? 'Actualizar detalle' : 'Reintentar';
+            expect(find.text(reintentar), findsOneWidget);
             transporte.estadoListado = 200;
             transporte.estadoDetalle = 200;
-            await tester.tap(find.text('Reintentar'));
+            await tester.tap(find.text(reintentar));
             await tester.pumpAndSettle();
             expect(
               find.byKey(ValueKey(enDetalle ? 'detalle-41' : 'viaje-41')),

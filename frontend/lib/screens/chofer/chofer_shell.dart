@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../controllers/chofer/ejecucion_viaje_controller.dart';
+import '../../controllers/chofer/asistencia_ubicacion_inicio.dart';
 import '../../core/theme/app_spacing.dart';
 import '../../models/chofer/viaje_resumen.dart';
 import 'detalle_viaje_chofer_screen.dart';
@@ -20,6 +21,7 @@ class ChoferShell extends StatefulWidget {
     this.fechaInicial,
     this.acciones,
     this.comprobarUbicacionInicio,
+    this.asistenciaUbicacionInicio,
     super.key,
   });
 
@@ -29,6 +31,7 @@ class ChoferShell extends StatefulWidget {
   final DateTime? fechaInicial;
   final AccionesEjecucionViaje? acciones;
   final ComprobarUbicacionInicio? comprobarUbicacionInicio;
+  final AsistenciaUbicacionInicio? asistenciaUbicacionInicio;
 
   @override
   State<ChoferShell> createState() => _ChoferShellState();
@@ -168,6 +171,7 @@ class _ChoferShellState extends State<ChoferShell> {
             acciones: _acciones,
             comprobarUbicacionInicio: widget.comprobarUbicacionInicio,
             controlador: entrada.controlador,
+            asistenciaUbicacionInicio: widget.asistenciaUbicacionInicio,
           ),
         ),
       ),

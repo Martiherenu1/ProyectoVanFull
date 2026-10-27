@@ -9,7 +9,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.database import get_db
 from app.core.security import UsuarioActual, requiere_rol
-from app.schemas.viajes import Viaje, ViajeCreate
+from app.schemas.viajes import Viaje, ViajeCreate, ViajeUpdate
 from app.services import viajes as servicio
 
 router = APIRouter(prefix="/viajes", tags=["viajes"])
@@ -47,3 +47,13 @@ async def crear_viaje(
     db: AsyncSession = Depends(get_db),
 ):
     return await servicio.crear_viaje(db, datos)
+
+
+@router.patch("/{id_viaje}", response_model=Viaje, response_model_exclude_none=True)
+async def actualizar_viaje(
+    id_viaje: int,
+    datos: ViajeUpdate,
+    _: UsuarioActual = Depends(requiere_rol("administrador", "dueno")),
+    db: AsyncSession = Depends(get_db),
+):
+    return await servicio.actualizar_viaje(db, id_viaje, datos)

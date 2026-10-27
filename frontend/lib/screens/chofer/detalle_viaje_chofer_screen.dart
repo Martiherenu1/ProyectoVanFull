@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../controllers/chofer/ejecucion_viaje_controller.dart';
+import '../../controllers/chofer/asistencia_ubicacion_inicio.dart';
 import '../../core/theme/app_spacing.dart';
 import '../../core/theme/app_theme.dart';
 import '../../models/chofer/operacion_asignada.dart';
@@ -17,6 +18,7 @@ class DetalleViajeChoferScreen extends StatefulWidget {
     required this.cargarDetalle,
     this.acciones,
     this.comprobarUbicacionInicio,
+    this.asistenciaUbicacionInicio,
     this.controlador,
     super.key,
   });
@@ -25,6 +27,7 @@ class DetalleViajeChoferScreen extends StatefulWidget {
   final CargarDetalleViajeChofer cargarDetalle;
   final AccionesEjecucionViaje? acciones;
   final ComprobarUbicacionInicio? comprobarUbicacionInicio;
+  final AsistenciaUbicacionInicio? asistenciaUbicacionInicio;
 
   /// Prestado: su propietario inicia consultas, actualiza fuentes y lo dispone.
   /// Debe corresponder a idViaje. Sin él, el detalle conserva la propiedad local.
@@ -122,7 +125,10 @@ class _DetalleViajeChoferScreenState extends State<DetalleViajeChoferScreen> {
         return Center(
           child: SingleChildScrollView(
             padding: const EdgeInsets.all(AppSpacing.lg),
-            child: AccionesViajeChofer(controlador: _controlador),
+            child: AccionesViajeChofer(
+              controlador: _controlador,
+              asistenciaUbicacion: widget.asistenciaUbicacionInicio,
+            ),
           ),
         );
       }
@@ -161,7 +167,10 @@ class _DetalleViajeChoferScreenState extends State<DetalleViajeChoferScreen> {
       padding: const EdgeInsets.all(AppSpacing.lg),
       children: [
         if (widget.acciones != null)
-          AccionesViajeChofer(controlador: _controlador),
+          AccionesViajeChofer(
+            controlador: _controlador,
+            asistenciaUbicacion: widget.asistenciaUbicacionInicio,
+          ),
         _titulo(context, 'Viaje ${viaje.idViaje}'),
         _fila('Fecha: $fecha · ${viaje.horario ?? 'Sin horario'}'),
         _fila('${viaje.sentido.etiqueta} · ${viaje.estado.etiqueta}'),

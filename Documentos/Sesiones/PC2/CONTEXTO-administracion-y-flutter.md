@@ -1,114 +1,184 @@
 # Contexto vivo · Administración y Flutter (Facundo)
 
-## Estado
+## Corte de estado
 
-2026-10-25: Issue #152 integra la navegación compartida sobre la sesión de #153 y su único `HttpApiClient`.
-Administración reutiliza los adaptadores de listado y creación; Chofer recibe su `ChoferShell` y adaptadores
-existentes sin modificar código de Martín. Las entradas usan `SesionController.generacion` para aislar cuentas.
+Última verificación: **2026-10-27**.
 
-2026-10-23: #87 y #99 integrados en `main`. Issue #111 conecta la entrada del rol administrador con
-`ViajesDiaAdminScreen` mediante fecha, consulta y selección inyectables, sin login, sesión, HTTP ni datos
-simulados en producción. Sin rol, múltiples roles y rol desconocido conservan el comportamiento de #48.
+- `main`: `db62e5e017ad5061ff37ad60cafdedf2151dfaa0`.
+- CI de `main`: verde; **438 pruebas backend** y **548 pruebas Flutter** aprobadas.
+- PR abiertos de Facundo: ninguno.
+- Issue abierto de Facundo: **#84**, porque CU-014 continúa parcial.
+- Frontend administrativo publicado en Render y GitHub Pages: build `d19c22ae70887eb98a4ac905bbebec107d4ac68b`.
+  Contiene la composición administrativa integrada; no coincide con el HEAD actual de `main`, que avanzó después
+  por cambios de Chofer y documentación.
 
-2026-10-22: Issue #98 en desarrollo para la pantalla administrativa de Viajes del día (CU-018), con consulta
-inyectable y sin HTTP, autenticación ni navegación. CU-014 permanece pausado en el Draft PR #85 por decisiones
-pendientes sobre tipo/evidencia, descuento y respuestas para cliente o cuenta inexistentes.
+La línea funcional vigente es la especificación de Casos de Uso v1.3. Según ella:
 
-2026-10-19: el PR #47 (tema visual compartido de Flutter) está en `main`. `POST /viajes` de CU-018 también.
-CU-006 está en el PR #54 y CU-016 en el PR #52, ambos con CI aprobada. CU-018 y la base común Flutter siguen
-siendo trabajos independientes.
+- CU-014: Registrar pagos y comprobantes.
+- CU-015: Gestionar deuda.
+- CU-016: Confirmar o rechazar pago.
+- CU-018: Gestionar viajes y asignaciones.
+- CU-027: Consultar reservas por administración.
+- CU-036: Procesar operación mediante Mercado Pago en pruebas (`<<extend>>` de CU-014).
 
-## Hecho
+## Estado por responsabilidad
 
-- PR #50: `POST /viajes`, primera operación backend de administración, integrado en `main`.
-- PR #87: cliente API HTTP compartido, integrado en `main`.
-- PR #99 / Issue #98: pantalla Flutter administrativa de Viajes del día, integrada en `main`.
-- CU-018 mantiene cobertura parcial en el contrato vigente.
-- PR #47: temas oscuro para pasajero/chofer y claro para administración, tokens compartidos y vista temporal de
-  verificación. La corrección A.0–A.8 deja esquemas de color explícitos, dorado accesible en el tema claro,
-  tipografía Material completa y superficies sin sombras ni tintes.
-- Issue #48 implementado en esta rama: enrutador inicial por rol y portadas temporales para CU-002, CU-029 y
-  CU-018.
-- Issue #53 implementado en el PR #54: consulta de deuda propia de CU-006.
-- Issue #51 implementado en el PR #52: confirmación o rechazo manual de pagos de CU-016.
+### CU-018 · Gestionar viajes y asignaciones — PARCIAL
 
-## En curso
+**Implementado**
 
-- Issue #152: composición compartida de sesión, entradas por rol, ciclo de vida del transporte y política de
-  errores autenticados. No agrega contratos ni modifica pantallas propias de pasajero o chofer.
+- Backend: `POST /viajes` (#50) y `GET /viajes?fecha=YYYY-MM-DD` (#145).
+- Flutter: pantalla Viajes del día (#99), adaptador de consulta (#150), adaptador de creación (#130), formulario
+  de creación (#134), navegación y composición autenticada (#159).
+- Dataset sintético de demostración para 2026-10-30 (#101).
+- ADJ-03: se permite planificar sin chofer y/o vehículo; ambos son necesarios antes de iniciar el viaje.
 
-## Decisiones
+**Probado automáticamente**
 
-- 2026-10-16, Facundo: implementar primero solo la operación ya aprobada en OpenAPI,
-  `POST /viajes`, sin cambiar contratos compartidos, modelos ni migraciones. Registrado en #49.
-- 2026-10-16, línea base ADJ-03: un viaje puede planificarse sin vehículo ni chofer; se crea en
-  estado `programado`. Implementación de #49.
-- 2026-10-16, alcance de #49: no incluir modificación, cancelación, reasignación ni ejecución del
-  viaje. La ejecución sigue siendo responsabilidad del área de Martín.
-- 2026-10-19, #47: mantener Archivo para texto general e IBM Plex Mono solo para datos numéricos explícitos.
-  Las etiquetas en mayúsculas se transforman en el widget, porque `TextStyle` no modifica el contenido.
-- 2026-10-19, #47: aplicar las densidades 48/64/36 y la navegación real en #48; #47 sólo define los tokens y
-  muestra los tres temas sin incorporar funcionalidad de navegación.
-- 2026-10-20, #48: la navegación acepta un único rol conocido (`pasajero`, `chofer` o `administrador`). Sin rol,
-  con varios roles o con un rol desconocido no selecciona una portada y muestra un estado pendiente explícito.
-- 2026-10-20, #48: las entradas temporales son Buscar servicio (CU-002), Lista del viaje (CU-029) y Viajes del
-  día (CU-018), con sus temas y alturas 48/64/36; no implementan todavía funcionalidad ni permisos.
-- 2026-10-24, Martiniano (#153) y Facundo (#152): mantener un único `HttpApiClient`; un `401` invalida solamente
-  la sesión cuyo token originó la solicitud, un `403` conserva la sesión y las respuestas tardías no cruzan
-  entre cuentas. #152 reutiliza esa política y cierra el transporte al desmontar la composición, no al logout.
-- 2026-10-24, Martiniano y Facundo, #152: múltiples roles, roles desconocidos y `dueno` permanecen bloqueados
-  en Flutter. No se selecciona automáticamente un rol ni se inventa una interfaz de dueño.
-- 2026-10-18, Facundo: CU-006 calcula el saldo sin persistirlo; los movimientos `DEUDOR` suman y los
-  `ACREEDOR` restan según MR-R30. Un saldo neto acreedor se informa como cero.
-- 2026-10-18, Facundo: si existe el cliente individual pero no su cuenta corriente, CU-006 responde
-  `200`, saldo `0` y estado `al_dia`, porque sin cuenta no puede haber movimientos asociados.
-- 2026-10-18, Facundo: CU-016 crea el movimiento `ACREEDOR` al confirmar el pago; CU-014 y el rechazo
-  no crean movimientos. CU-006 conserva el cálculo por movimientos sin inventar estados.
-- 2026-10-18, Facundo: CU-016 crea, al confirmar, exactamente un `MovimientoCuenta` de naturaleza
-  `ACREEDOR`, asociado al cliente y al pago, por el importe pagado. El rechazo y CU-014 no crean
-  movimientos. Motivo: MR-R30 calcula la deuda desde movimientos y esta alternativa evita inventar
-  un catálogo de estados todavía pendiente. El movimiento se confirma en la misma transacción que
-  el pago y el recibo.
+- Backend: permisos, validación de fecha, lista vacía, estados, orden, asignaciones nulas y creación.
+- Flutter: carga, vacío, error/reintento, selección, serialización, formulario, navegación, sesión y 401/403.
 
-## Pendientes
+**Probado realmente en Render**
 
-- Issue #149: antes de la conexión real, alinear que OpenAPI `Viaje` no declara propiedades obligatorias,
-  mientras el backend y el `ViajeResumen` ya usado por la pantalla requieren los campos públicos base. El
-  adaptador no inventa valores: rechaza una respuesta incompleta.
-- CU-014: Draft PR #85 pausado; no declarar completo hasta resolver persistencia de tipo/evidencia, descuento y
-  respuestas para clientes inexistentes o sin cuenta corriente.
-- Issue #152 no conecta detalle administrativo. La selección de un viaje continúa sin destino porque no hay una
-  interfaz aprobada para ese detalle.
-- #53 y #51: cerrar mediante la revisión e integración de los PR #54 y #52.
-- CU-006 devuelve `404 CLIENTE_NO_ENCONTRADO` si no existe el cliente individual. Esa respuesta no
-  figura en OpenAPI y agregarla al contrato requiere el acuerdo de los tres integrantes.
-- PR #52 debe integrarse para que las confirmaciones de pago creen los movimientos acreedores que
-  CU-006 usa al calcular la deuda.
-- El catálogo físico de estados de `movimiento_cuenta` continúa PENDIENTE DE VALIDACIÓN; CU-006 no
-  filtra por un estado no aprobado.
-- CU-015 contempla acciones administrativas sobre deuda, pero todavía no tiene operaciones en
-  OpenAPI; no se inventan en este PR.
-- CU-018: reglas detalladas de conflictos o solapamientos de asignaciones están PENDIENTES DE
-  VALIDACIÓN y no fueron implementadas por #50 (#49).
-- CU-018 continúa con cobertura parcial: modificación, cancelación y reasignaciones requieren una
-  tarea y contrato posteriores; fuera del alcance de #49.
-- #47: Martiniano debe confirmar Archivo + IBM Plex Mono antes de incorporar archivos de fuentes y desactivar
-  la descarga en ejecución. No se descargaron ni agregaron fuentes en esta corrección.
-- #47: completar la plantilla del cuerpo del PR requiere una autorización remota separada.
-- #48/#152: las entradas de pasajero, chofer y administración se inyectan desde la sesión. Las cuentas con
-  múltiples roles, roles desconocidos y `dueno` quedan bloqueadas por decisión confirmada.
-- #48: `AppTheme.admin` es sólo el fallback visual temporal de los estados sin rol; no selecciona el rol de
-  administración y debe revisarse al integrar autenticación.
+- Login con una cuenta administrativa de rol único.
+- Acceso al módulo administrativo y al formulario Crear viaje.
+- El 2026-10-27 se envió una única creación para 2026-10-31 09:15, servicio 1, recorrido 1, sentido IDA,
+  capacidad planificada 18, sin chofer ni vehículo. La interfaz mostró éxito.
 
-## Entorno y trampas
+**Pendiente**
 
-- Docker Desktop debe estar iniciado para ejecutar PostgreSQL, Ruff y Pytest según el flujo del repo.
-- `gh` no está instalado en este equipo; el Issue #49 se creó desde GitHub en el navegador.
-- Ejecutar el formateador solamente sobre los archivos de esta tarea para no tocar otras áreas.
-- La suite completa mantiene advertencias conocidas de JWT de desarrollo y TestClient en desuso.
+- La persistencia de esa creación en Neon está **NO VERIFICADA**: no hubo una conexión autorizada de solo lectura
+  disponible. Tampoco quedó confirmada mediante un GET autenticado.
+- No están implementadas modificación, cancelación, asignación ni reasignación de chofer/vehículo. El contrato
+  marca GET y POST como cobertura parcial.
+- Las reglas detalladas de conflictos o solapamientos de asignaciones siguen PENDIENTES DE VALIDACIÓN.
+- OpenAPI `Viaje` no declara propiedades obligatorias, mientras el backend y `ViajeResumen` esperan los campos
+  públicos base. El adaptador rechaza respuestas incompletas y no inventa valores.
 
-## Para otras áreas
+### CU-027 · Consultar reservas por administración — NO IMPLEMENTADO
 
-- `POST /viajes` está disponible en `main` desde el PR #50.
-- Martín: esta tarea solo crea y planifica viajes; no cambia inicio, finalización, GPS ni abordajes.
-- Martiniano: esta tarea no cambia reservas, disponibilidad ni contratos compartidos.
+No hay endpoint, servicio, pantalla administrativa ni pruebas específicas. El contrato y el alcance de la
+interfaz continúan pendientes. No debe confundirse con las reservas propias del pasajero.
+
+### CU-014 · Registrar pagos y comprobantes — PARCIAL
+
+**Implementado**
+
+- `POST /pagos`, integrado por #85 y ampliado por #141.
+- Administrador/dueño registran indicando cliente; el pasajero solo registra un pago propio.
+- El pago queda `PENDIENTE`, se valida cliente/cuenta y se registra `pago_registrado` atómicamente.
+- Registrar no crea comprobante ni `MovimientoCuenta`; esos efectos pertenecen a la confirmación de CU-016.
+
+**Probado automáticamente**
+
+- Creación, roles, pasajero propio, cliente ajeno, cliente/cuenta inexistentes, validaciones, atomicidad e
+  interacción con CU-016.
+
+**Probado realmente en Render**
+
+- No probado con operaciones reales de pago.
+
+**Pendiente / bloqueado**
+
+- `tipo` y `evidencia_pago` existen en OpenAPI, pero no tienen columnas aprobadas. Actualmente se rechazan con
+  `400 VALIDACION`; no deben ignorarse ni persistirse inventando un modelo.
+- No está acordada la imputación contable del descuento del 15 % para efectivo.
+- Los clientes/pasajeros nuevos no reciben automáticamente una `cuenta_corriente`; sin ella se responde 404.
+- Issue #84 permanece abierto. OpenAPI documenta estas limitaciones, pero la operación no está marcada con
+  `x-cobertura: parcial`, a diferencia de la convención vigente.
+
+### CU-015 · Gestionar deuda — NO IMPLEMENTADO
+
+No existen operaciones administrativas aprobadas en OpenAPI ni una pantalla de administración. La consulta
+`GET /pasajeros/me/deuda` implementada en #54 es **CU-006**, para el pasajero autenticado, y no completa CU-015.
+Gestionar deuda no autoriza a modificar manualmente un saldo derivado. Las acciones administrativas exactas
+requieren contrato y validación del equipo.
+
+### CU-016 · Confirmar o rechazar pago — IMPLEMENTADO EN BACKEND
+
+**Implementado y probado automáticamente**
+
+- `POST /pagos/{id_pago}/confirmacion` (#52), para administrador/dueño.
+- Confirmar un pago pendiente crea atómicamente el `RECIBO`, el evento y exactamente un `MovimientoCuenta`
+  `ACREEDOR` por el importe del pago.
+- Rechazar no crea recibo ni movimiento. Un pago ya decidido no se vuelve a procesar.
+- Hay pruebas de permisos, estados, confirmación, rechazo y rollback.
+
+**Pendiente**
+
+- No existe pantalla administrativa de pagos pendientes/confirmación.
+- No fue probado realmente en Render.
+- El descuento del 15 % en efectivo no está resuelto por esta implementación.
+
+### CU-036 · Mercado Pago en pruebas — NO IMPLEMENTADO
+
+OpenAPI declara `POST /webhooks/mercadopago`, pero la aplicación no tiene router, servicio ni pruebas que lo
+implementen. Siguen pendientes la validación de notificaciones, seguridad, idempotencia, credenciales de prueba
+y confirmación automática de operaciones aprobadas/acreditadas. CU-036 no equivale a movimientos o estado de
+cuenta: es la integración de Mercado Pago que extiende CU-014.
+
+## Flutter compartido — INTEGRADO Y PROBADO
+
+- Base Flutter (#45), tema visual (#47), navegación por roles (#79), CI Flutter (#83), `ApiClient` HTTP
+  inyectable (#87), composición de sesión (#159) y estabilización de callbacks (#161) están en `main`.
+- Se reutiliza un único `HttpApiClient`; 401 invalida solo la sesión correspondiente, 403 conserva la sesión y
+  retira contenido protegido, y las respuestas tardías no contaminan una sesión nueva.
+- Pasajero conserva su entrada; administrador abre Viajes del día y Crear viaje; Chofer recibe su `ChoferShell`.
+- Roles múltiples, desconocidos y `dueno` permanecen bloqueados por decisión del equipo.
+- La suite Flutter completa está verde. La integración productiva de inicio/finalización/GPS pertenece a Martín.
+
+## Frontend administrativo y despliegue — PARCIALMENTE VALIDADO
+
+- Render y GitHub Pages sirven el frontend que contiene administración.
+- En navegador real se comprobaron login administrativo, entrada al módulo, apertura del formulario y respuesta
+  visual exitosa de una creación.
+- No se verificaron todavía en el entorno publicado: persistencia del viaje, listado autenticado con ese viaje,
+  pagos, confirmación/rechazo, reservas administrativas, deuda administrativa ni Mercado Pago.
+- El selector de fecha para el listado es una propuesta de mejora, no un requisito confirmado; no se incorpora
+  durante el freeze por inferencia.
+- Antes de la entrega corresponde coordinar un despliegue final desde el `main` definitivo, sin interferir con
+  los cambios compartidos de Martín y Martiniano.
+
+## Decisiones vigentes
+
+- **DEFINIDO POR EL EQUIPO — ADJ-03:** un viaje puede planificarse sin vehículo y/o chofer, pero no iniciarse
+  hasta tener ambos asignados.
+- **DEFINIDO POR EL EQUIPO — pagos:** CU-014 registra el pago pendiente sin movimiento. CU-016, al confirmar,
+  crea el movimiento `ACREEDOR`; el rechazo no lo crea.
+- **DEFINIDO POR EL EQUIPO — MR-R30:** saldo, deuda y cupo se calculan; no se persisten como valores derivados.
+- **DEFINIDO POR EL EQUIPO — sesión Flutter:** un cliente HTTP, 401 contextual, 403 sin logout y aislamiento por
+  generación/token.
+- **PENDIENTE DE VALIDACIÓN:** persistencia de tipo/evidencia, imputación del 15 %, alta de cuenta corriente,
+  conflictos de asignación y operaciones exactas de CU-015.
+
+## Alcance PC2 y pendientes para el 30/10
+
+El reparto acordado para PC2 asignó a Facundo CU-018, CU-027, CU-014, CU-015, CU-016 y CU-036, además de la base
+común Flutter. Que una operación esté parcial o no implementada **no significa que haya sido formalmente
+excluida**. El recorte respecto de ese reparto original está **PENDIENTE DE APROBACIÓN** por el equipo.
+
+No se encontró una exigencia docente específica que use las expresiones “CRUD completo de viajes” o “pantallas
+administrativas de pagos”. Sin embargo, el reparto del equipo sí prevé asignaciones, reservas y pagos a
+confirmar; no se los declara fuera del PC2 sin una decisión explícita.
+
+Prioridades documentales y de validación antes del viernes:
+
+1. Verificar por SELECT autorizado o GET autenticado la persistencia del viaje de prueba y registrar su ID/estado.
+2. Probar en Render el listado administrativo y logout sin efectuar nuevas escrituras.
+3. Validar con el equipo el recorte de CU-018, CU-027, CU-014, CU-015 y CU-036.
+4. Mantener abierto #84 hasta resolver o aceptar formalmente los límites de CU-014.
+5. Coordinar el despliegue final solo cuando el `main` compartido quede estable.
+
+## Fuera del alcance confirmado del PC2
+
+Según `REPARTO-PC2.md`: interfaces de dueño, clientes corporativos, reportes, facturación, abonos, recorridos y
+paradas, optimización de recorridos, y alta de choferes o vehículos (CU-005, CU-013, CU-017, CU-019 a CU-026,
+CU-028 y CU-031 a CU-035, CU-037). Los datos necesarios se proveen mediante el seed compartido.
+
+## Coordinación con otras áreas
+
+- Martín es responsable de Chofer, viaje en curso, CU-030 y GPS. No modificar simultáneamente `main.dart` ni
+  sus componentes durante esa integración.
+- Martiniano es responsable de autenticación, pasajero, servicios, tarifas y reservas del pasajero.
+- Los cambios de contrato, modelo o reglas se coordinan según `CONTRIBUTING.md`; no se resuelven desde este
+  contexto.

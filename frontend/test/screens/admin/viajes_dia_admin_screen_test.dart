@@ -108,19 +108,69 @@ void main() {
     }
   });
 
-  testWidgets('selecciona el viaje por ID mediante el callback', (
+  testWidgets('selecciona por ID y muestra el detalle de solo lectura', (
     tester,
   ) async {
     int? seleccionado;
     await mostrar(
       tester,
-      (_) async => [viaje(41), viaje(42)],
+      (_) async => [
+        viaje(41),
+        viaje(
+          42,
+          idVehiculo: null,
+          idChofer: null,
+          horario: null,
+          sentido: 'VUELTA',
+          estado: 'cancelado',
+        ),
+      ],
       seleccionar: (id) => seleccionado = id,
     );
     await tester.pumpAndSettle();
 
     await tester.tap(find.text('42'));
+    await tester.pumpAndSettle();
+
     expect(seleccionado, 42);
+    final detalle = find.byKey(const ValueKey('detalle-viaje-42'));
+    expect(detalle, findsOneWidget);
+    expect(
+      find.descendant(of: detalle, matching: find.text('Fecha: 30/10/2026')),
+      findsOneWidget,
+    );
+    expect(
+      find.descendant(of: detalle, matching: find.text('Horario: Sin horario')),
+      findsOneWidget,
+    );
+    expect(
+      find.descendant(of: detalle, matching: find.text('Estado: Cancelado')),
+      findsOneWidget,
+    );
+    expect(
+      find.descendant(of: detalle, matching: find.text('Sentido: Vuelta')),
+      findsOneWidget,
+    );
+    expect(
+      find.descendant(of: detalle, matching: find.text('Servicio: ID 2')),
+      findsOneWidget,
+    );
+    expect(
+      find.descendant(of: detalle, matching: find.text('Recorrido: ID 3')),
+      findsOneWidget,
+    );
+    expect(
+      find.descendant(
+        of: detalle,
+        matching: find.text('Vehículo: Sin asignar'),
+      ),
+      findsOneWidget,
+    );
+    expect(
+      find.descendant(of: detalle, matching: find.text('Chofer: Sin asignar')),
+      findsOneWidget,
+    );
+    expect(find.byType(TextField), findsNothing);
   });
 
   testWidgets('error saneado y reintento conservan la fecha', (tester) async {
@@ -149,7 +199,9 @@ void main() {
     expect(find.text('41'), findsOneWidget);
   });
 
-  testWidgets('cambiar fecha descarta el resultado anterior', (tester) async {
+  testWidgets('el selector cambia la fecha y descarta el resultado anterior', (
+    tester,
+  ) async {
     final anterior = Completer<List<ViajeResumen>>();
     final fechas = <DateTime>[];
     Future<List<ViajeResumen>> cargar(DateTime fecha) {
@@ -160,7 +212,10 @@ void main() {
     }
 
     await mostrar(tester, cargar);
-    await mostrar(tester, cargar, fecha: DateTime(2026, 10, 31));
+    await tester.tap(find.byKey(const ValueKey('seleccionar-fecha-viajes')));
+    await tester.pump(const Duration(seconds: 1));
+    await tester.tap(find.text('31'));
+    await tester.tap(find.widgetWithText(TextButton, 'OK'));
     await tester.pumpAndSettle();
     anterior.complete([viaje(51)]);
     await tester.pumpAndSettle();

@@ -1,5 +1,51 @@
 # Contexto vivo · Chofer y viaje en curso (Martín)
 
+## Prueba real acotada CU-030 — 27/10/2026
+
+- Entrega documental en rama `docs/chofer-prueba-real-cu030-20261027`, base identificada
+  inicial `14b83dd29d7cef5110bc5814315f360dbbbbd78c` (#171 integrada). Actualizada con origin/main
+  `533fc78e0ffad9a4ab9becfc2969f50e63926bf8` mediante merge fast-forward, sin conflictos ni rebase;
+  cambios preservados sin necesitar commit de preservación. Publicación mediante commit documental,
+  push normal y PR hacia main, sin merge; HEAD y resultado real de CI registrados en su descripción.
+  Los apartados inferiores conservan el estado histórico de preparación y publicación.
+- Martín confirmó recorrido UI en Samsung Galaxy S20+ 5G / Android 13, APK debug target ARM64
+  instalada por actualización conservando datos. Código Flutter 14b83dd; SHA-256 APK:
+  `37AFCA60589D946075EBFD92F399B4EA20AD6EA66DFE4F3C86C9612AE086C641`.
+- API Android `https://vanfull-api.onrender.com/api`; backend histórico Samsung `3296de3`, informado
+  por Martiniano desde Render para esa prueba. Él informó equivalencia de backend/ y render.yaml con
+  f511d3c; no verificación propia ni identificación del despliegue vigente.
+- Cuenta chofer1@vanfull.test, persona/chofer 3. Martiniano creó viaje 5 (informó POST administrativo
+  201) y autorizó una sola secuencia inicio → finalización, sin reintentos: 29/10/2026 10:00, IDA,
+  servicio/recorrido/vehículo 1, chofer 3, capacidad 18. No autoriza repetir ni modificar viajes 1/3.
+- Observaciones de Martín: login/consulta 29/10 Programado; Ubicación activa y permiso concedido
+  de antemano (precisión no comprobada), sin cambios de permisos, solicitud ni Ajustes durante el recorrido;
+  una pulsación mostró En curso; diálogo y confirmación mostraron
+  Finalizado sin acciones; retorno listado Finalizado; salida a login sin viajes. Sin errores ni
+  reintentos informados. No se confirmó fecha conservada en retorno ni bloqueo visual.
+- Observación Web posterior de Martín, separada de Samsung y API: ingresó con chofer1 en
+  https://vanfull.onrender.com/ y vio viaje 5 del 29/10 Finalizado. SHA frontend Web no identificado;
+  sin inspección HTTP. No acredita otra ejecución, acciones Web ni comparte por inferencia SHA/API con Android.
+- Guion único local sin seguimiento Git: `Documentos/Sesiones/PC2/PRUEBA-MANUAL-CU029.md` en el
+  checkout principal, §10; conserva §7–9 e IDs IF-CH-E2. No se copia a este worktree ni se aprueban
+  variantes por analogía. Martín consultó viajes 1/3 solo antes; la comprobación posterior es de Martiniano.
+- Martiniano confirmó después por API como admin1, solo lectura: viaje 5 finalizado, chofer 3/vehículo 1;
+  viajes 1/2/3 del 30/10 idénticos al seed según su comparación. Respaldo #181, HEAD
+  `57e765e800c199d6519be68f217c0b0d8c32916b`, CONTEXTO.md; publicada e integrada mediante merge
+  `533fc78e0ffad9a4ab9becfc2969f50e63926bf8`. Consulta atribuida a él, no a nuestra herramienta ni SQL.
+  Estado intermedio En curso por API y eventos viaje_iniciado/viaje_finalizado NO VERIFICADOS.
+  Sin inspección HTTP de las operaciones, conteos/cuerpos/códigos,
+  persistencia SQL ni respuesta/revocación del logout. Sin horarios ni duraciones inventados.
+- Denegación/permanente, concesión inicial, Ubicación apagada, aproximada, Ajustes, cancelación, incertidumbre,
+  fallos y concurrencia NO EJECUTADOS. Sin captura/envío GPS, seguimiento, QR, ausencias o abordajes.
+  Viaje 5 permanece finalizado según la confirmación; cualquier reinicio del dataset lo coordina Martiniano
+  por separado. CU-030/GPS/RNF-008 no completos. Solo comprobaciones documentales, sin repetir operaciones.
+
+- Integraciones verificadas en solo lectura: #175/#177/#179/#181. #179 agrega PATCH de viajes y cambia
+  backend después de la prueba; no se incorpora PATCH al alcance. Cualquier ensayo nuevo requiere
+  identificar backend nuevamente y avisar a Martiniano; main no demuestra el SHA desplegado.
+  #168 permanece separada, sin modificar/aprobar/integrar. #181 ya respalda la confirmación API;
+  sin seguimiento abierto equivalente encontrado y sin proponer duplicado ni cierres de #170/#123.
+
 ## Conexión y asistencia CU-030: publicación autorizada — 26/10/2026
 
 - Activo: `F:/dev/vanfull-cu030-conexion`, rama `feat/chofer-conexion-autenticada-cu030-corta`,

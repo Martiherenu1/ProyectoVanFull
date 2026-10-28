@@ -22,6 +22,7 @@ class ChoferShell extends StatefulWidget {
     this.acciones,
     this.comprobarUbicacionInicio,
     this.asistenciaUbicacionInicio,
+    this.onViajeAceptado,
     super.key,
   });
 
@@ -32,6 +33,7 @@ class ChoferShell extends StatefulWidget {
   final AccionesEjecucionViaje? acciones;
   final ComprobarUbicacionInicio? comprobarUbicacionInicio;
   final AsistenciaUbicacionInicio? asistenciaUbicacionInicio;
+  final ViajeAceptado? onViajeAceptado;
 
   @override
   State<ChoferShell> createState() => _ChoferShellState();
@@ -57,6 +59,8 @@ class _ChoferShellState extends State<ChoferShell> {
         cargarDetalle: widget.cargarDetalle,
         acciones: _acciones,
         comprobarUbicacionInicio: widget.comprobarUbicacionInicio,
+        onViajeAceptado: (viaje, inicio) =>
+            widget.onViajeAceptado?.call(viaje, inicio),
       ),
       _fuentes.value,
     ),
@@ -187,6 +191,23 @@ class _ChoferShellState extends State<ChoferShell> {
     _recargarSiCorresponde();
   }
 
+  void _listadoAceptado(List<ViajeResumen> viajes) {
+    for (final viaje in viajes) {
+      if (viaje.estado != EstadoViaje.finalizado &&
+          viaje.estado != EstadoViaje.cancelado) {
+        continue;
+      }
+      final c = _coordinadores[viaje.idViaje]?.controlador;
+      if (c != null &&
+          c.detalle?.viaje.estado != viaje.estado &&
+          c.viajeConfirmado?.estado != viaje.estado) {
+        // El resumen solo pide verificar: el mismo coordinador acepta el detalle
+        // y reconcilia antes de publicar el cierre al consumidor GPS.
+        c.consultar();
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) => Scaffold(
     body: NavigatorPopHandler<Object?>(
@@ -202,6 +223,7 @@ class _ChoferShellState extends State<ChoferShell> {
               onViajeSeleccionado: _abrirDetalle,
               invalidado: _listadoInvalidado,
               revisionRecarga: _revisionRecarga,
+              onViajesAceptados: _listadoAceptado,
             ),
           ),
         ),

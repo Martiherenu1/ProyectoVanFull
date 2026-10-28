@@ -47,8 +47,8 @@ class Settings(BaseSettings):
 
     # Agente AG-01 (OpenRouter)
     openrouter_api_key: str = ""
-    openrouter_model_primary: str = "minimax/minimax-m3:free"
-    openrouter_model_fallback: str = "nvidia/nemotron-3-super-120b-a12b:free"
+    openrouter_model_primary: str = "nvidia/nemotron-3-ultra-550b-a55b:free"
+    openrouter_model_fallback: str = "nvidia/nemotron-3.5-lightning:free"
 
     # Integraciones (entorno de pruebas)
     mercadopago_access_token: str = ""

@@ -16,7 +16,7 @@ En la tabla, **secreto** quiere decir que no va al chat, ni a un commit, ni a un
 |---|---|---|
 | Render (panel) | `DATABASE_URL` | **secreto**: la cadena **directa** de Neon, tal cual la da el panel |
 | Render (panel) | `OPENROUTER_API_KEY` | **secreto**, opcional: sin ella, el asistente deriva a una persona |
-| Render (panel) | `OPENROUTER_MODEL_PRIMARY`, `OPENROUTER_MODEL_FALLBACK` | públicos. Los valores por defecto del repo hoy no funcionan gratis: los de la demo están en `CONTEXTO.md` §13 |
+| Render (panel) | `OPENROUTER_MODEL_PRIMARY`, `OPENROUTER_MODEL_FALLBACK` | públicos. Opcionales: los valores por defecto del repo son los de la demo (`nvidia/nemotron-3-ultra-550b-a55b:free` y `nvidia/nemotron-3.5-lightning:free`, `CONTEXTO.md` §13) |
 | Render (`render.yaml`) | `JWT_SECRET` | lo genera Render (`generateValue`); nadie lo ve ni lo copia |
 | Render (`render.yaml`) | `ENV=production`, `API_PREFIX=/api`, `CORS_ORIGINS=https://vanfull.onrender.com,https://martiherenu1.github.io` | públicos |
 | GitHub → Settings → Secrets and variables → Actions → **Variables** | `API_BASE_URL` | `https://<servicio>.onrender.com/api` (público: queda en el JS) |

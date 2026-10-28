@@ -1,3 +1,9 @@
+import 'adapters/chofer/captura_gps_android.dart';
+import 'controllers/chofer/seguimiento_gps_controller.dart';
+import 'screens/chofer/panel_gps.dart';
+import 'screens/gps/ubicacion_screen.dart';
+import 'services/gps/ubicacion_api.dart';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
@@ -66,6 +72,7 @@ class _VanFullBootstrapState extends State<VanFullBootstrap> {
   late final ViajesChoferApi _viajesChofer;
   late final DetalleViajeChoferApi _detalleChofer;
   late final EjecucionViajeApi _ejecucionChofer;
+  late final UbicacionApi _gpsApi;
   late final ComprobarUbicacionInicio _comprobarUbicacion;
   late final AsistenciaUbicacionInicio? _asistenciaUbicacion;
 
@@ -92,6 +99,7 @@ class _VanFullBootstrapState extends State<VanFullBootstrap> {
     _viajesChofer = ViajesChoferApi(httpClient);
     _detalleChofer = DetalleViajeChoferApi(httpClient);
     _ejecucionChofer = EjecucionViajeApi(httpClient);
+    _gpsApi = UbicacionApi(httpClient);
     final comprobador = ComprobadorUbicacionAndroid();
     _comprobarUbicacion =
         widget.comprobarUbicacionInicio ??
@@ -132,6 +140,7 @@ class _VanFullBootstrapState extends State<VanFullBootstrap> {
       controller: controller,
       listar: _viajesDiaAdmin,
       crear: _viajesAdmin,
+      gpsApi: _gpsApi,
       onSalir: controller.salir,
     ),
     entradaChofer: (controller) => _EntradaChofer(
@@ -139,6 +148,7 @@ class _VanFullBootstrapState extends State<VanFullBootstrap> {
       listar: _viajesChofer,
       detalle: _detalleChofer,
       ejecucion: _ejecucionChofer,
+      gpsApi: _gpsApi,
       comprobarUbicacion: _comprobarUbicacion,
       asistenciaUbicacion: _asistenciaUbicacion,
       onSalir: controller.salir,
@@ -151,12 +161,14 @@ class _EntradaAdministracion extends StatefulWidget {
     required this.controller,
     required this.listar,
     required this.crear,
+    required this.gpsApi,
     required this.onSalir,
   });
 
   final SesionController controller;
   final ViajesDiaAdminApi listar;
   final ViajesAdminApi crear;
+  final UbicacionApi gpsApi;
   final VoidCallback onSalir;
 
   @override
@@ -177,7 +189,18 @@ class _EntradaAdministracionState extends State<_EntradaAdministracion> {
             ViajesDiaAdminScreen(
               fecha: DateTime.now(),
               cargarViajes: _cargarViajes,
-              onViajeSeleccionado: (_) {},
+              onViajeSeleccionado: (id) => Navigator.of(context).push(
+                MaterialPageRoute<void>(
+                  builder: (_) => UbicacionScreen(
+                    idViaje: id,
+                    consultar: (id) => _protegerAcceso(
+                      controller: widget.controller,
+                      solicitud: () => widget.gpsApi.consultar(id),
+                      onAccesoDenegado: _denegarAcceso,
+                    ),
+                  ),
+                ),
+              ),
               actualizarViaje: _actualizarViaje,
             ),
             Positioned(
@@ -270,6 +293,7 @@ class _EntradaChofer extends StatefulWidget {
     required this.listar,
     required this.detalle,
     required this.ejecucion,
+    required this.gpsApi,
     required this.comprobarUbicacion,
     required this.asistenciaUbicacion,
     required this.onSalir,
@@ -279,6 +303,7 @@ class _EntradaChofer extends StatefulWidget {
   final ViajesChoferApi listar;
   final DetalleViajeChoferApi detalle;
   final EjecucionViajeApi ejecucion;
+  final UbicacionApi gpsApi;
   final ComprobarUbicacionInicio comprobarUbicacion;
   final AsistenciaUbicacionInicio? asistenciaUbicacion;
   final VoidCallback onSalir;
@@ -293,12 +318,28 @@ class _EntradaChoferState extends State<_EntradaChofer> {
   late final String? _token;
   late final AccionesEjecucionViaje _acciones;
   late final AsistenciaUbicacionInicio? _asistencia;
+  late final SeguimientoGpsController _gps;
 
   @override
   void initState() {
     super.initState();
     _generacion = widget.controller.generacion;
     _token = widget.controller.token;
+    _gps = SeguimientoGpsController(
+      comprobar: _comprobarUbicacion,
+      capturar: capturarGpsAndroid,
+      sesionVigente: () => _vigente && !_accesoDenegado,
+      enviar: (id, p) {
+        _exigirSesion();
+        return widget.gpsApi.enviar(
+          id,
+          p.latitude,
+          p.longitude,
+          p.timestamp,
+          _token!,
+        );
+      },
+    );
     _acciones = AccionesEjecucionViaje(
       iniciar: (id) => _ejecutar(widget.ejecucion.iniciar, id),
       finalizar: (id) => _ejecutar(widget.ejecucion.finalizar, id),
@@ -353,41 +394,64 @@ class _EntradaChoferState extends State<_EntradaChofer> {
     }
   }
 
+  void _viajeAceptado(ViajeResumen viaje, bool inicioConfirmado) {
+    if (!_vigente || _accesoDenegado) return;
+    _gps.confirmar(
+      viaje,
+      iniciar:
+          inicioConfirmado &&
+          WidgetsBinding.instance.lifecycleState == AppLifecycleState.resumed,
+    );
+  }
+
   @override
   Widget build(BuildContext context) => _accesoDenegado
       ? _AccesoDenegado(
           key: const Key('chofer-acceso-denegado'),
           onSalir: widget.onSalir,
         )
-      : ChoferShell(
-          cargarViajes: _cargarViajes,
-          cargarDetalle: _cargarDetalle,
-          acciones: _acciones,
-          comprobarUbicacionInicio: _comprobarUbicacion,
-          asistenciaUbicacionInicio: _asistencia,
-          onSalir: widget.onSalir,
+      : PanelGps(
+          controller: _gps,
+          child: ChoferShell(
+            cargarViajes: _cargarViajes,
+            cargarDetalle: _cargarDetalle,
+            acciones: _acciones,
+            comprobarUbicacionInicio: _comprobarUbicacion,
+            asistenciaUbicacionInicio: _asistencia,
+            onViajeAceptado: _viajeAceptado,
+            onSalir: widget.onSalir,
+          ),
         );
 
-  Future<List<ViajeResumen>> _cargarViajes(DateTime fecha) {
+  Future<List<ViajeResumen>> _cargarViajes(DateTime fecha) async {
     _exigirSesion();
-    return _protegerAcceso(
+    final viajes = await _protegerAcceso<List<ViajeResumen>>(
       controller: widget.controller,
       solicitud: () => widget.listar.cargarViajes(fecha),
       onAccesoDenegado: _denegarAcceso,
     );
+    return viajes;
   }
 
-  Future<OperacionAsignada?> _cargarDetalle(int idViaje) {
+  Future<OperacionAsignada?> _cargarDetalle(int idViaje) async {
     _exigirSesion();
-    return _protegerAcceso(
+    final detalle = await _protegerAcceso<OperacionAsignada?>(
       controller: widget.controller,
       solicitud: () => widget.detalle.cargarDetalle(idViaje),
       onAccesoDenegado: _denegarAcceso,
     );
+    return detalle;
+  }
+
+  @override
+  void dispose() {
+    _gps.dispose();
+    super.dispose();
   }
 
   void _denegarAcceso() {
     if (!_vigente || _accesoDenegado) return;
+    _gps.detener('Acceso no disponible. GPS detenido.');
     setState(() => _accesoDenegado = true);
   }
 }

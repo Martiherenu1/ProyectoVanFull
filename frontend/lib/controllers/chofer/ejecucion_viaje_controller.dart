@@ -14,6 +14,11 @@ typedef CargarDetalleViajeChofer = Future<OperacionAsignada?> Function(
 /// El futuro adaptador invocará el POST sin cuerpo y devolverá su Viaje.
 typedef CambiarEstadoViajeChofer = Future<ViajeResumen> Function(int idViaje);
 
+typedef ViajeAceptado = void Function(
+  ViajeResumen viaje,
+  bool inicioConfirmado,
+);
+
 enum MotivoRechazoViaje {
   validacion,
   noAutenticado,
@@ -87,7 +92,11 @@ class EjecucionViajeController extends ChangeNotifier {
     required this._cargarDetalle,
     this._acciones,
     this._comprobarUbicacionInicio,
+    this.onViajeAceptado,
   });
+
+  final ViajeAceptado? onViajeAceptado;
+  ViajeResumen? _ultimoViajeAceptado;
 
   int _idViaje;
   CargarDetalleViajeChofer _cargarDetalle;
@@ -171,7 +180,10 @@ class EjecucionViajeController extends ChangeNotifier {
     final mismoViaje = idViaje == _idViaje;
     _pendiente = mismoViaje ? _pendiente ?? _enviada : null;
     // Cambiar callbacks no invalida un estado ya confirmado por el servidor.
-    if (!mismoViaje) _viajeConfirmado = null;
+    if (!mismoViaje) {
+      _viajeConfirmado = null;
+      _ultimoViajeAceptado = null;
+    }
     _enviada = null;
     _idViaje = idViaje;
     _cargarDetalle = cargarDetalle;
@@ -239,16 +251,21 @@ class EjecucionViajeController extends ChangeNotifier {
       if (recibido.viaje.idViaje != id) {
         throw const FormatException('Detalle de otro viaje');
       }
-      final confirmado = _viajeConfirmado?.estado;
+      final confirmado = (_viajeConfirmado ?? _ultimoViajeAceptado)?.estado;
       // Los POST actuales confirman en_curso o finalizado. Una lectura puede
-      // conservar ese estado o avanzar de en_curso a finalizado, nunca retroceder.
+      // conservar ese estado o aceptar el cierre informado, nunca retroceder.
       final compatible =
           confirmado == null ||
+          confirmado == EstadoViaje.programado ||
           recibido.viaje.estado == confirmado ||
           confirmado == EstadoViaje.enCurso &&
-              recibido.viaje.estado == EstadoViaje.finalizado;
+              (recibido.viaje.estado == EstadoViaje.finalizado ||
+                  recibido.viaje.estado == EstadoViaje.cancelado);
       if (!compatible) {
-        _fase = FaseDetalleViaje.confirmadoSinDetalle;
+        _viajeConfirmado ??= _ultimoViajeAceptado;
+        _fase = _pendiente != null
+            ? FaseDetalleViaje.incierto
+            : FaseDetalleViaje.confirmadoSinDetalle;
         _avisar();
         return;
       }
@@ -263,11 +280,29 @@ class EjecucionViajeController extends ChangeNotifier {
         _viajeConfirmado = null;
         _detalle = recibido;
         _fase = FaseDetalleViaje.listo;
+        _publicarAceptado(recibido.viaje);
       }
       _avisar();
     } catch (error) {
       if (!_vigente(generacion)) return;
       _falloLectura(error);
+    }
+  }
+
+  /// Se publica solo después de las mismas guardas y reconciliación de CU-030.
+  void _publicarAceptado(ViajeResumen viaje, {bool inicioConfirmado = false}) {
+    _ultimoViajeAceptado = viaje;
+    try {
+      onViajeAceptado?.call(viaje, inicioConfirmado);
+    } catch (error, stack) {
+      // Un consumidor no puede convertir una confirmación en resultado incierto.
+      FlutterError.reportError(
+        FlutterErrorDetails(
+          exception: error,
+          stack: stack,
+          library: 'viaje aceptado',
+        ),
+      );
     }
   }
 
@@ -383,6 +418,11 @@ class EjecucionViajeController extends ChangeNotifier {
       }
       return;
     }
+    _publicarAceptado(
+      _viajeConfirmado!,
+      inicioConfirmado: operacion == OperacionViaje.inicio,
+    );
+    if (!_vigente(generacion)) return;
     await _cargar();
   }
 

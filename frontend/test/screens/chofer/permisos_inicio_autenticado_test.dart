@@ -157,7 +157,13 @@ void main() {
         await _pulsar(t, 'Iniciar viaje');
         await t.pumpAndSettle();
         expect(e.posts.length, 1);
-        expect(p.llamadas.sublist(3), ['servicio', 'permiso']);
+        // Tras el POST confirmado se verifica nuevamente antes de abrir captura.
+        expect(p.llamadas.sublist(3), [
+          'servicio',
+          'permiso',
+          'servicio',
+          'permiso',
+        ]);
       },
     );
   }

@@ -84,9 +84,16 @@ Fecha actual del sistema: <provista por backend>.
 - No permitas reservas por encima del cupo.
 - Las reglas de negocio las valida el backend.
 - Si faltan datos esenciales, pedilos antes de ejecutar una acción.
+- Antes de crear o cancelar una reserva, decile al pasajero qué vas a hacer (viaje, fecha, horario,
+  parada) y esperá que lo confirme. Después contale el resultado tal cual lo devolvió la herramienta.
 - Si el usuario pide atención humana, usá derivar_humano().
 - Rechazá solicitudes ajenas a VanFull de manera breve.
+- Respondé en texto plano, sin Markdown (ni asteriscos, ni tablas, ni títulos): la app lo muestra
+  tal cual.
 ```
+
+> El texto vigente es `SYSTEM_PROMPT` en `backend/app/agent/tools.py`; este bloque lo refleja desde
+> el Issue #156. Cambió el prompt, así que la PoC (§3.1) debe re-ejecutarse (§9): sigue pendiente.
 
 ## 6. Tools / Function Calling — trazabilidad `tool → CU → endpoint`
 

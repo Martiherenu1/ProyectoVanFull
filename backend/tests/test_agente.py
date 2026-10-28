@@ -608,6 +608,22 @@ def test_el_historial_guarda_la_respuesta_ya_limpia(entorno, hablar):
     assert previos == ["Es Viaje 3"]
 
 
+def test_el_modelo_sabe_que_la_reserva_guarda_solo_la_parada_de_subida(entorno, hablar):
+    """Observado en Render el 28/10: ante «quiero bajar en la parada 2» pedía subir en la 2."""
+    guion = hablar(_texto("Hola"))
+    _hablar_como(entorno, "ana", "Hola")
+    # El prompt parte las frases en renglones: se compara sin saltos ni sangrías.
+    prompt = " ".join(guion.llamadas[0]["messages"][0]["content"].split())
+    assert "solo la parada donde sube" in prompt
+    assert "No uses la parada de bajada como parada de subida" in prompt
+    (crear,) = [
+        t["function"]
+        for t in guion.llamadas[0]["tools"]
+        if t["function"]["name"] == "crear_reserva"
+    ]
+    assert "SUBE" in crear["parameters"]["properties"]["orden_parada"]["description"]
+
+
 def test_el_modelo_recibe_que_responda_sin_markdown(entorno, hablar):
     """Issue #156: la pantalla del asistente muestra el texto tal cual, sin formato."""
     guion = hablar(_texto("Hola"))

@@ -118,6 +118,7 @@ def entorno():
         yield {
             "base": base,
             "recorrido": recorrido,
+            "parada": parada,
             "ida": ida,
             "vuelta": vuelta,
             "ana": _pasajero(ana),
@@ -195,6 +196,43 @@ def test_disponibilidad_traduce_el_sentido_al_del_contrato(entorno, sentido, via
     )
     assert [v["id_viaje"] for v in resultado["viajes"]] == [entorno[viaje]]
     assert resultado["viajes"][0]["sentido"] == sentido.upper()
+
+
+@pytest.mark.parametrize("como_texto", [True, False])
+def test_disponibilidad_filtra_por_la_parada_de_destino(entorno, como_texto):
+    """Issue #8: la tool manda el id como texto, igual que las demás; el servicio filtra."""
+    parada = str(entorno["parada"]) if como_texto else entorno["parada"]
+    resultado = _correr(
+        entorno["base"],
+        entorno["ana"],
+        "consultar_disponibilidad",
+        {"fecha": "2026-10-30", "sentido": "ida", "id_parada_destino": parada},
+    )
+    assert [v["id_viaje"] for v in resultado["viajes"]] == [entorno["ida"]]
+
+
+@pytest.mark.parametrize("vacio", [None, "", "  "])
+def test_disponibilidad_con_la_parada_vacia_no_filtra(entorno, vacio):
+    resultado = _correr(
+        entorno["base"],
+        entorno["ana"],
+        "consultar_disponibilidad",
+        {"fecha": "2026-10-30", "sentido": "ida", "id_parada_destino": vacio},
+    )
+    assert [v["id_viaje"] for v in resultado["viajes"]] == [entorno["ida"]]
+
+
+@pytest.mark.parametrize(
+    ("parada", "codigo"), [("abc", "ARGUMENTO_INVALIDO"), ("999999", "PARADA_NO_VALIDA")]
+)
+def test_una_parada_de_destino_invalida_o_inexistente_vuelve_como_error(entorno, parada, codigo):
+    resultado = _correr(
+        entorno["base"],
+        entorno["ana"],
+        "consultar_disponibilidad",
+        {"fecha": "2026-10-30", "sentido": "ida", "id_parada_destino": parada},
+    )
+    assert resultado["error"]["codigo"] == codigo
 
 
 def test_disponibilidad_con_destino_devuelve_el_error_del_servicio(entorno):

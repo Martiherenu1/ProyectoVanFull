@@ -7,8 +7,8 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.errors import ApiError
 from app.models.personas import Chofer
-from app.models.servicios import Servicio
-from app.models.viajes import Recorrido, Vehiculo
+from app.models.servicios import PeriodoAbonoViaje, Servicio
+from app.models.viajes import Recorrido, RegistroListaEspera, Reserva, Vehiculo
 from app.models.viajes import Viaje as ViajeModelo
 from app.schemas.viajes import Viaje, ViajeCreate, ViajeUpdate
 from app.services.disponibilidad import (
@@ -19,6 +19,47 @@ from app.services.eventos import registrar_evento
 
 TIPO_VIAJE_CREADO = "viaje_creado"
 TIPO_VIAJE_ACTUALIZADO = "viaje_actualizado"
+TIPO_VIAJE_CANCELADO = "viaje_cancelado"
+
+
+async def cancelar_viaje(db: AsyncSession, id_viaje: int) -> Viaje:
+    """Propuesta PC2 #180; confirmación de Martín pendiente. No implementa RN-019/CU-017.
+
+    CONVENCIONES §8: solo bloquea viaje; nunca adquiere pasajero o reserva después.
+    Comparte el lock con crear_reserva e iniciar_viaje antes de validar y escribir.
+    """
+    viaje = await db.scalar(
+        select(ViajeModelo).where(ViajeModelo.id_viaje == id_viaje).with_for_update()
+    )
+    if viaje is None:
+        raise ApiError(404, "VIAJE_NO_ENCONTRADO", "El viaje no existe.")
+    tipo = await db.scalar(
+        select(Servicio.tipo_servicio).where(Servicio.id_servicio == viaje.id_servicio)
+    )
+    if viaje.estado != "programado" or tipo in {"ESPECIAL", "CORPORATIVO"}:
+        raise ApiError(
+            409, "ESTADO_VIAJE_INVALIDO", "El viaje no admite esta cancelación limitada."
+        )
+    compromisos = (
+        select(Reserva.id_reserva).where(
+            Reserva.id_viaje == id_viaje,
+            Reserva.estado.in_(("provisional", "consolidada")),
+        ),
+        select(PeriodoAbonoViaje.id_periodo_abono).where(PeriodoAbonoViaje.id_viaje == id_viaje),
+        select(RegistroListaEspera.id_registro_lista_espera).where(
+            RegistroListaEspera.id_viaje == id_viaje,
+            RegistroListaEspera.estado == "en_espera",
+        ),
+    )
+    for consulta in compromisos:
+        if await db.scalar(consulta.limit(1)) is not None:
+            # Código propuesto: pendiente de confirmación final del equipo (#180).
+            raise ApiError(409, "VIAJE_CON_COMPROMISOS", "El viaje tiene compromisos pendientes.")
+    viaje.estado = "cancelado"
+    await registrar_evento(db, tipo_evento=TIPO_VIAJE_CANCELADO, id_viaje=id_viaje)
+    resultado = _a_schema(viaje)
+    await db.commit()
+    return resultado
 
 
 async def listar_viajes(db: AsyncSession, fecha: date) -> list[Viaje]:

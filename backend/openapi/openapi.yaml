@@ -916,6 +916,43 @@ paths:
   # ---------------------------------------------------------------------------
   # VIAJES (ejecución — chofer)
   # ---------------------------------------------------------------------------
+  /viajes/{id_viaje}/cancelacion:
+    post:
+      tags: [viajes]
+      summary: Cancelación lógica limitada de viaje (propuesta PC2)
+      description: |
+        Propuesta local #180: recorte acordado con Martiniano según la indicación del equipo;
+        confirmación final de Martín pendiente. Solo administrador o dueño, viaje programado,
+        excluidos servicios ESPECIAL/CORPORATIVO. Rechaza reservas provisional/consolidada,
+        cualquier vínculo periodo_abono_viaje y lista de espera con estado exacto en_espera.
+        Cambia estado a cancelado sin borrar registros, con bloqueo del viaje y evento atómico.
+        RN-019 no implementada; CU-017/#75 pendiente. CU-018 mantiene cobertura parcial.
+        VIAJE_CON_COMPROMISOS es un código propuesto pendiente de confirmación final.
+      x-cu: CU-018
+      x-cobertura: parcial
+      x-estado-aprobacion: pendiente-confirmacion-Martin
+      parameters:
+        - $ref: '#/components/parameters/IdViaje'
+      responses:
+        '200':
+          description: Viaje cancelado lógicamente, sin reintegros.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Viaje'
+        '401':
+          $ref: '#/components/responses/NoAutenticado'
+        '403':
+          $ref: '#/components/responses/SinPermiso'
+        '404':
+          $ref: '#/components/responses/NoEncontrado'
+        '409':
+          description: ESTADO_VIAJE_INVALIDO (estado o servicio excluido) o VIAJE_CON_COMPROMISOS (propuesto).
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
   /viajes/{id_viaje}/inicio:
     post:
       tags: [chofer]

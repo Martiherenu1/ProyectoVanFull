@@ -152,6 +152,14 @@ cuenta: es la integración de Mercado Pago que extiende CU-014.
 
 ## Decisiones vigentes
 
+- **Propuesta local #180 (28/10/2026):** Facundo indica recorte acordado con Martiniano y autoriza
+  preparar backend/OpenAPI y pruebas locales; confirmación final de Martín pendiente. Cancelación
+  lógica solo de viajes programados no ESPECIAL/CORPORATIVO y sin reservas provisional/consolidada,
+  vínculos periodo_abono_viaje ni lista de espera en_espera. `VIAJE_CON_COMPROMISOS` es propuesto.
+  RN-019 no implementada; CU-017/#75 pendiente; CU-018 mantiene cobertura parcial. No publicado.
+  Verificación local: 5 pruebas contrato/rutas aprobadas; 20 casos PostgreSQL (incluidas cuatro
+  carreras reservas/CU-030) omitidos porque la conexión local se cierra. Concurrencia sin acreditar.
+
 - **DEFINIDO POR EL EQUIPO — ADJ-03:** un viaje puede planificarse sin vehículo y/o chofer, pero no iniciarse
   hasta tener ambos asignados.
 - **DEFINIDO POR EL EQUIPO — pagos:** CU-014 registra el pago pendiente sin movimiento. CU-016, al confirmar,

@@ -22,7 +22,7 @@ class UbicacionScreen extends StatefulWidget {
   final int idViaje;
   final Future<UbicacionViaje> Function(int) consultar;
 
-  /// Opcionales hasta conectar la composición después de #186.
+  /// La composición autenticada los inyecta; opcionales para usos aislados.
   /// Solo retiran UI/resultados anteriores, no reemplazan autenticación.
   final Object? alcance;
   final Listenable? invalidaciones;

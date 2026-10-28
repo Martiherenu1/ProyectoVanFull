@@ -556,6 +556,43 @@ def test_al_modelo_no_se_le_pide_un_destino_que_no_se_puede_filtrar(entorno, hab
     assert "no lo pidas" in disponibilidad["parameters"]["properties"]["destino"]["description"]
 
 
+@pytest.mark.parametrize(
+    ("con_formato", "plano"),
+    [
+        ("Es **Parada de prueba 2** (orden 2)", "Es Parada de prueba 2 (orden 2)"),
+        ("Tu __reserva__ está lista", "Tu reserva está lista"),
+        ("# Viajes\n## Hoy\nSí hay", "Viajes\nHoy\nSí hay"),
+        ("* Uno\n* Dos\n  + Tres", "- Uno\n- Dos\n  - Tres"),
+        ("Subís en *Parada 1* y bajás en `Parada 3`", "Subís en Parada 1 y bajás en Parada 3"),
+        ("**Viaje:** ID 3\n**Hora:** 18:00", "Viaje: ID 3\nHora: 18:00"),
+        ("Un ** suelto", "Un  suelto"),
+        # Lo que no es formato se respeta.
+        ("2 * 3 = 6 y id_viaje 3", "2 * 3 = 6 y id_viaje 3"),
+        ("- Uno\n- Dos", "- Uno\n- Dos"),
+        ("Hola, ¿en qué te ayudo?", "Hola, ¿en qué te ayudo?"),
+    ],
+)
+def test_la_respuesta_se_limpia_de_formato_markdown(con_formato, plano):
+    assert agente.a_texto_plano(con_formato) == plano
+
+
+def test_el_pasajero_no_recibe_markdown_aunque_el_modelo_lo_mande(entorno, hablar):
+    """Issue #156: observado en Render; la limpieza es del backend, no depende del prompt."""
+    hablar(_texto("Los viajes son:\n* **Viaje 3** – 18:00"))
+    cuerpo = _hablar_como(entorno, "ana", "Hola").json()
+    assert cuerpo["respuesta"] == "Los viajes son:\n- Viaje 3 – 18:00"
+
+
+def test_el_historial_guarda_la_respuesta_ya_limpia(entorno, hablar):
+    """El modelo ve sus respuestas sin formato y no copia ese estilo en el turno siguiente."""
+    hablar(_texto("Es **Viaje 3**"))
+    primera = _hablar_como(entorno, "ana", "Hola").json()
+    guion = hablar(_texto("Listo"))
+    _hablar_como(entorno, "ana", "Gracias", conversacion_id=primera["conversacion_id"])
+    previos = [m["content"] for m in guion.llamadas[0]["messages"] if m["role"] == "assistant"]
+    assert previos == ["Es Viaje 3"]
+
+
 def test_el_modelo_recibe_que_responda_sin_markdown(entorno, hablar):
     """Issue #156: la pantalla del asistente muestra el texto tal cual, sin formato."""
     guion = hablar(_texto("Hola"))

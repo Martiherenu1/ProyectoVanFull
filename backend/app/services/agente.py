@@ -12,6 +12,7 @@ guarda. Se pierden al reiniciar y no se comparten entre procesos. PENDIENTE: per
 """
 
 import json
+import re
 import time
 from collections import OrderedDict
 from dataclasses import dataclass
@@ -48,6 +49,23 @@ MENSAJE_DERIVACION = (
 _HORA_ARGENTINA = timezone(timedelta(hours=-3))
 _DIAS = ("lunes", "martes", "miércoles", "jueves", "viernes", "sábado", "domingo")
 _NOMBRES_HABILITADOS = {t["function"]["name"] for t in TOOLS_HABILITADAS}
+
+# La pantalla del asistente muestra el texto tal cual (Issue #156). El prompt pide texto plano, pero
+# el modelo a veces responde con Markdown igual: acá se limpia, que no depende de que obedezca.
+_VINETA = re.compile(r"^(\s*)[*+]\s+", re.MULTILINE)
+_TITULO = re.compile(r"^\s{0,3}#{1,6}\s+", re.MULTILINE)
+_NEGRITA = re.compile(r"(\*\*|__)(.+?)\1", re.DOTALL)
+# Un asterisco solo, pegado al texto de ambos lados: cursiva. "2 * 3" no entra (hay espacios).
+_CURSIVA = re.compile(r"(?<![*\w])\*(?=\S)([^*\n]+?)(?<=\S)\*(?![*\w])")
+
+
+def a_texto_plano(texto: str) -> str:
+    """Quita el formato Markdown (negritas, cursivas, títulos, viñetas con *, código)."""
+    texto = _VINETA.sub(r"\1- ", texto)
+    texto = _TITULO.sub("", texto)
+    texto = _NEGRITA.sub(r"\2", texto)
+    texto = _CURSIVA.sub(r"\1", texto)
+    return texto.replace("**", "").replace("`", "")
 
 
 @dataclass
@@ -139,7 +157,7 @@ async def responder(db: AsyncSession, usuario: UsuarioActual, datos: ChatRequest
             return _derivacion(conversacion_id, tool_usada)
 
         if not llamadas:
-            respuesta = (contenido or "").strip()
+            respuesta = a_texto_plano((contenido or "").strip())
             if not respuesta:
                 return _derivacion(conversacion_id, tool_usada)
             mensajes.append({"role": "assistant", "content": respuesta})

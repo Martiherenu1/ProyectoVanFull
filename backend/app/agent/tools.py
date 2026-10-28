@@ -31,6 +31,15 @@ TOOLS: list[dict] = [
                             "todos los viajes de esa fecha y sentido."
                         ),
                     },
+                    "id_parada_destino": {
+                        "type": "string",
+                        "description": (
+                            "id_parada (de consultar_paradas) por la que tiene que pasar el viaje. "
+                            "Si el pasajero dice dónde quiere bajar, buscá esa parada con "
+                            "consultar_paradas y usala. Solo filtra los viajes cuyo recorrido pasa "
+                            "por esa parada: no garantiza que se pueda bajar ahí."
+                        ),
+                    },
                     "sentido": {"type": "string", "enum": ["ida", "vuelta"]},
                 },
                 "required": ["fecha", "sentido"],

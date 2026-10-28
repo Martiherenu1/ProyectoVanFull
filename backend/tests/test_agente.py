@@ -556,6 +556,21 @@ def test_al_modelo_no_se_le_pide_un_destino_que_no_se_puede_filtrar(entorno, hab
     assert "no lo pidas" in disponibilidad["parameters"]["properties"]["destino"]["description"]
 
 
+def test_al_modelo_se_le_ofrece_buscar_por_parada_de_destino(entorno, hablar):
+    """Issue #8: la tool de disponibilidad acepta id_parada_destino y aclara su alcance."""
+    guion = hablar(_texto("Hola"))
+    _hablar_como(entorno, "ana", "Hola")
+    (disponibilidad,) = [
+        t["function"]
+        for t in guion.llamadas[0]["tools"]
+        if t["function"]["name"] == "consultar_disponibilidad"
+    ]
+    parada = disponibilidad["parameters"]["properties"]["id_parada_destino"]
+    assert "consultar_paradas" in parada["description"]
+    assert "no garantiza" in parada["description"]
+    assert "id_parada_destino" not in disponibilidad["parameters"]["required"]
+
+
 @pytest.mark.parametrize(
     ("con_formato", "plano"),
     [

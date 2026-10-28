@@ -103,7 +103,7 @@ endpoint del contrato OpenAPI. Estado del endpoint: ✅ ya definido en `openapi.
 
 | Tool | CU | Endpoint | Estado |
 |---|---|---|---|
-| `consultar_disponibilidad()` | CU-002 | `GET /servicios/disponibilidad` | ✅ |
+| `consultar_disponibilidad(fecha, sentido, id_parada_destino?)` | CU-002 | `GET /servicios/disponibilidad` | ✅ |
 | `consultar_horarios()` | CU-002 | `GET /servicios` (+ disponibilidad) | ✅ |
 | `consultar_recorridos()` | CU-002 | `GET /recorridos` | ⏳ |
 | `consultar_paradas()` | CU-002 | `GET /recorridos/{id}/paradas` | ✅ |

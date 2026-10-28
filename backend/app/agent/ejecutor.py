@@ -68,6 +68,12 @@ def _entero(valor: Any, nombre: str) -> int:
         raise _ArgumentoInvalido(f"`{nombre}` tiene que ser un número.") from exc
 
 
+def _entero_opcional(valor: Any, nombre: str) -> int | None:
+    if valor is None or str(valor).strip() == "":
+        return None
+    return _entero(valor, nombre)
+
+
 def _reserva_para_el_modelo(reserva: Reserva) -> dict:
     # 07-IA-y-Agentes §8: al modelo, lo mínimo. El id del pasajero es el del usuario: no aporta nada.
     return reserva.model_dump(mode="json", exclude={"id_pasajero"})
@@ -87,6 +93,7 @@ async def _consultar_disponibilidad(db: AsyncSession, usuario: UsuarioActual, ar
         # Issue #8: el servicio rechaza `destino` con FILTRO_NO_DISPONIBLE. No se descarta acá:
         # sería mostrar viajes a cualquier lado como si fueran al destino pedido.
         destino=args.get("destino") or None,
+        id_parada_destino=_entero_opcional(args.get("id_parada_destino"), "id_parada_destino"),
     )
     return {"viajes": [v.model_dump(mode="json", exclude_none=True) for v in viajes]}
 

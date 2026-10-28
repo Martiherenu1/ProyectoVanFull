@@ -2,7 +2,10 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:frontend/core/api/api_error.dart';
 import 'package:frontend/core/theme/app_spacing.dart';
+import 'package:frontend/models/admin/viaje_admin_resumen.dart';
+import 'package:frontend/models/admin/viaje_update.dart';
 import 'package:frontend/models/chofer/viaje_resumen.dart';
 import 'package:frontend/screens/admin/viajes_dia_admin_screen.dart';
 
@@ -14,7 +17,8 @@ ViajeResumen viaje(
   String fecha = '2026-10-30',
   String sentido = 'IDA',
   String estado = 'programado',
-}) => ViajeResumen.fromJson({
+  int? capacidad = 18,
+}) => ViajeAdminResumen.fromJson({
   'id_viaje': id,
   'id_servicio': 2,
   'id_recorrido': 3,
@@ -24,6 +28,7 @@ ViajeResumen viaje(
   'horario': ?horario,
   'sentido': sentido,
   'estado': estado,
+  'capacidad_planificada': capacidad,
 });
 
 Future<void> mostrar(
@@ -31,12 +36,14 @@ Future<void> mostrar(
   CargarViajesDelDia cargar, {
   DateTime? fecha,
   ValueChanged<int>? seleccionar,
+  ActualizarViaje? actualizar,
 }) => tester.pumpWidget(
   MaterialApp(
     home: ViajesDiaAdminScreen(
       fecha: fecha ?? DateTime(2026, 10, 30, 18),
       cargarViajes: cargar,
       onViajeSeleccionado: seleccionar ?? (_) {},
+      actualizarViaje: actualizar,
     ),
   ),
 );
@@ -235,5 +242,104 @@ void main() {
     pendiente.complete([viaje(41)]);
     await tester.pump();
     expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('edita un programado, quita opcionales y refresca el listado', (
+    tester,
+  ) async {
+    var cargas = 0;
+    ViajeUpdate? enviada;
+    final actualizado = viaje(
+      41,
+      fecha: '2026-10-31',
+      horario: null,
+      sentido: 'VUELTA',
+      idChofer: null,
+      idVehiculo: null,
+      capacidad: null,
+    );
+    await mostrar(
+      tester,
+      (_) async {
+        cargas++;
+        return [cargas == 1 ? viaje(41) : actualizado];
+      },
+      actualizar: (id, solicitud) async {
+        expect(id, 41);
+        enviada = solicitud;
+        return actualizado;
+      },
+    );
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.text('41'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const Key('editar-viaje')));
+    await tester.pumpAndSettle();
+    await tester.enterText(find.byKey(const Key('editar-fecha')), '2026-10-31');
+    await tester.enterText(find.byKey(const Key('editar-horario')), '');
+    await tester.enterText(find.byKey(const Key('editar-capacidad')), '');
+    await tester.enterText(find.byKey(const Key('editar-chofer')), '');
+    await tester.enterText(find.byKey(const Key('editar-vehiculo')), '');
+    final sentido = find.byKey(const Key('editar-sentido'));
+    await tester.ensureVisible(sentido);
+    await tester.pumpAndSettle();
+    await tester.tap(sentido);
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Vuelta').last);
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const Key('guardar-viaje')));
+    await tester.pumpAndSettle();
+
+    expect(enviada?.toJson(), {
+      'fecha': '2026-10-31',
+      'horario': null,
+      'sentido': 'VUELTA',
+      'capacidad_planificada': null,
+      'id_chofer': null,
+      'id_vehiculo': null,
+    });
+    expect(cargas, 2);
+    expect(find.text('Fecha: 31/10/2026'), findsOneWidget);
+    expect(find.text('Capacidad: Sin definir'), findsOneWidget);
+  });
+
+  testWidgets('muestra el mensaje contractual del backend al guardar', (
+    tester,
+  ) async {
+    await mostrar(
+      tester,
+      (_) async => [viaje(41)],
+      actualizar: (_, _) async => throw const ApiException(
+        statusCode: 409,
+        codigo: 'ESTADO_VIAJE_INVALIDO',
+        mensaje: 'Solo se modifican viajes programados.',
+      ),
+    );
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('41'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const Key('editar-viaje')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const Key('guardar-viaje')));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Solo se modifican viajes programados.'), findsOneWidget);
+    expect(find.byKey(const Key('editar-fecha')), findsOneWidget);
+  });
+
+  testWidgets('no permite editar un viaje que no está programado', (
+    tester,
+  ) async {
+    await mostrar(
+      tester,
+      (_) async => [viaje(41, estado: 'en_curso')],
+      actualizar: (_, _) async => viaje(41),
+    );
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('41'));
+    await tester.pumpAndSettle();
+
+    expect(find.byKey(const Key('editar-viaje')), findsNothing);
   });
 }

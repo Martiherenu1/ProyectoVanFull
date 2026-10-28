@@ -1,8 +1,9 @@
 # Recursos técnicos — Vanfull
 
 ## Identificadores de modelos (OpenRouter)
-- Principal: `minimax/minimax-m3:free`
-- Fallback: `nvidia/nemotron-3-super-120b-a12b:free`
+- Principal: `nvidia/nemotron-3-ultra-550b-a55b:free`
+- Fallback: `nvidia/nemotron-3.5-lightning:free`
+- Los de la PoC del PC1 (`minimax/minimax-m3:free` y `nvidia/nemotron-3-super-120b-a12b:free`) dejaron de funcionar gratis el 24/10/2026 (Issue #154).
 - Estrategia: endpoints `:free` para la fase académica, con fallback automático. Aceptar rate limiting
   como restricción de laboratorio. Reevaluar proveedor/costo/SLA en una eventual producción.
 

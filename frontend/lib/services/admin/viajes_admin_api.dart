@@ -1,5 +1,8 @@
 import '../../core/api/api_client.dart';
+import '../../models/admin/viaje_admin_resumen.dart';
 import '../../models/admin/viaje_create.dart';
+import '../../models/admin/viaje_update.dart';
+import '../../models/chofer/viaje_resumen.dart';
 
 /// Adaptador administrativo de la creación parcial de CU-018.
 ///
@@ -19,5 +22,25 @@ final class ViajesAdminApi {
       throw const ViajeCreadoInvalidoException();
     }
     return ViajeCreado.fromJson(cuerpo);
+  }
+
+  Future<ViajeResumen> actualizarViaje(
+    int idViaje,
+    ViajeUpdate solicitud,
+  ) async {
+    final cuerpo = await _client.patch(
+      'viajes/$idViaje',
+      body: solicitud.toJson(),
+    );
+    if (cuerpo is! Map<String, dynamic>) {
+      throw const ViajeCreadoInvalidoException();
+    }
+    try {
+      return ViajeAdminResumen.fromJson(cuerpo);
+    } on FormatException {
+      throw const ViajeCreadoInvalidoException();
+    } on TypeError {
+      throw const ViajeCreadoInvalidoException();
+    }
   }
 }

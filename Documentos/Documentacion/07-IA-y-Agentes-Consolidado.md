@@ -19,7 +19,7 @@ directamente a PostgreSQL: sólo consume servicios/endpoints del backend. El bac
 | | IA para **desarrollar** el proyecto | IA **dentro** de la solución (producto) |
 |---|---|---|
 | Qué es | Herramientas para analizar, diseñar, documentar y programar | El agente conversacional que usa el pasajero |
-| Cuáles | ChatGPT / Claude (análisis, diseño), Codex / Claude Code (programación) | **AG-01** sobre OpenRouter (MiniMax M3 / Nemotron 3 Super) |
+| Cuáles | ChatGPT / Claude (análisis, diseño), Codex / Claude Code (programación) | **AG-01** sobre OpenRouter (Nemotron 3 Ultra / Nemotron 3.5 Lightning) |
 | Gobernanza | Revisión humana obligatoria; una salida de IA no es una decisión del proyecto ni se mergea sin revisar | El modelo no decide reglas; las valida el backend |
 
 Este documento se enfoca en la **IA del producto** (requisito del PC1), y deja constancia de la IA de desarrollo por trazabilidad.
@@ -27,8 +27,9 @@ Este documento se enfoca en la **IA del producto** (requisito del PC1), y deja c
 ## 3. Modelos de la solución y justificación
 
 - **Gateway:** **OpenRouter** (permite rutear y aplicar *fallback* entre modelos con una interfaz común).
-- **Modelo principal:** **MiniMax M3 Free** — `minimax/minimax-m3:free`.
-- **Modelo fallback:** **NVIDIA Nemotron 3 Super Free** — `nvidia/nemotron-3-super-120b-a12b:free`.
+- **Modelo principal:** **NVIDIA Nemotron 3 Ultra Free** — `nvidia/nemotron-3-ultra-550b-a55b:free`.
+- **Modelo fallback:** **NVIDIA Nemotron 3.5 Lightning Free** — `nvidia/nemotron-3.5-lightning:free`.
+- **Cambio del 28/10/2026 (Issue #154):** los modelos del PC1 (MiniMax M3 Free como principal y Nemotron 3 Super Free como fallback) dejaron de estar disponibles gratis el 24/10 (`minimax/minimax-m3:free` ya no existe en OpenRouter). Se usan los dos de arriba, que son los de la demo. **No pasaron por la PoC de §3.1**: esa evidencia es de los modelos anteriores y la re-ejecución sigue pendiente (§9, Issue #156). Los defaults están en `backend/app/core/config.py` y `backend/.env.example`; en Render se cargan en el panel.
 - **Por qué endpoints `:free`:** criterio de la etapa académica (costo cero); desacoplado por OpenRouter para
   reevaluar proveedor/modelo en una eventual producción sin cambiar la arquitectura.
 
@@ -62,7 +63,7 @@ determinística antes de ejecutar cualquier tool.
 | **Identificador** | AG-01 — Agente Conversacional VanFull |
 | **Objetivo** | Atender consultas en lenguaje natural y ejecutar acciones habilitadas mediante tools controladas del backend |
 | **Usuarios** | Pasajeros / clientes autorizados, desde la app y (luego) WhatsApp — mismo agente en ambos canales |
-| **Modelo principal / fallback** | MiniMax M3 Free / NVIDIA Nemotron 3 Super Free |
+| **Modelo principal / fallback** | NVIDIA Nemotron 3 Ultra Free / NVIDIA Nemotron 3.5 Lightning Free (ver §3) |
 | **Gateway** | OpenRouter (fase académica) |
 | **Acceso a datos** | Indirecto, sólo vía tools/servicios de FastAPI. Sin acceso directo a PostgreSQL |
 | **Acciones críticas** | Las valida el backend: no ignora cupos, permisos, reglas de pago ni privacidad |
@@ -84,9 +85,16 @@ Fecha actual del sistema: <provista por backend>.
 - No permitas reservas por encima del cupo.
 - Las reglas de negocio las valida el backend.
 - Si faltan datos esenciales, pedilos antes de ejecutar una acción.
+- Antes de crear o cancelar una reserva, decile al pasajero qué vas a hacer (viaje, fecha, horario,
+  parada) y esperá que lo confirme. Después contale el resultado tal cual lo devolvió la herramienta.
 - Si el usuario pide atención humana, usá derivar_humano().
 - Rechazá solicitudes ajenas a VanFull de manera breve.
+- Respondé en texto plano, sin Markdown (ni asteriscos, ni tablas, ni títulos): la app lo muestra
+  tal cual.
 ```
+
+> El texto vigente es `SYSTEM_PROMPT` en `backend/app/agent/tools.py`; este bloque lo refleja desde
+> el Issue #156. Cambió el prompt, así que la PoC (§3.1) debe re-ejecutarse (§9): sigue pendiente.
 
 ## 6. Tools / Function Calling — trazabilidad `tool → CU → endpoint`
 
@@ -119,7 +127,7 @@ endpoint del contrato OpenAPI. Estado del endpoint: ✅ ya definido en `openapi.
 
 ```
 Usuario → POST /chat → Backend (inyecta fecha/hora + contexto del usuario)
-      → LLM (OpenRouter: MiniMax → fallback Nemotron) elige tool + argumentos
+      → LLM (OpenRouter: Nemotron 3 Ultra → fallback Nemotron 3.5 Lightning) elige tool + argumentos
       → Backend ejecuta la tool = servicio/endpoint FastAPI (valida RN, permisos, cupo)
       → resultado vuelve al modelo → respuesta en lenguaje natural
       → si no puede resolver de forma segura o el usuario lo pide → derivar_humano()

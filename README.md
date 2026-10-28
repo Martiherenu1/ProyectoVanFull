@@ -11,7 +11,7 @@ conversacional de IA para una empresa real de charters.
 | Frontend | Flutter (Web + Mobile) |
 | Backend | Python + FastAPI (REST / OpenAPI) |
 | Base de datos | PostgreSQL |
-| IA (AG-01) | OpenRouter → MiniMax M3 (principal) / Nemotron 3 Super (fallback) |
+| IA (AG-01) | OpenRouter → Nemotron 3 Ultra (principal) / Nemotron 3.5 Lightning (fallback) |
 | Mapas | Google Maps Platform (Routes API) |
 | Pagos | Mercado Pago (entorno de pruebas) |
 | Mensajería | WhatsApp |

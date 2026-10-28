@@ -338,7 +338,7 @@
           "servicios"
         ],
         "summary": "Consultar disponibilidad de cupos",
-        "description": "Disponibilidad de cupos para una fecha, destino y sentido. El cupo es derivado\n(capacidad - reservas consolidadas), evaluado por el backend (RN-001). (CU-002, RF-004)\n",
+        "description": "Disponibilidad de cupos para una fecha y sentido, y opcionalmente un recorrido o una parada\nde destino. El cupo es derivado (capacidad - reservas consolidadas), evaluado por el backend\n(RN-001). (CU-002, RF-004)\n\n`id_parada_destino` devuelve los viajes cuyo recorrido **pasa por** esa parada (Issue #8,\nAC08-03 y AC08-05). Es la primera entrega para PC2 y **no distingue ascenso de descenso ni\nhabilitaciones que cambien de un viaje a otro del mismo recorrido** (AC08-06 y AC08-07):\nun viaje cuyo recorrido incluye la parada se ofrece aunque en ese viaje no se pueda bajar\nahí. Esa brecha queda para una tarea de modelo posterior. No se deduce de la última parada.\n\n`destino` (texto) sigue sin soportarse: una dirección libre no es un destino habilitado\n(AC08-02). Se informa con `FILTRO_NO_DISPONIBLE`.\n",
         "x-cu": "CU-002",
         "security": [],
         "parameters": [
@@ -370,7 +370,8 @@
             "required": false,
             "schema": {
               "type": "string"
-            }
+            },
+            "description": "No soportado: si viene, responde `400 FILTRO_NO_DISPONIBLE`. Usar `id_parada_destino`."
           },
           {
             "name": "id_recorrido",
@@ -379,6 +380,15 @@
             "schema": {
               "type": "integer"
             }
+          },
+          {
+            "name": "id_parada_destino",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer"
+            },
+            "description": "Una parada de `GET /recorridos/{id_recorrido}/paradas`. Se combina con `id_recorrido` si viene. Si ningún viaje coincide, la respuesta es `200` con una lista vacía."
           }
         ],
         "responses": {
@@ -391,6 +401,16 @@
                   "items": {
                     "$ref": "#/components/schemas/Disponibilidad"
                   }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "`FILTRO_NO_DISPONIBLE` si viene `destino` (texto), o `PARADA_NO_VALIDA` si `id_parada_destino` no corresponde a una parada existente.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
                 }
               }
             }

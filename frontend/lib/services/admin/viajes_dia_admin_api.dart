@@ -1,4 +1,5 @@
 import '../../core/api/api_client.dart';
+import '../../models/admin/viaje_admin_resumen.dart';
 import '../../models/chofer/viaje_resumen.dart';
 
 /// Respuesta incompatible con `list[Viaje]`, sin conservar datos recibidos.
@@ -41,7 +42,7 @@ final class ViajesDiaAdminApi {
           if (item is! Map<String, dynamic>) {
             throw const ListadoViajesAdminInvalidoException();
           }
-          return ViajeResumen.fromJson(item);
+          return ViajeAdminResumen.fromJson(item);
         }),
       );
     } on FormatException {

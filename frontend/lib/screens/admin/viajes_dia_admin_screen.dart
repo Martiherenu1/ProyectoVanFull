@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
 
+import '../../core/api/api_error.dart';
 import '../../core/format/fecha_legible.dart';
 import '../../core/theme/app_spacing.dart';
 import '../../core/theme/app_theme.dart';
+import '../../models/admin/viaje_admin_resumen.dart';
+import '../../models/admin/viaje_update.dart';
 import '../../models/chofer/viaje_resumen.dart';
 
 /// La integración futura deberá consultar los viajes administrativos de esta
@@ -10,18 +13,24 @@ import '../../models/chofer/viaje_resumen.dart';
 typedef CargarViajesDelDia = Future<List<ViajeResumen>> Function(
   DateTime fecha,
 );
+typedef ActualizarViaje = Future<ViajeResumen> Function(
+  int idViaje,
+  ViajeUpdate solicitud,
+);
 
 class ViajesDiaAdminScreen extends StatefulWidget {
   const ViajesDiaAdminScreen({
     required this.fecha,
     required this.cargarViajes,
     required this.onViajeSeleccionado,
+    this.actualizarViaje,
     super.key,
   });
 
   final DateTime fecha;
   final CargarViajesDelDia cargarViajes;
   final ValueChanged<int> onViajeSeleccionado;
+  final ActualizarViaje? actualizarViaje;
 
   @override
   State<ViajesDiaAdminScreen> createState() => _ViajesDiaAdminScreenState();
@@ -95,7 +104,11 @@ class _ViajesDiaAdminScreenState extends State<ViajesDiaAdminScreen> {
     widget.onViajeSeleccionado(viaje.idViaje);
     showDialog<void>(
       context: context,
-      builder: (context) => _DetalleViajeAdminDialog(viaje: viaje),
+      builder: (context) => _DetalleViajeAdminDialog(
+        viaje: viaje,
+        actualizarViaje: widget.actualizarViaje,
+        onActualizado: (_) => _cargar(),
+      ),
     );
   }
 
@@ -260,38 +273,75 @@ class _ViajesDiaAdminScreenState extends State<ViajesDiaAdminScreen> {
   }
 }
 
-class _DetalleViajeAdminDialog extends StatelessWidget {
-  const _DetalleViajeAdminDialog({required this.viaje});
+class _DetalleViajeAdminDialog extends StatefulWidget {
+  const _DetalleViajeAdminDialog({
+    required this.viaje,
+    required this.actualizarViaje,
+    required this.onActualizado,
+  });
 
   final ViajeResumen viaje;
+  final ActualizarViaje? actualizarViaje;
+  final Future<void> Function(ViajeResumen viaje) onActualizado;
+
+  @override
+  State<_DetalleViajeAdminDialog> createState() =>
+      _DetalleViajeAdminDialogState();
+}
+
+class _DetalleViajeAdminDialogState extends State<_DetalleViajeAdminDialog> {
+  late ViajeResumen _viaje = widget.viaje;
+
+  Future<void> _editar() async {
+    final actualizado = await showDialog<ViajeResumen>(
+      context: context,
+      builder: (context) => _EditarViajeAdminDialog(
+        viaje: _viaje,
+        actualizarViaje: widget.actualizarViaje!,
+      ),
+    );
+    if (!mounted || actualizado == null) return;
+    setState(() => _viaje = actualizado);
+    await widget.onActualizado(actualizado);
+  }
 
   @override
   Widget build(BuildContext context) => AlertDialog(
-    title: Text('Viaje ${viaje.idViaje}'),
+    title: Text('Viaje ${_viaje.idViaje}'),
     content: SingleChildScrollView(
       child: Column(
-        key: ValueKey('detalle-viaje-${viaje.idViaje}'),
+        key: ValueKey('detalle-viaje-${_viaje.idViaje}'),
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          _dato('Fecha', fechaLegible(viaje.fecha)),
-          _dato('Horario', viaje.horario ?? 'Sin horario'),
-          _dato('Estado', viaje.estado.etiqueta),
-          _dato('Sentido', viaje.sentido.etiqueta),
-          _dato('Servicio', 'ID ${viaje.idServicio}'),
-          _dato('Recorrido', 'ID ${viaje.idRecorrido}'),
+          _dato('Fecha', fechaLegible(_viaje.fecha)),
+          _dato('Horario', _viaje.horario ?? 'Sin horario'),
+          _dato('Estado', _viaje.estado.etiqueta),
+          _dato('Sentido', _viaje.sentido.etiqueta),
+          _dato('Servicio', 'ID ${_viaje.idServicio}'),
+          _dato('Recorrido', 'ID ${_viaje.idRecorrido}'),
+          _dato('Capacidad', _capacidad(_viaje)?.toString() ?? 'Sin definir'),
           _dato(
             'Vehículo',
-            viaje.idVehiculo == null ? 'Sin asignar' : 'ID ${viaje.idVehiculo}',
+            _viaje.idVehiculo == null
+                ? 'Sin asignar'
+                : 'ID ${_viaje.idVehiculo}',
           ),
           _dato(
             'Chofer',
-            viaje.idChofer == null ? 'Sin asignar' : 'ID ${viaje.idChofer}',
+            _viaje.idChofer == null ? 'Sin asignar' : 'ID ${_viaje.idChofer}',
           ),
         ],
       ),
     ),
     actions: [
+      if (_viaje.estado == EstadoViaje.programado &&
+          widget.actualizarViaje != null)
+        FilledButton(
+          key: const Key('editar-viaje'),
+          onPressed: _editar,
+          child: const Text('Editar'),
+        ),
       TextButton(
         onPressed: () => Navigator.of(context).pop(),
         child: const Text('Cerrar'),
@@ -303,4 +353,226 @@ class _DetalleViajeAdminDialog extends StatelessWidget {
     padding: const EdgeInsets.only(bottom: AppSpacing.sm),
     child: Text('$etiqueta: $valor'),
   );
+
+  static int? _capacidad(ViajeResumen viaje) =>
+      viaje is ViajeAdminResumen ? viaje.capacidadPlanificada : null;
+}
+
+class _EditarViajeAdminDialog extends StatefulWidget {
+  const _EditarViajeAdminDialog({
+    required this.viaje,
+    required this.actualizarViaje,
+  });
+
+  final ViajeResumen viaje;
+  final ActualizarViaje actualizarViaje;
+
+  @override
+  State<_EditarViajeAdminDialog> createState() =>
+      _EditarViajeAdminDialogState();
+}
+
+class _EditarViajeAdminDialogState extends State<_EditarViajeAdminDialog> {
+  final _formulario = GlobalKey<FormState>();
+  late final _fecha = TextEditingController(
+    text: _fechaIso(widget.viaje.fecha),
+  );
+  late final _horario = TextEditingController(text: widget.viaje.horario);
+  late final _capacidad = TextEditingController(
+    text: widget.viaje is ViajeAdminResumen
+        ? (widget.viaje as ViajeAdminResumen).capacidadPlanificada?.toString()
+        : null,
+  );
+  late final _chofer = TextEditingController(
+    text: widget.viaje.idChofer?.toString(),
+  );
+  late final _vehiculo = TextEditingController(
+    text: widget.viaje.idVehiculo?.toString(),
+  );
+  late SentidoViaje _sentido = widget.viaje.sentido;
+  bool _guardando = false;
+  String? _error;
+
+  @override
+  void dispose() {
+    _fecha.dispose();
+    _horario.dispose();
+    _capacidad.dispose();
+    _chofer.dispose();
+    _vehiculo.dispose();
+    super.dispose();
+  }
+
+  Future<void> _guardar() async {
+    if (_guardando || !_formulario.currentState!.validate()) return;
+    setState(() {
+      _guardando = true;
+      _error = null;
+    });
+    try {
+      final actualizado = await widget.actualizarViaje(
+        widget.viaje.idViaje,
+        ViajeUpdate(
+          fecha: _leerFecha(_fecha.text.trim())!,
+          horario: _textoOpcional(_horario.text),
+          sentido: _sentido,
+          capacidadPlanificada: _enteroOpcional(_capacidad.text),
+          idChofer: _enteroOpcional(_chofer.text),
+          idVehiculo: _enteroOpcional(_vehiculo.text),
+        ),
+      );
+      if (mounted) Navigator.of(context).pop(actualizado);
+    } on ApiException catch (error) {
+      if (mounted) {
+        setState(() {
+          _guardando = false;
+          _error = error.mensaje;
+        });
+      }
+    } catch (_) {
+      if (mounted) {
+        setState(() {
+          _guardando = false;
+          _error = 'No pudimos actualizar el viaje. Volvé a intentar.';
+        });
+      }
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) => AlertDialog(
+    title: Text('Editar viaje ${widget.viaje.idViaje}'),
+    content: SingleChildScrollView(
+      child: Form(
+        key: _formulario,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            _campoTexto(
+              key: const Key('editar-fecha'),
+              controller: _fecha,
+              label: 'Fecha (AAAA-MM-DD)',
+              validator: _validarFecha,
+            ),
+            _campoTexto(
+              key: const Key('editar-horario'),
+              controller: _horario,
+              label: 'Horario (opcional)',
+            ),
+            DropdownButtonFormField<SentidoViaje>(
+              key: const Key('editar-sentido'),
+              initialValue: _sentido,
+              decoration: const InputDecoration(labelText: 'Sentido'),
+              items: [
+                for (final sentido in SentidoViaje.values)
+                  DropdownMenuItem(
+                    value: sentido,
+                    child: Text(sentido.etiqueta),
+                  ),
+              ],
+              onChanged: _guardando
+                  ? null
+                  : (valor) {
+                      if (valor != null) setState(() => _sentido = valor);
+                    },
+            ),
+            _campoEntero(
+              key: const Key('editar-capacidad'),
+              controller: _capacidad,
+              label: 'Capacidad planificada (opcional)',
+            ),
+            _campoEntero(
+              key: const Key('editar-chofer'),
+              controller: _chofer,
+              label: 'Chofer (ID, opcional)',
+            ),
+            _campoEntero(
+              key: const Key('editar-vehiculo'),
+              controller: _vehiculo,
+              label: 'Vehículo (ID, opcional)',
+            ),
+            if (_error != null) ...[
+              const SizedBox(height: AppSpacing.md),
+              Text(
+                _error!,
+                key: const Key('actualizacion-error'),
+                style: TextStyle(color: Theme.of(context).colorScheme.error),
+              ),
+            ],
+          ],
+        ),
+      ),
+    ),
+    actions: [
+      TextButton(
+        onPressed: _guardando ? null : () => Navigator.of(context).pop(),
+        child: const Text('Cancelar'),
+      ),
+      FilledButton(
+        key: const Key('guardar-viaje'),
+        onPressed: _guardando ? null : _guardar,
+        child: Text(_guardando ? 'Guardando…' : 'Guardar'),
+      ),
+    ],
+  );
+
+  Widget _campoTexto({
+    required Key key,
+    required TextEditingController controller,
+    required String label,
+    String? Function(String?)? validator,
+  }) => Padding(
+    padding: const EdgeInsets.only(bottom: AppSpacing.md),
+    child: TextFormField(
+      key: key,
+      controller: controller,
+      decoration: InputDecoration(labelText: label),
+      validator: validator,
+      enabled: !_guardando,
+    ),
+  );
+
+  Widget _campoEntero({
+    required Key key,
+    required TextEditingController controller,
+    required String label,
+  }) => _campoTexto(
+    key: key,
+    controller: controller,
+    label: label,
+    validator: (valor) {
+      final texto = valor?.trim() ?? '';
+      return texto.isNotEmpty && int.tryParse(texto) == null
+          ? 'Ingresá un número entero.'
+          : null;
+    },
+  );
+
+  static String? _validarFecha(String? valor) {
+    final texto = valor?.trim() ?? '';
+    if (texto.isEmpty) return 'Campo obligatorio.';
+    return _leerFecha(texto) == null ? 'Usá el formato AAAA-MM-DD.' : null;
+  }
+
+  static DateTime? _leerFecha(String texto) {
+    if (!RegExp(r'^\d{4}-\d{2}-\d{2}$').hasMatch(texto)) return null;
+    final fecha = DateTime.tryParse(texto);
+    if (fecha == null || _fechaIso(fecha) != texto) return null;
+    return fecha;
+  }
+
+  static String _fechaIso(DateTime fecha) =>
+      '${fecha.year.toString().padLeft(4, '0')}-'
+      '${fecha.month.toString().padLeft(2, '0')}-'
+      '${fecha.day.toString().padLeft(2, '0')}';
+
+  static int? _enteroOpcional(String valor) {
+    final texto = valor.trim();
+    return texto.isEmpty ? null : int.parse(texto);
+  }
+
+  static String? _textoOpcional(String valor) {
+    final texto = valor.trim();
+    return texto.isEmpty ? null : texto;
+  }
 }

@@ -41,7 +41,7 @@ Se cuentan las rutas distintas de `paths`, los métodos HTTP de cada ruta, los s
 | CU | Qué cubre v0.1 | Qué falta |
 |---|---|---|
 | **CU-003** Crear reserva | La creación y el rechazo por falta de cupo | La incorporación y gestión de la **lista de espera** que anuncia el `409` |
-| **CU-018** Gestionar viajes | Creación y actualización segura del viaje programado | Cancelar; cambiar servicio/recorrido; reglas de solapamiento |
+| **CU-018** Gestionar viajes | Creación y actualización segura; propuesta local #180 de cancelación limitada | Confirmación final de Martín para #180; RN-019 y CU-017/#75 (reintegros); cambiar servicio/recorrido; reglas de solapamiento |
 | **CU-030** Ejecutar viaje | Inicio, finalización y recepción de posiciones GPS | Avisos de demora y problemas, pendientes para otra tarea |
 
 La cobertura parcial queda marcada con `x-cobertura: parcial` o aclarada en la descripción del endpoint.

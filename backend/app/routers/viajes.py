@@ -31,6 +31,15 @@ def _fecha_iso(valor: object) -> date:
 FechaConsulta = Annotated[date, BeforeValidator(_fecha_iso)]
 
 
+@router.post("/{id_viaje}/cancelacion", response_model=Viaje, response_model_exclude_none=True)
+async def cancelar_viaje(
+    id_viaje: int,
+    _: UsuarioActual = Depends(requiere_rol("administrador", "dueno")),
+    db: AsyncSession = Depends(get_db),
+):
+    return await servicio.cancelar_viaje(db, id_viaje)
+
+
 @router.get("", response_model=list[Viaje], response_model_exclude_none=True)
 async def listar_viajes(
     fecha: FechaConsulta,

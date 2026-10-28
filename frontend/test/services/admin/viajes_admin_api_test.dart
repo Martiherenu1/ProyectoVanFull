@@ -4,6 +4,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:frontend/core/api/api_error.dart';
 import 'package:frontend/core/api/http_api_client.dart';
 import 'package:frontend/models/admin/viaje_create.dart';
+import 'package:frontend/models/admin/viaje_update.dart';
 import 'package:frontend/models/chofer/viaje_resumen.dart';
 import 'package:frontend/services/admin/viajes_admin_api.dart';
 import 'package:http/http.dart' as http;
@@ -175,6 +176,95 @@ void main() {
     final error = http.ClientException('Fallo simulado');
     responder = (_) async => throw error;
     await expectLater(api.crearViaje(solicitudBase()), throwsA(same(error)));
+    expect(llamadas, 1);
+  });
+
+  test('actualiza el viaje con PATCH y permite quitar opcionales', () async {
+    late http.Request enviada;
+    responder = (request) async {
+      enviada = request;
+      return http.Response(
+        jsonEncode({
+          ...viajeCreado(idVehiculo: null, idChofer: null),
+          'fecha': '2026-10-31',
+          'horario': null,
+          'sentido': 'VUELTA',
+          'capacidad_planificada': null,
+        }),
+        200,
+      );
+    };
+
+    final resultado = await api.actualizarViaje(
+      10,
+      ViajeUpdate(
+        fecha: DateTime(2026, 10, 31),
+        horario: null,
+        sentido: SentidoViaje.vuelta,
+        capacidadPlanificada: null,
+        idChofer: null,
+        idVehiculo: null,
+      ),
+    );
+
+    expect(enviada.method, 'PATCH');
+    expect(enviada.url.toString(), 'https://vanfull.test/api/viajes/10');
+    expect(jsonDecode(enviada.body), {
+      'fecha': '2026-10-31',
+      'horario': null,
+      'sentido': 'VUELTA',
+      'capacidad_planificada': null,
+      'id_chofer': null,
+      'id_vehiculo': null,
+    });
+    expect(resultado.fecha, DateTime(2026, 10, 31));
+    expect(resultado.sentido, SentidoViaje.vuelta);
+    expect(resultado.idChofer, isNull);
+    expect(resultado.idVehiculo, isNull);
+    expect(llamadas, 1);
+  });
+
+  test('propaga el error contractual de actualización', () async {
+    late Map<String, dynamic> cuerpo;
+    responder = (request) async {
+      cuerpo = jsonDecode(request.body) as Map<String, dynamic>;
+      return http.Response(
+        jsonEncode({
+          'error': {
+            'codigo': 'ESTADO_VIAJE_INVALIDO',
+            'mensaje': 'Solo se modifican viajes programados.',
+          },
+        }),
+        409,
+      );
+    };
+
+    await expectLater(
+      api.actualizarViaje(
+        10,
+        ViajeUpdate(
+          fecha: DateTime(2026, 10, 30),
+          horario: '07:30',
+          sentido: SentidoViaje.ida,
+          capacidadPlanificada: 18,
+          idChofer: 4,
+          idVehiculo: 3,
+        ),
+      ),
+      throwsA(
+        isA<ApiException>()
+            .having((error) => error.statusCode, 'status', 409)
+            .having((error) => error.codigo, 'código', 'ESTADO_VIAJE_INVALIDO'),
+      ),
+    );
+    expect(cuerpo, {
+      'fecha': '2026-10-30',
+      'horario': '07:30',
+      'sentido': 'IDA',
+      'capacidad_planificada': 18,
+      'id_chofer': 4,
+      'id_vehiculo': 3,
+    });
     expect(llamadas, 1);
   });
 }

@@ -20,6 +20,7 @@ import 'core/session/sesion_app.dart';
 import 'core/session/sesion_controller.dart';
 import 'core/theme/app_spacing.dart';
 import 'models/admin/viaje_create.dart';
+import 'models/admin/viaje_update.dart';
 import 'models/chofer/operacion_asignada.dart';
 import 'models/chofer/viaje_resumen.dart';
 import 'screens/admin/crear_viaje_admin_screen.dart';
@@ -200,6 +201,7 @@ class _EntradaAdministracionState extends State<_EntradaAdministracion> {
                   ),
                 ),
               ),
+              actualizarViaje: _actualizarViaje,
             ),
             Positioned(
               right: AppSpacing.lg,
@@ -266,6 +268,14 @@ class _EntradaAdministracionState extends State<_EntradaAdministracion> {
           capacidadPlanificada: capacidadPlanificada,
         ),
       ),
+      onAccesoDenegado: _denegarAcceso,
+    );
+  }
+
+  Future<ViajeResumen> _actualizarViaje(int idViaje, ViajeUpdate solicitud) {
+    return _protegerAcceso(
+      controller: widget.controller,
+      solicitud: () => widget.crear.actualizarViaje(idViaje, solicitud),
       onAccesoDenegado: _denegarAcceso,
     );
   }

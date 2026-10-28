@@ -195,6 +195,7 @@ def entorno():
                 "viajes": viajes,
                 "r1": r1,
                 "r2": r2,
+                "paradas": paradas,
                 "pasajeros": pasajeros,
                 "contratacion": contratacion,
             }
@@ -273,9 +274,62 @@ def test_el_destino_se_rechaza_de_forma_explicita(entorno):
     assert error["detalles"] == {"parametro": "destino"}
 
 
+def test_filtra_por_parada_de_destino_los_viajes_cuyo_recorrido_pasa_por_ella(entorno):
+    """#8, primera entrega: R1 pasa por las tres paradas (también por la intermedia, AC08-03)."""
+    v = entorno["viajes"]
+    en_r1 = {v[k] for k in ("con_reservas", "planificado", "sin_capacidad", "sobrevendido")}
+    for parada in entorno["paradas"]:
+        assert set(_por_viaje(entorno, id_parada_destino=parada)) == en_r1
+
+
+def test_la_parada_de_destino_conserva_el_resto_de_las_reglas_de_la_oferta(entorno):
+    """Sin cancelados, en curso, otro sentido ni otro día; el cupo se calcula igual."""
+    v = entorno["viajes"]
+    por_viaje = _por_viaje(entorno, id_parada_destino=entorno["paradas"][1])
+    for excluido in ("cancelado", "en_curso", "vuelta", "otro_dia", "otro_recorrido"):
+        assert v[excluido] not in por_viaje
+    assert por_viaje[v["planificado"]]["cupo_disponible"] == 10
+
+
+def test_la_parada_de_destino_se_combina_con_el_recorrido(entorno):
+    parada = entorno["paradas"][0]
+    assert _por_viaje(entorno, id_parada_destino=parada, id_recorrido=entorno["r2"]) == {}
+    con_r1 = _por_viaje(entorno, id_parada_destino=parada, id_recorrido=entorno["r1"])
+    assert entorno["viajes"]["con_reservas"] in con_r1
+
+
+def test_una_parada_que_ningun_recorrido_usa_da_lista_vacia(entorno):
+    suelta = _uno(
+        entorno["base"],
+        "INSERT INTO parada (nombre_descripcion) VALUES ('Suelta') RETURNING id_parada",
+    )
+    respuesta = _consultar(entorno, id_parada_destino=suelta)
+    assert respuesta.status_code == 200
+    assert respuesta.json() == []
+
+
+def test_una_parada_inexistente_es_400(entorno):
+    respuesta = _consultar(entorno, id_parada_destino=999999)
+    assert respuesta.status_code == 400
+    error = respuesta.json()["error"]
+    assert error["codigo"] == "PARADA_NO_VALIDA"
+    assert error["detalles"] == {"id_parada_destino": 999999}
+
+
+def test_el_destino_en_texto_sigue_sin_soporte_aunque_venga_la_parada(entorno):
+    respuesta = _consultar(entorno, destino="CABA", id_parada_destino=entorno["paradas"][0])
+    assert respuesta.status_code == 400
+    assert respuesta.json()["error"]["codigo"] == "FILTRO_NO_DISPONIBLE"
+
+
 @pytest.mark.parametrize(
     "params",
-    [{"fecha": "no-es-una-fecha"}, {"sentido": "ida"}, {"sentido": "OTRO"}],
+    [
+        {"fecha": "no-es-una-fecha"},
+        {"sentido": "ida"},
+        {"sentido": "OTRO"},
+        {"id_parada_destino": "no-es-un-numero"},
+    ],
 )
 def test_parametros_invalidos_son_400(entorno, params):
     respuesta = _consultar(entorno, **params)

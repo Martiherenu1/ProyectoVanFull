@@ -36,10 +36,16 @@ async def consultar_disponibilidad(
     sentido: Literal["IDA", "VUELTA"],
     destino: str | None = Query(default=None),
     id_recorrido: int | None = Query(default=None),
+    id_parada_destino: int | None = Query(default=None),
     db: AsyncSession = Depends(get_db),
 ):
     return await disponibilidad_servicio.consultar_disponibilidad(
-        db, fecha=fecha, sentido=sentido, id_recorrido=id_recorrido, destino=destino
+        db,
+        fecha=fecha,
+        sentido=sentido,
+        id_recorrido=id_recorrido,
+        destino=destino,
+        id_parada_destino=id_parada_destino,
     )
 
 

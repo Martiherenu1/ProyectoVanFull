@@ -12,7 +12,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.errors import ApiError
 from app.models.servicios import Servicio
-from app.models.viajes import Ausencia, Reserva, Vehiculo, Viaje
+from app.models.viajes import Ausencia, Parada, ParadaRecorrido, Reserva, Vehiculo, Viaje
 from app.schemas.servicios import Disponibilidad
 
 # RN-002: una reserva provisional no garantiza el cupo; solo la consolidada lo ocupa.
@@ -109,6 +109,7 @@ async def consultar_disponibilidad(
     sentido: str,
     id_recorrido: int | None = None,
     destino: str | None = None,
+    id_parada_destino: int | None = None,
 ) -> list[Disponibilidad]:
     if destino is not None:
         # Issue #8: el modelo no tiene un "destino" (ni en servicio, ni en recorrido, ni en parada).
@@ -119,6 +120,16 @@ async def consultar_disponibilidad(
             "FILTRO_NO_DISPONIBLE",
             "Todavía no se puede filtrar por destino. Consultá por fecha y sentido, o por recorrido.",
             {"parametro": "destino"},
+        )
+
+    if id_parada_destino is not None and not await db.scalar(
+        select(exists().where(Parada.id_parada == id_parada_destino))
+    ):
+        raise ApiError(
+            400,
+            "PARADA_NO_VALIDA",
+            "La parada de destino no existe.",
+            {"id_parada_destino": id_parada_destino},
         )
 
     ocupados = _lugares_ocupados()
@@ -135,6 +146,16 @@ async def consultar_disponibilidad(
     )
     if id_recorrido is not None:
         consulta = consulta.where(Viaje.id_recorrido == id_recorrido)
+    if id_parada_destino is not None:
+        # Issue #8, primera entrega de PC2: el recorrido del viaje pasa por esa parada. No distingue
+        # ascenso de descenso ni habilitaciones que cambien de un viaje a otro (AC08-06 y AC08-07):
+        # eso pide modelo nuevo y queda fuera de PC2. No se deduce de la última parada (AC08-03).
+        consulta = consulta.where(
+            exists().where(
+                ParadaRecorrido.id_recorrido == Viaje.id_recorrido,
+                ParadaRecorrido.id_parada == id_parada_destino,
+            )
+        )
 
     resultado = []
     for viaje, capacidad_vehiculo, cantidad in (await db.execute(consulta)).all():

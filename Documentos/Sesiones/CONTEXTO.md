@@ -33,7 +33,7 @@ grave es *no detectar* un pago, (3) notificaciones a clientes.
 | Mapas / rutas | **Google Maps Platform** (Routes API) |
 | Pagos | **Mercado Pago**, entorno de **pruebas** (webhooks) |
 | Gateway LLM | **OpenRouter** |
-| LLM principal / fallback | `minimax/minimax-m3:free` / `nvidia/nemotron-3-super-120b-a12b:free` |
+| LLM principal / fallback | `nvidia/nemotron-3-ultra-550b-a55b:free` / `nvidia/nemotron-3.5-lightning:free` (cambio del 28/10, #154; los del PC1 ya no funcionan gratis) |
 | Mensajería | **WhatsApp** (configuración exacta pendiente) |
 | Versionado | **Git + GitHub**, flujo rama → PR → merge |
 | Hosting (costo 0) | **Neon** (BD) · **Render** (backend) · **GitHub Pages** (web). Ver §7 |
@@ -310,8 +310,8 @@ el 25/10, salvo acuerdo» de REPARTO-PC2 no rige, por decisión de Martiniano):
   404. **Configuración provisoria de la demo, solo en el panel de Render:**
   `OPENROUTER_MODEL_PRIMARY=nvidia/nemotron-3-ultra-550b-a55b:free` y
   `OPENROUTER_MODEL_FALLBACK=nvidia/nemotron-3.5-lightning:free` (Martiniano eligió seguir gratis; los dos
-  devolvieron una tool call correcta en un diagnóstico directo). El repo (`config.py`, `.env.example`) sigue con los
-  aprobados.
+  devolvieron una tool call correcta en un diagnóstico directo). **Desde el 28/10 son también los valores por defecto
+  del repo** (`config.py`, `.env.example`, 07 §3; #154).
   - **Verificado contra Render con `pasajero1`:** consultar disponibilidad (los 3 viajes de ida del 30/10), paradas,
     crear reserva previa confirmación (reserva 3, viaje 3), el rechazo `RESERVA_CANCELADA_PREVIA` explicado sin
     inventar, consultar reservas y cancelar previa confirmación (en término, sin penalidad). Respuestas de 1,8 a
@@ -329,9 +329,10 @@ el 25/10, salvo acuerdo» de REPARTO-PC2 no rige, por decisión de Martiniano):
   - **Antes de la demo, obligatorio:** re-sembrar Neon con `--reiniciar`. `pasajero1` tiene canceladas reservas en
     los tres viajes de ida del 30/10 y, por MR-R15, no puede volver a reservar en ninguno. Y despertar la API 5
     minutos antes (`/api/health`).
-  - **Pendientes del equipo (no se resolvieron acá):** cambiar el modelo aprobado en 07 §3 y los valores por
-    defecto del repo (#154); actualizar 07 §5 (system prompt) y re-ejecutar la PoC, como pide 07 §9 (#156); qué
-    recibe la persona cuando el agente deriva (#42).
+  - **Pendientes del equipo (no se resolvieron acá):** ~~cambiar el modelo aprobado en 07 §3 y los valores por
+    defecto del repo (#154)~~ (hecho el 28/10); ~~actualizar 07 §5 (system prompt)~~ (hecho el 28/10, #156); falta
+    re-ejecutar la PoC con los modelos nuevos, como pide 07 §9 (#156); qué recibe la persona cuando el agente
+    deriva (#42).
 - **Prueba de chofer contra Render (26/10, Martiniano; para la prueba real de Martín sobre #123).** Martín pidió
   confirmar backend, usuario y dataset antes de probar con su Flutter local: login → listado por fecha → detalle por
   ID → volver → cerrar sesión, **solo lectura** (sin iniciar/finalizar viajes, ausencias, abordajes, GPS ni cambios

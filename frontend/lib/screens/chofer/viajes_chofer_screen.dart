@@ -18,10 +18,12 @@ class ViajesChoferScreen extends StatefulWidget {
     this.fechaInicial,
     this.invalidado = false,
     this.revisionRecarga = 0,
+    this.onViajesAceptados,
   });
 
   final CargarViajesChofer cargarViajes;
   final ValueChanged<int> onViajeSeleccionado;
+  final ValueChanged<List<ViajeResumen>>? onViajesAceptados;
 
   /// Solo inicializa la selección. Por defecto, el día local del dispositivo;
   /// se envía explícitamente, sin asumir la fecha por defecto del servidor.
@@ -86,6 +88,7 @@ class _ViajesChoferScreenState extends State<ViajesChoferScreen> {
         _viajes = List.unmodifiable(viajes);
         _cargando = false;
       });
+      widget.onViajesAceptados?.call(_viajes);
     } catch (_) {
       if (!mounted || solicitud != _solicitud) return;
       setState(() {

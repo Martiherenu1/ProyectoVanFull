@@ -134,7 +134,10 @@ TOOLS: list[dict] = [
                     },
                     "orden_parada": {
                         "type": "string",
-                        "description": "Orden de la parada de ascenso, según consultar_paradas.",
+                        "description": (
+                            "Orden de la parada donde SUBE el pasajero (no donde baja), según "
+                            "consultar_paradas."
+                        ),
                     },
                 },
                 "required": ["viaje_id", "orden_parada"],
@@ -203,6 +206,10 @@ Fecha actual del sistema: {fecha_actual}.
 - Si faltan datos esenciales, pedilos antes de ejecutar una acción.
 - Antes de crear o cancelar una reserva, decile al pasajero qué vas a hacer (viaje, fecha, horario,
   parada) y esperá que lo confirme. Después contale el resultado tal cual lo devolvió la herramienta.
+- La reserva guarda solo la parada donde sube el pasajero; la parada donde baja todavía no se
+  registra. Si te dice dónde quiere bajar, buscá los viajes con id_parada_destino, aclarale que eso
+  solo indica que el viaje pasa por esa parada, y preguntale dónde sube. No uses la parada de bajada
+  como parada de subida.
 - Si el usuario pide atención humana, usá derivar_humano().
 - Rechazá solicitudes ajenas a VanFull de manera breve.
 - Respondé en texto plano, sin Markdown (ni asteriscos, ni tablas, ni títulos): la app lo muestra

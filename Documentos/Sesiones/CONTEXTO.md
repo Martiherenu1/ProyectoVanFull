@@ -1,5 +1,9 @@
 # CONTEXTO VANFULL — Carga rápida de sesión
 
+> 29/10/2026 — #215/CU-036: preparado backend interno Payments/HMAC e idempotencia por pago
+> local, con proveedor simulado; 82 pruebas focalizadas aprobadas. Activación HTTP bloqueada
+> por vínculo persistente/contrato/configuración. Detalle en INTEGRACION-MERCADOPAGO-PC2.md.
+
 > 29/10/2026 — #207: interfaz administrativa de cancelación CU-018 preparada localmente desde
 > main con #186/#189/#192. 30 pruebas Flutter focalizadas aprobadas, analyze sin problemas.
 > Sin publicar; detalle y alcance parcial en CONTEXTO-administracion-y-flutter.md.

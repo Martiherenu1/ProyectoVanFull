@@ -98,6 +98,35 @@ interfaz continúan pendientes. No debe confundirse con las reservas propias del
 
 ### CU-015 · Gestionar deuda — NO IMPLEMENTADO
 
+**Continuación #212 (29/10/2026):** recuperados solo sus cambios preservados. Pantalla de
+consulta visual administrativa por ID de cliente, con puerto local y adaptador simulado solo
+en tests. Reutiliza ResumenDeudaAdmin/Deuda, sin menú ni HTTP. Carga/error/sin datos/reintento,
+aislamiento por alcance/adaptador y descarte al editar cliente/desmontar. No infiere ni ofrece
+suspensión, habilitación o límite mensual. 12 pruebas focalizadas aprobadas; analyze sin problemas.
+Ver `PREPARACION-CU015-PC2.md`: circuito real y gestión RN-004/005/006 siguen bloqueados por
+contrato y comportamiento a coordinar. Sin backend/permisos/contrato ni #210/#214/#216/#217.
+
+**Preparación independiente #212 (29/10/2026):** CU-015 v1.3 y RF-010/RN-004/005/006 leídos
+en Drive. Confirman consulta de situación y consecuencias, acciones permitidas, advertencia/
+suspensión, eventual pérdida de cupo, habilitación excepcional por cinco días y límite absoluto
+de un mes de abono/mes en curso. No habilitan edición manual del saldo.
+
+Main base `a8696de`, rama `feat/admin-situacion-deuda-cu015-212`, sin PR #210 ni cambios CU-027
+(documentos preservados en stash de esa rama). Componente independiente `ResumenDeudaAdmin`
+presenta cliente/saldo/estado suministrados, reutiliza Deuda y el formato de importe; sin datos
+muestra ausencia de información. Sin HTTP, navegación ni acciones; no implica circuito desplegado.
+Verificación: 3 pruebas focalizadas aprobadas, flutter analyze sin problemas y diff check correcto.
+
+**Bloqueos #212:** no existe contrato de consulta administrativa por cliente ni operaciones de
+consecuencias/habilitación. El DTO actual no expresa vencimiento, límite mensual ni habilitación;
+`pasajero.estado_habilitacion` no resuelve por sí solo el vencimiento excepcional. Coordinar
+contrato, almacenamiento/expiración y evaluación RN-006 con Martiniano/Martín antes de backend
+o conexión Flutter. No alterar CU-006, permisos, estados ni reglas. CU-015 sigue sin cumplirse.
+
+Fuentes: [CU-015 v1.3](https://drive.google.com/file/d/1Kc4m4e2LH5xRc1J9HY-2hTQaiLNeRA7y/view),
+[RF-010](https://docs.google.com/document/d/1sA_3o6trf_B2B7H5JyI1yQQhFIzO-8rh/edit),
+[RN-004/005/006](https://docs.google.com/document/d/1aG6RTv1lTyY36PkyYyYl46NW4PKYvYMb/edit).
+
 No existen operaciones administrativas aprobadas en OpenAPI ni una pantalla de administración. La consulta
 `GET /pasajeros/me/deuda` implementada en #54 es **CU-006**, para el pasajero autenticado, y no completa CU-015.
 Gestionar deuda no autoriza a modificar manualmente un saldo derivado. Las acciones administrativas exactas

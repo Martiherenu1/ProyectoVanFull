@@ -1,5 +1,13 @@
 # CONTEXTO VANFULL — Carga rápida de sesión
 
+> Continuación #212 — consulta visual de deuda por cliente preparada con adaptador simulado,
+> 12 pruebas focalizadas aprobadas. Sin menú/HTTP ni acciones; integración real pendiente.
+> Ver PREPARACION-CU015-PC2.md. No incorpora #210/#214/#216/#217.
+
+> 29/10/2026 — #212/CU-015: componente de presentación de deuda preparado sin conexión ni
+> acciones; circuito administrativo bloqueado por contrato y definición técnica de consecuencias.
+> Base main a8696de, sin #210 ni documentos CU-027; detalle en contexto administrativo.
+
 > 29/10/2026 — #207: interfaz administrativa de cancelación CU-018 preparada localmente desde
 > main con #186/#189/#192. 30 pruebas Flutter focalizadas aprobadas, analyze sin problemas.
 > Sin publicar; detalle y alcance parcial en CONTEXTO-administracion-y-flutter.md.

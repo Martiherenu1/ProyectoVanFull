@@ -20,6 +20,8 @@ En la tabla, **secreto** quiere decir que no va al chat, ni a un commit, ni a un
 | Render (`render.yaml`) | `JWT_SECRET` | lo genera Render (`generateValue`); nadie lo ve ni lo copia |
 | Render (`render.yaml`) | `ENV=production`, `API_PREFIX=/api`, `CORS_ORIGINS=https://vanfull.onrender.com,https://martiherenu1.github.io` | públicos |
 | GitHub → Settings → Secrets and variables → Actions → **Variables** | `API_BASE_URL` | `https://<servicio>.onrender.com/api` (público: queda en el JS) |
+| GitHub → Settings → Secrets and variables → Actions → **Variables** | `VANFULL_MAPS_WEB_KEY`, `VANFULL_MAPS_WEB_MAP_ID` | **opcionales**, para el mapa de la última posición. La clave web **queda en el JS publicado**: no es un secreto, la protege su restricción por origen en Google Cloud (`https://vanfull.onrender.com/*` y `https://martiherenu1.github.io/*`). Sin ellas el sitio compila y la pantalla muestra solo el texto |
+| Tu computadora, **fuera del repo** | `VANFULL_MAPS_ANDROID_KEY` | **secreto**, opcional: solo para compilar la APK a mano con `--dart-define`. Restringida por paquete y SHA-1 del certificado con el que se firma. Ningún workflow compila la APK |
 | GitHub → Settings → Pages | Source | «GitHub Actions» |
 | Tu computadora, **fuera del repo** | `contrasenas-demo.csv` | **secreto**: las contraseñas de las cuentas de la demo |
 
@@ -90,6 +92,20 @@ corrida); Render la sirve tal cual. Pages queda de respaldo.
 5. Después, cada corrida de **Web** redespliega el sitio de Render sola (`autoDeployTrigger: commit`).
 
 Para publicar cambios del frontend, volver a correr el workflow: no se publica solo.
+
+### Mapa de la última posición (opcional)
+
+El mapa usa Google Maps y **no se configura en el repositorio**. Si faltan las variables
+`VANFULL_MAPS_WEB_KEY` y `VANFULL_MAPS_WEB_MAP_ID`, el workflow **no corta**: compila y la pantalla de
+ubicación muestra la última posición en texto, sin cargar Maps. Con una sola de las dos, avisa pero compila.
+
+1. En Google Cloud, con la **prueba gratuita** sin pasarla a cuenta paga, habilitar solo *Maps JavaScript API* y
+   *Maps SDK for Android*. Poner **topes de cuota diarios** por API (las alertas de presupuesto solo avisan).
+2. Crear una clave web restringida por origen (los dos de arriba) y un *Map ID* web. La clave de Android es
+   otra, restringida por paquete y SHA-1. No comparten clave.
+3. Cargar `VANFULL_MAPS_WEB_KEY` y `VANFULL_MAPS_WEB_MAP_ID` como **Variables** de Actions y correr de nuevo
+   **Web**. Ningún valor va a un chat, un commit ni un Issue.
+4. Después de la demo, desactivar la facturación o borrar el proyecto de Google Cloud.
 
 ## Ensayo desde otro dispositivo
 

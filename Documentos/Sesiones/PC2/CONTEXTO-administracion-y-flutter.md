@@ -164,6 +164,14 @@ cuenta: es la integración de Mercado Pago que extiende CU-014.
   composición/sesión existentes aprobadas. Sin commit/push/PR; nueva operación de contrato
   pendiente de revisión al publicar, según CONTRIBUTING §1.9.
 
+- **Preparación local #215/CU-036 (29/10/2026):** rama `feat/admin-mercadopago-cu036-215`
+  desde main a8696de, sin #210/#214 ni stashes CU-015/CU-027. Adaptador GET Payments/HMAC
+  y servicio interno de validación/confirmación reutilizando pagos; 82 pruebas focalizadas
+  aprobadas (HTTP/vínculo falsos, PostgreSQL temporal real), Ruff/formato correctos.
+  No hay webhook HTTP activo ni integración real certificada. Bloqueados vínculo único
+  persistente, moneda/receptor/escenario, credenciales y contrato de notificaciones/errores.
+  Ver `INTEGRACION-MERCADOPAGO-PC2.md`; no se inventan estados contables ni se hacen cobros.
+
 - **Preparación local #207 (29/10/2026):** interfaz Flutter de cancelación CU-018 desde main
   `4d5c4ff` (#186/#189/#192 integrados). Botón en programado, confirmación, errores backend,
   actualización detalle/listado, protección contra doble envío y respuestas tras cierre/cambio

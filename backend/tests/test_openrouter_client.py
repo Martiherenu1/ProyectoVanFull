@@ -15,7 +15,7 @@ import httpx
 import pytest
 
 from app.agent import openrouter_client
-from app.agent.openrouter_client import OpenRouterError, chat_completion
+from app.agent.openrouter_client import CupoDiarioAgotado, OpenRouterError, chat_completion
 
 CLAVE = "sk-or-de-prueba"
 PRINCIPAL = "principal/modelo:free"
@@ -95,6 +95,76 @@ def test_si_fallan_los_dos_se_lanza_openrouter_error_y_se_registra(openrouter, f
     assert _modelos(pedidos) == [PRINCIPAL, FALLBACK]
     assert PRINCIPAL in caplog.text and FALLBACK in caplog.text
     assert CLAVE not in caplog.text
+
+
+# Cuerpo real que devolvió OpenRouter en Render el 29/10 a los dos modelos (Issue #233).
+CUPO_DIARIO = {
+    "error": {
+        "message": "Rate limit exceeded: free-models-per-day. Add 10 credits to unlock 1000 "
+        "free model requests per day",
+        "code": 429,
+        "metadata": {"limit_source": "openrouter_free_tier_daily"},
+    }
+}
+
+
+def test_si_los_dos_modelos_responden_cupo_diario_agotado_se_dice_aparte(openrouter, caplog):
+    pedidos = openrouter(lambda modelo, r: httpx.Response(429, json=CUPO_DIARIO))
+    with (
+        caplog.at_level(logging.WARNING, logger=openrouter_client.__name__),
+        pytest.raises(CupoDiarioAgotado),
+    ):
+        asyncio.run(chat_completion(MENSAJES))
+    assert _modelos(pedidos) == [PRINCIPAL, FALLBACK]
+    assert "free-models-per-day" in caplog.text
+    assert CLAVE not in caplog.text
+
+
+def test_el_cupo_diario_agotado_sigue_siendo_un_openrouter_error():
+    """Quien solo conoce OpenRouterError (cualquier otro llamador) lo sigue tratando como falla."""
+    assert issubclass(CupoDiarioAgotado, OpenRouterError)
+
+
+def test_si_el_principal_agota_el_cupo_pero_responde_el_fallback_se_usa_el_fallback(openrouter):
+    pedidos = openrouter(
+        lambda modelo, r: (
+            httpx.Response(429, json=CUPO_DIARIO)
+            if modelo == PRINCIPAL
+            else httpx.Response(200, json=RESPUESTA)
+        )
+    )
+    assert asyncio.run(chat_completion(MENSAJES)) == RESPUESTA
+    assert _modelos(pedidos) == [PRINCIPAL, FALLBACK]
+
+
+@pytest.mark.parametrize(
+    "otra_falla",
+    [
+        lambda m, r: httpx.Response(429, json={"error": {"code": 429}}),  # 429 por otro motivo
+        lambda m, r: httpx.Response(502, text="Bad gateway"),
+        lambda m, r: httpx.Response(200, json={"choices": []}),
+        _falla_de_red(httpx.ReadTimeout),
+    ],
+    ids=["429_otro_motivo", "502", "200_sin_choices", "timeout"],
+)
+def test_si_el_fallback_falla_por_otra_causa_no_se_dice_que_se_agoto_el_cupo(
+    openrouter, otra_falla
+):
+    openrouter(
+        lambda modelo, r: (
+            httpx.Response(429, json=CUPO_DIARIO) if modelo == PRINCIPAL else otra_falla(modelo, r)
+        )
+    )
+    with pytest.raises(OpenRouterError) as error:
+        asyncio.run(chat_completion(MENSAJES))
+    assert not isinstance(error.value, CupoDiarioAgotado)
+
+
+def test_sin_tiempo_para_llamar_a_ningun_modelo_no_se_dice_que_se_agoto_el_cupo(openrouter):
+    openrouter(lambda modelo, r: httpx.Response(429, json=CUPO_DIARIO))
+    with pytest.raises(OpenRouterError) as error:
+        asyncio.run(chat_completion(MENSAJES, limite=time.monotonic() - 1))
+    assert not isinstance(error.value, CupoDiarioAgotado)
 
 
 def test_el_principal_que_responde_bien_no_pasa_al_fallback(openrouter):

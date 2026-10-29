@@ -44,6 +44,12 @@ MENSAJE_DERIVACION = (
     "No pude resolver tu consulta por este medio. Te derivo con una persona de VanFull "
     "para que te ayude."
 )
+# El proveedor de los modelos gratuitos limita los pedidos por día (Issue #233): se le dice al
+# pasajero que es un límite y no una falla, y que puede seguir desde las otras pantallas.
+MENSAJE_SIN_CUPO = (
+    "El asistente alcanzó su límite de uso por hoy y no puede responder ahora. Podés seguir "
+    "desde las pestañas Buscar y Mis reservas, o te derivo con una persona de VanFull."
+)
 
 # Argentina no tiene horario de verano: un desfase fijo evita depender de la base de zonas horarias.
 _HORA_ARGENTINA = timezone(timedelta(hours=-3))
@@ -139,9 +145,11 @@ def _system_prompt() -> str:
     )
 
 
-def _derivacion(conversacion_id: str, tool_usada: str | None) -> ChatResponse:
+def _derivacion(
+    conversacion_id: str, tool_usada: str | None, mensaje: str = MENSAJE_DERIVACION
+) -> ChatResponse:
     return ChatResponse(
-        respuesta=MENSAJE_DERIVACION,
+        respuesta=mensaje,
         conversacion_id=conversacion_id,
         derivar_humano=True,
         tool_usada=tool_usada,
@@ -175,6 +183,8 @@ async def responder(db: AsyncSession, usuario: UsuarioActual, datos: ChatRequest
             del_modelo = salida["choices"][0]["message"]
             llamadas = del_modelo.get("tool_calls") or []
             contenido = del_modelo.get("content")
+        except openrouter_client.CupoDiarioAgotado:
+            return _derivacion(conversacion_id, tool_usada, MENSAJE_SIN_CUPO)
         except (openrouter_client.OpenRouterError, KeyError, IndexError, TypeError, AttributeError):
             # A1: ningún modelo respondió bien (o la respuesta no tiene la forma esperada).
             return _derivacion(conversacion_id, tool_usada)

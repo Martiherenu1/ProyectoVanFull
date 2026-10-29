@@ -25,7 +25,7 @@ python -c "import yaml,json,io; io.open('backend/openapi/openapi.json','w',encod
 - `redocly preview-docs backend/openapi/openapi.yaml`, o
 - al implementar el backend: `http://localhost:8000/docs` (Swagger UI de FastAPI).
 
-Validado con `openapi-spec-validator`: **OpenAPI 3.0.3 · 26 rutas · 28 operaciones HTTP · 29 schemas**.
+Validado con `openapi-spec-validator`: **OpenAPI 3.0.3 · 29 rutas · 33 operaciones HTTP · 29 schemas**.
 
 ## Cobertura de esta versión (v0.1)
 
@@ -34,19 +34,21 @@ de solo lectura (administrador/dueno), reutilizando Deuda. Sin cuenta informa 0.
 inexistente CLIENTE_NO_ENCONTRADO. CU-006 conserva su comportamiento. La gestión de
 consecuencias RN-004/005/006 sigue pendiente; CU-015 conserva cobertura parcial.
 
-> **v0.1 representa 18 de los 37 casos de uso, además de RF-028.** Los otros **19 CU** todavía no tienen
+> **v0.1 representa 20 de los 37 casos de uso, además de RF-028.** Los otros **17 CU** todavía no tienen
 > operaciones y se listan al final. Estos indicadores describen la **cobertura contractual de diseño**;
 > no indican funcionalidades implementadas en el backend ni en el frontend.
 
 Se cuentan las rutas distintas de `paths`, los métodos HTTP de cada ruta, los schemas de
 `components.schemas` y los identificadores distintos de `x-cu`. RF-028 es un requisito, no un CU adicional.
 
-**Tres de los 18 CU representados tienen cobertura parcial documentada**:
+**Coberturas parciales documentadas**:
 
 | CU | Qué cubre v0.1 | Qué falta |
 |---|---|---|
 | **CU-003** Crear reserva | La creación y el rechazo por falta de cupo | La incorporación y gestión de la **lista de espera** que anuncia el `409` |
+| **CU-015** Gestionar deuda | `GET /clientes/{id_cliente}/deuda`: consulta administrativa de solo lectura | RN-004/005/006: suspensión, habilitación excepcional y límite mensual |
 | **CU-018** Gestionar viajes | Creación y actualización segura; propuesta local #180 de cancelación limitada | Confirmación final de Martín para #180; RN-019 y CU-017/#75 (reintegros); cambiar servicio/recorrido; reglas de solapamiento |
+| **CU-027** Consultar reservas por administración | `GET /reservas` para administrador/dueño: todas las reservas, con `id_pasajero`, por `id_reserva` ascendente, solo lectura | Criterios de búsqueda adicionales, nombres y contactos de los pasajeros |
 | **CU-030** Ejecutar viaje | Inicio, finalización y recepción de posiciones GPS | Avisos de demora y problemas, pendientes para otra tarea |
 
 La cobertura parcial queda marcada con `x-cobertura: parcial` o aclarada en la descripción del endpoint.
@@ -82,6 +84,7 @@ y frontend continúa pendiente; documentar el contrato no implementa los servici
 | CU-011 Chatbot | `POST /chat` | RF-029/032 |
 | CU-012 Sesión | `POST /auth/login`, `POST /auth/logout` | RF-045 |
 | CU-014 Registrar pago | `POST /pagos` | RF-009, RN-016 |
+| CU-015 Gestionar deuda ⚠️ *parcial* | `GET /clientes/{id_cliente}/deuda` | RF-010, MR-R30; RN-004/005/006 pendientes |
 | CU-016 Confirmar/rechazar pago | `POST /pagos/{id}/confirmacion` | RF-011, RN-015 — validación administrativa cuando el medio no acredita automáticamente |
 | CU-018 Gestionar viajes ⚠️ *parcial* | `POST /viajes`, `PATCH /viajes/{id_viaje}` | RF-017/018, RN-001 |
 | CU-029 Consultar operación asignada | `GET /choferes/me/viajes` | RF-024, RN-029 |
@@ -99,8 +102,8 @@ ubicación en CU-009/CU-034 y no es una regla directa del POST GPS.
 
 ## CU pendientes de contrato (próxima iteración)
 
-Los siguientes CU todavía no tienen operaciones en el contrato:
+Estos **17 CU** todavía no tienen operaciones en el contrato:
 administración de pasajeros (CU-013), créditos/devoluciones (CU-017), recorridos (CU-019),
 optimización de recorrido (CU-020), choferes (CU-021), vehículos (CU-022), corporativos (CU-023, CU-033, CU-034, CU-035),
-facturación (CU-024), reportes (CU-025), historial (CU-026), reservas admin (CU-027), abonos (CU-028),
+facturación (CU-024), reportes (CU-025), historial (CU-026), abonos (CU-028),
 tarifas y administradores del dueño (CU-031, CU-032), notificaciones (CU-037).

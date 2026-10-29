@@ -614,6 +614,36 @@
       }
     },
     "/reservas": {
+      "get": {
+        "tags": [
+          "reservas"
+        ],
+        "summary": "Consultar reservas (administración)",
+        "description": "Lista para administración y dueño todas las reservas, provisionales, consolidadas y\ncanceladas, con el mismo schema `Reserva` (incluye `id_pasajero`). Se ordena por\n`id_reserva` ascendente; sin reservas responde 200 con una lista vacía. Es de solo lectura,\nno filtra ni pagina y no devuelve nombres, contactos ni importes. Los criterios de búsqueda\nadicionales de CU-027 quedan pendientes. No cambia las consultas del pasajero: las propias\nsiguen en `GET /pasajeros/me/reservas`. (CU-027)\n",
+        "x-cu": "CU-027",
+        "x-cobertura": "parcial",
+        "responses": {
+          "200": {
+            "description": "Lista de reservas",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Reserva"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/NoAutenticado"
+          },
+          "403": {
+            "$ref": "#/components/responses/SinPermiso"
+          }
+        }
+      },
       "post": {
         "tags": [
           "reservas"

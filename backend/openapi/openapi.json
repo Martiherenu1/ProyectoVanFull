@@ -1076,6 +1076,37 @@
         }
       }
     },
+    "/pagos/pendientes": {
+      "get": {
+        "tags": [
+          "pagos"
+        ],
+        "summary": "Consultar pagos pendientes de decisión administrativa",
+        "description": "Solo administrador o dueño. Devuelve únicamente pagos PENDIENTE, ordenados por\nfecha_hora e id_pago ascendentes. Lista vacía si no hay pendientes. No modifica\npagos ni genera movimientos o comprobantes. Complementa CU-016/RF-011/RN-015;\nlos pagos ya confirmados automáticamente quedan excluidos por su estado.\n",
+        "x-cu": "CU-016",
+        "responses": {
+          "200": {
+            "description": "Pagos pendientes de decisión.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Pago"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/NoAutenticado"
+          },
+          "403": {
+            "$ref": "#/components/responses/SinPermiso"
+          }
+        }
+      }
+    },
     "/pagos/{id_pago}/confirmacion": {
       "post": {
         "tags": [

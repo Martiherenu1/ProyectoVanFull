@@ -1,5 +1,9 @@
 # CONTEXTO VANFULL — Carga rápida de sesión
 
+> 29/10/2026 — #209: CU-016 preparado localmente (pantalla de pagos y GET pendientes mínimo).
+> Confirmación/rechazo reutiliza backend contable existente. Sin publicar; evidencia y pendiente
+> documental en CONTEXTO-administracion-y-flutter.md.
+
 > 29/10/2026 — #215/CU-036: preparado backend interno Payments/HMAC e idempotencia por pago
 > local, con proveedor simulado; 82 pruebas focalizadas aprobadas. Activación HTTP bloqueada
 > por vínculo persistente/contrato/configuración. Detalle en INTEGRACION-MERCADOPAGO-PC2.md.

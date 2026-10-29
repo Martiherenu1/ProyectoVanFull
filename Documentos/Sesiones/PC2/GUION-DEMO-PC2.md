@@ -34,6 +34,9 @@ que se van a usar en vivo**; usar otra cuenta u otro viaje.
    Si se agota, el asistente avisa que alcanzó su límite (#233) y manda a Buscar y Mis reservas.
 3. **Confirmar qué corre.** Commit desplegado en Render (se lee en el panel, Events) y SHA de `sitio-web`
    (el workflow `Web` se corre **desde `main`**). Después del último merge, relanzar `Web` una vez.
+   **Qué redeploya qué** (`render.yaml`): la API se redespliega solo si cambió algo bajo `backend/` y la CI de `main`
+   está en verde; la documentación y el frontend **no** la tocan. El sitio (`sitio-web`) solo cambia cuando alguien corre
+   `Web`. Para el corte de las 12:00, lo que hay que vigilar es `backend/`.
 4. **Recargar con Ctrl+Shift+R** en cada navegador de la demo: Flutter Web guarda el sitio en caché y puede mostrar
    la versión anterior.
 5. **El viaje 1 sin tocar.** Nadie lo modifica ni lo reasigna hasta el ensayo de GPS.

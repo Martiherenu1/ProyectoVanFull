@@ -167,7 +167,51 @@ Fuente CU: https://drive.google.com/file/d/1Kc4m4e2LH5xRc1J9HY-2hTQaiLNeRA7y/vie
 - Issue #84 permanece abierto. OpenAPI documenta estas limitaciones, pero la operación no está marcada con
   `x-cobertura: parcial`, a diferencia de la convención vigente.
 
-### CU-015 · Gestionar deuda — NO IMPLEMENTADO
+### CU-015 · Gestionar deuda — CONSULTA PUBLICADA EN #218, GESTIÓN PARCIAL
+
+**Continuación #212/#218, contrato acordado con Martiniano (instrucción del equipo):**
+GET `/clientes/{id_cliente}/deuda`, administrador/dueno, esquema Deuda; sin cuenta devuelve
+saldo cero/al_dia; inexistente 404 CLIENTE_NO_ENCONTRADO y otros roles 403 SIN_PERMISO.
+Cálculo común extraído de `services/deuda.py`, CU-006 sin cambios de comportamiento.
+Consulta administrativa Flutter conectada a HTTP/sesión y menú, identificación por ID,
+errores y descarte de respuestas viejas; conserva navegación CU-014/CU-016/#222.
+No edita saldo ni infiere suspensión. RN-004/005/006 siguen pendientes: suspensión,
+habilitación excepcional y límite mensual no implementados. Main 4aea002 incorporado en la
+rama publicada de #218, sin merge hacia main. 25 pruebas backend y 57 Flutter focalizadas
+aprobadas; suite Flutter local de publicación: 733/733; Ruff/analyze y OpenAPI válidos.
+CI #300 aprobada sobre 5f8a6d6 (Backend y Flutter):
+https://github.com/Martiherenu1/ProyectoVanFull/actions/runs/40902318550.
+Sin prueba manual contra Render. La revisión no ejecutó nuevamente los checks locales.
+Los párrafos inferiores conservan el historial de la preparación desconectada.
+
+**Continuación #212 (29/10/2026):** recuperados solo sus cambios preservados. Pantalla de
+consulta visual administrativa por ID de cliente, con puerto local y adaptador simulado solo
+en tests. Reutiliza ResumenDeudaAdmin/Deuda, sin menú ni HTTP. Carga/error/sin datos/reintento,
+aislamiento por alcance/adaptador y descarte al editar cliente/desmontar. No infiere ni ofrece
+suspensión, habilitación o límite mensual. 12 pruebas focalizadas aprobadas; analyze sin problemas.
+Ver `PREPARACION-CU015-PC2.md`: circuito real y gestión RN-004/005/006 siguen bloqueados por
+contrato y comportamiento a coordinar. Sin backend/permisos/contrato ni #210/#214/#216/#217.
+
+**Preparación independiente #212 (29/10/2026):** CU-015 v1.3 y RF-010/RN-004/005/006 leídos
+en Drive. Confirman consulta de situación y consecuencias, acciones permitidas, advertencia/
+suspensión, eventual pérdida de cupo, habilitación excepcional por cinco días y límite absoluto
+de un mes de abono/mes en curso. No habilitan edición manual del saldo.
+
+Main base `a8696de`, rama `feat/admin-situacion-deuda-cu015-212`, sin PR #210 ni cambios CU-027
+(documentos preservados en stash de esa rama). Componente independiente `ResumenDeudaAdmin`
+presenta cliente/saldo/estado suministrados, reutiliza Deuda y el formato de importe; sin datos
+muestra ausencia de información. Sin HTTP, navegación ni acciones; no implica circuito desplegado.
+Verificación: 3 pruebas focalizadas aprobadas, flutter analyze sin problemas y diff check correcto.
+
+**Bloqueos #212:** no existe contrato de consulta administrativa por cliente ni operaciones de
+consecuencias/habilitación. El DTO actual no expresa vencimiento, límite mensual ni habilitación;
+`pasajero.estado_habilitacion` no resuelve por sí solo el vencimiento excepcional. Coordinar
+contrato, almacenamiento/expiración y evaluación RN-006 con Martiniano/Martín antes de backend
+o conexión Flutter. No alterar CU-006, permisos, estados ni reglas. CU-015 sigue sin cumplirse.
+
+Fuentes: [CU-015 v1.3](https://drive.google.com/file/d/1Kc4m4e2LH5xRc1J9HY-2hTQaiLNeRA7y/view),
+[RF-010](https://docs.google.com/document/d/1sA_3o6trf_B2B7H5JyI1yQQhFIzO-8rh/edit),
+[RN-004/005/006](https://docs.google.com/document/d/1aG6RTv1lTyY36PkyYyYl46NW4PKYvYMb/edit).
 
 No existen operaciones administrativas aprobadas en OpenAPI ni una pantalla de administración. La consulta
 `GET /pasajeros/me/deuda` implementada en #54 es **CU-006**, para el pasajero autenticado, y no completa CU-015.

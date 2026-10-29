@@ -34,6 +34,8 @@ import 'services/admin/viajes_admin_api.dart';
 import 'services/admin/registro_pagos_admin_api.dart';
 import 'screens/admin/registrar_pago_admin_screen.dart';
 import 'services/admin/pagos_admin_api.dart';
+import 'services/admin/deuda_admin_api.dart';
+import 'screens/admin/consultar_deuda_admin_screen.dart';
 import 'services/admin/reservas_admin_api.dart';
 import 'screens/admin/consultar_reservas_admin_screen.dart';
 import 'screens/admin/pagos_pendientes_screen.dart';
@@ -89,6 +91,7 @@ class _VanFullBootstrapState extends State<VanFullBootstrap> {
   late final ViajesAdminApi _viajesAdmin;
   late final RegistroPagosAdminApi _registroPagosAdmin;
   late final PagosAdminApi _pagosAdmin;
+  late final DeudaAdminApi _deudaAdmin;
   late final ReservasAdminApi _reservasAdmin;
   late final ViajesChoferApi _viajesChofer;
   late final DetalleViajeChoferApi _detalleChofer;
@@ -119,6 +122,7 @@ class _VanFullBootstrapState extends State<VanFullBootstrap> {
     _viajesAdmin = ViajesAdminApi(httpClient);
     _registroPagosAdmin = RegistroPagosAdminApi(httpClient);
     _pagosAdmin = PagosAdminApi(httpClient);
+    _deudaAdmin = DeudaAdminApi(httpClient);
     _reservasAdmin = ReservasAdminApi(httpClient);
     _viajesChofer = ViajesChoferApi(httpClient);
     _detalleChofer = DetalleViajeChoferApi(httpClient);
@@ -197,6 +201,7 @@ class _VanFullBootstrapState extends State<VanFullBootstrap> {
       crear: _viajesAdmin,
       registrarPagos: _registroPagosAdmin,
       pagos: _pagosAdmin,
+      deuda: _deudaAdmin,
       reservas: _reservasAdmin,
       configuracionMapa: widget.configuracionMapa,
       prepararMapa: widget.prepararMapa,
@@ -224,6 +229,7 @@ class _EntradaAdministracion extends StatefulWidget {
     required this.crear,
     required this.registrarPagos,
     required this.pagos,
+    required this.deuda,
     required this.reservas,
     required this.configuracionMapa,
     required this.prepararMapa,
@@ -237,6 +243,7 @@ class _EntradaAdministracion extends StatefulWidget {
   final ViajesAdminApi crear;
   final RegistroPagosAdminApi registrarPagos;
   final PagosAdminApi pagos;
+  final DeudaAdminApi deuda;
   final ReservasAdminApi reservas;
   final ConfiguracionMapa? configuracionMapa;
   final PrepararMapa? prepararMapa;
@@ -295,6 +302,11 @@ class _EntradaAdministracionState extends State<_EntradaAdministracion> {
                       key: const Key('admin-registrar-pago'),
                       onPressed: _abrirRegistroPago,
                       child: const Text('Registrar pago'),
+                    ),
+                    OutlinedButton(
+                      key: const Key('admin-consultar-deuda'),
+                      onPressed: _abrirDeuda,
+                      child: const Text('Consultar deuda'),
                     ),
                     ElevatedButton.icon(
                       key: const Key('admin-crear-viaje'),
@@ -370,6 +382,36 @@ class _EntradaAdministracionState extends State<_EntradaAdministracion> {
       return resultado;
     });
     final pantalla = ConsultarReservasAdminScreen(
+      consulta: consulta,
+      alcance: Object(),
+    );
+    Navigator.of(context)
+        .push(MaterialPageRoute<void>(builder: (_) => pantalla));
+  }
+
+  void _abrirDeuda() {
+    final controller = widget.controller;
+    final generacion = controller.generacion;
+    final token = controller.token;
+    final api = widget.deuda;
+    bool vigente() =>
+        mounted &&
+        !_accesoDenegado &&
+        token != null &&
+        controller.generacion == generacion &&
+        controller.token == token;
+    if (!vigente()) return;
+    final consulta = ConsultaDeudaAdminProtegida((id) async {
+      if (!vigente()) throw StateError('La sesión ya no está vigente.');
+      final resultado = await _protegerAcceso(
+        controller: controller,
+        solicitud: () => api.consultar(id),
+        onAccesoDenegado: _denegarAcceso,
+      );
+      if (!vigente()) throw StateError('La sesión ya no está vigente.');
+      return resultado;
+    });
+    final pantalla = ConsultarDeudaAdminScreen(
       consulta: consulta,
       alcance: Object(),
     );

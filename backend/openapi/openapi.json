@@ -182,6 +182,73 @@
         }
       }
     },
+    "/clientes/{id_cliente}/deuda": {
+      "get": {
+        "tags": [
+          "administracion"
+        ],
+        "summary": "Consultar deuda de un cliente",
+        "description": "Solo administrador y dueno. Consulta derivada de movimientos, sin editar saldo\nni inferir suspensión. Cliente sin cuenta corriente devuelve saldo 0.00 y estado\nal_dia. Cliente inexistente responde CLIENTE_NO_ENCONTRADO; otros roles SIN_PERMISO.\nRN-004/005/006 siguen pendientes de implementación. (CU-015, RF-010)\n",
+        "x-cu": "CU-015",
+        "x-cobertura": "parcial",
+        "parameters": [
+          {
+            "name": "id_cliente",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "minimum": 1
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Estado de deuda derivado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Deuda"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "VALIDACION — identificador inválido",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/NoAutenticado"
+          },
+          "403": {
+            "description": "SIN_PERMISO — requiere administrador o dueno",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "CLIENTE_NO_ENCONTRADO",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/pasajeros/me/deuda": {
       "get": {
         "tags": [

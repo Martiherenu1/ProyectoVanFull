@@ -4,8 +4,11 @@ Fecha: 2026-10-29. Base: main `2d03aca`. Relacionados: #215 y #216.
 **PROPUESTA DE IA — PENDIENTE DE VALIDACIÓN.** No autoriza modelos, contrato HTTP,
 migraciones, despliegues ni operaciones externas. CU-036 permanece **PARCIAL**;
 webhook HTTP inactivo, sin integración real certificada. Se conserva la decisión
-de Martiniano de no aprobar cambios de modelo/contrato antes de PC2; esta tarea
-prepara una alternativa, no revoca aquella decisión ni acredita su aprobación.
+de Martiniano de no aprobar cambios de modelo/contrato antes de PC2 como antecedente.
+Actualización comunicada por el usuario: autoriza avanzar en rama aislada, pero exige
+aprobación escrita de Martiniano, Martín y Facundo antes de integrar modelo/contrato
+a main. Plazo comunicado: **30/10/2026, 10:00, Argentina**. No se presume ninguna de
+esas tres aprobaciones. El alcance de esta edición sigue siendo solo documental.
 
 ## Fuentes y alcance confirmado
 
@@ -116,4 +119,158 @@ la cobertura contable existente. No se realizó prueba sandbox externa.
 Validar propuesta con Martiniano (modelo/HTTP/configuración) y Martín si afecta DER o
 línea base. Recién después implementar vínculo/router, preparar pruebas de DB aislada
 y solicitar autorización del escenario sandbox. Esta rama se detiene antes de commit,
-push o PR; no altera contratos ni configura despliegues.
+push o PR adicionales; no altera contratos ni configura despliegues. La preparación
+anterior ya fue publicada en Draft PR #240; la edición siguiente queda local.
+
+## Decisiones concretas para votar — revisión de #240
+
+Cada D requiere respuesta escrita «apruebo» o «rechazo + alternativa» de los tres
+en #238/#240, referida a esta revisión. Ninguna D está aprobada por este documento.
+La condición de unanimidad comunicada por el usuario prevalece sobre el flujo
+general de CONTRIBUTING.md. Sin unanimidad al plazo, conservar CU-036 PARCIAL,
+webhook inactivo y preparación en Draft; no habilitar integración por vencimiento.
+Estas decisiones concretan las alternativas anteriores, que se conservan como historia.
+
+### D1 — una tabla exclusiva de vínculo sandbox, relación 1:1
+
+Nombre propuesto: `pago_mercadopago`, sin añadir columnas ni estados a `pago`.
+
+| Campo | Tipo / restricción propuesta |
+|---|---|
+| `id_operacion` | VARCHAR(64), PK, CHECK solo dígitos, longitud 1..64 |
+| `id_pago` | BIGINT NOT NULL UNIQUE, FK pago.id_pago ON DELETE RESTRICT |
+| `id_receptor` | BIGINT NOT NULL CHECK > 0 |
+| `moneda` | VARCHAR(3) NOT NULL CHECK tres letras mayúsculas |
+| `creado_en` | TIMESTAMPTZ NOT NULL DEFAULT now() |
+
+Proveedor y entorno son invariantes de esta tabla: exclusivamente Mercado Pago y
+sandbox; no se propone soporte productivo ni multientorno. Si se necesita eso,
+reabrir clave compuesta proveedor/entorno/id_operacion antes de implementar.
+Un Pago tiene 0..1 vínculo; cada vínculo tiene exactamente un Pago y cada operación
+solo uno. El vínculo es inmutable, sin endpoint de edición/borrado. La FK y UNIQUE
+garantizan identidad/cardinalidad; servicio valida MERCADO_PAGO, PENDIENTE, importe,
+receptor autorizado, moneda configurada y live_mode=false bajo lock del Pago.
+No duplicar saldo/importe ni introducir una nueva regla económica.
+
+### D2 — asociación explícita mediante comando local, no por webhook
+
+Proponer comando restringido a entorno local de pruebas, con `id_pago` e
+`id_operacion` explícitos, ambos identificados por el responsable del escenario.
+Consultar Payments antes de insertar D1, comprobar D1 y mostrar confirmación sin
+datos sensibles. Insertar en transacción con lock del Pago; repetir el mismo vínculo
+es idempotente, otro vínculo para cualquiera de las dos identidades es conflicto.
+No alterar el estado del Pago al vincular. No usar external_reference, coincidencia
+de importe ni ID local como correlación implícita. No agregar endpoint de asociación.
+La primera notificación puede llegar antes del alta: responder conflicto sin ACK de
+éxito; tras alta, reenviar desde panel del proveedor o ejecutar reproceso controlado.
+Esto es una preparación manual sandbox, no un circuito de cobro productivo CU-014.
+
+### D3 — webhook síncrono mínimo y contrato explícito
+
+Única ruta propuesta: `POST /api/webhooks/mercadopago` (OpenAPI relativo
+`/webhooks/mercadopago` bajo servidor /api), sin JWT; autenticación exclusiva HMAC.
+Headers obligatorios x-signature (`ts`, `v1`) y x-request-id; query obligatoria
+`data.id`; JSON con type=payment, live_mode=false, data.id coincidente. Aceptar
+metadatos adicionales sin usarlos para decisiones ni persistir datos del pagador.
+HMAC-SHA256 sobre `id:{data.id};request-id:{x-request-id};ts:{ts};`, comparación
+constante; proponer ventana de 300 segundos, reloj UTC sincronizado y límites
+actuales de identificador. Es política propuesta, no una exigencia de RN-015.
+
+| Respuesta propuesta | Condición / efecto |
+|---|---|
+| 200, cuerpo vacío | Confirmación comprometida, duplicado comprobado o estado no approved consultado válidamente; sin nueva transición para este último |
+| 400 WEBHOOK_INVALIDO | JSON, IDs, tópico o entorno incompatibles; no confirmar |
+| 401 FIRMA_WEBHOOK_INVALIDA | Firma ausente/inválida/fuera de ventana; no consultar Payments |
+| 409 VINCULO_PAGO_INVALIDO | Sin vínculo o incompatibilidad de importe/moneda/receptor/estado local; no confirmar |
+| 503 PROVEEDOR_NO_DISPONIBLE | Timeout, error/red, 429/5xx o respuesta Payments inválida; no confirmar |
+| 503 INTEGRACION_NO_DISPONIBLE | Configuración incompleta, timeout de lock o DB indisponible; rollback |
+| 500 ERROR_INTERNO | Fallo no previsto; rollback, mensaje sanitizado |
+
+Los códigos son **propuestos**, no agregados al contrato actual. Errores con el
+esquema uniforme existente. Token rechazado por proveedor se trata como incidente
+de configuración y no se oculta como éxito; requiere intervención, no bucle interno.
+Si está deshabilitado, no registrar router (404); no simular ACK.
+
+GET Payments con máximo 10 s y un intento por entrega; presupuesto total propuesto
+15 s, incluyendo lock/DB, con timeout de lock 2 s. Cancelar y rollback si vence antes
+de commit; jamás responder 200 antes de commit. Una respuesta perdida después de
+commit se recupera mediante duplicado idempotente. No incorporar worker/inbox en
+este mínimo. Si las mediciones no cumplen el presupuesto, bloquear activación y
+proponer inbox durable mediante nueva decisión de modelo, nunca background en memoria.
+
+Solo status=approved del recurso real consultado habilita CU-016. Conservar las
+validaciones y locks existentes, RECIBO/ACREEDOR/evento de CU-016 y sus UNIQUE.
+No interpretar otro estado como aprobado, rechazo contable o reintegro.
+
+### D4 — reintentos y registro mínimo sin tabla de eventos adicional
+
+Registrar únicamente categoría, request-id acotado y validado, ID de operación y
+resultado técnico; sin firmas, tokens, headers completos, cuerpos ni PII. Desactivar
+logs HTTP detallados y proteger acceso/retención del log del entorno de prueba.
+No crear historia durable en esta etapa: declarar expresamente esa limitación.
+Ante error no emitir 200; permitir reentrega del proveedor. No suponer que solo
+reintenta 503 ni fijar su calendario desde VanFull. Para firma de reentrega demasiado
+antigua, no ampliar ventana automáticamente: reenviar una notificación nueva desde
+panel o reprocesar por comando local autenticado por acceso al entorno, que consulta
+Payments y reutiliza el servicio de liquidación con vínculo/lock sin falsificar HMAC.
+Ese comando es administrativo local de sandbox, no un bypass HTTP público.
+Sin confirmación de nuevo evento cuando cambie el estado, el responsable debe
+reconciliar explícitamente operaciones no acreditadas. No hay garantía de recuperación
+desatendida tras agotar entregas: si se exige, rechazar este mínimo y aprobar inbox.
+
+Fuente técnica consultada: Mercado Pago documenta ACK 200/201 dentro de 22 s y
+reentregas cuando no se recibe ACK; distingue notificación de consulta del recurso.
+[Webhooks oficiales](https://www.mercadopago.com.pe/developers/es/docs/links-and-debts/additional-content/your-integrations/notifications/webhooks).
+Los presupuestos, códigos y operación local anteriores son propuestas VanFull.
+
+### D5 — escenario sandbox acotado, con autorización de ejecución separada
+
+Responsable designado por el equipo aporta token de prueba de la aplicación,
+secreto webhook, receptor, moneda e ID de operación de prueba, fuera del repo y
+sin pegarlos en Issue/PR/log. No usar token productivo; prefijo del token no es
+prueba suficiente: verificar cuenta/aplicación y live_mode=false del recurso.
+Si no existe operación de prueba, acordar su generación mediante herramientas
+oficiales y tarjetas/usuarios de prueba, exclusivamente en modo test. El simulador
+de notificaciones por sí solo no certifica un pago consultable en Payments.
+
+Proponer: backend y PostgreSQL local aislados, futuro esquema aprobado y HTTPS
+temporal autorizado hacia ese backend; sin Neon/Render. Usar CU-014 para crear Pago
+PENDIENTE del cliente de prueba por importe explícitamente acordado con la operación,
+sin elegir un monto ni una moneda por inferencia; asociar con D2. Activar router solo
+para ese entorno después de aprobación separada; registrar URL de pruebas en panel.
+Probar evento aprobado real de sandbox, duplicados/concurrencia, fallo transitorio y
+reproceso. Antes/después: Pago CONFIRMADO, exactamente un RECIBO y un ACREEDOR y sin
+asientos adicionales tras repetición. Incluir negativo de firma, receptor/importe,
+operación desconocida y live_mode=true exclusivamente simulado; nunca consultar un
+pago real para ese negativo. Guardar evidencia sanitizada y cerrar acceso temporal.
+Sin credenciales/operación/URL autorizadas, ejecutar mocks y declarar prueba real bloqueada.
+
+### D6 — lista exacta de cambios futuros, sin ejecutarlos ahora
+
+- Una nueva revisión Alembic hija del head vigente al implementar, creando solo
+  `pago_mercadopago` y restricciones D1; downgrade elimina esa tabla, sin CASCADE.
+  No editar 0001. Actualizar juntos schema.sql, modelo específico e import de modelos.
+- Resolver SQL y comandos locales `vincular` / `reprocesar` en módulo sandbox dedicado;
+  extraer de ser necesario la liquidación común sin alterar CU-016 ni saltar HMAC HTTP.
+- Router/schema webhook y registro condicional en app/main.py; una sola operación
+  HTTP nueva/activada, sin endpoint de creación de cobro, vínculo ni nuevos permisos.
+- OpenAPI YAML/JSON y README coherentes con D3 y x-cobertura parcial vigente.
+- Settings/.env.example: MERCADOPAGO_SANDBOX_ENABLED=false,
+  MERCADOPAGO_WEBHOOK_SECRET vacío, MERCADOPAGO_WEBHOOK_TOLERANCE_SECONDS=300,
+  MERCADOPAGO_COLLECTOR_ID y MERCADOPAGO_CURRENCY obligatorios al habilitar;
+  reutilizar MERCADOPAGO_ACCESS_TOKEN. Exigir entorno local/test; error de arranque
+  si se intenta habilitar con ENV=production. Timeouts D3 constantes documentadas.
+- Sin cambios de render.yaml, despliegues ni secretos versionados. La URL pública
+  temporal y configuración del panel son acciones externas separadas, no de este diff.
+- Pruebas futuras: restricciones y carreras de asociación, contrato HTTP, atomicidad,
+  presupuesto/rollback, sesión de DB tras error, reentrega con firma nueva y reproceso.
+
+## Trabajo independiente y bloqueo de integración
+
+Independiente: propuesta, matriz de casos y pruebas existentes con MockTransport;
+se pueden preparar fakes de vínculo y reloj sin modificar contrato/modelos.
+Dependiente de aprobación: D1–D6 y pruebas que fijan su comportamiento, migración,
+resolver persistente, router/contrato/configuración y conexión externa. La autorización
+de rama aislada no autoriza en esta tarea esos cambios, migraciones o activación.
+Solo se edita este documento; sin commit/push. No se repiten pruebas de código ante
+una edición documental. Validación: diff check y coherencia entre D1–D6.

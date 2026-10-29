@@ -886,9 +886,15 @@
         "tags": [
           "gps"
         ],
-        "summary": "Consultar ubicación y estimaciones del vehículo",
-        "description": "Última ubicación del vehículo del servicio (solo usuarios vinculados, RN-030).\nMarca \"desactualizada\" si supera 30 s (RNF-008). Incluye ETA cuando está disponible.\nConsumidores hacen polling (~10 s, RNF-007). (CU-009, RF-022)\n",
+        "summary": "Consultar última ubicación del vehículo",
+        "description": "Requiere autenticación bearer (401 NO_AUTENTICADO sin token válido).\nAdministrador y dueño conservan acceso por rol. El pasajero autenticado debe\ntener una reserva propia consolidada del mismo viaje (RN-030); se consulta\nprimero esa reserva, sin bloquearla. Sin reserva propia consolidada se responde\n403 SIN_PERMISO sin coordenadas, incluso si el viaje no existe o no está en_curso.\nUna reserva ajena, provisional o cancelada no habilita. Ausencia y abordaje\nno agregan restricciones. El rol chofer por sí solo no habilita este GET.\n\nDespués de autorizar, si el viaje no existe o no está en_curso se responde\n404 VIAJE_NO_DISPONIBLE. Solo para un viaje en_curso autorizado, si falta una\nposición completa se responde 404 UBICACION_NO_DISPONIBLE. Esa es la precedencia:\nautenticación, permiso, disponibilidad del viaje y disponibilidad de posición.\n\nMarca \"desactualizada\" si supera 30 s (RNF-008).\nConsumidores hacen polling (~10 s, RNF-007). (CU-009, RF-022)\nCOBERTURA PARCIAL: ETA todavía no está implementado; eta_minutos es null.\nNo acredita continuidad GPS ni cumplimiento de RNF-008.\n",
         "x-cu": "CU-009",
+        "x-cobertura": "parcial",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
         "parameters": [
           {
             "$ref": "#/components/parameters/IdViaje"
@@ -896,7 +902,7 @@
         ],
         "responses": {
           "200": {
-            "description": "Ubicación del vehículo",
+            "description": "Última ubicación del vehículo; eta_minutos es null mientras ETA no esté implementado.",
             "content": {
               "application/json": {
                 "schema": {
@@ -905,11 +911,28 @@
               }
             }
           },
+          "401": {
+            "$ref": "#/components/responses/NoAutenticado"
+          },
           "403": {
-            "$ref": "#/components/responses/SinPermiso"
+            "description": "SIN_PERMISO. Rol no autorizado o pasajero sin reserva propia consolidada; precede a ambos 404 y no expone coordenadas.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
           },
           "404": {
-            "$ref": "#/components/responses/NoEncontrado"
+            "description": "VIAJE_NO_DISPONIBLE si el viaje no existe o no está en_curso; de lo contrario UBICACION_NO_DISPONIBLE si falta una posición completa. Solo después de autorizar.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
           }
         }
       },

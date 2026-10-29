@@ -30,7 +30,7 @@ verifica, incluido que se pueda iniciar sesión con cada cuenta.
 | `persona`, `pasajero`, `cliente`, `cliente_individual` | 5 personas: 2 pasajeros (con su cliente individual), 2 choferes y 1 administrador |
 | `chofer` | Las personas 3 y 5. La 3 tiene la cuenta `chofer1@vanfull.test`; la 5 ("Chofer Dos") **no tiene cuenta de acceso**: existe solo para probar la reasignación de CU-018. `chofer` usa `id_persona` como PK/FK; no tiene otro identificador |
 | `cuenta_corriente` | Una cuenta corriente para cada uno de los 2 clientes individuales |
-| `cuenta_acceso`, `cuenta_rol` | Una cuenta por persona. Roles: `pasajero` ×2, `chofer`, `administrador` |
+| `cuenta_acceso`, `cuenta_rol` | Una cuenta por persona, **salvo la persona 5** (chofer sin cuenta: no puede iniciar sesión ni publicar GPS, solo recibir asignaciones). Roles: `pasajero` ×2, `chofer`, `administrador` |
 | `servicio` | Un servicio universitario y uno laboral |
 | `recorrido`, `parada`, `parada_recorrido` | Un recorrido con 3 paradas (nombres y sin coordenadas: son de prueba) |
 | `vehiculo` | Vehículos 1 y 2, patentes sintéticas `VF029AA` y `VF030AA`, capacidad 20 cada uno (el 2 es para probar la reasignación) |

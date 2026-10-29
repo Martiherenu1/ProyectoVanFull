@@ -211,6 +211,7 @@ class _EntradaAdministracionState extends State<_EntradaAdministracion> {
               cargarViajes: _cargarViajes,
               onViajeSeleccionado: _abrirUbicacion,
               actualizarViaje: _actualizarViaje,
+              cancelarViaje: _cancelarViaje,
             ),
             Positioned(
               right: AppSpacing.lg,
@@ -326,6 +327,25 @@ class _EntradaAdministracionState extends State<_EntradaAdministracion> {
       solicitud: () => widget.crear.actualizarViaje(idViaje, solicitud),
       onAccesoDenegado: _denegarAcceso,
     );
+  }
+
+  Future<ViajeResumen> _cancelarViaje(int idViaje) async {
+    final generacion = widget.controller.generacion;
+    final token = widget.controller.token;
+    bool vigente() =>
+        mounted &&
+        !_accesoDenegado &&
+        token != null &&
+        widget.controller.generacion == generacion &&
+        widget.controller.token == token;
+    if (!vigente()) throw StateError('La sesión ya no está vigente.');
+    final resultado = await _protegerAcceso(
+      controller: widget.controller,
+      solicitud: () => widget.crear.cancelarViaje(idViaje),
+      onAccesoDenegado: _denegarAcceso,
+    );
+    if (!vigente()) throw StateError('La sesión ya no está vigente.');
+    return resultado;
   }
 
   void _denegarAcceso() {

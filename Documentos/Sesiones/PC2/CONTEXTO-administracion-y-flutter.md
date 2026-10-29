@@ -152,6 +152,14 @@ cuenta: es la integración de Mercado Pago que extiende CU-014.
 
 ## Decisiones vigentes
 
+- **Preparación local #207 (29/10/2026):** interfaz Flutter de cancelación CU-018 desde main
+  `4d5c4ff` (#186/#189/#192 integrados). Botón en programado, confirmación, errores backend,
+  actualización detalle/listado, protección contra doble envío y respuestas tras cierre/cambio
+  de sesión. main.dart solo inyecta el callback administrativo con control de generación/token.
+  Sin cambios backend/OpenAPI/BD ni ampliación de RN-019. 30 pruebas focalizadas aprobadas y
+  flutter analyze sin problemas; dependencias restauradas con lockfile exigido, sin cambiarlo.
+  Rama `feat/admin-cancelar-viaje-flutter-cu018-207`, sin commit/push/PR; pendiente autorización.
+
 - **Propuesta local #180 (28/10/2026):** Facundo indica recorte acordado con Martiniano y autoriza
   preparar backend/OpenAPI y pruebas locales; confirmación final de Martín pendiente. Cancelación
   lógica solo de viajes programados no ESPECIAL/CORPORATIVO y sin reservas provisional/consolidada,

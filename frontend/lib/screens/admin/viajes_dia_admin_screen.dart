@@ -24,6 +24,7 @@ class ViajesDiaAdminScreen extends StatefulWidget {
     required this.cargarViajes,
     required this.onViajeSeleccionado,
     this.actualizarViaje,
+    this.cancelarViaje,
     super.key,
   });
 
@@ -31,6 +32,7 @@ class ViajesDiaAdminScreen extends StatefulWidget {
   final CargarViajesDelDia cargarViajes;
   final ValueChanged<int> onViajeSeleccionado;
   final ActualizarViaje? actualizarViaje;
+  final Future<ViajeResumen> Function(int)? cancelarViaje;
 
   @override
   State<ViajesDiaAdminScreen> createState() => _ViajesDiaAdminScreenState();
@@ -107,6 +109,7 @@ class _ViajesDiaAdminScreenState extends State<ViajesDiaAdminScreen> {
       builder: (context) => _DetalleViajeAdminDialog(
         viaje: viaje,
         actualizarViaje: widget.actualizarViaje,
+        cancelarViaje: widget.cancelarViaje,
         onActualizado: (_) => _cargar(),
       ),
     );
@@ -278,11 +281,13 @@ class _DetalleViajeAdminDialog extends StatefulWidget {
     required this.viaje,
     required this.actualizarViaje,
     required this.onActualizado,
+    required this.cancelarViaje,
   });
 
   final ViajeResumen viaje;
   final ActualizarViaje? actualizarViaje;
   final Future<void> Function(ViajeResumen viaje) onActualizado;
+  final Future<ViajeResumen> Function(int)? cancelarViaje;
 
   @override
   State<_DetalleViajeAdminDialog> createState() =>
@@ -291,6 +296,65 @@ class _DetalleViajeAdminDialog extends StatefulWidget {
 
 class _DetalleViajeAdminDialogState extends State<_DetalleViajeAdminDialog> {
   late ViajeResumen _viaje = widget.viaje;
+  bool _cancelando = false;
+  String? _errorCancelacion;
+
+  bool get _detalleVigente =>
+      mounted && (ModalRoute.of(context)?.isCurrent ?? false);
+
+  Future<void> _cancelar() async {
+    if (_cancelando) return;
+    setState(() {
+      _cancelando = true;
+      _errorCancelacion = null;
+    });
+    final confirmado = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('¿Cancelar viaje?'),
+        content: const Text(
+          'El viaje quedará cancelado. Esta operación no aplica reintegros.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text('Volver'),
+          ),
+          FilledButton(
+            key: const Key('confirmar-cancelacion'),
+            onPressed: () => Navigator.pop(context, true),
+            child: const Text('Confirmar cancelación'),
+          ),
+        ],
+      ),
+    );
+    if (!_detalleVigente) return;
+    if (confirmado != true) {
+      setState(() => _cancelando = false);
+      return;
+    }
+    try {
+      final cancelado = await widget.cancelarViaje!(_viaje.idViaje);
+      if (!_detalleVigente) return;
+      setState(() {
+        _viaje = cancelado;
+        _cancelando = false;
+      });
+      await widget.onActualizado(cancelado);
+    } on ApiException catch (error) {
+      if (!_detalleVigente) return;
+      setState(() {
+        _errorCancelacion = error.mensaje;
+        _cancelando = false;
+      });
+    } catch (_) {
+      if (!_detalleVigente) return;
+      setState(() {
+        _errorCancelacion = 'No pudimos cancelar el viaje. Volvé a intentar.';
+        _cancelando = false;
+      });
+    }
+  }
 
   Future<void> _editar() async {
     final actualizado = await showDialog<ViajeResumen>(
@@ -317,6 +381,8 @@ class _DetalleViajeAdminDialogState extends State<_DetalleViajeAdminDialog> {
           _dato('Fecha', fechaLegible(_viaje.fecha)),
           _dato('Horario', _viaje.horario ?? 'Sin horario'),
           _dato('Estado', _viaje.estado.etiqueta),
+          if (_errorCancelacion != null)
+            Text(_errorCancelacion!, key: const Key('error-cancelacion')),
           _dato('Sentido', _viaje.sentido.etiqueta),
           _dato('Servicio', 'ID ${_viaje.idServicio}'),
           _dato('Recorrido', 'ID ${_viaje.idRecorrido}'),
@@ -339,8 +405,15 @@ class _DetalleViajeAdminDialogState extends State<_DetalleViajeAdminDialog> {
           widget.actualizarViaje != null)
         FilledButton(
           key: const Key('editar-viaje'),
-          onPressed: _editar,
+          onPressed: _cancelando ? null : _editar,
           child: const Text('Editar'),
+        ),
+      if (_viaje.estado == EstadoViaje.programado &&
+          widget.cancelarViaje != null)
+        TextButton(
+          key: const Key('cancelar-viaje'),
+          onPressed: _cancelando ? null : _cancelar,
+          child: const Text('Cancelar viaje'),
         ),
       TextButton(
         onPressed: () => Navigator.of(context).pop(),

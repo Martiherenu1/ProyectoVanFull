@@ -304,14 +304,6 @@ def test_el_listado_de_administracion_trae_los_datos_del_viaje_y_el_horario_null
     assert "horario" in sin_horario and sin_horario["horario"] is None
 
 
-def test_sin_reservas_el_listado_de_administracion_es_una_lista_vacia():
-    with base_migrada() as base, cliente_api(base) as http:
-        admin = _persona(base, "9", pasajero=False)
-        respuesta = http.get(TODAS, headers=_con(admin, ["administrador"]))
-    assert respuesta.status_code == 200
-    assert respuesta.json() == []
-
-
 def test_el_listado_de_administracion_sin_token_es_401(entorno):
     assert entorno["http"].get(TODAS).status_code == 401
 

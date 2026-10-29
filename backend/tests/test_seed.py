@@ -61,7 +61,7 @@ def test_el_csv_de_cuentas_no_trae_hashes_ni_contrasenas():
 
 def test_carga_las_tablas_y_devuelve_la_cantidad(base):
     resumen = _cargar(base)
-    assert resumen["persona"] == 4
+    assert resumen["persona"] == 5
     assert resumen["cuenta_rol"] == 4
     for tabla, cantidad in resumen.items():
         assert _uno(base, f'SELECT count(*) FROM "{tabla}"') == cantidad
@@ -166,6 +166,30 @@ def test_el_seed_es_compatible_con_cu018_y_cu029(base):
         assert creado.json()["id_viaje"] == 4
 
 
+def test_el_segundo_chofer_y_el_segundo_vehiculo_permiten_reasignar(base):
+    """El viaje 1 nace con chofer 3 y vehículo 1: sin otros ids, CU-018 no puede probar la reasignación."""
+    _cargar(base)
+    assert _uno(base, "SELECT count(*) FROM chofer") == 2
+    assert _uno(base, "SELECT count(*) FROM vehiculo") == 2
+    contrasenas = seed.leer_contrasenas(seed.CONTRASENAS)
+    with cliente_api(base) as cliente:
+        sesion = cliente.post(
+            "/api/auth/login",
+            json={
+                "identificador_acceso": "admin1@vanfull.test",
+                "password": contrasenas["admin1@vanfull.test"],
+            },
+        )
+        reasignado = cliente.patch(
+            "/api/viajes/1",
+            json={"id_chofer": 5, "id_vehiculo": 2},
+            headers={"Authorization": f"Bearer {sesion.json()['access_token']}"},
+        )
+        assert reasignado.status_code == 200
+        assert reasignado.json()["id_chofer"] == 5
+        assert reasignado.json()["id_vehiculo"] == 2
+
+
 def test_las_secuencias_siguen_despues_de_la_carga(base):
     """Con ids explícitos la secuencia quedaría en 1 y el próximo INSERT chocaría."""
     _cargar(base)
@@ -174,7 +198,7 @@ def test_las_secuencias_siguen_despues_de_la_carga(base):
         "INSERT INTO persona (nombre, apellido, dni) VALUES ('Nueva', 'Persona', '90000099') "
         "RETURNING id_persona",
     )
-    assert nuevo == 5
+    assert nuevo == 6
 
 
 def test_la_carga_es_todo_o_nada(base, tmp_path):
@@ -192,7 +216,7 @@ def test_no_carga_dos_veces_sin_pedirlo(base):
     _cargar(base)
     with pytest.raises(seed.ErrorSeed, match="--reiniciar"):
         _cargar(base)
-    assert _uno(base, "SELECT count(*) FROM persona") == 4
+    assert _uno(base, "SELECT count(*) FROM persona") == 5
 
 
 def test_con_reiniciar_deja_el_mismo_estado(base):

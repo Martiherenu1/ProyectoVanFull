@@ -1,8 +1,9 @@
 # CONTEXTO VANFULL — Carga rápida de sesión
 
-> Integración administrativa #227, 2026-10-29: rama test/admin-integracion-pc2-227 desde main
-> a7ded22. 3 casos nuevos pagos→deuda/ciclo viaje y 11 existentes CU-027 aprobados en PostgreSQL
-> temporal local; sin cambios funcionales ni workflows. Preparado sin commit/push/PR.
+> Integración Flutter #229, 2026-10-29: test/admin-flutter-integracion-pc2-229 desde main
+> 8e16205 (#228 integrado). Tres circuitos UI nuevos; 32 focalizadas y analyze aprobados.
+> Solo pruebas/contextos, sin cambios productivos ni Neon/Render. Sin commit/push/PR.
+> Antecedente #227/#228: 3 casos backend + 11 existentes CU-027 aprobados, ya integrados.
 
 > **Corte Administración PC2 — 2026-10-29, main bceb929, #225.** PR #210/#214/#216/#217/#218
 > mergeados. CU-018/027/014/015: PARCIAL; CU-016: circuito documentado IMPLEMENTADO, contraste

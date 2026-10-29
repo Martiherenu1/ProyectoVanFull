@@ -1,8 +1,18 @@
+import java.util.Base64
+
 plugins {
     id("com.android.application")
     // The Flutter Gradle Plugin must be applied after the Android and Kotlin Gradle plugins.
     id("dev.flutter.flutter-gradle-plugin")
 }
+
+// Configuracion externa compartida con Dart; vacia por defecto.
+val mapsDefines = providers.gradleProperty("dart-defines").orNull
+    ?.split(",")?.filter { it.isNotEmpty() }?.mapNotNull {
+        val parts = String(Base64.getDecoder().decode(it),
+            Charsets.UTF_8).split("=", limit = 2)
+        if (parts.size == 2) parts[0] to parts[1] else null
+    }?.toMap().orEmpty()
 
 android {
     namespace = "com.vanfull.frontend"
@@ -17,6 +27,8 @@ android {
     defaultConfig {
         // TODO: Specify your own unique Application ID (https://developer.android.com/studio/build/application-id.html).
         applicationId = "com.vanfull.frontend"
+        manifestPlaceholders["vanfullMapsAndroidKey"] =
+            mapsDefines["VANFULL_MAPS_ANDROID_KEY"].orEmpty()
         // You can update the following values to match your application needs.
         // For more information, see: https://flutter.dev/to/review-gradle-config.
         minSdk = flutter.minSdkVersion

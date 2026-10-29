@@ -1,0 +1,70 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>Loader Maps: pruebas locales sin red</title>
+<body>Ejecutando…</body>
+<script>
+(async () => {
+  const appendLocal = document.head.append.bind(document.head);
+  let scripts;
+  let casos = 0;
+  document.head.append = script => scripts.push(script); // No inserta ni carga scripts Maps.
+  function assert(condicion, nombre) {
+    if (!condicion) throw new Error(nombre);
+  }
+  async function reset() {
+    scripts = [];
+    window.google = undefined;
+    const local = document.createElement('script');
+    local.src = '../web/vanfull_maps.js';
+    await new Promise((resolve, reject) => {
+      local.onload = resolve;
+      local.onerror = () => reject(new Error('No se cargó helper local'));
+      appendLocal(local);
+    });
+  }
+  try {
+    await reset();
+    for (const [clave, mapa] of [['', ''], ['prueba', ''], ['', 'mapa'], [' ', 'mapa']]) {
+      assert(await window.vanfullMapsPreparar(clave, mapa) === false, 'configuración incompleta');
+    }
+    assert(scripts.length === 0, 'sin scripts remotos');
+    casos++;
+
+    await reset();
+    const a = window.vanfullMapsPreparar('prueba', 'mapa');
+    const b = window.vanfullMapsPreparar('prueba', 'mapa');
+    assert(a === b && scripts.length === 1, 'carga única');
+    const url = new URL(scripts[0].src);
+    assert(url.searchParams.get('libraries') === 'marker', 'biblioteca marker');
+    assert(url.searchParams.get('v') === 'quarterly', 'canal quarterly');
+    window.google = {maps: {Map: function() {}, marker: {AdvancedMarkerElement: function() {}}}};
+    window.vanfullMapsPreparado();
+    assert(await a === true, 'SDK falso listo');
+    assert(await window.vanfullMapsPreparar('otra', 'mapa') === false, 'no rotación implícita');
+    assert(scripts.length === 1, 'sin segunda inyección');
+    casos++;
+
+    for (const auth of [false, true]) {
+      await reset();
+      const p = window.vanfullMapsPreparar('prueba', 'mapa');
+      if (auth) window.gm_authFailure(); else scripts[0].onerror();
+      assert(await p === false, 'fallo simulado');
+      assert(await window.vanfullMapsPreparar('prueba', 'mapa') === false, 'sin reintento');
+      assert(scripts.length === 1, 'una inyección fallida');
+      casos++;
+    }
+
+    await reset();
+    const p = window.vanfullMapsPreparar('prueba', 'mapa');
+    window.google = {maps: {Map: function() {}}};
+    window.vanfullMapsPreparado();
+    assert(await p === false, 'falta biblioteca avanzada');
+    casos++;
+    document.body.dataset.tests = 'passed';
+    document.body.textContent = casos + ' pruebas aprobadas; helper real, SDK y carga remota falsos.';
+  } catch (error) {
+    document.body.dataset.tests = 'failed';
+    document.body.textContent = 'FALLO: ' + error.message;
+  }
+})();
+</script>

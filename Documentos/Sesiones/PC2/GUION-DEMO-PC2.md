@@ -15,8 +15,15 @@
 | Reservas, pagos, posiciones | Ninguno: el seed no los carga |
 | Segundo chofer / vehículo | Persona 5 y chofer 5 (sin cuenta de acceso), vehículo 2 (`VF030AA`), para reasignar |
 
-**Neon tiene hoy datos distintos del seed** (se cargaron a mano en pruebas) hasta que se re-siembre con
-`--reiniciar`. Sin esa corrida, lo de arriba no es lo que vamos a ver.
+**Neon se re-sembró el 29/10/2026 a las 18:44 (Argentina)** con `--reiniciar` (seed `08442e2`, `main` `8217c9c`) y se
+verificó en solo lectura: viaje 1 programado con chofer 3 y vehículo 1, choferes 3 y 5, vehículos 1 y 2, 4 cuentas y
+reservas, pagos y posiciones en cero. Lo de arriba es lo que hay. Las cuentas conservan sus contraseñas. **Todo lo que se
+pruebe a partir de ahí ensucia esa base:** quien quiera dejarla limpia vuelve a correr el reinicio.
+
+**Cuidado con reservar y cancelar el mismo viaje:** la base guarda una sola fila por pasajero y viaje, aunque esté
+cancelada, y reactivarla no está definido (MR-R15). Si un pasajero cancela una reserva, no puede reservar ese mismo
+viaje de nuevo (`RESERVA_CANCELADA_PREVIA`, 409). Para la demo, **no probar reserva y cancelación con la cuenta y el viaje
+que se van a usar en vivo**; usar otra cuenta u otro viaje.
 
 ## 2. Una hora antes: checklist
 
@@ -47,7 +54,7 @@ reservar uno `en_curso`), y ve la ubicación solo con una reserva propia consoli
 
 ## 4. Qué se declara parcial (no se muestra como completo)
 
-CU-003 sin lista de espera · CU-005 y CU-007 en el contrato pero **sin implementar** · CU-014 sin comprobantes ni adjuntos ·
+CU-003 sin lista de espera · CU-007 en el contrato pero **sin implementar**, y CU-005 con backend (#243, con la interpretación de «disponibilidad compatible» pendiente de validar, #242) pero **sin pantalla** · CU-014 sin comprobantes ni adjuntos ·
 CU-015 solo lectura (RN-004/005/006 pendientes) · CU-018 sin reintegros (RN-019) · CU-027 sin filtros ·
 CU-030 sin avisos de demora · CU-036 solo preparación interna, **webhook inactivo** · ETA vacío en CU-009 ·
 los 17 CU sin contrato (CU-013, 017, 019 a 026, 028, 031 a 035, 037). Detalle en `backend/openapi/README.md`.

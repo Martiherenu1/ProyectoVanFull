@@ -399,6 +399,21 @@ def test_si_el_modelo_no_responde_bien_se_deriva_a_una_persona(entorno, hablar, 
     assert cuerpo["conversacion_id"] not in agente._conversaciones
 
 
+def test_si_se_agoto_el_cupo_diario_el_pasajero_lo_sabe(entorno, hablar):
+    """Issue #233: en Render los dos modelos contestaron 429 por el límite diario gratuito."""
+    hablar(openrouter_client.CupoDiarioAgotado("cupo agotado"))
+    respuesta = _hablar_como(entorno, "ana", "Hola")
+    assert respuesta.status_code == 200
+    cuerpo = respuesta.json()
+    assert cuerpo["respuesta"] == agente.MENSAJE_SIN_CUPO
+    assert cuerpo["respuesta"] != agente.MENSAJE_DERIVACION
+    # Como en el resto de A1, se ofrece una persona; y un turno fallido no deja nada a medias.
+    assert cuerpo["derivar_humano"] is True
+    assert cuerpo["conversacion_id"] not in agente._conversaciones
+    # El mensaje manda a las pestañas de la app que existen.
+    assert "Buscar" in agente.MENSAJE_SIN_CUPO and "Mis reservas" in agente.MENSAJE_SIN_CUPO
+
+
 def test_sin_clave_se_deriva_sin_llamar_a_openrouter(entorno, monkeypatch):
     """La demo sin OPENROUTER_API_KEY: el cliente real, sin red, termina en derivación y no en 500."""
     monkeypatch.setattr(openrouter_client.settings, "openrouter_api_key", "")

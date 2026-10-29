@@ -31,6 +31,19 @@ class OpenRouterError(RuntimeError):
     """No se obtuvo respuesta válida de ningún modelo (principal ni fallback)."""
 
 
+class CupoDiarioAgotado(OpenRouterError):
+    """Todos los modelos respondieron que se agotó el límite diario de la cuenta gratuita.
+
+    Es un caso aparte para poder decirle al pasajero la verdad (Issue #233): el servicio no
+    falló, no hay más pedidos hasta que el cupo se renueve.
+    """
+
+
+def _es_cupo_diario(resp: httpx.Response) -> bool:
+    # Observado en Render el 29/10: «Rate limit exceeded: free-models-per-day», código 429.
+    return resp.status_code == 429 and "free-models-per-day" in resp.text
+
+
 def _tiene_mensaje(cuerpo: object) -> bool:
     # OpenRouter puede contestar 200 con un `error` en vez de `choices` (falla del proveedor).
     try:
@@ -55,6 +68,11 @@ async def chat_completion(
     headers = {"Authorization": f"Bearer {settings.openrouter_api_key}"}
     modelos = [settings.openrouter_model_primary, settings.openrouter_model_fallback]
 
+    # Solo si TODOS los intentos fallaron por el cupo diario se informa como tal (y hubo alguno:
+    # si se agotó el tiempo del mensaje antes de llamar a un modelo, no se sabe nada del cupo).
+    solo_cupo_diario = True
+    intentados = 0
+
     async with httpx.AsyncClient() as client:
         for modelo in modelos:
             espera = TIMEOUT_POR_LLAMADA
@@ -64,6 +82,7 @@ async def chat_completion(
                 logger.warning("AG-01: se agotó el tiempo del mensaje antes de probar %s", modelo)
                 break
 
+            intentados += 1
             payload: dict = {"model": modelo, "messages": messages}
             if tools:
                 payload["tools"] = tools
@@ -74,12 +93,15 @@ async def chat_completion(
                     )
             except (httpx.HTTPError, TimeoutError) as exc:
                 logger.warning("AG-01: %s no respondió (%s)", modelo, type(exc).__name__)
+                solo_cupo_diario = False
                 continue  # probar el siguiente modelo
             if resp.status_code != 200:
                 logger.warning(
                     "AG-01: %s respondió %s: %s", modelo, resp.status_code, resp.text[:_MAX_LOG]
                 )
+                solo_cupo_diario = solo_cupo_diario and _es_cupo_diario(resp)
                 continue
+            solo_cupo_diario = False
             try:
                 cuerpo = resp.json()
             except ValueError:
@@ -92,4 +114,6 @@ async def chat_completion(
                 continue
             return cuerpo
 
+    if solo_cupo_diario and intentados:
+        raise CupoDiarioAgotado("Se agotó el límite diario de pedidos a modelos gratuitos.")
     raise OpenRouterError("Ningún modelo (principal ni fallback) respondió correctamente.")

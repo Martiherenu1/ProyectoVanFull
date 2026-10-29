@@ -64,7 +64,22 @@ La línea funcional vigente es la especificación de Casos de Uso v1.3. Según e
 - OpenAPI `Viaje` no declara propiedades obligatorias, mientras el backend y `ViajeResumen` esperan los campos
   públicos base. El adaptador rechaza respuestas incompletas y no inventa valores.
 
-### CU-027 · Consultar reservas por administración — NO IMPLEMENTADO
+### CU-027 · Consultar reservas por administración — CONSULTA CONECTADA LOCALMENTE
+
+**Continuación #211/#217:** contrato real de #224 mergeado, GET `/api/reservas` solo
+administrador/dueno, todas las reservas por id_reserva ascendente, schema Reserva con id_pasajero.
+Contrastado con CU-027 v1.3/RF-043 ya analizado: listado, selección y detalle de solo lectura;
+criterios de búsqueda adicionales no definidos, sin filtros/paginación inventados. Detalle
+local del resultado: no se llama GET /reservas/{id}, que mantiene propiedad del pasajero.
+Adaptador HTTP reutiliza sesión y protección común 401/403. ReservaAdmin compone Reserva
+existente y conserva id_pasajero en listado/detalle sin tocar el modelo del pasajero.
+Carga/vacío/error/reintento y descarte de respuestas tardías conservados. Navegación CU-014,
+CU-016 y #222 intacta; CU-015/#218 todavía Draft, fuera de main, sin incorporar esa rama.
+Main a01df1e integrado localmente, conflictos documentales resueltos conservando aportes.
+54 pruebas focalizadas Flutter aprobadas (contrato HTTP, identidad, sesión, estados, detalle,
+responsive y navegación); analyze y diff check correctos. Sin backend modificado ni Ruff aplicable.
+Sin commit/push; la consulta local no acredita filtros futuros ni despliegue operativo.
+Los párrafos inferiores conservan el historial de preparación anterior al contrato #224.
 
 **Continuación local #211 (29/10/2026):** recuperados únicamente sus documentos del stash
 de CU-027 (se conserva copia). Preparada pantalla administrativa de solo lectura y puerto
@@ -96,6 +111,36 @@ No hay endpoint, servicio, pantalla administrativa ni pruebas específicas. El c
 interfaz continúan pendientes. No debe confundirse con las reservas propias del pasajero.
 
 ### CU-014 · Registrar pagos y comprobantes — PARCIAL
+
+**Avance local #213, 29/10/2026:** rama `feat/admin-registrar-pago-cu014-213` desde main
+`a8696de`, sin cambios de #210/CU-015/CU-027. Los trabajos locales #212 y #211 se preservaron
+en stashes separados con sus nombres de rama; no aplicarlos sobre esta rama.
+
+Leídos CU-014 v1.3 aprobado, RN-011/013/014/015/016 y contrato/servicio POST /pagos.
+Formulario administrativo integrado al endpoint existente: ID cliente destinatario con cuenta
+existente, importe recibido, transferencia o billetera. Confirma destinatario/importe antes
+de enviar y muestra el estado real devuelto; no confirma pagos ni genera recibos/movimientos.
+Reutiliza HTTP/sesión, Pago, MedioPago y formato de importes; main.dart solo conecta el registro.
+Muestra errores de cliente/cuenta/permiso/validación; evita doble envío y efectos de sesión vieja.
+
+Preparación aislada: BorradorImputacionPago y formulario local para tipo/referencia de respaldo,
+sin serialización, persistencia, subida de archivos ni conexión al registro real. El adaptador
+rechaza borradores con datos antes de HTTP: no los descarta silenciosamente. No determina tipo,
+seña mínima o condiciones empresariales; estos campos son candidatos a integración, no decisiones.
+
+**Para integrar lo restante (#84):** acordar almacenamiento y validación de tipo/evidencia con
+Martiniano/Martín; definir tarifa aplicable e imputación del 15 % antes de habilitar efectivo;
+vinculación con contratación/acuerdos y validación backend de seña general 50 %/excepciones
+empresariales; definir semántica CUENTA_CORRIENTE y conectar CU-036 para Mercado Pago cuando
+corresponda. Cliente sin cuenta conserva 404: no hay alta automática. No cambiar permisos.
+La UI identifica este registro como parcial y no habilita efectivo, señas/acuerdos especiales
+ni adjuntos. Sin cambios backend/OpenAPI/BD ni módulos Pasajero/Chofer/GPS. CU-014 sigue parcial.
+
+Validación local: 26 pruebas Flutter focalizadas aprobadas (adaptador, formulario/borrador,
+sesión y composición existente), flutter analyze sin problemas y diff check correcto.
+No se registraron pagos reales; sin commit/push/PR.
+
+Fuente CU: https://drive.google.com/file/d/1Kc4m4e2LH5xRc1J9HY-2hTQaiLNeRA7y/view
 
 **Implementado**
 
@@ -177,6 +222,26 @@ cuenta: es la integración de Mercado Pago que extiende CU-014.
   los cambios compartidos de Martín y Martiniano.
 
 ## Decisiones vigentes
+
+- **Preparación local #209, CU-016 (29/10/2026):** main `a8696de`, rama
+  `feat/admin-pagos-pendientes-cu016-209`. Pantalla de pagos pendientes, confirmación/rechazo,
+  errores, recarga y protección frente a doble envío/sesión anterior. Reutiliza POST de decisión
+  sin cambiar efectos contables; propone GET `/pagos/pendientes` solo administrador/dueño,
+  filtro PENDIENTE y orden de presentación fecha/id. No es una regla económica nueva.
+  Sin cambios Pasajero/Chofer/GPS ni modelos de BD. Fuente consultada: CU-016/RN-015 del MVC
+  aprobado y contrato vigente; especificación detallada v1.3 no localizada mediante el conector
+  Drive: contraste documental pendiente antes de declarar cobertura integral.
+  44 pruebas backend/contrato y 15 específicas Flutter de pagos aprobadas; otras 9 pruebas de
+  composición/sesión existentes aprobadas. Sin commit/push/PR; nueva operación de contrato
+  pendiente de revisión al publicar, según CONTRIBUTING §1.9.
+
+- **Preparación local #215/CU-036 (29/10/2026):** rama `feat/admin-mercadopago-cu036-215`
+  desde main a8696de, sin #210/#214 ni stashes CU-015/CU-027. Adaptador GET Payments/HMAC
+  y servicio interno de validación/confirmación reutilizando pagos; 82 pruebas focalizadas
+  aprobadas (HTTP/vínculo falsos, PostgreSQL temporal real), Ruff/formato correctos.
+  No hay webhook HTTP activo ni integración real certificada. Bloqueados vínculo único
+  persistente, moneda/receptor/escenario, credenciales y contrato de notificaciones/errores.
+  Ver `INTEGRACION-MERCADOPAGO-PC2.md`; no se inventan estados contables ni se hacen cobros.
 
 - **Preparación local #207 (29/10/2026):** interfaz Flutter de cancelación CU-018 desde main
   `4d5c4ff` (#186/#189/#192 integrados). Botón en programado, confirmación, errores backend,

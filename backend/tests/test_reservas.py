@@ -1,4 +1,5 @@
-"""Consulta de reservas propias (CU-010): GET /api/pasajeros/me/reservas y /api/reservas/{id}."""
+"""Consulta de reservas: las propias (CU-010, GET /api/pasajeros/me/reservas y /api/reservas/{id}) y
+el listado de administración (CU-027, GET /api/reservas)."""
 
 import asyncio
 from pathlib import Path
@@ -10,6 +11,7 @@ from app.core.security import crear_token
 from tests._bd import base_migrada, cliente_api, consultar, ejecutar_sql
 
 LISTA = "/api/pasajeros/me/reservas"
+TODAS = "/api/reservas"
 CONTRATO = Path(__file__).resolve().parents[1] / "openapi" / "openapi.yaml"
 
 
@@ -261,5 +263,82 @@ def test_la_respuesta_no_trae_campos_que_el_contrato_no_declara(entorno):
         ]
     )
     respuesta = entorno["http"].get(LISTA, headers=_con(entorno["ana"], ["pasajero"]))
+    for reserva in respuesta.json():
+        assert set(reserva) == declarados
+
+
+# --- Listado de administración (CU-027) ----------------------------------------------------
+
+
+@pytest.mark.parametrize("rol", ["administrador", "dueno"])
+def test_administracion_lista_las_reservas_de_todos_con_cualquier_estado(entorno, rol):
+    respuesta = entorno["http"].get(TODAS, headers=_con(entorno["chofer"], [rol]))
+    assert respuesta.status_code == 200
+    r = entorno["reservas"]
+    por_id = {x["id_reserva"]: x for x in respuesta.json()}
+    assert set(por_id) == set(r.values())
+    assert por_id[r["ana_cancelada"]]["estado"] == "cancelada"
+    assert por_id[r["ana_provisional"]]["estado"] == "provisional"
+    assert por_id[r["beto"]]["id_pasajero"] == entorno["beto"]
+
+
+def test_el_listado_de_administracion_va_por_id_reserva_ascendente(entorno):
+    respuesta = entorno["http"].get(TODAS, headers=_con(entorno["chofer"], ["administrador"]))
+    ids = [x["id_reserva"] for x in respuesta.json()]
+    assert ids == sorted(ids)
+    assert ids == sorted(entorno["reservas"].values())
+
+
+def test_el_listado_de_administracion_trae_los_datos_del_viaje_y_el_horario_null(entorno):
+    r = entorno["reservas"]
+    respuesta = entorno["http"].get(TODAS, headers=_con(entorno["chofer"], ["administrador"]))
+    por_id = {x["id_reserva"]: x for x in respuesta.json()}
+    consolidada = por_id[r["ana_consolidada"]]
+    assert (consolidada["fecha"], consolidada["horario"], consolidada["sentido"]) == (
+        "2026-10-30",
+        "07:30",
+        "IDA",
+    )
+    assert consolidada["id_recorrido"] == entorno["recorrido"]
+    sin_horario = por_id[r["gaby_sin_horario"]]
+    assert "horario" in sin_horario and sin_horario["horario"] is None
+
+
+def test_el_listado_de_administracion_sin_token_es_401(entorno):
+    assert entorno["http"].get(TODAS).status_code == 401
+
+
+@pytest.mark.parametrize("rol", ["pasajero", "chofer"])
+def test_el_listado_de_administracion_no_es_para_pasajero_ni_chofer(entorno, rol):
+    id_persona = entorno["ana"] if rol == "pasajero" else entorno["chofer"]
+    respuesta = entorno["http"].get(TODAS, headers=_con(id_persona, [rol]))
+    assert respuesta.status_code == 403
+    assert respuesta.json()["error"]["codigo"] == "SIN_PERMISO"
+
+
+def test_el_detalle_por_id_sigue_siendo_solo_del_pasajero(entorno):
+    """CU-027 no extiende `GET /reservas/{id}`: administración no ve una reserva por esa ruta."""
+    id_reserva = entorno["reservas"]["ana_provisional"]
+    respuesta = entorno["http"].get(
+        f"/api/reservas/{id_reserva}", headers=_con(entorno["chofer"], ["administrador"])
+    )
+    assert respuesta.status_code == 403
+
+
+def test_el_listado_de_administracion_no_modifica_ninguna_reserva(entorno):
+    base = entorno["base"]
+    sql = "SELECT id_reserva, estado, orden_parada, id_viaje FROM reserva ORDER BY id_reserva"
+    antes = asyncio.run(consultar(base, sql))
+    entorno["http"].get(TODAS, headers=_con(entorno["chofer"], ["administrador"]))
+    assert asyncio.run(consultar(base, sql)) == antes
+
+
+def test_el_listado_de_administracion_no_trae_campos_que_el_contrato_no_declara(entorno):
+    declarados = set(
+        yaml.safe_load(CONTRATO.read_text(encoding="utf-8"))["components"]["schemas"]["Reserva"][
+            "properties"
+        ]
+    )
+    respuesta = entorno["http"].get(TODAS, headers=_con(entorno["chofer"], ["administrador"]))
     for reserva in respuesta.json():
         assert set(reserva) == declarados

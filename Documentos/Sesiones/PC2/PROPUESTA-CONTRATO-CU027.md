@@ -1,49 +1,36 @@
-# CU-027 / #211 — propuesta mínima para Martiniano
+# CU-027 / #211 — contrato real y conexión Flutter
 
-**PROPUESTA DE IA · PENDIENTE DE VALIDACIÓN. No modifica OpenAPI ni autoriza una operación.**
+La propuesta inicial queda superada por el contrato mergeado en **PR #224**.
+**DEFINIDO POR EL EQUIPO:** GET `/api/reservas`, administrador/dueno, autenticación bearer.
+200 devuelve array Reserva con id_pasajero; incluye provisionales, consolidadas y canceladas,
+por id_reserva ascendente. Sin resultados devuelve []; errores 401/403 uniformes.
+No filtros, paginación, nombres, contactos ni importes adicionales.
 
-Fuente aprobada: CU-027 v1.3 / RF-043, consulta administrativa sin escrituras, selección y
-detalle con información/estado; sin resultados informa vacío. No define filtros concretos.
-https://drive.google.com/file/d/1Kc4m4e2LH5xRc1J9HY-2hTQaiLNeRA7y/view
+## Contraste con CU-027 v1.3 / RF-043
 
-## Contrato mínimo propuesto, no implementado
+El análisis previo de la especificación aprobada exige localizar/seleccionar/consultar reservas,
+mostrar información y estado, informar ausencia de resultados y no modificarlas. No enumera
+filtros concretos: el contrato #224 deja criterios de búsqueda adicionales pendientes.
+La interfaz permite localizar visualmente la reserva por ID y seleccionar su detalle.
+No amplía GET /reservas/{id}: esa ruta sigue siendo del pasajero y exige propiedad.
+ACT-05/ACT-06 están en el CU; la interfaz del dueño continúa fuera del reparto PC2.
 
-- GET `/reservas`, sin parámetros de filtrado nuevos. La ruta hoy tiene POST del pasajero;
-  agregar GET debe coordinarse, sin modificar POST ni el significado de CU-010.
-- Autenticación requerida y autorización administrativa ACT-05/ACT-06, a validar con el dueño
-  del servicio. No cambiar `/pasajeros/me/reservas` ni ampliar acceso al detalle existente.
-- 200: array del schema `Reserva` vigente, `[]` cuando no hay resultados.
-- 401/403: respuestas uniformes existentes; su definición final debe incorporarse al contrato.
-- No imponer orden, límite de búsqueda o estados omitidos por inferencia. El frontend conserva
-  el orden recibido y presenta provisional/consolidada/cancelada sin transformarlos.
-- El detalle local usa la reserva seleccionada del listado completo. No requiere otra ruta
-  para esta preparación. Si se exige una relectura actualizada por ID, acordarla expresamente.
-- No cambios de modelo, escrituras, cancelación, cupos, abonos o consecuencias económicas.
+## Implementación local
 
-## Decisiones concretas que debe validar Martiniano
+- ReservasAdminApi consume solo GET /reservas con el HTTP/sesión existente, sin parámetros.
+- ReservaAdmin compone Reserva existente y conserva idPasajero obligatorio. No cambia modelo
+  ni contratos del pasajero; listado y detalle muestran ese identificador, sin inferir identidad personal.
+- Pantalla conserva orden recibido, estados, horario nulo, carga/vacío/error/reintento/actualizar.
+  El detalle usa el resultado seleccionado, sin nuevas peticiones ni acciones de escritura.
+- Navegación administrativa real, protección común 401/403, generación de sesión y descarte de
+  respuestas antiguas al cambiar cuenta/alcance, cerrar o renovar adaptador.
+- Main a01df1e con #210/#214/#222 y #224 integrado. CU-015/#218 permanece Draft y fuera de
+  main; no se incorpora su código no mergeado. Sus cambios locales permanecen en su rama.
 
-Ruta, alcance de lectura y roles; schema/campos visibles; estados incluidos y orden de
-presentación; volumen/paginación si corresponde; necesidad de consulta remota del detalle.
-Los criterios de búsqueda definitivos siguen pendientes. La preparación actual permite
-ubicar visualmente el ID en el listado y seleccionarlo, **sin inventar filtros HTTP**.
+54 pruebas Flutter focalizadas aprobadas, incluidos adaptador HTTP, id_pasajero, los tres
+estados, detalle local, respuesta tardía, permisos, reintento, navegación y controles 320/1440 px.
+Analyze y diff check correctos. Backend/OpenAPI/modelo del pasajero intactos; Ruff no aplica.
+Sin commit/push ni despliegue de esta continuación. Criterios adicionales de búsqueda siguen pendientes.
 
-El DTO Flutter `Reserva` actual no conserva `id_pasajero`, aunque figura en el schema backend.
-Se reutiliza tal cual; no se inventan nombre/contacto del pasajero ni se cambia su modelo.
-Definir identificación adicional si es necesaria antes de extender el DTO administrativo.
-
-## Frontend listo para conectar tras aprobación
-
-`ConsultaReservasAdmin.listar()` es un puerto local, sin HTTP ni decisiones de autorización.
-`ConsultarReservasAdminScreen` recibe ese puerto y una identidad opaca `alcance` que el futuro
-integrador debe renovar al cambiar sesión. Invalida cargas anteriores, limpia selección y
-detalle al cambiar alcance/adaptador, y descarta respuestas tras desmontar la pantalla.
-El doble `ConsultaSimulada` existe solo en tests, nunca en navegación operativa.
-
-El integrador deberá implementar el adaptador HTTP para la ruta acordada y conectarlo a la
-sesión administrativa existente (401 contextual/403 sin logout y generación de sesión).
-No llamar la ruta privada del pasajero para obtener reservas ajenas. No se modificó main.dart
-ni se agregaron menús o una pantalla con datos falsos al producto. El componente no demuestra
-permisos reales ni acredita el circuito CU-027 completo.
-
-Validación local: listado, selección/detalle, tres estados, carga/error/vacío/reintento,
-horario ausente, reconstrucción, cambio de alcance y respuesta/error después de desmontar.
+Fuente ya contrastada: [CU-027 v1.3 aprobado](https://drive.google.com/file/d/1Kc4m4e2LH5xRc1J9HY-2hTQaiLNeRA7y/view).
+Contrato real: backend/openapi/openapi.yaml, GET /reservas (PR #224).

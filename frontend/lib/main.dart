@@ -31,6 +31,13 @@ import 'screens/admin/viajes_dia_admin_screen.dart';
 import 'screens/chofer/chofer_shell.dart';
 import 'screens/pasajero/pasajero_shell.dart';
 import 'services/admin/viajes_admin_api.dart';
+import 'services/admin/registro_pagos_admin_api.dart';
+import 'screens/admin/registrar_pago_admin_screen.dart';
+import 'services/admin/pagos_admin_api.dart';
+import 'services/admin/reservas_admin_api.dart';
+import 'screens/admin/consultar_reservas_admin_screen.dart';
+import 'screens/admin/pagos_pendientes_screen.dart';
+import 'models/admin/pago_admin.dart';
 import 'services/admin/viajes_dia_admin_api.dart';
 import 'services/chofer/detalle_viaje_chofer_api.dart';
 import 'services/chofer/ejecucion_viaje_api.dart';
@@ -80,6 +87,9 @@ class _VanFullBootstrapState extends State<VanFullBootstrap> {
   late final PasajeroApi _pasajero;
   late final ViajesDiaAdminApi _viajesDiaAdmin;
   late final ViajesAdminApi _viajesAdmin;
+  late final RegistroPagosAdminApi _registroPagosAdmin;
+  late final PagosAdminApi _pagosAdmin;
+  late final ReservasAdminApi _reservasAdmin;
   late final ViajesChoferApi _viajesChofer;
   late final DetalleViajeChoferApi _detalleChofer;
   late final EjecucionViajeApi _ejecucionChofer;
@@ -107,6 +117,9 @@ class _VanFullBootstrapState extends State<VanFullBootstrap> {
     _pasajero = PasajeroApi(httpClient);
     _viajesDiaAdmin = ViajesDiaAdminApi(httpClient);
     _viajesAdmin = ViajesAdminApi(httpClient);
+    _registroPagosAdmin = RegistroPagosAdminApi(httpClient);
+    _pagosAdmin = PagosAdminApi(httpClient);
+    _reservasAdmin = ReservasAdminApi(httpClient);
     _viajesChofer = ViajesChoferApi(httpClient);
     _detalleChofer = DetalleViajeChoferApi(httpClient);
     _ejecucionChofer = EjecucionViajeApi(httpClient);
@@ -142,15 +155,49 @@ class _VanFullBootstrapState extends State<VanFullBootstrap> {
     super.dispose();
   }
 
+  /// Ubicación del viaje de una reserva consolidada (RN-030). A diferencia de
+  /// Administración, un 403 acá no cierra la sesión: significa que esa reserva
+  /// no da acceso, y la pantalla lo muestra como «ubicación no disponible».
+  Widget _pantallaUbicacionPasajero(SesionController controller, int idViaje) {
+    final sesion = controller.sesion;
+    final generacion = controller.generacion;
+    bool vigente() =>
+        mounted &&
+        controller.generacion == generacion &&
+        identical(controller.sesion, sesion);
+    return UbicacionScreen(
+      idViaje: idViaje,
+      consultar: (viaje) {
+        if (!vigente()) {
+          throw StateError('La sesión de esta vista ya no está vigente.');
+        }
+        return _gpsApi.consultar(viaje);
+      },
+      alcance: Object(),
+      invalidaciones: controller,
+      contextoVigente: vigente,
+      configuracionMapa: widget.configuracionMapa,
+      prepararMapa: widget.prepararMapa,
+      crearVisorMapa: widget.crearVisorMapa,
+    );
+  }
+
   @override
   Widget build(BuildContext context) => SesionApp(
     controller: _sesion,
-    entradaPasajero: (controller) =>
-        PasajeroShell(api: _pasajero, onSalir: controller.salir),
+    entradaPasajero: (controller) => PasajeroShell(
+      api: _pasajero,
+      onSalir: controller.salir,
+      pantallaUbicacion: (idViaje) =>
+          _pantallaUbicacionPasajero(controller, idViaje),
+    ),
     entradaAdministrador: (controller) => _EntradaAdministracion(
       controller: controller,
       listar: _viajesDiaAdmin,
       crear: _viajesAdmin,
+      registrarPagos: _registroPagosAdmin,
+      pagos: _pagosAdmin,
+      reservas: _reservasAdmin,
       configuracionMapa: widget.configuracionMapa,
       prepararMapa: widget.prepararMapa,
       crearVisorMapa: widget.crearVisorMapa,
@@ -175,6 +222,9 @@ class _EntradaAdministracion extends StatefulWidget {
     required this.controller,
     required this.listar,
     required this.crear,
+    required this.registrarPagos,
+    required this.pagos,
+    required this.reservas,
     required this.configuracionMapa,
     required this.prepararMapa,
     required this.crearVisorMapa,
@@ -185,6 +235,9 @@ class _EntradaAdministracion extends StatefulWidget {
   final SesionController controller;
   final ViajesDiaAdminApi listar;
   final ViajesAdminApi crear;
+  final RegistroPagosAdminApi registrarPagos;
+  final PagosAdminApi pagos;
+  final ReservasAdminApi reservas;
   final ConfiguracionMapa? configuracionMapa;
   final PrepararMapa? prepararMapa;
   final ConstructorVisorMapa? crearVisorMapa;
@@ -214,17 +267,35 @@ class _EntradaAdministracionState extends State<_EntradaAdministracion> {
               cancelarViaje: _cancelarViaje,
             ),
             Positioned(
+              left: AppSpacing.lg,
               right: AppSpacing.lg,
               bottom: AppSpacing.lg,
               child: SafeArea(
-                child: Row(
+                child: Wrap(
+                  alignment: WrapAlignment.end,
+                  spacing: AppSpacing.sm,
+                  runSpacing: AppSpacing.sm,
                   children: [
                     OutlinedButton(
                       key: const Key('admin-salir'),
                       onPressed: widget.onSalir,
                       child: const Text('Cerrar sesión'),
                     ),
-                    const SizedBox(width: AppSpacing.sm),
+                    OutlinedButton(
+                      key: const Key('admin-pagos-pendientes'),
+                      onPressed: _abrirPagos,
+                      child: const Text('Pagos pendientes'),
+                    ),
+                    OutlinedButton(
+                      key: const Key('admin-consultar-reservas'),
+                      onPressed: _abrirReservas,
+                      child: const Text('Consultar reservas'),
+                    ),
+                    OutlinedButton(
+                      key: const Key('admin-registrar-pago'),
+                      onPressed: _abrirRegistroPago,
+                      child: const Text('Registrar pago'),
+                    ),
                     ElevatedButton.icon(
                       key: const Key('admin-crear-viaje'),
                       onPressed: () => Navigator.of(context).push(
@@ -242,6 +313,100 @@ class _EntradaAdministracionState extends State<_EntradaAdministracion> {
             ),
           ],
         );
+
+  void _abrirRegistroPago() {
+    final controller = widget.controller;
+    final generacion = controller.generacion;
+    final token = controller.token;
+    final api = widget.registrarPagos;
+    bool vigente() =>
+        mounted &&
+        !_accesoDenegado &&
+        token != null &&
+        controller.generacion == generacion &&
+        controller.token == token;
+    if (!vigente()) return;
+    final pantalla = RegistrarPagoAdminScreen(
+      registrar:
+          ({required idCliente, required importe, required medio}) async {
+            if (!vigente()) throw StateError('La sesión ya no está vigente.');
+            final pago = await _protegerAcceso(
+              controller: controller,
+              solicitud: () => api.registrar(
+                idCliente: idCliente,
+                importe: importe,
+                medio: medio,
+              ),
+              onAccesoDenegado: _denegarAcceso,
+            );
+            if (!vigente()) throw StateError('La sesión ya no está vigente.');
+            return pago;
+          },
+    );
+    Navigator.of(context)
+        .push(MaterialPageRoute<void>(builder: (_) => pantalla));
+  }
+
+  void _abrirReservas() {
+    final controller = widget.controller;
+    final generacion = controller.generacion;
+    final token = controller.token;
+    final api = widget.reservas;
+    bool vigente() =>
+        mounted &&
+        !_accesoDenegado &&
+        token != null &&
+        controller.generacion == generacion &&
+        controller.token == token;
+    if (!vigente()) return;
+    final consulta = ConsultaReservasAdminProtegida(() async {
+      if (!vigente()) throw StateError('La sesión ya no está vigente.');
+      final resultado = await _protegerAcceso(
+        controller: controller,
+        solicitud: api.listar,
+        onAccesoDenegado: _denegarAcceso,
+      );
+      if (!vigente()) throw StateError('La sesión ya no está vigente.');
+      return resultado;
+    });
+    final pantalla = ConsultarReservasAdminScreen(
+      consulta: consulta,
+      alcance: Object(),
+    );
+    Navigator.of(context)
+        .push(MaterialPageRoute<void>(builder: (_) => pantalla));
+  }
+
+  void _abrirPagos() {
+    final controller = widget.controller;
+    final generacion = controller.generacion;
+    final token = controller.token;
+    final api = widget.pagos;
+    bool vigente() =>
+        mounted &&
+        !_accesoDenegado &&
+        token != null &&
+        controller.generacion == generacion &&
+        controller.token == token;
+    Future<T> proteger<T>(Future<T> Function() operacion) async {
+      if (!vigente()) throw StateError('La sesión ya no está vigente.');
+      final resultado = await _protegerAcceso(
+        controller: controller,
+        solicitud: operacion,
+        onAccesoDenegado: _denegarAcceso,
+      );
+      if (!vigente()) throw StateError('La sesión ya no está vigente.');
+      return resultado;
+    }
+
+    if (!vigente()) return;
+    final pantalla = PagosPendientesScreen(
+      cargar: () => proteger<List<PagoAdmin>>(api.pendientes),
+      decidir: (id, decision) => proteger(() => api.decidir(id, decision)),
+    );
+    Navigator.of(context)
+        .push(MaterialPageRoute<void>(builder: (_) => pantalla));
+  }
 
   void _abrirUbicacion(int id) {
     final controller = widget.controller;

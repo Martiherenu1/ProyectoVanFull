@@ -1,7 +1,6 @@
-import '../../models/pasajero/reserva.dart';
+import '../../models/admin/reserva_admin.dart';
 
-/// Puerto local de lectura CU-027. No prescribe ruta, filtros ni permisos HTTP.
-/// El adaptador real queda pendiente del contrato acordado con Martiniano.
+/// Puerto de lectura CU-027 para el contrato administrativo de GET /reservas.
 abstract interface class ConsultaReservasAdmin {
-  Future<List<Reserva>> listar();
+  Future<List<ReservaAdmin>> listar();
 }

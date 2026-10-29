@@ -405,6 +405,31 @@ paths:
   # RESERVAS
   # ---------------------------------------------------------------------------
   /reservas:
+    get:
+      tags: [reservas]
+      summary: Consultar reservas (administración)
+      description: |
+        Lista para administración y dueño todas las reservas, provisionales, consolidadas y
+        canceladas, con el mismo schema `Reserva` (incluye `id_pasajero`). Se ordena por
+        `id_reserva` ascendente; sin reservas responde 200 con una lista vacía. Es de solo lectura,
+        no filtra ni pagina y no devuelve nombres, contactos ni importes. Los criterios de búsqueda
+        adicionales de CU-027 quedan pendientes. No cambia las consultas del pasajero: las propias
+        siguen en `GET /pasajeros/me/reservas`. (CU-027)
+      x-cu: CU-027
+      x-cobertura: parcial
+      responses:
+        '200':
+          description: Lista de reservas
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Reserva'
+        '401':
+          $ref: '#/components/responses/NoAutenticado'
+        '403':
+          $ref: '#/components/responses/SinPermiso'
     post:
       tags: [reservas]
       summary: Crear reserva
@@ -815,6 +840,30 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
+
+  /pagos/pendientes:
+    get:
+      tags: [pagos]
+      summary: Consultar pagos pendientes de decisión administrativa
+      description: |
+        Solo administrador o dueño. Devuelve únicamente pagos PENDIENTE, ordenados por
+        fecha_hora e id_pago ascendentes. Lista vacía si no hay pendientes. No modifica
+        pagos ni genera movimientos o comprobantes. Complementa CU-016/RF-011/RN-015;
+        los pagos ya confirmados automáticamente quedan excluidos por su estado.
+      x-cu: CU-016
+      responses:
+        '200':
+          description: Pagos pendientes de decisión.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Pago'
+        '401':
+          $ref: '#/components/responses/NoAutenticado'
+        '403':
+          $ref: '#/components/responses/SinPermiso'
 
   /pagos/{id_pago}/confirmacion:
     post:

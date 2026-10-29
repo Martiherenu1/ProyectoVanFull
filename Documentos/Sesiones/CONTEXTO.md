@@ -1,5 +1,11 @@
 # CONTEXTO VANFULL — Carga rápida de sesión
 
+> CU-027/#211/#217 — continuación local: main a01df1e integrado; GET /reservas de #224
+> conectado con HTTP/sesión administrativa. Listado/selección/detalle conserva id_pasajero;
+> sin filtros ni escrituras. 54 pruebas Flutter aprobadas, analyze/diff check correctos.
+> CU-015/#218 sigue Draft fuera de main, sin mezclarlo. Sin commit/push de esta continuación.
+> Las notas inferiores son históricas; ver PROPUESTA-CONTRATO-CU027.md actualizado.
+
 > Continuación #211 — frontend CU-027 preparado con puerto de lectura y adaptador simulado
 > solo en tests. 13 pruebas focalizadas aprobadas, analyze y diff check correctos. Sin HTTP ni
 > main.dart; propuesta mínima en PROPUESTA-CONTRATO-CU027.md, pendiente de Martiniano.
@@ -7,6 +13,18 @@
 > 29/10/2026 — #211/CU-027: verificada especificación v1.3 aprobada. Consulta administrativa
 > de reservas sin escrituras; falta contrato de lectura autorizado. Implementación bloqueada
 > por coordinación con Martiniano; rama local desde main a8696de, sin cambios de #210.
+
+> 29/10/2026 — #213/CU-014: registro administrativo parcial Flutter preparado con endpoint
+> existente y borrador aislado para tipo/respaldo. 26 pruebas focalizadas aprobadas; bloqueos #84
+> detallados en contexto administrativo. Sin publicar; CU-015/CU-027 preservados aparte.
+
+> 29/10/2026 — #209: CU-016 preparado localmente (pantalla de pagos y GET pendientes mínimo).
+> Confirmación/rechazo reutiliza backend contable existente. Sin publicar; evidencia y pendiente
+> documental en CONTEXTO-administracion-y-flutter.md.
+
+> 29/10/2026 — #215/CU-036: preparado backend interno Payments/HMAC e idempotencia por pago
+> local, con proveedor simulado; 82 pruebas focalizadas aprobadas. Activación HTTP bloqueada
+> por vínculo persistente/contrato/configuración. Detalle en INTEGRACION-MERCADOPAGO-PC2.md.
 
 > 29/10/2026 — #207: interfaz administrativa de cancelación CU-018 preparada localmente desde
 > main con #186/#189/#192. 30 pruebas Flutter focalizadas aprobadas, analyze sin problemas.

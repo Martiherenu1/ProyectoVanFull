@@ -4,26 +4,27 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:frontend/core/api/api_error.dart';
 import 'package:frontend/models/pasajero/reserva.dart';
+import 'package:frontend/models/admin/reserva_admin.dart';
 import 'package:frontend/screens/admin/consultar_reservas_admin_screen.dart';
 import 'package:frontend/services/admin/consulta_reservas_admin.dart';
 
 /// Doble exclusivo del test: no demuestra permisos ni integración administrativa real.
 final class ConsultaSimulada implements ConsultaReservasAdmin {
   ConsultaSimulada(this.responder);
-  final Future<List<Reserva>> Function() responder;
+  final Future<List<ReservaAdmin>> Function() responder;
   int llamadas = 0;
   @override
-  Future<List<Reserva>> listar() {
+  Future<List<ReservaAdmin>> listar() {
     llamadas++;
     return responder();
   }
 }
 
-Reserva reserva(
+ReservaAdmin reserva(
   int id, {
   String estado = 'consolidada',
   String? horario = '07:30',
-}) => Reserva.fromJson({
+}) => ReservaAdmin.fromJson({
   'id_reserva': id,
   'id_pasajero': 5,
   'id_viaje': 41,
@@ -48,7 +49,7 @@ void main() {
   testWidgets(
     'carga, localiza por ID en listado, selecciona y consulta sin acciones de escritura',
     (tester) async {
-      final pendiente = Completer<List<Reserva>>();
+      final pendiente = Completer<List<ReservaAdmin>>();
       final consulta = ConsultaSimulada(() => pendiente.future);
       await mostrar(tester, consulta, Object());
       expect(find.byType(CircularProgressIndicator), findsOneWidget);
@@ -67,6 +68,7 @@ void main() {
       expect(find.byKey(const Key('detalle-reserva-7')), findsOneWidget);
       for (final dato in [
         'Reserva: 7',
+        'Pasajero: 5',
         'Viaje: 41',
         'Recorrido: 2',
         'Orden de parada de ascenso: 3',
@@ -83,7 +85,7 @@ void main() {
       await tester.pumpAndSettle();
       expect(find.byKey(const Key('reserva-8')), findsOneWidget);
       expect(consulta.llamadas, 1);
-      expect(reservas.first.estado, EstadoReserva.consolidada);
+      expect(reservas.first.reserva.estado, EstadoReserva.consolidada);
     },
   );
   testWidgets('vacío y horario ausente no se inventan', (tester) async {
@@ -136,7 +138,7 @@ void main() {
   testWidgets('nueva sesión limpia detalle y descarta carga anterior', (
     tester,
   ) async {
-    final vieja = Completer<List<Reserva>>();
+    final vieja = Completer<List<ReservaAdmin>>();
     var intento = 0;
     final consulta = ConsultaSimulada(() async {
       if (intento++ == 0) return [reserva(7)];
@@ -175,7 +177,7 @@ void main() {
     tester,
   ) async {
     for (final error in [false, true]) {
-      final pendiente = Completer<List<Reserva>>();
+      final pendiente = Completer<List<ReservaAdmin>>();
       await mostrar(tester, ConsultaSimulada(() => pendiente.future), Object());
       await tester.pump();
       await tester.pumpWidget(

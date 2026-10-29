@@ -4,10 +4,10 @@ import '../../core/api/api_error.dart';
 import '../../core/format/fecha_legible.dart';
 import '../../core/theme/app_spacing.dart';
 import '../../core/theme/app_theme.dart';
-import '../../models/pasajero/reserva.dart';
+import '../../models/admin/reserva_admin.dart';
 import '../../services/admin/consulta_reservas_admin.dart';
 
-/// Preparación de CU-027/RF-043: sin conexión HTTP ni acciones de escritura.
+/// Consulta administrativa CU-027/RF-043, sin acciones de escritura.
 class ConsultarReservasAdminScreen extends StatefulWidget {
   const ConsultarReservasAdminScreen({
     super.key,
@@ -16,7 +16,7 @@ class ConsultarReservasAdminScreen extends StatefulWidget {
   });
   final ConsultaReservasAdmin consulta;
 
-  /// Identidad opaca de la sesión/vista suministrada por el futuro integrador.
+  /// Identidad opaca de la sesión/vista suministrada por el integrador.
   /// Nunca usar el token como identidad visible ni reutilizarla entre cuentas.
   final Object alcance;
   @override
@@ -26,8 +26,8 @@ class ConsultarReservasAdminScreen extends StatefulWidget {
 
 class _ConsultarReservasAdminScreenState
     extends State<ConsultarReservasAdminScreen> {
-  List<Reserva> _reservas = const [];
-  Reserva? _seleccionada;
+  List<ReservaAdmin> _reservas = const [];
+  ReservaAdmin? _seleccionada;
   bool _cargando = true;
   String? _error;
   int _solicitud = 0;
@@ -80,7 +80,7 @@ class _ConsultarReservasAdminScreenState
         title: Text(
           _seleccionada == null
               ? 'Consultar reservas'
-              : 'Reserva ${_seleccionada!.idReserva}',
+              : 'Reserva ${_seleccionada!.reserva.idReserva}',
         ),
         leading: _seleccionada == null
             ? null
@@ -118,7 +118,7 @@ class _ConsultarReservasAdminScreenState
         ),
       );
     }
-    final reserva = _seleccionada;
+    final reserva = _seleccionada?.reserva;
     if (reserva != null) {
       return SingleChildScrollView(
         padding: const EdgeInsets.all(AppSpacing.lg),
@@ -127,6 +127,7 @@ class _ConsultarReservasAdminScreenState
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text('Reserva: ${reserva.idReserva}'),
+            Text('Pasajero: ${_seleccionada!.idPasajero}'),
             Text('Viaje: ${reserva.idViaje}'),
             Text('Recorrido: ${reserva.idRecorrido}'),
             Text('Orden de parada de ascenso: ${reserva.ordenParada}'),
@@ -148,17 +149,18 @@ class _ConsultarReservasAdminScreenState
       itemCount: _reservas.length,
       separatorBuilder: (_, _) => const Divider(),
       itemBuilder: (context, index) {
-        final reserva = _reservas[index];
+        final item = _reservas[index];
+        final reserva = item.reserva;
         return ListTile(
           key: ValueKey('reserva-${reserva.idReserva}'),
           title: Text(
             'Reserva ${reserva.idReserva} · Viaje ${reserva.idViaje}',
           ),
           subtitle: Text(
-            '${fechaLegible(reserva.fecha)} · ${reserva.horario ?? 'Sin horario'} · ${reserva.estado.etiqueta} (${reserva.estado.valorApi})',
+            'Pasajero: ${item.idPasajero} · ${fechaLegible(reserva.fecha)} · ${reserva.horario ?? 'Sin horario'} · ${reserva.estado.etiqueta} (${reserva.estado.valorApi})',
           ),
           trailing: const Icon(Icons.chevron_right),
-          onTap: () => setState(() => _seleccionada = reserva),
+          onTap: () => setState(() => _seleccionada = item),
         );
       },
     );

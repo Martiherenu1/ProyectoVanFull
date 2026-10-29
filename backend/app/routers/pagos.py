@@ -12,6 +12,14 @@ from app.services import pagos as servicio
 router = APIRouter(prefix="/pagos", tags=["pagos"])
 
 
+@router.get("/pendientes", response_model=list[Pago])
+async def listar_pagos_pendientes(
+    _: UsuarioActual = Depends(requiere_rol("administrador", "dueno")),
+    db: AsyncSession = Depends(get_db),
+):
+    return await servicio.listar_pagos_pendientes(db)
+
+
 @router.post("", response_model=Pago, status_code=201)
 async def registrar_pago(
     datos: PagoCreate,

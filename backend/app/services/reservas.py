@@ -1,4 +1,5 @@
 """Reservas del pasajero: consulta (CU-010, RF-043), creación (CU-003, RF-005) y cancelación (CU-004).
+Incluye la consulta de solo lectura de administración (CU-027).
 
 Cambiar de parada (CU-005) no es del PC2 (REPARTO-PC2.md).
 `reserva` es una tabla de este módulo: lo que otras áreas necesiten de ella lo piden por estas
@@ -56,6 +57,22 @@ async def listar_reservas_del_pasajero(db: AsyncSession, usuario: UsuarioActual)
         .order_by(
             Viaje.fecha.desc(), Viaje.horario.desc().nulls_last(), ReservaModelo.id_reserva.desc()
         )
+    )
+    return [_a_schema(r, v) for r, v in (await db.execute(consulta)).all()]
+
+
+async def listar_reservas_para_administracion(db: AsyncSession) -> list[Reserva]:
+    """Todas las reservas, de cualquier estado, por `id_reserva` ascendente (CU-027).
+
+    Solo lectura y sin filtros: los criterios de búsqueda de CU-027 no están definidos en la
+    especificación aprobada y quedan pendientes. No se trunca ni se pagina; el llamador ya es
+    administración (el router exige el rol). Devuelve el mismo `Reserva` que la consulta propia, con
+    `id_pasajero`; no suma nombres, contactos ni importes.
+    """
+    consulta = (
+        select(ReservaModelo, Viaje)
+        .join(Viaje, Viaje.id_viaje == ReservaModelo.id_viaje)
+        .order_by(ReservaModelo.id_reserva)
     )
     return [_a_schema(r, v) for r, v in (await db.execute(consulta)).all()]
 

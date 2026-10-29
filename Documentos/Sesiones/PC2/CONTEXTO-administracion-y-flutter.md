@@ -78,15 +78,15 @@ consulta Payments y servicio contable interno con simulaciones, no la recepción
 
 ## En curso
 
-#227, rama `test/admin-integracion-pc2-227`, desde main a7ded22 (cierre #225/#226 integrado).
-Inspección focalizada encontró dos brechas: CU-014→CU-016→CU-015 con deuda/reintentos reales,
-y ciclo HTTP crear/asignar/reasignar/actualizar/cancelar un mismo viaje. Nuevo archivo
-`backend/tests/test_integracion_admin.py`: 3 casos aprobados en bases PostgreSQL temporales.
-CU-027 ya cubierto: 11 casos existentes seleccionados aprobados, sin duplicar pruebas.
-Ruff y formato/diff check correctos. Sin defectos funcionales detectados en estos circuitos;
-se corrigió solo un DNI ficticio del nuevo fixture que excedía VARCHAR(20).
-Sin código funcional, contratos, modelos, sitio-web o workflow Web modificados/ejecutados.
-Detener antes de commit/push; PR pendiente de autorización. Los Issues parciales permanecen abiertos;
+#229, rama `test/admin-flutter-integracion-pc2-229`, desde main 8e16205 (#228 integrado).
+Solo `frontend/test/admin_circuitos_ui_integration_test.dart` y contextos: tres casos UI con
+MockClient y helpers existentes. Registro→pendientes→confirmar/rechazar→deuda (2 variantes),
+y edición de viaje→PATCH autenticado→GET/refresco de detalle/listado. No recalcula deuda en UI.
+CU-015 tardío y CU-027 listado/selección/detalle ya cubiertos: no se duplican sus casos.
+32 focalizadas aprobadas (3 nuevas + 29 existentes), analyze/diff check correctos.
+Sin defectos funcionales detectados, código productivo ni acceso Neon/Render. Sin commit/push/PR.
+#227/#228 ya integrados: 3 backend nuevos + 11 existentes CU-027 aprobados, sin cambios funcionales.
+Los Issues parciales permanecen abiertos;
 #209/#213 cerrados corresponden a entregas acotadas, no completan otros pendientes de los CU.
 
 ## Decisiones y contradicciones

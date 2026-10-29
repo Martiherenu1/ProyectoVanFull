@@ -617,6 +617,35 @@ def test_el_historial_guarda_la_respuesta_ya_limpia(entorno, hablar):
     assert previos == ["Es Viaje 3"]
 
 
+@pytest.mark.parametrize(
+    ("iso", "legible"),
+    [
+        ("Hay lugar el 2026-10-30 a la ida", "Hay lugar el 30/10/2026 a la ida"),
+        ("Del 2026-11-01 al 2026-11-05.", "Del 01/11/2026 al 05/11/2026."),
+        ("(2026-12-31)", "(31/12/2026)"),
+        # Lo que no es una fecha válida o no es solo una fecha se respeta.
+        ("2026-13-45", "2026-13-45"),
+        ("2026-02-30", "2026-02-30"),
+        ("2026-10-30T18:00:00", "2026-10-30T18:00:00"),
+        ("id 12026-10-300 y 2026-10-30-5", "id 12026-10-300 y 2026-10-30-5"),
+        ("Sale a las 18:00 del 30/10", "Sale a las 18:00 del 30/10"),
+    ],
+)
+def test_las_fechas_iso_se_muestran_como_dia_mes_anio(iso, legible):
+    assert agente.fechas_legibles(iso) == legible
+
+
+def test_el_pasajero_ve_la_fecha_legible_y_el_modelo_conserva_la_iso(entorno, hablar):
+    """Issue #231: al pasajero le llegaba «2026-10-30»; el modelo debe seguir viendo el ISO."""
+    hablar(_texto("Hay lugar el 2026-10-30"))
+    primera = _hablar_como(entorno, "ana", "Hola").json()
+    assert primera["respuesta"] == "Hay lugar el 30/10/2026"
+    guion = hablar(_texto("Listo"))
+    _hablar_como(entorno, "ana", "Gracias", conversacion_id=primera["conversacion_id"])
+    previos = [m["content"] for m in guion.llamadas[0]["messages"] if m["role"] == "assistant"]
+    assert previos == ["Hay lugar el 2026-10-30"]
+
+
 def test_el_modelo_sabe_que_la_reserva_guarda_solo_la_parada_de_subida(entorno, hablar):
     """Observado en Render el 28/10: ante «quiero bajar en la parada 2» pedía subir en la 2."""
     guion = hablar(_texto("Hola"))

@@ -7,6 +7,7 @@ Toda falla se registra en el log con el modelo y el motivo (07-IA-y-Agentes §8)
 es lo único que permite saber en Render por qué el asistente derivó.
 """
 
+import asyncio
 import logging
 import time
 
@@ -19,6 +20,8 @@ logger = logging.getLogger(__name__)
 
 OPENROUTER_URL = "https://openrouter.ai/api/v1/chat/completions"
 # Tope de cada llamada a un modelo. El tope del mensaje entero lo pone quien llama (`limite`).
+# Es un tope de la llamada entera (`asyncio.timeout`), no solo de cada lectura: el de httpx se
+# reinicia con cada dato que llega y un modelo lento puede mantener la llamada abierta de más.
 TIMEOUT_POR_LLAMADA = 30.0
 # Del cuerpo de un error se guarda el principio: alcanza para el motivo y no llena el log.
 _MAX_LOG = 300
@@ -65,10 +68,11 @@ async def chat_completion(
             if tools:
                 payload["tools"] = tools
             try:
-                resp = await client.post(
-                    OPENROUTER_URL, headers=headers, json=payload, timeout=espera
-                )
-            except httpx.HTTPError as exc:
+                async with asyncio.timeout(espera):
+                    resp = await client.post(
+                        OPENROUTER_URL, headers=headers, json=payload, timeout=espera
+                    )
+            except (httpx.HTTPError, TimeoutError) as exc:
                 logger.warning("AG-01: %s no respondió (%s)", modelo, type(exc).__name__)
                 continue  # probar el siguiente modelo
             if resp.status_code != 200:

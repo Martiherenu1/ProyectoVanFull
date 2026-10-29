@@ -133,3 +133,38 @@ def test_pasado_el_tope_del_mensaje_no_se_prueba_ningun_modelo(openrouter):
     with pytest.raises(OpenRouterError):
         asyncio.run(chat_completion(MENSAJES, limite=time.monotonic() - 1))
     assert pedidos == []
+
+
+def test_un_modelo_que_no_termina_de_responder_se_corta_al_llegar_al_tope(monkeypatch, caplog):
+    """Prueba en Render del 29/10: un mensaje no respondió en 120 s.
+
+    El tiempo de espera de httpx es por lectura: si el modelo sigue mandando datos, no vence. El
+    tope tiene que cortar la llamada entera, no solo cada lectura.
+    """
+    monkeypatch.setattr(openrouter_client.settings, "openrouter_api_key", CLAVE)
+    monkeypatch.setattr(openrouter_client.settings, "openrouter_model_primary", PRINCIPAL)
+    monkeypatch.setattr(openrouter_client.settings, "openrouter_model_fallback", FALLBACK)
+    cliente_real = httpx.AsyncClient
+    pedidos: list[httpx.Request] = []
+
+    async def colgado(request: httpx.Request) -> httpx.Response:
+        pedidos.append(request)
+        await asyncio.sleep(30)
+        return httpx.Response(200, json=RESPUESTA)
+
+    monkeypatch.setattr(
+        openrouter_client.httpx,
+        "AsyncClient",
+        lambda **kwargs: cliente_real(transport=httpx.MockTransport(colgado), **kwargs),
+    )
+    inicio = time.monotonic()
+    with (
+        caplog.at_level(logging.WARNING, logger=openrouter_client.logger.name),
+        pytest.raises(OpenRouterError),
+    ):
+        asyncio.run(chat_completion(MENSAJES, limite=time.monotonic() + 0.5))
+    # Corta cerca del tope; con el principal colgado no queda tiempo para el fallback.
+    assert time.monotonic() - inicio < 3
+    assert len(pedidos) == 1
+    assert PRINCIPAL in caplog.text
+    assert "TimeoutError" in caplog.text

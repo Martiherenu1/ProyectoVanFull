@@ -103,13 +103,22 @@ class _ViajesDiaAdminScreenState extends State<ViajesDiaAdminScreen> {
   }
 
   void _seleccionarViaje(ViajeResumen viaje) {
+    final cancelar = widget.cancelarViaje;
+    Future<ViajeResumen> cancelarYRecargar(int id) async {
+      final cancelado = await cancelar!(id);
+      // La operación pertenece a la pantalla, no al diálogo que la inició.
+      // El callback de composición valida también la sesión original.
+      if (mounted && widget.cancelarViaje == cancelar) await _cargar();
+      return cancelado;
+    }
+
     widget.onViajeSeleccionado(viaje.idViaje);
     showDialog<void>(
       context: context,
       builder: (context) => _DetalleViajeAdminDialog(
         viaje: viaje,
         actualizarViaje: widget.actualizarViaje,
-        cancelarViaje: widget.cancelarViaje,
+        cancelarViaje: cancelar == null ? null : cancelarYRecargar,
         onActualizado: (_) => _cargar(),
       ),
     );
@@ -340,7 +349,6 @@ class _DetalleViajeAdminDialogState extends State<_DetalleViajeAdminDialog> {
         _viaje = cancelado;
         _cancelando = false;
       });
-      await widget.onActualizado(cancelado);
     } on ApiException catch (error) {
       if (!_detalleVigente) return;
       setState(() {

@@ -86,7 +86,7 @@ void main() {
     await abrir(tester, (id) async => datos.viaje(id), estado: 'cancelado');
     expect(find.byKey(const Key('cancelar-viaje')), findsNothing);
   });
-  testWidgets('evita doble envío y descarta respuesta tras cerrar', (
+  testWidgets('evita doble envío y refresca listado tras cerrar el detalle', (
     tester,
   ) async {
     final respuesta = Completer<ViajeResumen>();
@@ -108,6 +108,36 @@ void main() {
     respuesta.complete(datos.viaje(10, estado: 'cancelado'));
     await tester.pumpAndSettle();
     expect(tester.takeException(), isNull);
-    expect(find.text('Programado'), findsOneWidget);
+    expect(find.text('Cancelado'), findsOneWidget);
+    expect(find.byKey(const Key('detalle-viaje-10')), findsNothing);
+  });
+
+  testWidgets('no recarga si se desmontó la pantalla original', (tester) async {
+    final respuesta = Completer<ViajeResumen>();
+    var cargas = 0;
+    await tester.pumpWidget(
+      MaterialApp(
+        home: ViajesDiaAdminScreen(
+          fecha: DateTime(2026, 10, 30),
+          cargarViajes: (_) async {
+            cargas++;
+            return [datos.viaje(10)];
+          },
+          onViajeSeleccionado: (_) {},
+          cancelarViaje: (_) => respuesta.future,
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('10').first);
+    await tester.pumpAndSettle();
+    await confirmar(tester);
+    await tester.pumpWidget(const MaterialApp(home: Text('Otra pantalla')));
+    await tester.pumpAndSettle();
+    respuesta.complete(datos.viaje(10, estado: 'cancelado'));
+    await tester.pumpAndSettle();
+    expect(cargas, 1);
+    expect(find.text('Otra pantalla'), findsOneWidget);
+    expect(tester.takeException(), isNull);
   });
 }

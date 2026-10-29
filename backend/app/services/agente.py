@@ -54,15 +54,18 @@ _NOMBRES_HABILITADOS = {t["function"]["name"] for t in TOOLS_HABILITADAS}
 # el modelo a veces responde con Markdown igual: acá se limpia, que no depende de que obedezca.
 _VINETA = re.compile(r"^(\s*)[*+]\s+", re.MULTILINE)
 _TITULO = re.compile(r"^\s{0,3}#{1,6}\s+", re.MULTILINE)
+# Cita: un ">" al inicio del renglón (el modelo lo usa para destacar una aclaración).
+_CITA = re.compile(r"^[ \t]{0,3}(?:>[ \t]?)+", re.MULTILINE)
 _NEGRITA = re.compile(r"(\*\*|__)(.+?)\1", re.DOTALL)
 # Un asterisco solo, pegado al texto de ambos lados: cursiva. "2 * 3" no entra (hay espacios).
 _CURSIVA = re.compile(r"(?<![*\w])\*(?=\S)([^*\n]+?)(?<=\S)\*(?![*\w])")
 
 
 def a_texto_plano(texto: str) -> str:
-    """Quita el formato Markdown (negritas, cursivas, títulos, viñetas con *, código)."""
+    """Quita el formato Markdown (negritas, cursivas, títulos, citas, viñetas con *, código)."""
     texto = _VINETA.sub(r"\1- ", texto)
     texto = _TITULO.sub("", texto)
+    texto = _CITA.sub("", texto)
     texto = _NEGRITA.sub(r"\2", texto)
     texto = _CURSIVA.sub(r"\1", texto)
     return texto.replace("**", "").replace("`", "")

@@ -1,3 +1,6 @@
+import 'models/gps/ubicacion_viaje.dart';
+import 'core/maps/configuracion_mapa.dart';
+import 'widgets/gps/mapa_ultima_posicion.dart';
 import 'adapters/chofer/captura_gps_android.dart';
 import 'controllers/chofer/seguimiento_gps_controller.dart';
 import 'screens/chofer/panel_gps.dart';
@@ -51,6 +54,9 @@ class VanFullBootstrap extends StatefulWidget {
     this.crearTransporte,
     this.comprobarUbicacionInicio,
     this.asistenciaUbicacionInicio,
+    this.configuracionMapa,
+    this.prepararMapa,
+    this.crearVisorMapa,
     super.key,
   });
 
@@ -58,6 +64,11 @@ class VanFullBootstrap extends StatefulWidget {
   final CrearTransporteHttp? crearTransporte;
   final ComprobarUbicacionInicio? comprobarUbicacionInicio;
   final AsistenciaUbicacionInicio? asistenciaUbicacionInicio;
+
+  // Reemplazos del visor/loader para verificar la composición sin Maps real.
+  final ConfiguracionMapa? configuracionMapa;
+  final PrepararMapa? prepararMapa;
+  final ConstructorVisorMapa? crearVisorMapa;
 
   @override
   State<VanFullBootstrap> createState() => _VanFullBootstrapState();
@@ -140,6 +151,9 @@ class _VanFullBootstrapState extends State<VanFullBootstrap> {
       controller: controller,
       listar: _viajesDiaAdmin,
       crear: _viajesAdmin,
+      configuracionMapa: widget.configuracionMapa,
+      prepararMapa: widget.prepararMapa,
+      crearVisorMapa: widget.crearVisorMapa,
       gpsApi: _gpsApi,
       onSalir: controller.salir,
     ),
@@ -161,6 +175,9 @@ class _EntradaAdministracion extends StatefulWidget {
     required this.controller,
     required this.listar,
     required this.crear,
+    required this.configuracionMapa,
+    required this.prepararMapa,
+    required this.crearVisorMapa,
     required this.gpsApi,
     required this.onSalir,
   });
@@ -168,6 +185,9 @@ class _EntradaAdministracion extends StatefulWidget {
   final SesionController controller;
   final ViajesDiaAdminApi listar;
   final ViajesAdminApi crear;
+  final ConfiguracionMapa? configuracionMapa;
+  final PrepararMapa? prepararMapa;
+  final ConstructorVisorMapa? crearVisorMapa;
   final UbicacionApi gpsApi;
   final VoidCallback onSalir;
 
@@ -189,18 +209,7 @@ class _EntradaAdministracionState extends State<_EntradaAdministracion> {
             ViajesDiaAdminScreen(
               fecha: DateTime.now(),
               cargarViajes: _cargarViajes,
-              onViajeSeleccionado: (id) => Navigator.of(context).push(
-                MaterialPageRoute<void>(
-                  builder: (_) => UbicacionScreen(
-                    idViaje: id,
-                    consultar: (id) => _protegerAcceso(
-                      controller: widget.controller,
-                      solicitud: () => widget.gpsApi.consultar(id),
-                      onAccesoDenegado: _denegarAcceso,
-                    ),
-                  ),
-                ),
-              ),
+              onViajeSeleccionado: _abrirUbicacion,
               actualizarViaje: _actualizarViaje,
             ),
             Positioned(
@@ -232,6 +241,45 @@ class _EntradaAdministracionState extends State<_EntradaAdministracion> {
             ),
           ],
         );
+
+  void _abrirUbicacion(int id) {
+    final controller = widget.controller;
+    final sesion = controller.sesion;
+    final generacion = controller.generacion;
+    final api = widget.gpsApi;
+    if (sesion == null || _accesoDenegado) return;
+    // Identidad opaca propia de la ruta; nunca usa el token como key.
+    final alcance = Object();
+    bool vigente() =>
+        mounted &&
+        !_accesoDenegado &&
+        controller.generacion == generacion &&
+        identical(controller.sesion, sesion);
+    Future<UbicacionViaje> consultar(int viaje) {
+      if (!vigente()) {
+        throw StateError('La sesión de esta vista ya no está vigente.');
+      }
+      return _protegerAcceso(
+        controller: controller,
+        solicitud: () => api.consultar(viaje),
+        onAccesoDenegado: _denegarAcceso,
+      );
+    }
+
+    // Crear una vez evita renovar funciones/fuentes al reconstruir la ruta.
+    final pantalla = UbicacionScreen(
+      idViaje: id,
+      consultar: consultar,
+      alcance: alcance,
+      invalidaciones: controller,
+      contextoVigente: vigente,
+      configuracionMapa: widget.configuracionMapa,
+      prepararMapa: widget.prepararMapa,
+      crearVisorMapa: widget.crearVisorMapa,
+    );
+    Navigator.of(context)
+        .push(MaterialPageRoute<void>(builder: (_) => pantalla));
+  }
 
   Future<List<ViajeResumen>> _cargarViajes(DateTime fecha) async {
     return _protegerAcceso(

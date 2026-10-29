@@ -5,6 +5,13 @@
 Corte 2026-10-29: #216 MERGED, código presente en main bceb929. Estado PARCIAL: preparación
 interna; circuito HTTP PENDIENTE. El merge no activa el webhook ni certifica integración real.
 
+**DEFINIDO POR EL EQUIPO — Martiniano, 2026-10-29:** entrega PARCIAL de CU-036 confirmada
+expresamente, según comunicación del usuario. #216 es preparación interna integrada (HMAC,
+consulta Payments y servicio contable interno con simulaciones); webhook HTTP inactivo,
+sin integración real certificada. No se aprueban cambios de modelo ni contrato HTTP antes
+del PC2. Vínculo único operación↔pago, contrato webhook y sandbox real quedan post-demo en #215.
+Los antecedentes técnicos siguientes se conservan; no autorizan activar el circuito ni ampliar el recorte.
+
 CU-036 v1.3, RF-012 y RN-015 aprobados: integración académica en pruebas, validación de
 operación conocida y acreditación automática válida, sin segunda aprobación humana.
 La especificación deja API, credenciales, autenticidad, reintentos y escenario exacto como
@@ -37,7 +44,7 @@ Registra categorías técnicas sanitizadas en logs, sin payloads, firmas, tokens
 una operación externa no pueda vincularse a dos pagos exige el vínculo único persistente
 pendiente. No existe resolvedor real ni se infiere external_reference=id_pago.
 
-## Qué falta para integrar
+## Qué falta para integrar — post-demo (#215)
 
 1. Acordar con el equipo escenario académico y selección técnica Payments/HMAC propuesta;
    no se declara como decisión funcional aprobada ni integración productiva.

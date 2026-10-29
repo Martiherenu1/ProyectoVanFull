@@ -62,13 +62,19 @@ Solo PENDIENTE; lock del pago y efectos atómicos. Rechazo sin recibo/movimiento
 La fuente detallada CU-016 v1.3 no se localizó según #210; se usaron MVC aprobado y contrato.
 Por eso se informa IMPLEMENTADO el circuito documentado, sin certificar toda la especificación v1.3.
 
-### CU-036
+### CU-036 — PARCIAL en PC2
+
+**DEFINIDO POR EL EQUIPO — Martiniano, 2026-10-29:** confirma expresamente la entrega PARCIAL
+de CU-036 en PC2 (decisión comunicada por el usuario). No aprueba cambios de modelo ni de
+contrato HTTP antes del PC2; los pendientes de integración pasan a post-demo en #215.
 
 `app/integrations/mercadopago.py` y `app/services/mercadopago.py` están integrados por #216.
 HMAC, consulta Payments, validación y confirmación contable reutilizada; no crea/captura cobros.
 `app/main.py`/routers NO registran POST /webhooks/mercadopago: el contrato de diseño no lo activa.
 Pruebas usan HTTP/proveedor y vínculo falsos, PostgreSQL temporal real. Idempotencia por pago local
 con vínculo fijo; NO acredita asociación única global MP↔pagos ni ensayo sandbox real.
+Webhook HTTP inactivo; sin integración real certificada. El alcance entregado es HMAC,
+consulta Payments y servicio contable interno con simulaciones, no la recepción HTTP completa.
 
 ## En curso
 
@@ -99,7 +105,8 @@ Antes de commit/push/PR se requiere autorización del usuario. Los Issues parcia
 - #212: RN-004 advertencia/suspensión/cupo; RN-005 habilitación excepcional cinco días y expiración;
   RN-006 límite mensual/referencia de abono. Sin acciones operativas ni inferencias desde el saldo.
 - #211: criterios de búsqueda adicionales de CU-027; identificación personal adicional solo si se acuerda.
-- #215: vínculo persistente MP↔pago, contrato HTTP/ACK/reintentos, sandbox/moneda/receptor/escenario,
+- #215, post-demo por decisión de Martiniano: vínculo único operación↔pago, contrato webhook
+  HTTP/ACK/reintentos, sandbox real/moneda/receptor/escenario,
   handler/DI, conciliación durable y validación real autorizada. Webhook inactivo.
 - #225: contraste documental CU-016 v1.3, contradicción de aprobación CU-018 y coordinación de prueba real.
 - Notion: PENDIENTE DE COMPROBAR/ACTUALIZAR por Facundo; no se consultó ni modificó, sin asumir acceso.

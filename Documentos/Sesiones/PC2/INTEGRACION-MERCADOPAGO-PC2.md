@@ -1,6 +1,9 @@
-# CU-036 — preparación interna local (#215)
+# CU-036 — preparación interna integrada, webhook pendiente (#215/#216)
 
 ## Estado y fuentes
+
+Corte 2026-10-29: #216 MERGED, código presente en main bceb929. Estado PARCIAL: preparación
+interna; circuito HTTP PENDIENTE. El merge no activa el webhook ni certifica integración real.
 
 CU-036 v1.3, RF-012 y RN-015 aprobados: integración académica en pruebas, validación de
 operación conocida y acreditación automática válida, sin segunda aprobación humana.
@@ -59,5 +62,6 @@ con espera efectiva del lock; más regresión de pagos y rutas. PostgreSQL tempo
 el entorno testing existente; HTTP/proveedor/vínculo completamente falsos. Ruff y formato
 correctos. Sin nuevas dependencias, router/configuración activos, OpenAPI ni cambios de modelo.
 
-Base main a8696de; PR #210 y #214 abiertos, no incorporados. CU-015 y CU-027 permanecen en
-stashes separados. Sin commit, push, PR ni ejecución de cobros o acceso a producción.
+Base a8696de y stashes citados en la preparación son históricos. Hoy main bceb929 integra
+#210/#214/#216/#217/#218. PR #216 informa 599 pruebas backend aprobadas al publicar;
+separadas de las 82 focalizadas anteriores. Sin nuevas suites, cobros ni producción en #225.

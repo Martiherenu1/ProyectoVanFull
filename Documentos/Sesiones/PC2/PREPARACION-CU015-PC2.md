@@ -1,8 +1,8 @@
-# CU-015 / #212 / #218 — consulta administrativa publicada en #218
+# CU-015 / #212 / #218 — consulta administrativa integrada en main (#218)
 
 **Cobertura parcial:** consulta conectada de punta a punta en código y probada con HTTP
-simulado/PostgreSQL local. Continuación publicada en #218, sin merge hacia main ni prueba
-manual del despliegue. La gestión RN-004/005/006 permanece pendiente.
+simulado/PostgreSQL local. PR #218 mergeado el 29/10/2026, comprobado en main bceb929.
+Sin prueba manual del despliegue. La gestión RN-004/005/006 permanece pendiente.
 
 ## Contrato acordado
 
@@ -22,7 +22,7 @@ OpenAPI conserva x-cobertura parcial y JSON regenerado/validado.
 - Respuestas tardías no afectan otra sesión ni una pantalla desmontada. 401/403 siguen la
   protección común administrativa; 404 se muestra en la consulta. Sin selector de clientes
   basado en endpoints adicionales ni permisos nuevos en otros roles.
-- Main actualizado 4aea002, con #210/#214/#222; sus rutas y botones se conservan. Controles
+- Base de preparación 4aea002 (histórica). Main bceb929 integra #218 y #217, además de #210/#214/#222. Controles
   administrativos probados a 320 y 1440 px. Cambios de otras ramas no mergeadas preservados.
 
 ## Pendientes

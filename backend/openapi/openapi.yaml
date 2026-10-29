@@ -852,6 +852,7 @@ paths:
         PC1): para él se usa la cuenta corriente de su cliente individual y no puede registrar
         pagos de otro cliente.
       x-cu: CU-014
+      x-cobertura: parcial
       requestBody:
         required: true
         content:

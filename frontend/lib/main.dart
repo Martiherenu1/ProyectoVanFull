@@ -31,6 +31,8 @@ import 'screens/admin/viajes_dia_admin_screen.dart';
 import 'screens/chofer/chofer_shell.dart';
 import 'screens/pasajero/pasajero_shell.dart';
 import 'services/admin/viajes_admin_api.dart';
+import 'services/admin/registro_pagos_admin_api.dart';
+import 'screens/admin/registrar_pago_admin_screen.dart';
 import 'services/admin/pagos_admin_api.dart';
 import 'screens/admin/pagos_pendientes_screen.dart';
 import 'models/admin/pago_admin.dart';
@@ -83,6 +85,7 @@ class _VanFullBootstrapState extends State<VanFullBootstrap> {
   late final PasajeroApi _pasajero;
   late final ViajesDiaAdminApi _viajesDiaAdmin;
   late final ViajesAdminApi _viajesAdmin;
+  late final RegistroPagosAdminApi _registroPagosAdmin;
   late final PagosAdminApi _pagosAdmin;
   late final ViajesChoferApi _viajesChofer;
   late final DetalleViajeChoferApi _detalleChofer;
@@ -111,6 +114,7 @@ class _VanFullBootstrapState extends State<VanFullBootstrap> {
     _pasajero = PasajeroApi(httpClient);
     _viajesDiaAdmin = ViajesDiaAdminApi(httpClient);
     _viajesAdmin = ViajesAdminApi(httpClient);
+    _registroPagosAdmin = RegistroPagosAdminApi(httpClient);
     _pagosAdmin = PagosAdminApi(httpClient);
     _viajesChofer = ViajesChoferApi(httpClient);
     _detalleChofer = DetalleViajeChoferApi(httpClient);
@@ -187,6 +191,7 @@ class _VanFullBootstrapState extends State<VanFullBootstrap> {
       controller: controller,
       listar: _viajesDiaAdmin,
       crear: _viajesAdmin,
+      registrarPagos: _registroPagosAdmin,
       pagos: _pagosAdmin,
       configuracionMapa: widget.configuracionMapa,
       prepararMapa: widget.prepararMapa,
@@ -212,6 +217,7 @@ class _EntradaAdministracion extends StatefulWidget {
     required this.controller,
     required this.listar,
     required this.crear,
+    required this.registrarPagos,
     required this.pagos,
     required this.configuracionMapa,
     required this.prepararMapa,
@@ -223,6 +229,7 @@ class _EntradaAdministracion extends StatefulWidget {
   final SesionController controller;
   final ViajesDiaAdminApi listar;
   final ViajesAdminApi crear;
+  final RegistroPagosAdminApi registrarPagos;
   final PagosAdminApi pagos;
   final ConfiguracionMapa? configuracionMapa;
   final PrepararMapa? prepararMapa;
@@ -253,23 +260,30 @@ class _EntradaAdministracionState extends State<_EntradaAdministracion> {
               cancelarViaje: _cancelarViaje,
             ),
             Positioned(
+              left: AppSpacing.lg,
               right: AppSpacing.lg,
               bottom: AppSpacing.lg,
               child: SafeArea(
-                child: Row(
+                child: Wrap(
+                  alignment: WrapAlignment.end,
+                  spacing: AppSpacing.sm,
+                  runSpacing: AppSpacing.sm,
                   children: [
                     OutlinedButton(
                       key: const Key('admin-salir'),
                       onPressed: widget.onSalir,
                       child: const Text('Cerrar sesión'),
                     ),
-                    const SizedBox(width: AppSpacing.sm),
                     OutlinedButton(
                       key: const Key('admin-pagos-pendientes'),
                       onPressed: _abrirPagos,
                       child: const Text('Pagos pendientes'),
                     ),
-                    const SizedBox(width: AppSpacing.sm),
+                    OutlinedButton(
+                      key: const Key('admin-registrar-pago'),
+                      onPressed: _abrirRegistroPago,
+                      child: const Text('Registrar pago'),
+                    ),
                     ElevatedButton.icon(
                       key: const Key('admin-crear-viaje'),
                       onPressed: () => Navigator.of(context).push(
@@ -287,6 +301,39 @@ class _EntradaAdministracionState extends State<_EntradaAdministracion> {
             ),
           ],
         );
+
+  void _abrirRegistroPago() {
+    final controller = widget.controller;
+    final generacion = controller.generacion;
+    final token = controller.token;
+    final api = widget.registrarPagos;
+    bool vigente() =>
+        mounted &&
+        !_accesoDenegado &&
+        token != null &&
+        controller.generacion == generacion &&
+        controller.token == token;
+    if (!vigente()) return;
+    final pantalla = RegistrarPagoAdminScreen(
+      registrar:
+          ({required idCliente, required importe, required medio}) async {
+            if (!vigente()) throw StateError('La sesión ya no está vigente.');
+            final pago = await _protegerAcceso(
+              controller: controller,
+              solicitud: () => api.registrar(
+                idCliente: idCliente,
+                importe: importe,
+                medio: medio,
+              ),
+              onAccesoDenegado: _denegarAcceso,
+            );
+            if (!vigente()) throw StateError('La sesión ya no está vigente.');
+            return pago;
+          },
+    );
+    Navigator.of(context)
+        .push(MaterialPageRoute<void>(builder: (_) => pantalla));
+  }
 
   void _abrirPagos() {
     final controller = widget.controller;

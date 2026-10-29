@@ -71,6 +71,36 @@ interfaz continúan pendientes. No debe confundirse con las reservas propias del
 
 ### CU-014 · Registrar pagos y comprobantes — PARCIAL
 
+**Avance local #213, 29/10/2026:** rama `feat/admin-registrar-pago-cu014-213` desde main
+`a8696de`, sin cambios de #210/CU-015/CU-027. Los trabajos locales #212 y #211 se preservaron
+en stashes separados con sus nombres de rama; no aplicarlos sobre esta rama.
+
+Leídos CU-014 v1.3 aprobado, RN-011/013/014/015/016 y contrato/servicio POST /pagos.
+Formulario administrativo integrado al endpoint existente: ID cliente destinatario con cuenta
+existente, importe recibido, transferencia o billetera. Confirma destinatario/importe antes
+de enviar y muestra el estado real devuelto; no confirma pagos ni genera recibos/movimientos.
+Reutiliza HTTP/sesión, Pago, MedioPago y formato de importes; main.dart solo conecta el registro.
+Muestra errores de cliente/cuenta/permiso/validación; evita doble envío y efectos de sesión vieja.
+
+Preparación aislada: BorradorImputacionPago y formulario local para tipo/referencia de respaldo,
+sin serialización, persistencia, subida de archivos ni conexión al registro real. El adaptador
+rechaza borradores con datos antes de HTTP: no los descarta silenciosamente. No determina tipo,
+seña mínima o condiciones empresariales; estos campos son candidatos a integración, no decisiones.
+
+**Para integrar lo restante (#84):** acordar almacenamiento y validación de tipo/evidencia con
+Martiniano/Martín; definir tarifa aplicable e imputación del 15 % antes de habilitar efectivo;
+vinculación con contratación/acuerdos y validación backend de seña general 50 %/excepciones
+empresariales; definir semántica CUENTA_CORRIENTE y conectar CU-036 para Mercado Pago cuando
+corresponda. Cliente sin cuenta conserva 404: no hay alta automática. No cambiar permisos.
+La UI identifica este registro como parcial y no habilita efectivo, señas/acuerdos especiales
+ni adjuntos. Sin cambios backend/OpenAPI/BD ni módulos Pasajero/Chofer/GPS. CU-014 sigue parcial.
+
+Validación local: 26 pruebas Flutter focalizadas aprobadas (adaptador, formulario/borrador,
+sesión y composición existente), flutter analyze sin problemas y diff check correcto.
+No se registraron pagos reales; sin commit/push/PR.
+
+Fuente CU: https://drive.google.com/file/d/1Kc4m4e2LH5xRc1J9HY-2hTQaiLNeRA7y/view
+
 **Implementado**
 
 - `POST /pagos`, integrado por #85 y ampliado por #141.
@@ -96,7 +126,18 @@ interfaz continúan pendientes. No debe confundirse con las reservas propias del
 - Issue #84 permanece abierto. OpenAPI documenta estas limitaciones, pero la operación no está marcada con
   `x-cobertura: parcial`, a diferencia de la convención vigente.
 
-### CU-015 · Gestionar deuda — NO IMPLEMENTADO
+### CU-015 · Gestionar deuda — CONSULTA IMPLEMENTADA LOCALMENTE, GESTIÓN PARCIAL
+
+**Continuación #212/#218, contrato acordado con Martiniano (instrucción del equipo):**
+GET `/clientes/{id_cliente}/deuda`, administrador/dueno, esquema Deuda; sin cuenta devuelve
+saldo cero/al_dia; inexistente 404 CLIENTE_NO_ENCONTRADO y otros roles 403 SIN_PERMISO.
+Cálculo común extraído de `services/deuda.py`, CU-006 sin cambios de comportamiento.
+Consulta administrativa Flutter conectada a HTTP/sesión y menú, identificación por ID,
+errores y descarte de respuestas viejas; conserva navegación CU-014/CU-016/#222.
+No edita saldo ni infiere suspensión. RN-004/005/006 siguen pendientes: suspensión,
+habilitación excepcional y límite mensual no implementados. Main 4aea002 integrado localmente;
+sin commit/push. 25 pruebas backend y 57 Flutter aprobadas, Ruff/analyze y OpenAPI válidos.
+Los párrafos inferiores conservan el historial de la preparación desconectada.
 
 **Continuación #212 (29/10/2026):** recuperados solo sus cambios preservados. Pantalla de
 consulta visual administrativa por ID de cliente, con puerto local y adaptador simulado solo
@@ -180,6 +221,26 @@ cuenta: es la integración de Mercado Pago que extiende CU-014.
   los cambios compartidos de Martín y Martiniano.
 
 ## Decisiones vigentes
+
+- **Preparación local #209, CU-016 (29/10/2026):** main `a8696de`, rama
+  `feat/admin-pagos-pendientes-cu016-209`. Pantalla de pagos pendientes, confirmación/rechazo,
+  errores, recarga y protección frente a doble envío/sesión anterior. Reutiliza POST de decisión
+  sin cambiar efectos contables; propone GET `/pagos/pendientes` solo administrador/dueño,
+  filtro PENDIENTE y orden de presentación fecha/id. No es una regla económica nueva.
+  Sin cambios Pasajero/Chofer/GPS ni modelos de BD. Fuente consultada: CU-016/RN-015 del MVC
+  aprobado y contrato vigente; especificación detallada v1.3 no localizada mediante el conector
+  Drive: contraste documental pendiente antes de declarar cobertura integral.
+  44 pruebas backend/contrato y 15 específicas Flutter de pagos aprobadas; otras 9 pruebas de
+  composición/sesión existentes aprobadas. Sin commit/push/PR; nueva operación de contrato
+  pendiente de revisión al publicar, según CONTRIBUTING §1.9.
+
+- **Preparación local #215/CU-036 (29/10/2026):** rama `feat/admin-mercadopago-cu036-215`
+  desde main a8696de, sin #210/#214 ni stashes CU-015/CU-027. Adaptador GET Payments/HMAC
+  y servicio interno de validación/confirmación reutilizando pagos; 82 pruebas focalizadas
+  aprobadas (HTTP/vínculo falsos, PostgreSQL temporal real), Ruff/formato correctos.
+  No hay webhook HTTP activo ni integración real certificada. Bloqueados vínculo único
+  persistente, moneda/receptor/escenario, credenciales y contrato de notificaciones/errores.
+  Ver `INTEGRACION-MERCADOPAGO-PC2.md`; no se inventan estados contables ni se hacen cobros.
 
 - **Preparación local #207 (29/10/2026):** interfaz Flutter de cancelación CU-018 desde main
   `4d5c4ff` (#186/#189/#192 integrados). Botón en programado, confirmación, errores backend,

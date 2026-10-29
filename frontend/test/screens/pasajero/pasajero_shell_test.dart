@@ -205,4 +205,45 @@ void main() {
     expect(find.byKey(const ValueKey('ir-a-pago')), findsOneWidget);
     expect(servidor.pedidosDeReservas, greaterThan(antes));
   });
+
+  testWidgets('desde Mis reservas se abre la ubicación del viaje reservado', (
+    tester,
+  ) async {
+    final servidor = ServidorFalso()
+      ..reservas.add({
+        'id_reserva': 41,
+        'id_pasajero': 7,
+        'id_viaje': 12,
+        'id_recorrido': 3,
+        'orden_parada': 1,
+        'fecha': '2026-10-30',
+        'horario': '06:15',
+        'sentido': 'IDA',
+        'estado': 'consolidada',
+      });
+    final pedidos = <int>[];
+    await tester.pumpWidget(
+      MaterialApp(
+        home: PasajeroShell(
+          api: PasajeroApi(servidor),
+          onSalir: () {},
+          pantallaUbicacion: (idViaje) {
+            pedidos.add(idViaje);
+            return const Scaffold(body: Text('pantalla de ubicación'));
+          },
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Mis reservas'));
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.byKey(const ValueKey('reserva-41')));
+    await tester.pump();
+    await tester.tap(find.byKey(const ValueKey('ubicacion-41')));
+    await tester.pumpAndSettle();
+
+    expect(pedidos, [12]);
+    expect(find.text('pantalla de ubicación'), findsOneWidget);
+  });
 }

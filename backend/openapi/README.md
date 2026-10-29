@@ -29,6 +29,11 @@ Validado con `openapi-spec-validator`: **OpenAPI 3.0.3 · 26 rutas · 28 operaci
 
 ## Cobertura de esta versión (v0.1)
 
+Actualización CU-015/#212: `GET /clientes/{id_cliente}/deuda` agrega consulta administrativa
+de solo lectura (administrador/dueno), reutilizando Deuda. Sin cuenta informa 0.00/al_dia;
+inexistente CLIENTE_NO_ENCONTRADO. CU-006 conserva su comportamiento. La gestión de
+consecuencias RN-004/005/006 sigue pendiente; CU-015 conserva cobertura parcial.
+
 > **v0.1 representa 18 de los 37 casos de uso, además de RF-028.** Los otros **19 CU** todavía no tienen
 > operaciones y se listan al final. Estos indicadores describen la **cobertura contractual de diseño**;
 > no indican funcionalidades implementadas en el backend ni en el frontend.
@@ -94,8 +99,8 @@ ubicación en CU-009/CU-034 y no es una regla directa del POST GPS.
 
 ## CU pendientes de contrato (próxima iteración)
 
-Estos **19 CU** todavía no tienen operaciones en el contrato:
-administración de pasajeros (CU-013), deuda admin (CU-015), créditos/devoluciones (CU-017), recorridos (CU-019),
+Los siguientes CU todavía no tienen operaciones en el contrato:
+administración de pasajeros (CU-013), créditos/devoluciones (CU-017), recorridos (CU-019),
 optimización de recorrido (CU-020), choferes (CU-021), vehículos (CU-022), corporativos (CU-023, CU-033, CU-034, CU-035),
 facturación (CU-024), reportes (CU-025), historial (CU-026), reservas admin (CU-027), abonos (CU-028),
 tarifas y administradores del dueño (CU-031, CU-032), notificaciones (CU-037).

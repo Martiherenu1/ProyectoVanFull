@@ -7,7 +7,7 @@ import '../../models/pasajero/deuda.dart';
 import '../../services/admin/consulta_deuda_admin.dart';
 import '../../widgets/admin/resumen_deuda_admin.dart';
 
-/// Preparación parcial CU-015: identificación/consulta visual, sin HTTP ni acciones.
+/// Consulta CU-015 de solo lectura, sin acciones sobre saldo o habilitación.
 class ConsultarDeudaAdminScreen extends StatefulWidget {
   const ConsultarDeudaAdminScreen({
     super.key,

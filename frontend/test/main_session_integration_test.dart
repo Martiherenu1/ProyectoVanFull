@@ -47,6 +47,13 @@ final class _TransporteControlado extends http.BaseClient {
     if (path.endsWith('/auth/logout')) {
       return http.StreamedResponse(const Stream.empty(), 204);
     }
+    if (path.endsWith('/pasajeros/me/reservas')) {
+      return _json(200, const [_reservaPasajero]);
+    }
+    if (path.endsWith('/pasajeros/me/deuda')) {
+      return _json(200, const {'saldo': 0, 'estado': 'al_dia'});
+    }
+    if (path.endsWith('/viajes/12/ubicacion')) return _sinPermiso();
     if (path.endsWith('/choferes/me/viajes/41')) {
       if (estadoDetalleChofer == 403) return _sinPermiso();
       return _json(200, const {});
@@ -89,6 +96,18 @@ final class _TransporteControlado extends http.BaseClient {
   http.StreamedResponse _sinPermiso() => _json(403, {
     'error': {'codigo': 'SIN_PERMISO', 'mensaje': 'Acceso denegado'},
   });
+
+  static const _reservaPasajero = {
+    'id_reserva': 41,
+    'id_pasajero': 7,
+    'id_viaje': 12,
+    'id_recorrido': 3,
+    'orden_parada': 1,
+    'fecha': '2026-10-30',
+    'horario': '06:15',
+    'sentido': 'IDA',
+    'estado': 'consolidada',
+  };
 
   static const _viajeChofer = {
     'id_viaje': 41,
@@ -445,4 +464,42 @@ void main() {
     expect(find.text('Ingresar'), findsNothing);
     await tester.pumpWidget(const SizedBox.shrink());
   });
+
+  testWidgets(
+    'el pasajero abre la ubicación de su reserva y un 403 no cierra su sesión',
+    (tester) async {
+      final transporte = _TransporteControlado(rol: 'pasajero');
+      await tester.pumpWidget(
+        VanFullBootstrap(
+          apiBaseUrl: 'https://vanfull.test/api/',
+          crearTransporte: () => transporte,
+        ),
+      );
+      await _login(tester);
+
+      await tester.tap(find.text('Mis reservas'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.byKey(const ValueKey('reserva-41')));
+      await tester.pump();
+      await tester.tap(find.byKey(const ValueKey('ubicacion-41')));
+      await tester.pumpAndSettle();
+
+      expect(
+        transporte.pedidos.any(
+          (pedido) => pedido.url.path.endsWith('/viajes/12/ubicacion'),
+        ),
+        isTrue,
+      );
+      expect(
+        find.text('Ubicación no disponible para esta sesión o viaje.'),
+        findsOneWidget,
+      );
+      // La sesión sigue: volver muestra Mis reservas, no el inicio de sesión.
+      expect(find.text('Ingresar'), findsNothing);
+      await tester.pageBack();
+      await tester.pumpAndSettle();
+      expect(find.byKey(const ValueKey('reserva-41')), findsOneWidget);
+      await tester.pumpWidget(const SizedBox.shrink());
+    },
+  );
 }

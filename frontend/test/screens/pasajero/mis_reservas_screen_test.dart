@@ -47,6 +47,7 @@ Future<void> mostrar(
   CancelarReserva? cancelar,
   VoidCallback? buscar,
   ValueChanged<Deuda>? pagar,
+  ValueChanged<Reserva>? verUbicacion,
 }) => tester.pumpWidget(
   MaterialApp(
     home: MisReservasScreen(
@@ -55,6 +56,7 @@ Future<void> mostrar(
       cancelarReserva: cancelar ?? (id) async => cancelada(id),
       onBuscarServicio: buscar ?? () {},
       onRegistrarPago: pagar,
+      onVerUbicacion: verUbicacion,
     ),
   ),
 );
@@ -354,5 +356,49 @@ void main() {
     );
     await tester.pump();
     expect(find.byKey(const ValueKey('ir-a-pago')), findsNothing);
+  });
+
+  group('Ver ubicación', () {
+    testWidgets('una reserva consolidada abierta ofrece ver la ubicación', (
+      tester,
+    ) async {
+      Reserva? recibida;
+      await mostrar(tester, verUbicacion: (r) => recibida = r);
+      await tester.pump();
+      expect(find.byKey(const ValueKey('ubicacion-1')), findsNothing);
+
+      await tester.tap(find.byKey(const ValueKey('reserva-1')));
+      await tester.pump();
+      await tester.tap(find.byKey(const ValueKey('ubicacion-1')));
+
+      expect(recibida?.idReserva, 1);
+      expect(recibida?.idViaje, 101);
+    });
+
+    testWidgets('provisional y cancelada no la ofrecen', (tester) async {
+      await mostrar(
+        tester,
+        reservas: () async => [
+          reserva(1, estado: 'provisional'),
+          reserva(2, estado: 'cancelada'),
+        ],
+        verUbicacion: (_) {},
+      );
+      await tester.pump();
+      for (final id in [1, 2]) {
+        await tester.tap(find.byKey(ValueKey('reserva-$id')));
+        await tester.pump();
+        expect(find.byKey(ValueKey('ubicacion-$id')), findsNothing);
+      }
+    });
+
+    testWidgets('sin callback no hay botón', (tester) async {
+      await mostrar(tester);
+      await tester.pump();
+      await tester.tap(find.byKey(const ValueKey('reserva-1')));
+      await tester.pump();
+
+      expect(find.byKey(const ValueKey('ubicacion-1')), findsNothing);
+    });
   });
 }

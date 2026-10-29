@@ -1,42 +1,44 @@
-# CU-015 / #212 — consulta visual parcial
+# CU-015 / #212 / #218 — consulta administrativa integrada localmente
 
-**Preparación independiente; no funcional de punta a punta.** Sin menú, HTTP, backend,
-permisos nuevos o cambios del contrato compartido. No acredita cumplimiento de CU-015 completo.
+**Cobertura parcial:** consulta conectada de punta a punta en código y probada con HTTP
+simulado/PostgreSQL local. Sin despliegue ni commit/push de esta continuación.
 
-## Parte preparada
+## Contrato acordado
 
-- `ConsultarDeudaAdminScreen`: identifica cliente por ID, consulta explícita, carga, errores
-  y reintento; distingue ausencia de información de saldo cero informado.
-- Reutiliza `ResumenDeudaAdmin`, `Deuda`, tema y formato de importe existentes. No recalcula
-  saldo ni traduce deuda a suspensión/habilitación. No hay edición de importes.
-- `ConsultaDeudaAdmin.consultar(idCliente)` es un puerto local, **no un endpoint aprobado**.
-  El adaptador simulado existe solo en tests y no se ofrece en navegación operativa.
-- Editar el cliente limpia la consulta anterior; cambiar alcance/adaptador elimina identificación
-  y resultados. Respuestas tardías o tras desmontar la pantalla no se aplican.
-- El integrador futuro debe renovar la identidad opaca `alcance` al cambiar sesión y utilizar
-  la consulta administrativa autorizada que acuerde el equipo; no reutilizar CU-006 para datos ajenos.
+**DEFINIDO POR EL EQUIPO:** contrato comunicado por el usuario como acordado con Martiniano:
+GET `/api/clientes/{id_cliente}/deuda`, solo administrador y dueno. 200 reutiliza Deuda
+(saldo, estado); cliente sin cuenta devuelve 0.00/al_dia; inexistente responde
+404 CLIENTE_NO_ENCONTRADO, otros roles 403 SIN_PERMISO. No autoriza editar saldo.
+OpenAPI conserva x-cobertura parcial y JSON regenerado/validado.
 
-## Acciones separadas y bloqueadas
+## Implementación
 
-CU-015 v1.3/RF-010 exige gestión de consecuencias además de consulta. RN-004 contempla
-advertencia/suspensión y eventual pérdida de cupo; RN-005 habilitación excepcional por cinco
-días; RN-006 límite absoluto de un mes de abono y dentro del mes corriente, sin excepciones.
-El saldo es derivado (MR-R30); no se habilita una operación de edición manual.
+- `services/deuda.py` comparte cálculo por id_cliente. MR-R30 conserva suma de movimientos,
+  sin filtros económicos nuevos ni persistencia del saldo; CU-006 conserva identificación propia.
+- Flutter reutiliza Deuda/ResumenDeudaAdmin, HTTP y sesión existentes. «Consultar deuda» abre
+  identificación por ID y consulta visual, con carga, error/reintento y sin datos. Elegir otro
+  cliente elimina la respuesta anterior; cero informado se distingue de ausencia de información.
+- Respuestas tardías no afectan otra sesión ni una pantalla desmontada. 401/403 siguen la
+  protección común administrativa; 404 se muestra en la consulta. Sin selector de clientes
+  basado en endpoints adicionales ni permisos nuevos en otros roles.
+- Main actualizado 4aea002, con #210/#214/#222; sus rutas y botones se conservan. Controles
+  administrativos probados a 320 y 1440 px. Cambios de otras ramas no mergeadas preservados.
 
-Falta acordar con Martiniano/Martín contrato de consulta por cliente, campos de situación y
-consecuencias, acciones permitidas, autorización, almacenamiento/expiración de habilitación y
-referencia de abono/mes para RN-006. El modelo `Deuda` actual solo expone saldo y estado de deuda;
-no informa límites ni suspensión. No se crean botones para esas acciones ni se simula su ejecución.
+## Pendientes
 
-No se inventa ruta HTTP, método de actualización, cambio de estado o regla económica. El backend
-vigente GET /pasajeros/me/deuda corresponde a CU-006 y conserva su autorización de propiedad.
+**RN-004/005/006 NO IMPLEMENTADAS:** suspensión/advertencia y eventual pérdida de cupo,
+habilitación excepcional por cinco días, evaluación de límite mensual. Deben coordinarse
+contrato/comportamiento y datos necesarios con el equipo antes de implementarlas.
+La consulta no deriva suspensión, habilitación ni límites desde el saldo; no ofrece acciones.
+CU-015 no se declara completo como gestión de consecuencias.
 
-## Fuentes y verificación
+## Validación
 
-- [CU-015 v1.3 aprobado](https://drive.google.com/file/d/1Kc4m4e2LH5xRc1J9HY-2hTQaiLNeRA7y/view).
-- [RF-010](https://docs.google.com/document/d/1sA_3o6trf_B2B7H5JyI1yQQhFIzO-8rh/edit).
-- [RN-004/005/006](https://docs.google.com/document/d/1aG6RTv1lTyY36PkyYyYl46NW4PKYvYMb/edit).
+25 pruebas backend aprobadas (CU-006 existente, CU-015/permisos/cálculo/sin cuenta/404/solo lectura
+ y rutas contractuales) en bases temporales del PostgreSQL de testing existente, sin producción.
+57 pruebas Flutter focalizadas aprobadas (adaptador, pantalla, sesión, navegación y responsive).
+Flutter analyze sin problemas; Ruff check/format correctos; YAML/JSON OpenAPI válidos e iguales.
 
-12 pruebas focalizadas de pantalla/componente aprobadas con adaptador simulado; ninguna
-consulta a cuentas reales. Base main a8696de en rama propia #212, sin #210/#214/#216/#217.
-Trabajos de otras ramas preservados por separado; Draft condicionado a verificaciones completas.
+Fuentes vigentes: [CU-015 v1.3](https://drive.google.com/file/d/1Kc4m4e2LH5xRc1J9HY-2hTQaiLNeRA7y/view),
+[RF-010](https://docs.google.com/document/d/1sA_3o6trf_B2B7H5JyI1yQQhFIzO-8rh/edit),
+[RN-004/005/006](https://docs.google.com/document/d/1aG6RTv1lTyY36PkyYyYl46NW4PKYvYMb/edit).

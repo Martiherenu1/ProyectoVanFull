@@ -11,7 +11,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.core.errors import ApiError
 from app.core.security import UsuarioActual
 from app.models.cuenta_corriente import CuentaCorriente, MovimientoCuenta
-from app.models.personas import ClienteIndividual
+from app.models.personas import Cliente, ClienteIndividual
 from app.schemas.deuda import Deuda
 
 ESTADO_AL_DIA = "al_dia"
@@ -34,6 +34,21 @@ async def consultar_deuda_propia(db: AsyncSession, usuario: UsuarioActual) -> De
             "No hay un cliente individual asociado al pasajero autenticado.",
         )
 
+    return await calcular_deuda_cliente(db, id_cliente)
+
+
+async def consultar_deuda_cliente(db: AsyncSession, id_cliente: int) -> Deuda:
+    """Consulta administrativa CU-015; no altera saldo ni habilitación."""
+    existe = (
+        await db.execute(select(Cliente.id_cliente).where(Cliente.id_cliente == id_cliente))
+    ).scalar_one_or_none()
+    if existe is None:
+        raise ApiError(404, "CLIENTE_NO_ENCONTRADO", "No se encontró el cliente.")
+    return await calcular_deuda_cliente(db, id_cliente)
+
+
+async def calcular_deuda_cliente(db: AsyncSession, id_cliente: int) -> Deuda:
+    """Cálculo común CU-006/CU-015 para un cliente previamente identificado."""
     tiene_cuenta = (
         await db.execute(
             select(CuentaCorriente.id_cliente).where(CuentaCorriente.id_cliente == id_cliente)

@@ -16,6 +16,16 @@ TIPO_PAGO_CONFIRMADO = "pago_confirmado"
 TIPO_PAGO_RECHAZADO = "pago_rechazado"
 
 
+async def listar_pagos_pendientes(db: AsyncSession) -> list[Pago]:
+    """Consulta CU-016/RN-015, sin efectos contables ni revalidación de confirmados."""
+    pagos = await db.scalars(
+        select(PagoModelo)
+        .where(PagoModelo.estado == "PENDIENTE")
+        .order_by(PagoModelo.fecha_hora, PagoModelo.id_pago)
+    )
+    return [_a_schema(pago) for pago in pagos]
+
+
 def _a_schema(pago: PagoModelo) -> Pago:
     return Pago(
         id_pago=pago.id_pago,

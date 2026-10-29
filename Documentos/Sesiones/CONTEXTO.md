@@ -1,5 +1,11 @@
 # CONTEXTO VANFULL — Carga rápida de sesión
 
+> CU-015/#212/#218 — continuación local: contrato acordado con Martiniano para GET
+> /clientes/{id_cliente}/deuda, administrador/dueno. Backend, HTTP y navegación conectados;
+> CU-006 conserva su comportamiento. 25 pruebas backend y 57 Flutter aprobadas, analyze/Ruff
+> y contrato válidos. RN-004/005/006 pendientes. Main 4aea002 integrado sin commit/push.
+> Las notas de preparación inferiores son históricas; ver PREPARACION-CU015-PC2.md.
+
 > Continuación #212 — consulta visual de deuda por cliente preparada con adaptador simulado,
 > 12 pruebas focalizadas aprobadas. Sin menú/HTTP ni acciones; integración real pendiente.
 > Ver PREPARACION-CU015-PC2.md. No incorpora #210/#214/#216/#217.
@@ -7,6 +13,18 @@
 > 29/10/2026 — #212/CU-015: componente de presentación de deuda preparado sin conexión ni
 > acciones; circuito administrativo bloqueado por contrato y definición técnica de consecuencias.
 > Base main a8696de, sin #210 ni documentos CU-027; detalle en contexto administrativo.
+
+> 29/10/2026 — #213/CU-014: registro administrativo parcial Flutter preparado con endpoint
+> existente y borrador aislado para tipo/respaldo. 26 pruebas focalizadas aprobadas; bloqueos #84
+> detallados en contexto administrativo. Sin publicar; CU-015/CU-027 preservados aparte.
+
+> 29/10/2026 — #209: CU-016 preparado localmente (pantalla de pagos y GET pendientes mínimo).
+> Confirmación/rechazo reutiliza backend contable existente. Sin publicar; evidencia y pendiente
+> documental en CONTEXTO-administracion-y-flutter.md.
+
+> 29/10/2026 — #215/CU-036: preparado backend interno Payments/HMAC e idempotencia por pago
+> local, con proveedor simulado; 82 pruebas focalizadas aprobadas. Activación HTTP bloqueada
+> por vínculo persistente/contrato/configuración. Detalle en INTEGRACION-MERCADOPAGO-PC2.md.
 
 > 29/10/2026 — #207: interfaz administrativa de cancelación CU-018 preparada localmente desde
 > main con #186/#189/#192. 30 pruebas Flutter focalizadas aprobadas, analyze sin problemas.

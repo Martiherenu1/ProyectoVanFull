@@ -31,6 +31,7 @@ class MisReservasScreen extends StatefulWidget {
     required this.cancelarReserva,
     required this.onBuscarServicio,
     this.onRegistrarPago,
+    this.onVerUbicacion,
   });
 
   final CargarReservas cargarReservas;
@@ -42,6 +43,10 @@ class MisReservasScreen extends StatefulWidget {
 
   /// Lleva a la pantalla de Pago con el saldo cargado. Sin él no hay botón.
   final ValueChanged<Deuda>? onRegistrarPago;
+
+  /// Abre la ubicación del viaje de una reserva consolidada (RN-030). Sin él no
+  /// hay botón. El backend decide si ya hay posición: acá solo se ofrece.
+  final ValueChanged<Reserva>? onVerUbicacion;
 
   @override
   State<MisReservasScreen> createState() => _MisReservasScreenState();
@@ -307,6 +312,20 @@ class _MisReservasScreenState extends State<MisReservasScreen> {
                   _motivos[id]!,
                   key: ValueKey('motivo-$id'),
                   style: Theme.of(context).textTheme.bodySmall,
+                ),
+              ),
+            if (abierta &&
+                reserva.estado == EstadoReserva.consolidada &&
+                widget.onVerUbicacion != null)
+              Padding(
+                padding: const EdgeInsets.only(bottom: AppSpacing.sm),
+                child: ElevatedButton(
+                  key: ValueKey('ubicacion-$id'),
+                  onPressed: () => widget.onVerUbicacion!(reserva),
+                  style: ElevatedButton.styleFrom(
+                    minimumSize: const Size(0, AppSpacing.touchTarget),
+                  ),
+                  child: const Text('Ver ubicación'),
                 ),
               ),
             if (abierta && reserva.estado != EstadoReserva.cancelada)

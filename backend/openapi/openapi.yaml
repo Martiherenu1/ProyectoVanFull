@@ -138,6 +138,52 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
 
+  /clientes/{id_cliente}/deuda:
+    get:
+      tags: [administracion]
+      summary: Consultar deuda de un cliente
+      description: |
+        Solo administrador y dueno. Consulta derivada de movimientos, sin editar saldo
+        ni inferir suspensión. Cliente sin cuenta corriente devuelve saldo 0.00 y estado
+        al_dia. Cliente inexistente responde CLIENTE_NO_ENCONTRADO; otros roles SIN_PERMISO.
+        RN-004/005/006 siguen pendientes de implementación. (CU-015, RF-010)
+      x-cu: CU-015
+      x-cobertura: parcial
+      parameters:
+        - name: id_cliente
+          in: path
+          required: true
+          schema:
+            type: integer
+            minimum: 1
+      responses:
+        '200':
+          description: Estado de deuda derivado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Deuda'
+        '400':
+          description: VALIDACION — identificador inválido
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          $ref: '#/components/responses/NoAutenticado'
+        '403':
+          description: SIN_PERMISO — requiere administrador o dueno
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: CLIENTE_NO_ENCONTRADO
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
   /pasajeros/me/deuda:
     get:
       tags: [pasajero]
@@ -815,6 +861,30 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
+
+  /pagos/pendientes:
+    get:
+      tags: [pagos]
+      summary: Consultar pagos pendientes de decisión administrativa
+      description: |
+        Solo administrador o dueño. Devuelve únicamente pagos PENDIENTE, ordenados por
+        fecha_hora e id_pago ascendentes. Lista vacía si no hay pendientes. No modifica
+        pagos ni genera movimientos o comprobantes. Complementa CU-016/RF-011/RN-015;
+        los pagos ya confirmados automáticamente quedan excluidos por su estado.
+      x-cu: CU-016
+      responses:
+        '200':
+          description: Pagos pendientes de decisión.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Pago'
+        '401':
+          $ref: '#/components/responses/NoAutenticado'
+        '403':
+          $ref: '#/components/responses/SinPermiso'
 
   /pagos/{id_pago}/confirmacion:
     post:

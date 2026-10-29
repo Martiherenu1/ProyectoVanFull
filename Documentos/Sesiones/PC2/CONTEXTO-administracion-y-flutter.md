@@ -182,6 +182,26 @@ cuenta: es la integración de Mercado Pago que extiende CU-014.
 
 ## Decisiones vigentes
 
+- **Preparación local #209, CU-016 (29/10/2026):** main `a8696de`, rama
+  `feat/admin-pagos-pendientes-cu016-209`. Pantalla de pagos pendientes, confirmación/rechazo,
+  errores, recarga y protección frente a doble envío/sesión anterior. Reutiliza POST de decisión
+  sin cambiar efectos contables; propone GET `/pagos/pendientes` solo administrador/dueño,
+  filtro PENDIENTE y orden de presentación fecha/id. No es una regla económica nueva.
+  Sin cambios Pasajero/Chofer/GPS ni modelos de BD. Fuente consultada: CU-016/RN-015 del MVC
+  aprobado y contrato vigente; especificación detallada v1.3 no localizada mediante el conector
+  Drive: contraste documental pendiente antes de declarar cobertura integral.
+  44 pruebas backend/contrato y 15 específicas Flutter de pagos aprobadas; otras 9 pruebas de
+  composición/sesión existentes aprobadas. Sin commit/push/PR; nueva operación de contrato
+  pendiente de revisión al publicar, según CONTRIBUTING §1.9.
+
+- **Preparación local #215/CU-036 (29/10/2026):** rama `feat/admin-mercadopago-cu036-215`
+  desde main a8696de, sin #210/#214 ni stashes CU-015/CU-027. Adaptador GET Payments/HMAC
+  y servicio interno de validación/confirmación reutilizando pagos; 82 pruebas focalizadas
+  aprobadas (HTTP/vínculo falsos, PostgreSQL temporal real), Ruff/formato correctos.
+  No hay webhook HTTP activo ni integración real certificada. Bloqueados vínculo único
+  persistente, moneda/receptor/escenario, credenciales y contrato de notificaciones/errores.
+  Ver `INTEGRACION-MERCADOPAGO-PC2.md`; no se inventan estados contables ni se hacen cobros.
+
 - **Preparación local #207 (29/10/2026):** interfaz Flutter de cancelación CU-018 desde main
   `4d5c4ff` (#186/#189/#192 integrados). Botón en programado, confirmación, errores backend,
   actualización detalle/listado, protección contra doble envío y respuestas tras cierre/cambio

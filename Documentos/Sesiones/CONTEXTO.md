@@ -1,9 +1,11 @@
 # CONTEXTO VANFULL — Carga rápida de sesión
 
-> CU-027/#211/#217 — continuación local: main a01df1e integrado; GET /reservas de #224
+> CU-027/#211/#217 — continuación publicada: main a01df1e integrado; GET /reservas de #224
 > conectado con HTTP/sesión administrativa. Listado/selección/detalle conserva id_pasajero;
 > sin filtros ni escrituras. 54 pruebas Flutter aprobadas, analyze/diff check correctos.
-> CU-015/#218 sigue Draft fuera de main, sin mezclarlo. Sin commit/push de esta continuación.
+> Al preparar esta rama, CU-015/#218 estaba Draft fuera de main; referencia histórica.
+> Continuación publicada en #217, sin merge ni prueba real de despliegue.
+> CI #302 aprobada sobre 2829032; cobertura parcial, criterios adicionales pendientes.
 > Las notas inferiores son históricas; ver PROPUESTA-CONTRATO-CU027.md actualizado.
 
 > Continuación #211 — frontend CU-027 preparado con puerto de lectura y adaptador simulado

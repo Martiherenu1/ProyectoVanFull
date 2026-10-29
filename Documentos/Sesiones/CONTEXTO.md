@@ -1,5 +1,13 @@
 # CONTEXTO VANFULL — Carga rápida de sesión
 
+> Continuación #211 — frontend CU-027 preparado con puerto de lectura y adaptador simulado
+> solo en tests. 13 pruebas focalizadas aprobadas, analyze y diff check correctos. Sin HTTP ni
+> main.dart; propuesta mínima en PROPUESTA-CONTRATO-CU027.md, pendiente de Martiniano.
+
+> 29/10/2026 — #211/CU-027: verificada especificación v1.3 aprobada. Consulta administrativa
+> de reservas sin escrituras; falta contrato de lectura autorizado. Implementación bloqueada
+> por coordinación con Martiniano; rama local desde main a8696de, sin cambios de #210.
+
 > 29/10/2026 — #207: interfaz administrativa de cancelación CU-018 preparada localmente desde
 > main con #186/#189/#192. 30 pruebas Flutter focalizadas aprobadas, analyze sin problemas.
 > Sin publicar; detalle y alcance parcial en CONTEXTO-administracion-y-flutter.md.

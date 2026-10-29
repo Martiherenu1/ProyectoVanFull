@@ -1,7 +1,8 @@
-# CU-015 / #212 / #218 — consulta administrativa integrada localmente
+# CU-015 / #212 / #218 — consulta administrativa publicada en #218
 
 **Cobertura parcial:** consulta conectada de punta a punta en código y probada con HTTP
-simulado/PostgreSQL local. Sin despliegue ni commit/push de esta continuación.
+simulado/PostgreSQL local. Continuación publicada en #218, sin merge hacia main ni prueba
+manual del despliegue. La gestión RN-004/005/006 permanece pendiente.
 
 ## Contrato acordado
 
@@ -33,6 +34,12 @@ La consulta no deriva suspensión, habilitación ni límites desde el saldo; no 
 CU-015 no se declara completo como gestión de consecuencias.
 
 ## Validación
+
+Estado de publicación verificado el 29/10/2026: código revisado en `5f8a6d6`,
+[CI #300](https://github.com/Martiherenu1/ProyectoVanFull/actions/runs/40902318550)
+aprobada en Backend y Flutter. Esta evidencia remota se distingue de los resultados locales
+que siguen; no se repitieron pruebas locales para esta corrección documental.
+Suite Flutter local de publicación informada: 733/733 aprobadas.
 
 25 pruebas backend aprobadas (CU-006 existente, CU-015/permisos/cálculo/sin cuenta/404/solo lectura
  y rutas contractuales) en bases temporales del PostgreSQL de testing existente, sin producción.

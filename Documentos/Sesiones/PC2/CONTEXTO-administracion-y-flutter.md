@@ -126,7 +126,7 @@ Fuente CU: https://drive.google.com/file/d/1Kc4m4e2LH5xRc1J9HY-2hTQaiLNeRA7y/vie
 - Issue #84 permanece abierto. OpenAPI documenta estas limitaciones, pero la operación no está marcada con
   `x-cobertura: parcial`, a diferencia de la convención vigente.
 
-### CU-015 · Gestionar deuda — CONSULTA IMPLEMENTADA LOCALMENTE, GESTIÓN PARCIAL
+### CU-015 · Gestionar deuda — CONSULTA PUBLICADA EN #218, GESTIÓN PARCIAL
 
 **Continuación #212/#218, contrato acordado con Martiniano (instrucción del equipo):**
 GET `/clientes/{id_cliente}/deuda`, administrador/dueno, esquema Deuda; sin cuenta devuelve
@@ -135,8 +135,12 @@ Cálculo común extraído de `services/deuda.py`, CU-006 sin cambios de comporta
 Consulta administrativa Flutter conectada a HTTP/sesión y menú, identificación por ID,
 errores y descarte de respuestas viejas; conserva navegación CU-014/CU-016/#222.
 No edita saldo ni infiere suspensión. RN-004/005/006 siguen pendientes: suspensión,
-habilitación excepcional y límite mensual no implementados. Main 4aea002 integrado localmente;
-sin commit/push. 25 pruebas backend y 57 Flutter aprobadas, Ruff/analyze y OpenAPI válidos.
+habilitación excepcional y límite mensual no implementados. Main 4aea002 incorporado en la
+rama publicada de #218, sin merge hacia main. 25 pruebas backend y 57 Flutter focalizadas
+aprobadas; suite Flutter local de publicación: 733/733; Ruff/analyze y OpenAPI válidos.
+CI #300 aprobada sobre 5f8a6d6 (Backend y Flutter):
+https://github.com/Martiherenu1/ProyectoVanFull/actions/runs/40902318550.
+Sin prueba manual contra Render. La revisión no ejecutó nuevamente los checks locales.
 Los párrafos inferiores conservan el historial de la preparación desconectada.
 
 **Continuación #212 (29/10/2026):** recuperados solo sus cambios preservados. Pantalla de

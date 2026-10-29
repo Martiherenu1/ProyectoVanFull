@@ -1,9 +1,10 @@
 # CONTEXTO VANFULL — Carga rápida de sesión
 
-> CU-015/#212/#218 — continuación local: contrato acordado con Martiniano para GET
+> CU-015/#212/#218 — continuación publicada: contrato acordado con Martiniano para GET
 > /clientes/{id_cliente}/deuda, administrador/dueno. Backend, HTTP y navegación conectados;
 > CU-006 conserva su comportamiento. 25 pruebas backend y 57 Flutter aprobadas, analyze/Ruff
-> y contrato válidos. RN-004/005/006 pendientes. Main 4aea002 integrado sin commit/push.
+> y contrato válidos. RN-004/005/006 pendientes. Main 4aea002 incorporado en la rama publicada.
+> CI #300 aprobada sobre 5f8a6d6; PR abierta, sin merge ni validación real en Render.
 > Las notas de preparación inferiores son históricas; ver PREPARACION-CU015-PC2.md.
 
 > Continuación #212 — consulta visual de deuda por cliente preparada con adaptador simulado,

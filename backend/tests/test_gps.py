@@ -91,7 +91,7 @@ def test_consulta_admin_vigencia_y_cierre_sin_acceso_inferido(entorno):
         r = entorno["http"].get(url, headers=_token(1, [rol]))
         assert r.status_code == 200 and r.json()["desactualizada"]
         assert r.json()["eta_minutos"] is None
-    # Pasajero: fail-closed hasta armonización contractual de reserva consolidada.
+    # Pasajero sin reserva propia consolidada no habilitado.
     for rol in ["pasajero", "chofer"]:
         assert (
             entorno["http"].get(url, headers=_token(entorno["choferes"][0], [rol])).status_code

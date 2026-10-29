@@ -9,6 +9,7 @@ from app.core.errors import ApiError
 from app.core.security import UsuarioActual
 from app.models.viajes import PosicionGps, Viaje
 from app.schemas.gps import PosicionGpsCreate, ResultadoPosicionGps, Ubicacion
+from app.services import reservas
 from app.services.ejecucion_viajes import _bloquear_viaje_propio
 
 
@@ -44,15 +45,30 @@ async def enviar(
 
 
 async def consultar(db: AsyncSession, usuario: UsuarioActual, id_viaje: int) -> Ubicacion:
+    # RN-030: permiso antes del viaje para no revelar su existencia ni estado.
+    requiere_reserva = not set(usuario.roles).intersection({"administrador", "dueno"})
+    if requiere_reserva:
+        reserva = (
+            await reservas.reserva_propia_del_viaje(db, usuario, id_viaje)
+            if "pasajero" in usuario.roles
+            else None
+        )
+        if reserva is None or reserva.estado != "consolidada":
+            raise ApiError(403, "SIN_PERMISO", "No tenés permiso para consultar esta ubicación.")
+    # Solo lock del viaje; reserva leída sin FOR UPDATE (CONVENCIONES §8).
     # Compartido con finalización; no mostrar un cierre confirmado como seguimiento activo.
     viaje = await db.scalar(
         select(Viaje).where(Viaje.id_viaje == id_viaje).with_for_update(read=True)
     )
+    if requiere_reserva:
+        # La cancelación pudo confirmar antes de adquirir el lock del viaje.
+        # Expirar fuerza una lectura fresca aunque el helper devuelva el mismo objeto ORM.
+        db.expire(reserva)
+        reserva = await reservas.reserva_propia_del_viaje(db, usuario, id_viaje)
+        if reserva is None or reserva.estado != "consolidada":
+            raise ApiError(403, "SIN_PERMISO", "No tenés permiso para consultar esta ubicación.")
     if viaje is None or viaje.estado != "en_curso":
         raise ApiError(404, "VIAJE_NO_DISPONIBLE", "Ubicación no disponible.")
-    if not set(usuario.roles).intersection({"administrador", "dueno"}):
-        # Pendiente precisión contractual de reserva consolidada; no ampliar acceso.
-        raise ApiError(403, "SIN_PERMISO", "No tenés permiso para consultar esta ubicación.")
     posicion = await db.get(PosicionGps, id_viaje)
     if (
         posicion is None

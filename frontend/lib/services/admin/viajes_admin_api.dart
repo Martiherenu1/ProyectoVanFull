@@ -16,6 +16,20 @@ final class ViajesAdminApi {
 
   final ApiClient _client;
 
+  Future<ViajeResumen> cancelarViaje(int idViaje) async {
+    final cuerpo = await _client.post('viajes/$idViaje/cancelacion');
+    if (cuerpo is! Map<String, dynamic>) {
+      throw const ViajeCreadoInvalidoException();
+    }
+    try {
+      return ViajeAdminResumen.fromJson(cuerpo);
+    } on FormatException {
+      throw const ViajeCreadoInvalidoException();
+    } on TypeError {
+      throw const ViajeCreadoInvalidoException();
+    }
+  }
+
   Future<ViajeCreado> crearViaje(ViajeCreate solicitud) async {
     final cuerpo = await _client.post('viajes', body: solicitud.toJson());
     if (cuerpo is! Map<String, dynamic>) {

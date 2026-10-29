@@ -1,5 +1,9 @@
 # CONTEXTO VANFULL — Carga rápida de sesión
 
+> 29/10/2026 — #207: interfaz administrativa de cancelación CU-018 preparada localmente desde
+> main con #186/#189/#192. 30 pruebas Flutter focalizadas aprobadas, analyze sin problemas.
+> Sin publicar; detalle y alcance parcial en CONTEXTO-administracion-y-flutter.md.
+
 > **Para qué sirve:** documento de arranque. Leyendo esto se recupera todo el contexto crítico del proyecto sin
 > releer la documentación completa. **Mantenerlo actualizado al cerrar cada sesión.**
 >

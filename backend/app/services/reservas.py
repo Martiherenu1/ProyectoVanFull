@@ -17,12 +17,13 @@ from app.models.personas import Cliente, ClienteIndividual, Pasajero
 from app.models.servicios import Contratacion, Servicio
 from app.models.viajes import Ausencia, ParadaRecorrido, Viaje
 from app.models.viajes import Reserva as ReservaModelo
-from app.schemas.reservas import Reserva, ReservaCreate, ResultadoCancelacion
+from app.schemas.reservas import CambioParada, Reserva, ReservaCreate, ResultadoCancelacion
 from app.services.disponibilidad import ESTADO_OFRECIDO, cupo_del_viaje
 from app.services.eventos import registrar_evento
 
 TIPO_RESERVA_CREADA = "reserva_creada"
 TIPO_RESERVA_CANCELADA = "reserva_cancelada"
+TIPO_PARADA_CAMBIADA = "reserva_parada_cambiada"
 
 # RN-017: la referencia operativa para cancelar un viaje ocasional es antes de las 18:00 del día
 # anterior. Argentina no tiene horario de verano: UTC-3 todo el año.
@@ -330,5 +331,65 @@ async def cancelar_reserva(
         importe_penalidad=0.0,
         motivo=motivo,
     )
+    await db.commit()
+    return resultado
+
+
+async def cambiar_parada(
+    db: AsyncSession, usuario: UsuarioActual, id_reserva: int, datos: CambioParada
+) -> Reserva:
+    """Cambia la parada de ascenso de una reserva propia (CU-005, RF-008, RN-020).
+
+    «Disponibilidad compatible con el horario, recorrido y unidad» (RN-020), con el modelo actual:
+    la capacidad se calcula por viaje y la reserva ya ocupa su lugar en él, así que cambiar de parada
+    dentro del mismo viaje mantiene horario, recorrido y unidad y no consume otro lugar. Es compatible
+    la parada que pertenece al recorrido del viaje. PENDIENTE DE VALIDACIÓN por el equipo (Issue #242).
+
+    Como la cancelación, solo una reserva no cancelada de un viaje todavía `programado`. Si falla, la
+    parada original queda como estaba (A1). Mismo orden de bloqueos que `cancelar_reserva`.
+    """
+    de_la_reserva = (
+        ReservaModelo.id_reserva == id_reserva,
+        ReservaModelo.id_pasajero == usuario.id_persona,
+    )
+    id_viaje = await db.scalar(select(ReservaModelo.id_viaje).where(*de_la_reserva))
+    if id_viaje is None:
+        raise ApiError(404, "RESERVA_NO_ENCONTRADA", "La reserva no existe.")
+
+    await db.scalar(
+        select(Pasajero.id_persona)
+        .where(Pasajero.id_persona == usuario.id_persona)
+        .with_for_update()
+    )
+    viaje = await db.scalar(select(Viaje).where(Viaje.id_viaje == id_viaje).with_for_update())
+    reserva = await db.scalar(select(ReservaModelo).where(*de_la_reserva).with_for_update())
+    if reserva is None:
+        raise ApiError(404, "RESERVA_NO_ENCONTRADA", "La reserva no existe.")
+
+    if reserva.estado == "cancelada":
+        raise ApiError(409, "RESERVA_NO_MODIFICABLE", "La reserva está cancelada.")
+    if viaje.estado != ESTADO_OFRECIDO:
+        raise ApiError(409, "VIAJE_NO_MODIFICABLE", "El viaje ya no está programado.")
+
+    parada = await db.scalar(
+        select(ParadaRecorrido.orden).where(
+            ParadaRecorrido.id_recorrido == viaje.id_recorrido,
+            ParadaRecorrido.orden == datos.orden_parada,
+        )
+    )
+    if parada is None:
+        raise ApiError(
+            400,
+            "PARADA_NO_VALIDA",
+            "La parada no pertenece al recorrido del viaje.",
+            {"orden_parada": datos.orden_parada, "id_recorrido": viaje.id_recorrido},
+        )
+    if reserva.orden_parada == datos.orden_parada:
+        raise ApiError(409, "PARADA_SIN_CAMBIOS", "La reserva ya tiene esa parada.")
+
+    reserva.orden_parada = datos.orden_parada
+    await db.flush()
+    await registrar_evento(db, tipo_evento=TIPO_PARADA_CAMBIADA, id_reserva=reserva.id_reserva)
+    resultado = _a_schema(reserva, viaje)
     await db.commit()
     return resultado

@@ -1,349 +1,130 @@
 # Contexto vivo · Administración y Flutter (Facundo)
 
-## Corte de estado
-
-Última verificación: **2026-10-27**.
-
-- `main`: `63da29ee1153256366b5380f0d953a55df97728e`.
-- CI de `main`: verde; **438 pruebas backend** y **548 pruebas Flutter** aprobadas.
-- PR abiertos de Facundo: ninguno.
-- Issue abierto de Facundo: **#84**, porque CU-014 continúa parcial.
-- Frontend administrativo publicado en Render y GitHub Pages: build `d19c22ae70887eb98a4ac905bbebec107d4ac68b`.
-  Contiene la composición administrativa integrada; no coincide con el HEAD actual de `main`, que avanzó después
-  por cambios de Chofer y documentación.
-
-La línea funcional vigente es la especificación de Casos de Uso v1.3. Según ella:
-
-- CU-014: Registrar pagos y comprobantes.
-- CU-015: Gestionar deuda.
-- CU-016: Confirmar o rechazar pago.
-- CU-018: Gestionar viajes y asignaciones.
-- CU-027: Consultar reservas por administración.
-- CU-036: Procesar operación mediante Mercado Pago en pruebas (`<<extend>>` de CU-014).
-
-## Estado por responsabilidad
-
-### CU-018 · Gestionar viajes y asignaciones — PARCIAL
-
-**Implementado**
-
-- Backend: `POST /viajes` (#50), `GET /viajes?fecha=YYYY-MM-DD` (#145) y actualización segura de
-  viajes programados mediante `PATCH /viajes/{id_viaje}` (#178).
-- Flutter: pantalla Viajes del día (#99), adaptador de consulta (#150), adaptador de creación (#130), formulario
-  de creación (#134), navegación y composición autenticada (#159).
-- Dataset sintético de demostración para 2026-10-30 (#101).
-- ADJ-03: se permite planificar sin chofer y/o vehículo; ambos son necesarios antes de iniciar el viaje.
-
-**Probado automáticamente**
-
-- Backend: permisos, validación de fecha, lista vacía, estados, orden, asignaciones nulas, creación y
-  actualización programada con protección de capacidad y concurrencia con CU-030.
-- Flutter: carga, vacío, error/reintento, selección, serialización, formulario, navegación, sesión y 401/403.
-
-**Probado realmente en Render**
-
-- Prueba manual realizada por Facundo el 2026-10-27 en `https://vanfull.onrender.com`:
-  - inicio de sesión administrativo: APROBADO;
-  - acceso a «Viajes del día»: APROBADO;
-  - carga del listado sin errores, incluso con resultado vacío: APROBADO;
-  - navegación a «Crear viaje» y regreso sin enviar datos: APROBADO;
-  - logout con regreso al login: APROBADO;
-  - recarga posterior sin exponer contenido protegido: APROBADO.
-- En una comprobación separada se envió una única creación para 2026-10-31 09:15, servicio 1, recorrido 1,
-  sentido IDA, capacidad planificada 18, sin chofer ni vehículo. La interfaz mostró un mensaje de éxito, pero
-  ese resultado visual no demuestra por sí solo la persistencia.
-
-**Pendiente**
-
-- La persistencia de esa creación en Neon está **NO VERIFICADA**: no hubo una conexión autorizada de solo lectura
-  disponible. Tampoco quedó confirmada mediante un GET autenticado.
-- No están implementadas la cancelación ni la modificación de servicio/recorrido. Estos dos últimos campos se
-  excluyen del update porque no está definido cómo migrar contrataciones, paradas y reservas vinculadas.
-- El contrato marca GET, POST y PATCH como cobertura parcial de CU-018.
-- Las reglas detalladas de conflictos o solapamientos de asignaciones siguen PENDIENTES DE VALIDACIÓN.
-- OpenAPI `Viaje` no declara propiedades obligatorias, mientras el backend y `ViajeResumen` esperan los campos
-  públicos base. El adaptador rechaza respuestas incompletas y no inventa valores.
-
-### CU-027 · Consultar reservas por administración — CONSULTA PUBLICADA EN #217
-
-**Continuación #211/#217:** contrato real de #224 mergeado, GET `/api/reservas` solo
-administrador/dueno, todas las reservas por id_reserva ascendente, schema Reserva con id_pasajero.
-Contrastado con CU-027 v1.3/RF-043 ya analizado: listado, selección y detalle de solo lectura;
-criterios de búsqueda adicionales no definidos, sin filtros/paginación inventados. Detalle
-local del resultado: no se llama GET /reservas/{id}, que mantiene propiedad del pasajero.
-Adaptador HTTP reutiliza sesión y protección común 401/403. ReservaAdmin compone Reserva
-existente y conserva id_pasajero en listado/detalle sin tocar el modelo del pasajero.
-Carga/vacío/error/reintento y descarte de respuestas tardías conservados. Navegación CU-014,
-CU-016 y #222 intacta. Al preparar esta rama, CU-015/#218 estaba Draft fuera de main;
-referencia histórica de aislamiento, no estado vigente de #218.
-Main a01df1e incorporado en la rama publicada; conflictos documentales resueltos conservando aportes.
-54 pruebas focalizadas Flutter aprobadas (contrato HTTP, identidad, sesión, estados, detalle,
-responsive y navegación); analyze y diff check correctos. Sin backend modificado ni Ruff aplicable.
-Publicada en #217, sin merge ni ensayo real del despliegue. CI #302 sobre 2829032 aprobada:
-https://github.com/Martiherenu1/ProyectoVanFull/actions/runs/40904507118.
-Suite Flutter local de publicación informada: 724/724. No se repitieron checks locales
-para esta corrección documental. La consulta conserva cobertura parcial y no acredita filtros futuros.
-Los párrafos inferiores conservan el historial de preparación anterior al contrato #224.
-
-**Continuación local #211 (29/10/2026):** recuperados únicamente sus documentos del stash
-de CU-027 (se conserva copia). Preparada pantalla administrativa de solo lectura y puerto
-`ConsultaReservasAdmin`, sin HTTP, filtros ni main.dart. Reutiliza Reserva/EstadoReserva,
-tema administrativo y fecha existente. Carga, error/vacío, listado por ID, selección/detalle,
-actualización y descarte de resultados al desmontar/cambiar alcance o adaptador.
-Adaptador simulado solo en tests; no se alteraron permisos del pasajero. Ver
-`PROPUESTA-CONTRATO-CU027.md`: GET de listado propuesto para validar con Martiniano, no aprobado.
-La conexión administrativa sigue bloqueada; CU-015 y PR #210/#214/#216 no incorporados.
-Validación: 13 pruebas focalizadas (pantalla y modelo Reserva existente) aprobadas, analyze
-sin problemas y diff check correcto. Sin commit/push/PR; CU-027 no se declara operativo.
-
-**Verificación focalizada 29/10/2026 — #211:** rama `feat/admin-consultar-reservas-cu027-211`
-desde main `a8696de`; #210 sigue abierto y no se incorporó. Leída la sección CU-027 de
-[la especificación v1.3 aprobada](https://drive.google.com/file/d/1Kc4m4e2LH5xRc1J9HY-2hTQaiLNeRA7y/view):
-RF-043, consulta administrativa autenticada/autorizada, criterios disponibles, resultados,
-selección y detalle con información/estado; sin resultados informa vacío; no modifica reservas.
-El CU no enumera filtros concretos. ACT-05/ACT-06 figuran en el CU; el reparto PC2 deja fuera
-la interfaz del dueño: no ampliarla implícitamente.
-
-**BLOQUEADO POR COORDINACIÓN DE CONTRATO:** faltan listado y lectura administrativa; el detalle
-actual implementado exige pasajero y propiedad, aunque OpenAPI diga propia/autorizada.
-Reutilizables: schema Reserva, modelos Reserva/Viaje y servicio de reservas de Martiniano.
-Coordinar ruta/filtros/campos/autorización sin alterar CU-010; no hay necesidad identificada
-de cambios estructurales de BD. No se implementó código ni se ejecutaron pruebas funcionales.
-Issue #211 registra alternativas como propuestas, no decisiones aprobadas.
-
-No hay endpoint, servicio, pantalla administrativa ni pruebas específicas. El contrato y el alcance de la
-interfaz continúan pendientes. No debe confundirse con las reservas propias del pasajero.
-
-### CU-014 · Registrar pagos y comprobantes — PARCIAL
-
-**Avance local #213, 29/10/2026:** rama `feat/admin-registrar-pago-cu014-213` desde main
-`a8696de`, sin cambios de #210/CU-015/CU-027. Los trabajos locales #212 y #211 se preservaron
-en stashes separados con sus nombres de rama; no aplicarlos sobre esta rama.
-
-Leídos CU-014 v1.3 aprobado, RN-011/013/014/015/016 y contrato/servicio POST /pagos.
-Formulario administrativo integrado al endpoint existente: ID cliente destinatario con cuenta
-existente, importe recibido, transferencia o billetera. Confirma destinatario/importe antes
-de enviar y muestra el estado real devuelto; no confirma pagos ni genera recibos/movimientos.
-Reutiliza HTTP/sesión, Pago, MedioPago y formato de importes; main.dart solo conecta el registro.
-Muestra errores de cliente/cuenta/permiso/validación; evita doble envío y efectos de sesión vieja.
-
-Preparación aislada: BorradorImputacionPago y formulario local para tipo/referencia de respaldo,
-sin serialización, persistencia, subida de archivos ni conexión al registro real. El adaptador
-rechaza borradores con datos antes de HTTP: no los descarta silenciosamente. No determina tipo,
-seña mínima o condiciones empresariales; estos campos son candidatos a integración, no decisiones.
-
-**Para integrar lo restante (#84):** acordar almacenamiento y validación de tipo/evidencia con
-Martiniano/Martín; definir tarifa aplicable e imputación del 15 % antes de habilitar efectivo;
-vinculación con contratación/acuerdos y validación backend de seña general 50 %/excepciones
-empresariales; definir semántica CUENTA_CORRIENTE y conectar CU-036 para Mercado Pago cuando
-corresponda. Cliente sin cuenta conserva 404: no hay alta automática. No cambiar permisos.
-La UI identifica este registro como parcial y no habilita efectivo, señas/acuerdos especiales
-ni adjuntos. Sin cambios backend/OpenAPI/BD ni módulos Pasajero/Chofer/GPS. CU-014 sigue parcial.
-
-Validación local: 26 pruebas Flutter focalizadas aprobadas (adaptador, formulario/borrador,
-sesión y composición existente), flutter analyze sin problemas y diff check correcto.
-No se registraron pagos reales; sin commit/push/PR.
-
-Fuente CU: https://drive.google.com/file/d/1Kc4m4e2LH5xRc1J9HY-2hTQaiLNeRA7y/view
-
-**Implementado**
-
-- `POST /pagos`, integrado por #85 y ampliado por #141.
-- Administrador/dueño registran indicando cliente; el pasajero solo registra un pago propio.
-- El pago queda `PENDIENTE`, se valida cliente/cuenta y se registra `pago_registrado` atómicamente.
-- Registrar no crea comprobante ni `MovimientoCuenta`; esos efectos pertenecen a la confirmación de CU-016.
-
-**Probado automáticamente**
-
-- Creación, roles, pasajero propio, cliente ajeno, cliente/cuenta inexistentes, validaciones, atomicidad e
-  interacción con CU-016.
-
-**Probado realmente en Render**
-
-- No probado con operaciones reales de pago.
-
-**Pendiente / bloqueado**
-
-- `tipo` y `evidencia_pago` existen en OpenAPI, pero no tienen columnas aprobadas. Actualmente se rechazan con
-  `400 VALIDACION`; no deben ignorarse ni persistirse inventando un modelo.
-- No está acordada la imputación contable del descuento del 15 % para efectivo.
-- Los clientes/pasajeros nuevos no reciben automáticamente una `cuenta_corriente`; sin ella se responde 404.
-- Issue #84 permanece abierto. OpenAPI documenta estas limitaciones, pero la operación no está marcada con
-  `x-cobertura: parcial`, a diferencia de la convención vigente.
-
-### CU-015 · Gestionar deuda — CONSULTA PUBLICADA EN #218, GESTIÓN PARCIAL
-
-**Continuación #212/#218, contrato acordado con Martiniano (instrucción del equipo):**
-GET `/clientes/{id_cliente}/deuda`, administrador/dueno, esquema Deuda; sin cuenta devuelve
-saldo cero/al_dia; inexistente 404 CLIENTE_NO_ENCONTRADO y otros roles 403 SIN_PERMISO.
-Cálculo común extraído de `services/deuda.py`, CU-006 sin cambios de comportamiento.
-Consulta administrativa Flutter conectada a HTTP/sesión y menú, identificación por ID,
-errores y descarte de respuestas viejas; conserva navegación CU-014/CU-016/#222.
-No edita saldo ni infiere suspensión. RN-004/005/006 siguen pendientes: suspensión,
-habilitación excepcional y límite mensual no implementados. Main 4aea002 incorporado en la
-rama publicada de #218, sin merge hacia main. 25 pruebas backend y 57 Flutter focalizadas
-aprobadas; suite Flutter local de publicación: 733/733; Ruff/analyze y OpenAPI válidos.
-CI #300 aprobada sobre 5f8a6d6 (Backend y Flutter):
-https://github.com/Martiherenu1/ProyectoVanFull/actions/runs/40902318550.
-Sin prueba manual contra Render. La revisión no ejecutó nuevamente los checks locales.
-Los párrafos inferiores conservan el historial de la preparación desconectada.
-
-**Continuación #212 (29/10/2026):** recuperados solo sus cambios preservados. Pantalla de
-consulta visual administrativa por ID de cliente, con puerto local y adaptador simulado solo
-en tests. Reutiliza ResumenDeudaAdmin/Deuda, sin menú ni HTTP. Carga/error/sin datos/reintento,
-aislamiento por alcance/adaptador y descarte al editar cliente/desmontar. No infiere ni ofrece
-suspensión, habilitación o límite mensual. 12 pruebas focalizadas aprobadas; analyze sin problemas.
-Ver `PREPARACION-CU015-PC2.md`: circuito real y gestión RN-004/005/006 siguen bloqueados por
-contrato y comportamiento a coordinar. Sin backend/permisos/contrato ni #210/#214/#216/#217.
-
-**Preparación independiente #212 (29/10/2026):** CU-015 v1.3 y RF-010/RN-004/005/006 leídos
-en Drive. Confirman consulta de situación y consecuencias, acciones permitidas, advertencia/
-suspensión, eventual pérdida de cupo, habilitación excepcional por cinco días y límite absoluto
-de un mes de abono/mes en curso. No habilitan edición manual del saldo.
-
-Main base `a8696de`, rama `feat/admin-situacion-deuda-cu015-212`, sin PR #210 ni cambios CU-027
-(documentos preservados en stash de esa rama). Componente independiente `ResumenDeudaAdmin`
-presenta cliente/saldo/estado suministrados, reutiliza Deuda y el formato de importe; sin datos
-muestra ausencia de información. Sin HTTP, navegación ni acciones; no implica circuito desplegado.
-Verificación: 3 pruebas focalizadas aprobadas, flutter analyze sin problemas y diff check correcto.
-
-**Bloqueos #212:** no existe contrato de consulta administrativa por cliente ni operaciones de
-consecuencias/habilitación. El DTO actual no expresa vencimiento, límite mensual ni habilitación;
-`pasajero.estado_habilitacion` no resuelve por sí solo el vencimiento excepcional. Coordinar
-contrato, almacenamiento/expiración y evaluación RN-006 con Martiniano/Martín antes de backend
-o conexión Flutter. No alterar CU-006, permisos, estados ni reglas. CU-015 sigue sin cumplirse.
-
-Fuentes: [CU-015 v1.3](https://drive.google.com/file/d/1Kc4m4e2LH5xRc1J9HY-2hTQaiLNeRA7y/view),
-[RF-010](https://docs.google.com/document/d/1sA_3o6trf_B2B7H5JyI1yQQhFIzO-8rh/edit),
-[RN-004/005/006](https://docs.google.com/document/d/1aG6RTv1lTyY36PkyYyYl46NW4PKYvYMb/edit).
-
-No existen operaciones administrativas aprobadas en OpenAPI ni una pantalla de administración. La consulta
-`GET /pasajeros/me/deuda` implementada en #54 es **CU-006**, para el pasajero autenticado, y no completa CU-015.
-Gestionar deuda no autoriza a modificar manualmente un saldo derivado. Las acciones administrativas exactas
-requieren contrato y validación del equipo.
-
-### CU-016 · Confirmar o rechazar pago — IMPLEMENTADO EN BACKEND
-
-**Implementado y probado automáticamente**
-
-- `POST /pagos/{id_pago}/confirmacion` (#52), para administrador/dueño.
-- Confirmar un pago pendiente crea atómicamente el `RECIBO`, el evento y exactamente un `MovimientoCuenta`
-  `ACREEDOR` por el importe del pago.
-- Rechazar no crea recibo ni movimiento. Un pago ya decidido no se vuelve a procesar.
-- Hay pruebas de permisos, estados, confirmación, rechazo y rollback.
-
-**Pendiente**
-
-- No existe pantalla administrativa de pagos pendientes/confirmación.
-- No fue probado realmente en Render.
-- El descuento del 15 % en efectivo no está resuelto por esta implementación.
-
-### CU-036 · Mercado Pago en pruebas — NO IMPLEMENTADO
-
-OpenAPI declara `POST /webhooks/mercadopago`, pero la aplicación no tiene router, servicio ni pruebas que lo
-implementen. Siguen pendientes la validación de notificaciones, seguridad, idempotencia, credenciales de prueba
-y confirmación automática de operaciones aprobadas/acreditadas. CU-036 no equivale a movimientos o estado de
-cuenta: es la integración de Mercado Pago que extiende CU-014.
-
-## Flutter compartido — INTEGRADO Y PROBADO
-
-- Base Flutter (#45), tema visual (#47), navegación por roles (#79), CI Flutter (#83), `ApiClient` HTTP
-  inyectable (#87), composición de sesión (#159) y estabilización de callbacks (#161) están en `main`.
-- Se reutiliza un único `HttpApiClient`; 401 invalida solo la sesión correspondiente, 403 conserva la sesión y
-  retira contenido protegido, y las respuestas tardías no contaminan una sesión nueva.
-- Pasajero conserva su entrada; administrador abre Viajes del día y Crear viaje; Chofer recibe su `ChoferShell`.
-- Roles múltiples, desconocidos y `dueno` permanecen bloqueados por decisión del equipo.
-- La suite Flutter completa está verde. La integración productiva de inicio/finalización/GPS pertenece a Martín.
-
-## Frontend administrativo y despliegue — PARCIALMENTE VALIDADO
-
-- Render y GitHub Pages sirven el frontend que contiene administración.
-- La evidencia manual de Render está separada de las pruebas automatizadas: cubre login, entrada a Viajes del
-  día, carga correcta de una lista incluso vacía, navegación al formulario y regreso, logout y protección tras
-  recargar. También hubo un resultado visual exitoso al crear un viaje, sin verificación de persistencia.
-- No se probaron desde Flutter consultas de otras fechas, ni se confirmó la creación mediante GET autenticado o
-  SELECT en Neon. Tampoco se probaron un CRUD completo, pagos, confirmación/rechazo, reservas administrativas,
-  deuda administrativa ni Mercado Pago.
-- El selector de fecha para el listado es una propuesta de mejora, no un requisito confirmado; no se incorpora
-  durante el freeze por inferencia.
-- Antes de la entrega corresponde coordinar un despliegue final desde el `main` definitivo, sin interferir con
-  los cambios compartidos de Martín y Martiniano.
-
-## Decisiones vigentes
-
-- **Preparación local #209, CU-016 (29/10/2026):** main `a8696de`, rama
-  `feat/admin-pagos-pendientes-cu016-209`. Pantalla de pagos pendientes, confirmación/rechazo,
-  errores, recarga y protección frente a doble envío/sesión anterior. Reutiliza POST de decisión
-  sin cambiar efectos contables; propone GET `/pagos/pendientes` solo administrador/dueño,
-  filtro PENDIENTE y orden de presentación fecha/id. No es una regla económica nueva.
-  Sin cambios Pasajero/Chofer/GPS ni modelos de BD. Fuente consultada: CU-016/RN-015 del MVC
-  aprobado y contrato vigente; especificación detallada v1.3 no localizada mediante el conector
-  Drive: contraste documental pendiente antes de declarar cobertura integral.
-  44 pruebas backend/contrato y 15 específicas Flutter de pagos aprobadas; otras 9 pruebas de
-  composición/sesión existentes aprobadas. Sin commit/push/PR; nueva operación de contrato
-  pendiente de revisión al publicar, según CONTRIBUTING §1.9.
-
-- **Preparación local #215/CU-036 (29/10/2026):** rama `feat/admin-mercadopago-cu036-215`
-  desde main a8696de, sin #210/#214 ni stashes CU-015/CU-027. Adaptador GET Payments/HMAC
-  y servicio interno de validación/confirmación reutilizando pagos; 82 pruebas focalizadas
-  aprobadas (HTTP/vínculo falsos, PostgreSQL temporal real), Ruff/formato correctos.
-  No hay webhook HTTP activo ni integración real certificada. Bloqueados vínculo único
-  persistente, moneda/receptor/escenario, credenciales y contrato de notificaciones/errores.
-  Ver `INTEGRACION-MERCADOPAGO-PC2.md`; no se inventan estados contables ni se hacen cobros.
-
-- **Preparación local #207 (29/10/2026):** interfaz Flutter de cancelación CU-018 desde main
-  `4d5c4ff` (#186/#189/#192 integrados). Botón en programado, confirmación, errores backend,
-  actualización detalle/listado, protección contra doble envío y respuestas tras cierre/cambio
-  de sesión. main.dart solo inyecta el callback administrativo con control de generación/token.
-  Sin cambios backend/OpenAPI/BD ni ampliación de RN-019. 30 pruebas focalizadas aprobadas y
-  flutter analyze sin problemas; dependencias restauradas con lockfile exigido, sin cambiarlo.
-  Rama `feat/admin-cancelar-viaje-flutter-cu018-207`, sin commit/push/PR; pendiente autorización.
-
-- **Propuesta local #180 (28/10/2026):** Facundo indica recorte acordado con Martiniano y autoriza
-  preparar backend/OpenAPI y pruebas locales; confirmación final de Martín pendiente. Cancelación
-  lógica solo de viajes programados no ESPECIAL/CORPORATIVO y sin reservas provisional/consolidada,
-  vínculos periodo_abono_viaje ni lista de espera en_espera. `VIAJE_CON_COMPROMISOS` es propuesto.
-  RN-019 no implementada; CU-017/#75 pendiente; CU-018 mantiene cobertura parcial. No publicado.
-  Verificación local: 5 pruebas contrato/rutas aprobadas; 20 casos PostgreSQL (incluidas cuatro
-  carreras reservas/CU-030) omitidos porque la conexión local se cierra. Concurrencia sin acreditar.
-
-- **DEFINIDO POR EL EQUIPO — ADJ-03:** un viaje puede planificarse sin vehículo y/o chofer, pero no iniciarse
-  hasta tener ambos asignados.
-- **DEFINIDO POR EL EQUIPO — pagos:** CU-014 registra el pago pendiente sin movimiento. CU-016, al confirmar,
-  crea el movimiento `ACREEDOR`; el rechazo no lo crea.
-- **DEFINIDO POR EL EQUIPO — MR-R30:** saldo, deuda y cupo se calculan; no se persisten como valores derivados.
-- **DEFINIDO POR EL EQUIPO — sesión Flutter:** un cliente HTTP, 401 contextual, 403 sin logout y aislamiento por
-  generación/token.
-- **PENDIENTE DE VALIDACIÓN:** persistencia de tipo/evidencia, imputación del 15 %, alta de cuenta corriente,
-  conflictos de asignación y operaciones exactas de CU-015.
-
-## Alcance PC2 y pendientes para el 30/10
-
-El reparto acordado para PC2 asignó a Facundo CU-018, CU-027, CU-014, CU-015, CU-016 y CU-036, además de la base
-común Flutter. Que una operación esté parcial o no implementada **no significa que haya sido formalmente
-excluida**. El recorte respecto de ese reparto original está **PENDIENTE DE APROBACIÓN** por el equipo.
-
-No se encontró una exigencia docente específica que use las expresiones “CRUD completo de viajes” o “pantallas
-administrativas de pagos”. Sin embargo, el reparto del equipo sí prevé asignaciones, reservas y pagos a
-confirmar; no se los declara fuera del PC2 sin una decisión explícita.
-
-Prioridades documentales y de validación antes del viernes:
-
-1. Verificar por SELECT autorizado o GET autenticado la persistencia del viaje de prueba y registrar su ID/estado.
-2. Validar con el equipo el recorte de CU-018, CU-027, CU-014, CU-015 y CU-036.
-3. Mantener abierto #84 hasta resolver o aceptar formalmente los límites de CU-014.
-4. Coordinar el despliegue final solo cuando el `main` compartido quede estable.
-
-## Fuera del alcance confirmado del PC2
-
-Según `REPARTO-PC2.md`: interfaces de dueño, clientes corporativos, reportes, facturación, abonos, recorridos y
-paradas, optimización de recorridos, y alta de choferes o vehículos (CU-005, CU-013, CU-017, CU-019 a CU-026,
-CU-028 y CU-031 a CU-035, CU-037). Los datos necesarios se proveen mediante el seed compartido.
-
-## Coordinación con otras áreas
-
-- Martín es responsable de Chofer, viaje en curso, CU-030 y GPS. No modificar simultáneamente `main.dart` ni
-  sus componentes durante esa integración.
-- Martiniano es responsable de autenticación, pasajero, servicios, tarifas y reservas del pasajero.
-- Los cambios de contrato, modelo o reglas se coordinan según `CONTRIBUTING.md`; no se resuelven desde este
-  contexto.
+## Estado
+
+Corte documental **2026-10-29**, main `bceb929` (Issue #225). PR #210/#214/#216/#217/#218
+mergeados, contrastados con código y contratos; no equivalen a CU completos ni a despliegue real.
+IMPLEMENTADO = circuito descrito existente; PARCIAL = obligaciones faltantes; PENDIENTE = parte ausente.
+No se ejecutan suites generales ni operaciones reales en este cierre. Notion: SIN VERIFICAR, no modificado.
+
+## Hecho — cobertura y trazabilidad
+
+| CU / RF | Estado | Código y alcance integrado | RN / límites | Issue → PR |
+|---|---|---|---|---|
+| CU-018 / RF-017/018 | PARCIAL | Viajes: alta, listado por fecha y selector, update de programado, cancelación lógica limitada en backend y Flutter | ADJ-03; capacidad/asignaciones; RN-019 NO implementada | #180/#207 → #189/#208; #186 update y #177 fecha; #75 reintegros |
+| CU-027 / RF-043 | PARCIAL | GET /api/reservas, listado/selección/detalle local con id_pasajero, solo lectura | Todos los estados, orden id_reserva; criterios adicionales pendientes; CU-010 intacto | #211/#223 → #224/#217 |
+| CU-014 / RF-009 (RF-028 secundario) | PARCIAL | Registro PENDIENTE y evento; formulario transferencia/billetera para cliente con cuenta | RN-015/016; RN-011/013/014 incompletas; no emitir recibo al registrar | #84/#213 → #85/#141/#214 |
+| CU-015 / RF-010 | PARCIAL | GET /api/clientes/{id_cliente}/deuda y Flutter por ID; cálculo común, CU-006 conservado | MR-R30; RN-004/005/006 pendientes; no editar saldo ni inferir suspensión | #212 → #218 |
+| CU-016 / RF-011 | IMPLEMENTADO (circuito documentado) | Pendientes, confirmar/rechazar y actualizar listado, backend y Flutter | RN-015: solo confirmar genera RECIBO/ACREEDOR/evento atómicos; no se acredita contraste integral v1.3 | #209 → #210; #52 backend original |
+| CU-036 / RF-012, RNF-003 | PARCIAL; circuito HTTP PENDIENTE | Adaptador HMAC/GET Payments y servicio interno con proveedor/vínculo simulados en tests | RN-015 reutilizada; sin webhook activo ni validación real | #215 → #216 |
+
+### CU-018
+
+`backend/app/services/viajes.py`, routers/viajes.py y pantallas/adaptadores administrativos:
+POST /viajes, GET /viajes?fecha, PATCH /viajes/{id_viaje}, POST /viajes/{id_viaje}/cancelacion.
+Cancelación solo programado, sin ESPECIAL/CORPORATIVO, reservas provisional/consolidada,
+periodo_abono_viaje ni lista de espera en_espera. FOR UPDATE del viaje; estado cancelado y
+registro de evento atómicos, sin DELETE. Errores ESTADO_VIAJE_INVALIDO/VIAJE_CON_COMPROMISOS.
+Flutter pide confirmación; refresca listado tras éxito aunque se cierre detalle, y aísla sesión.
+No modifica servicio/recorrido ni aplica reintegro RN-019; solapamientos detallados siguen sin definir.
+
+### CU-027
+
+`backend/app/services/reservas.py` (Martiniano), `ReservasAdminApi`, `ReservaAdmin` y
+`ConsultarReservasAdminScreen`. GET /reservas para administrador/dueno, todas las reservas por
+id_reserva ascendente, [] si vacío. Modelo administrativo conserva id_pasajero sin alterar Reserva
+del pasajero. Detalle usa el resultado seleccionado; GET /reservas/{id} mantiene propiedad CU-010.
+Sin filtros/paginación inventados, nombres/contactos ni escrituras. Carga/error/reintento y sesión protegida.
+
+### CU-014
+
+`backend/app/services/pagos.py`, `RegistroPagosAdminApi` y `RegistrarPagoAdminScreen`.
+POST /pagos admite administrador/dueno y pasajero propio; valida cliente/cuenta y crea PENDIENTE
+con pago_registrado, sin comprobante/movimiento. Flutter administrativo ofrece transferencia/billetera.
+`BorradorImputacionPago` y su formulario NO están montados ni persisten: preparación aislada.
+Tipo/evidencia se rechazan con 400 VALIDACION; sin cuenta responde 404, sin alta automática.
+El schema backend admite otros medios, pero eso NO implementa descuento 15 %, señas ni Mercado Pago.
+En #225 solo se añade x-cobertura: parcial a POST /pagos y se regenera JSON; contrato funcional intacto.
+
+### CU-015
+
+`services/deuda.py`, routers/deuda.py, `DeudaAdminApi`, `ConsultarDeudaAdminScreen`.
+Consulta administrativa por ID con esquema Deuda: sin cuenta 0.00/al_dia; inexistente
+404 CLIENTE_NO_ENCONTRADO; otros roles 403 SIN_PERMISO. Saldo derivado MR-R30, no editable.
+El cálculo compartido no cambia identificación propia ni comportamiento CU-006.
+RN-004/005/006 no implementadas: situación de deuda no equivale a suspensión/habilitación/límite.
+
+### CU-016
+
+GET /pagos/pendientes y POST /pagos/{id_pago}/confirmacion, administrador/dueno.
+`PagosPendientesScreen`/`PagosAdminApi`: confirmación explícita, recarga, errores, doble envío y sesión.
+Solo PENDIENTE; lock del pago y efectos atómicos. Rechazo sin recibo/movimiento; decidido no se reprocesa.
+La fuente detallada CU-016 v1.3 no se localizó según #210; se usaron MVC aprobado y contrato.
+Por eso se informa IMPLEMENTADO el circuito documentado, sin certificar toda la especificación v1.3.
+
+### CU-036 — PARCIAL en PC2
+
+**DEFINIDO POR EL EQUIPO — Martiniano, 2026-10-29:** confirma expresamente la entrega PARCIAL
+de CU-036 en PC2 (decisión comunicada por el usuario). No aprueba cambios de modelo ni de
+contrato HTTP antes del PC2; los pendientes de integración pasan a post-demo en #215.
+
+`app/integrations/mercadopago.py` y `app/services/mercadopago.py` están integrados por #216.
+HMAC, consulta Payments, validación y confirmación contable reutilizada; no crea/captura cobros.
+`app/main.py`/routers NO registran POST /webhooks/mercadopago: el contrato de diseño no lo activa.
+Pruebas usan HTTP/proveedor y vínculo falsos, PostgreSQL temporal real. Idempotencia por pago local
+con vínculo fijo; NO acredita asociación única global MP↔pagos ni ensayo sandbox real.
+Webhook HTTP inactivo; sin integración real certificada. El alcance entregado es HMAC,
+consulta Payments y servicio contable interno con simulaciones, no la recepción HTTP completa.
+
+## En curso
+
+#225, rama `docs/admin-cierre-pc2-225`: documentación y seguimiento, sin código funcional.
+Antes de commit/push/PR se requiere autorización del usuario. Los Issues parciales permanecen abiertos;
+#209/#213 cerrados corresponden a entregas acotadas, no completan otros pendientes de los CU.
+
+## Decisiones y contradicciones
+
+- **DEFINIDO POR EL EQUIPO:** reparto 13/10 en REPARTO-PC2.md, ADJ-03, MR-R30 y pagos:
+  registro no acredita; confirmar produce ACREEDOR/RECIBO; rechazo no los produce.
+- CU-027: recorte acordado en #224; CU-015: contrato de consulta acordado con Martiniano en #218.
+- CU-018: [revisión #189](https://github.com/Martiherenu1/ProyectoVanFull/pull/189#pullrequestreview-5689483311)
+  consigna confirmación de Martín/Facundo del 28/10 y de VIAJE_CON_COMPROMISOS. Issue #180,
+  docstring y x-estado-aprobacion/descripcion aún contienen el estado anterior pendiente. Prima
+  esa revisión posterior como evidencia documental; el merge por sí solo no constituye aprobación.
+  Se registra contradicción en #180/#225 sin cambiar servicios ni ese metadato contractual aquí.
+- El selector de fecha está integrado (#177), no es una propuesta pendiente de implementación.
+- REPARTO conserva decisiones de alcance; la tabla de contratos faltantes del 13/10 es histórica.
+  Los recortes no se convierten en exclusión formal de obligaciones restantes por estar mergeados.
+
+## Pendientes
+
+- #180/#75: reintegro 100 % RN-019, CU-017 y almacenamiento/operación de créditos; servicio/recorrido
+  y solapamientos de asignaciones pendientes. Cancelación limitada no satisface estas obligaciones.
+- #84: tipo/evidencia y persistencia; efectivo RN-011/15 % sin cálculo/imputación; señas RN-013/014,
+  contratación/acuerdos; semántica CUENTA_CORRIENTE y cliente sin cuenta. No inventar reglas económicas.
+- #212: RN-004 advertencia/suspensión/cupo; RN-005 habilitación excepcional cinco días y expiración;
+  RN-006 límite mensual/referencia de abono. Sin acciones operativas ni inferencias desde el saldo.
+- #211: criterios de búsqueda adicionales de CU-027; identificación personal adicional solo si se acuerda.
+- #215, post-demo por decisión de Martiniano: vínculo único operación↔pago, contrato webhook
+  HTTP/ACK/reintentos, sandbox real/moneda/receptor/escenario,
+  handler/DI, conciliación durable y validación real autorizada. Webhook inactivo.
+- #225: contraste documental CU-016 v1.3, contradicción de aprobación CU-018 y coordinación de prueba real.
+- Notion: PENDIENTE DE COMPROBAR/ACTUALIZAR por Facundo; no se consultó ni modificó, sin asumir acceso.
+
+## Entorno, evidencia y despliegue
+
+Este cierre verifica estáticamente código/contratos y metadatos de Issues/PR, sin suites generales.
+Evidencia histórica, NO nueva ejecución: #189 20 PostgreSQL; #210 558 backend/680 Flutter;
+#214 682 Flutter (publicación inicial); #216 599 backend con 82 focalizadas de preparación;
+#218 25 backend/733 Flutter; #217 724 Flutter y resolución final 42 focalizadas/analyze.
+Los resultados corresponden a esos HEAD, no certifican nuevamente el main del corte.
+Prueba manual Render 27/10 conservada: login, listado, formulario sin envío, logout/recarga; éxito
+visual de una creación sin confirmación de persistencia. Nuevos circuitos/despliegue actual SIN VERIFICAR.
+No se accedió a Neon/producción ni se hicieron pagos, cobros, migraciones o pruebas reales en este cierre.
+
+## Para otras áreas
+
+Usar los endpoints de lectura integrados para deuda/reservas/pagos; respetar las consultas propias
+CU-006/CU-010. Administración mantiene alta/update/cancelación limitada; ejecución y GPS pertenecen a Martín.
+Roles múltiples/desconocidos/dueno siguen sin portada Flutter específica, según reparto; el backend
+conserva administrador/dueno donde está contratado. No confundir permisos HTTP con interfaz implementada.

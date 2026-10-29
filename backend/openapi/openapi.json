@@ -1123,6 +1123,7 @@
         "summary": "Registrar un pago",
         "description": "Registra un pago total/parcial/seña asociado a un cliente o pasajero. Puede pagar\nun tercero (RN-016). El registro NO confirma el pago (ver /confirmacion). (CU-014, RF-009)\n\nLo registran administración (indica `id_cliente`) o el propio pasajero (pantalla 5 del\nPC1): para él se usa la cuenta corriente de su cliente individual y no puede registrar\npagos de otro cliente.\n",
         "x-cu": "CU-014",
+        "x-cobertura": "parcial",
         "requestBody": {
           "required": true,
           "content": {

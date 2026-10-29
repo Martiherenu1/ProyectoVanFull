@@ -46,12 +46,35 @@ Se cuentan las rutas distintas de `paths`, los métodos HTTP de cada ruta, los s
 | CU | Qué cubre v0.1 | Qué falta |
 |---|---|---|
 | **CU-003** Crear reserva | La creación y el rechazo por falta de cupo | La incorporación y gestión de la **lista de espera** que anuncia el `409` |
+| **CU-014** Registrar pagos y comprobantes | `POST /pagos` registra PENDIENTE; formulario administrativo transferencia/billetera (#214); `x-cobertura: parcial` | Tipo/evidencia, efectivo/15 %, señas y acuerdos (#84); registro no confirma ni genera recibo/movimiento |
 | **CU-015** Gestionar deuda | `GET /clientes/{id_cliente}/deuda`: consulta administrativa de solo lectura | RN-004/005/006: suspensión, habilitación excepcional y límite mensual |
-| **CU-018** Gestionar viajes | Creación y actualización segura; propuesta local #180 de cancelación limitada | Confirmación final de Martín para #180; RN-019 y CU-017/#75 (reintegros); cambiar servicio/recorrido; reglas de solapamiento |
+| **CU-018** Gestionar viajes | Creación, listado por fecha, actualización programada y cancelación lógica limitada (#189/#208), integrados | RN-019 y CU-017/#75 (reintegros); cambiar servicio/recorrido; reglas de solapamiento |
 | **CU-027** Consultar reservas por administración | `GET /reservas` para administrador/dueño: todas las reservas, con `id_pasajero`, por `id_reserva` ascendente, solo lectura | Criterios de búsqueda adicionales, nombres y contactos de los pasajeros |
 | **CU-030** Ejecutar viaje | Inicio, finalización y recepción de posiciones GPS | Avisos de demora y problemas, pendientes para otra tarea |
 
 La cobertura parcial queda marcada con `x-cobertura: parcial` o aclarada en la descripción del endpoint.
+
+### Corte técnico de Administración — 2026-10-29 (#225)
+
+Los PR #210/#214/#216/#217/#218 están mergeados en main `bceb929`; el merge no acredita
+el cumplimiento integral de sus CU ni su despliegue. La tabla contractual anterior no debe
+confundirse con la cobertura funcional siguiente (trazabilidad completa en el contexto de Administración):
+
+| CU | Estado del código integrado | Seguimiento |
+|---|---|---|
+| CU-018 | PARCIAL: alta, listado por fecha, update y cancelación limitada | #180, #75; #186/#189/#208 |
+| CU-027 | PARCIAL: listado/selección/detalle administrativo con id_pasajero | #211; #224/#217; criterios de búsqueda adicionales pendientes |
+| CU-014 | PARCIAL: registro; borrador tipo/respaldo no operativo | #84/#213; #85/#141/#214 |
+| CU-015 | PARCIAL: consulta administrativa, CU-006 conservado | #212/#218; RN-004/005/006 pendientes |
+| CU-016 | IMPLEMENTADO: circuito documentado de pendientes/confirmación/rechazo | #209/#210; contraste detallado v1.3 pendiente, sin acreditar cobertura integral de toda la especificación |
+| CU-036 | PARCIAL: preparación interna; circuito HTTP PENDIENTE | #215/#216; webhook no registrado, proveedor/vínculo simulados en tests |
+
+CU-018: la revisión de [#189](https://github.com/Martiherenu1/ProyectoVanFull/pull/189#pullrequestreview-5689483311)
+consigna conformidad de Martín/Facundo y código VIAJE_CON_COMPROMISOS confirmados el 28/10.
+La descripción y `x-estado-aprobacion` heredados aún dicen pendiente: contradicción documental
+registrada en #180/#225; no se modifica ese metadato ni el contrato funcional en este cierre.
+CU-036: la ruta declarada en diseño no está implementada por un router HTTP. No afirmar
+validación real, idempotencia global ni activación a partir de #216.
 
 **CU-029 tiene documentadas sus operaciones de consulta**: viajes propios, el caso sin asignaciones y
 el detalle operativo con recorrido, paradas, identificación permitida y cantidades. El detalle separa

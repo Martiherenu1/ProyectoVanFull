@@ -6,6 +6,12 @@
 
 ## 1. Quién hace qué
 
+**Actualización documental 2026-10-29 (#225):** las tablas de faltantes y estados de base de este
+plan conservan el corte original del 13/10. Los seis CU de Facundo y sus endpoints ya integrados,
+cobertura parcial y pendientes actuales se registran en CONTEXTO-administracion-y-flutter.md.
+No implica cambiar reparto, reglas ni exclusiones; Notion sigue pendiente de comprobar/actualizar.
+
+
 | | Martiniano | Martín | Facundo |
 |---|---|---|---|
 | **Usuario** | Pasajero (antes del viaje) | Chofer y el viaje en curso | Administración |

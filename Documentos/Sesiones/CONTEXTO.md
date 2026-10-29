@@ -1,5 +1,9 @@
 # CONTEXTO VANFULL — Carga rápida de sesión
 
+> Integración administrativa #227, 2026-10-29: rama test/admin-integracion-pc2-227 desde main
+> a7ded22. 3 casos nuevos pagos→deuda/ciclo viaje y 11 existentes CU-027 aprobados en PostgreSQL
+> temporal local; sin cambios funcionales ni workflows. Preparado sin commit/push/PR.
+
 > **Corte Administración PC2 — 2026-10-29, main bceb929, #225.** PR #210/#214/#216/#217/#218
 > mergeados. CU-018/027/014/015: PARCIAL; CU-016: circuito documentado IMPLEMENTADO, contraste
 > detallado v1.3 pendiente; CU-036: preparación interna PARCIAL, circuito HTTP PENDIENTE.

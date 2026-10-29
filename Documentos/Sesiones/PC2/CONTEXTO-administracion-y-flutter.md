@@ -78,8 +78,15 @@ consulta Payments y servicio contable interno con simulaciones, no la recepción
 
 ## En curso
 
-#225, rama `docs/admin-cierre-pc2-225`: documentación y seguimiento, sin código funcional.
-Antes de commit/push/PR se requiere autorización del usuario. Los Issues parciales permanecen abiertos;
+#227, rama `test/admin-integracion-pc2-227`, desde main a7ded22 (cierre #225/#226 integrado).
+Inspección focalizada encontró dos brechas: CU-014→CU-016→CU-015 con deuda/reintentos reales,
+y ciclo HTTP crear/asignar/reasignar/actualizar/cancelar un mismo viaje. Nuevo archivo
+`backend/tests/test_integracion_admin.py`: 3 casos aprobados en bases PostgreSQL temporales.
+CU-027 ya cubierto: 11 casos existentes seleccionados aprobados, sin duplicar pruebas.
+Ruff y formato/diff check correctos. Sin defectos funcionales detectados en estos circuitos;
+se corrigió solo un DNI ficticio del nuevo fixture que excedía VARCHAR(20).
+Sin código funcional, contratos, modelos, sitio-web o workflow Web modificados/ejecutados.
+Detener antes de commit/push; PR pendiente de autorización. Los Issues parciales permanecen abiertos;
 #209/#213 cerrados corresponden a entregas acotadas, no completan otros pendientes de los CU.
 
 ## Decisiones y contradicciones

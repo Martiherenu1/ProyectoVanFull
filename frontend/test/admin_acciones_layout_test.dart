@@ -5,6 +5,8 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:frontend/main.dart';
 import 'package:frontend/screens/admin/registrar_pago_admin_screen.dart';
 import 'package:frontend/screens/admin/pagos_pendientes_screen.dart';
+import 'package:frontend/screens/admin/consultar_deuda_admin_screen.dart';
+import 'package:frontend/screens/admin/consultar_reservas_admin_screen.dart';
 import 'package:http/http.dart' as http;
 import 'package:http/testing.dart';
 
@@ -43,6 +45,7 @@ void main() {
       await tester.tap(find.text('Ingresar'));
       await tester.pumpAndSettle();
       for (final key in [
+        'admin-consultar-reservas',
         'admin-consultar-deuda',
         'admin-salir',
         'admin-registrar-pago',
@@ -54,8 +57,23 @@ void main() {
         final rect = tester.getRect(boton);
         expect(rect.left, greaterThanOrEqualTo(0));
         expect(rect.right, lessThanOrEqualTo(ancho));
+        expect(rect.top, greaterThanOrEqualTo(0));
+        expect(rect.bottom, lessThanOrEqualTo(900));
       }
       expect(tester.takeException(), isNull);
+      await tester.tap(find.byKey(const Key('admin-consultar-deuda')));
+      await tester.pumpAndSettle();
+      expect(find.byType(ConsultarDeudaAdminScreen), findsOneWidget);
+      expect(tester.takeException(), isNull);
+      await tester.pageBack();
+      await tester.pumpAndSettle();
+      await tester.tap(find.byKey(const Key('admin-consultar-reservas')));
+      await tester.pumpAndSettle();
+      expect(find.byType(ConsultarReservasAdminScreen), findsOneWidget);
+      expect(find.text('No hay reservas para mostrar.'), findsOneWidget);
+      expect(tester.takeException(), isNull);
+      await tester.pageBack();
+      await tester.pumpAndSettle();
       await tester.tap(find.byKey(const Key('admin-registrar-pago')));
       await tester.pumpAndSettle();
       expect(find.byType(RegistrarPagoAdminScreen), findsOneWidget);

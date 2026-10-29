@@ -64,7 +64,52 @@ La línea funcional vigente es la especificación de Casos de Uso v1.3. Según e
 - OpenAPI `Viaje` no declara propiedades obligatorias, mientras el backend y `ViajeResumen` esperan los campos
   públicos base. El adaptador rechaza respuestas incompletas y no inventa valores.
 
-### CU-027 · Consultar reservas por administración — NO IMPLEMENTADO
+### CU-027 · Consultar reservas por administración — CONSULTA PUBLICADA EN #217
+
+**Continuación #211/#217:** contrato real de #224 mergeado, GET `/api/reservas` solo
+administrador/dueno, todas las reservas por id_reserva ascendente, schema Reserva con id_pasajero.
+Contrastado con CU-027 v1.3/RF-043 ya analizado: listado, selección y detalle de solo lectura;
+criterios de búsqueda adicionales no definidos, sin filtros/paginación inventados. Detalle
+local del resultado: no se llama GET /reservas/{id}, que mantiene propiedad del pasajero.
+Adaptador HTTP reutiliza sesión y protección común 401/403. ReservaAdmin compone Reserva
+existente y conserva id_pasajero en listado/detalle sin tocar el modelo del pasajero.
+Carga/vacío/error/reintento y descarte de respuestas tardías conservados. Navegación CU-014,
+CU-016 y #222 intacta. Al preparar esta rama, CU-015/#218 estaba Draft fuera de main;
+referencia histórica de aislamiento, no estado vigente de #218.
+Main a01df1e incorporado en la rama publicada; conflictos documentales resueltos conservando aportes.
+54 pruebas focalizadas Flutter aprobadas (contrato HTTP, identidad, sesión, estados, detalle,
+responsive y navegación); analyze y diff check correctos. Sin backend modificado ni Ruff aplicable.
+Publicada en #217, sin merge ni ensayo real del despliegue. CI #302 sobre 2829032 aprobada:
+https://github.com/Martiherenu1/ProyectoVanFull/actions/runs/40904507118.
+Suite Flutter local de publicación informada: 724/724. No se repitieron checks locales
+para esta corrección documental. La consulta conserva cobertura parcial y no acredita filtros futuros.
+Los párrafos inferiores conservan el historial de preparación anterior al contrato #224.
+
+**Continuación local #211 (29/10/2026):** recuperados únicamente sus documentos del stash
+de CU-027 (se conserva copia). Preparada pantalla administrativa de solo lectura y puerto
+`ConsultaReservasAdmin`, sin HTTP, filtros ni main.dart. Reutiliza Reserva/EstadoReserva,
+tema administrativo y fecha existente. Carga, error/vacío, listado por ID, selección/detalle,
+actualización y descarte de resultados al desmontar/cambiar alcance o adaptador.
+Adaptador simulado solo en tests; no se alteraron permisos del pasajero. Ver
+`PROPUESTA-CONTRATO-CU027.md`: GET de listado propuesto para validar con Martiniano, no aprobado.
+La conexión administrativa sigue bloqueada; CU-015 y PR #210/#214/#216 no incorporados.
+Validación: 13 pruebas focalizadas (pantalla y modelo Reserva existente) aprobadas, analyze
+sin problemas y diff check correcto. Sin commit/push/PR; CU-027 no se declara operativo.
+
+**Verificación focalizada 29/10/2026 — #211:** rama `feat/admin-consultar-reservas-cu027-211`
+desde main `a8696de`; #210 sigue abierto y no se incorporó. Leída la sección CU-027 de
+[la especificación v1.3 aprobada](https://drive.google.com/file/d/1Kc4m4e2LH5xRc1J9HY-2hTQaiLNeRA7y/view):
+RF-043, consulta administrativa autenticada/autorizada, criterios disponibles, resultados,
+selección y detalle con información/estado; sin resultados informa vacío; no modifica reservas.
+El CU no enumera filtros concretos. ACT-05/ACT-06 figuran en el CU; el reparto PC2 deja fuera
+la interfaz del dueño: no ampliarla implícitamente.
+
+**BLOQUEADO POR COORDINACIÓN DE CONTRATO:** faltan listado y lectura administrativa; el detalle
+actual implementado exige pasajero y propiedad, aunque OpenAPI diga propia/autorizada.
+Reutilizables: schema Reserva, modelos Reserva/Viaje y servicio de reservas de Martiniano.
+Coordinar ruta/filtros/campos/autorización sin alterar CU-010; no hay necesidad identificada
+de cambios estructurales de BD. No se implementó código ni se ejecutaron pruebas funcionales.
+Issue #211 registra alternativas como propuestas, no decisiones aprobadas.
 
 No hay endpoint, servicio, pantalla administrativa ni pruebas específicas. El contrato y el alcance de la
 interfaz continúan pendientes. No debe confundirse con las reservas propias del pasajero.

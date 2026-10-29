@@ -1,5 +1,21 @@
 # CONTEXTO VANFULL — Carga rápida de sesión
 
+> CU-027/#211/#217 — continuación publicada: main a01df1e integrado; GET /reservas de #224
+> conectado con HTTP/sesión administrativa. Listado/selección/detalle conserva id_pasajero;
+> sin filtros ni escrituras. 54 pruebas Flutter aprobadas, analyze/diff check correctos.
+> Al preparar esta rama, CU-015/#218 estaba Draft fuera de main; referencia histórica.
+> Continuación publicada en #217, sin merge ni prueba real de despliegue.
+> CI #302 aprobada sobre 2829032; cobertura parcial, criterios adicionales pendientes.
+> Las notas inferiores son históricas; ver PROPUESTA-CONTRATO-CU027.md actualizado.
+
+> Continuación #211 — frontend CU-027 preparado con puerto de lectura y adaptador simulado
+> solo en tests. 13 pruebas focalizadas aprobadas, analyze y diff check correctos. Sin HTTP ni
+> main.dart; propuesta mínima en PROPUESTA-CONTRATO-CU027.md, pendiente de Martiniano.
+
+> 29/10/2026 — #211/CU-027: verificada especificación v1.3 aprobada. Consulta administrativa
+> de reservas sin escrituras; falta contrato de lectura autorizado. Implementación bloqueada
+> por coordinación con Martiniano; rama local desde main a8696de, sin cambios de #210.
+
 > CU-015/#212/#218 — continuación publicada: contrato acordado con Martiniano para GET
 > /clientes/{id_cliente}/deuda, administrador/dueno. Backend, HTTP y navegación conectados;
 > CU-006 conserva su comportamiento. 25 pruebas backend y 57 Flutter aprobadas, analyze/Ruff

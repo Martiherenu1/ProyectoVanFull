@@ -36,6 +36,8 @@ import 'screens/admin/registrar_pago_admin_screen.dart';
 import 'services/admin/pagos_admin_api.dart';
 import 'services/admin/deuda_admin_api.dart';
 import 'screens/admin/consultar_deuda_admin_screen.dart';
+import 'services/admin/reservas_admin_api.dart';
+import 'screens/admin/consultar_reservas_admin_screen.dart';
 import 'screens/admin/pagos_pendientes_screen.dart';
 import 'models/admin/pago_admin.dart';
 import 'services/admin/viajes_dia_admin_api.dart';
@@ -90,6 +92,7 @@ class _VanFullBootstrapState extends State<VanFullBootstrap> {
   late final RegistroPagosAdminApi _registroPagosAdmin;
   late final PagosAdminApi _pagosAdmin;
   late final DeudaAdminApi _deudaAdmin;
+  late final ReservasAdminApi _reservasAdmin;
   late final ViajesChoferApi _viajesChofer;
   late final DetalleViajeChoferApi _detalleChofer;
   late final EjecucionViajeApi _ejecucionChofer;
@@ -120,6 +123,7 @@ class _VanFullBootstrapState extends State<VanFullBootstrap> {
     _registroPagosAdmin = RegistroPagosAdminApi(httpClient);
     _pagosAdmin = PagosAdminApi(httpClient);
     _deudaAdmin = DeudaAdminApi(httpClient);
+    _reservasAdmin = ReservasAdminApi(httpClient);
     _viajesChofer = ViajesChoferApi(httpClient);
     _detalleChofer = DetalleViajeChoferApi(httpClient);
     _ejecucionChofer = EjecucionViajeApi(httpClient);
@@ -198,6 +202,7 @@ class _VanFullBootstrapState extends State<VanFullBootstrap> {
       registrarPagos: _registroPagosAdmin,
       pagos: _pagosAdmin,
       deuda: _deudaAdmin,
+      reservas: _reservasAdmin,
       configuracionMapa: widget.configuracionMapa,
       prepararMapa: widget.prepararMapa,
       crearVisorMapa: widget.crearVisorMapa,
@@ -225,6 +230,7 @@ class _EntradaAdministracion extends StatefulWidget {
     required this.registrarPagos,
     required this.pagos,
     required this.deuda,
+    required this.reservas,
     required this.configuracionMapa,
     required this.prepararMapa,
     required this.crearVisorMapa,
@@ -238,6 +244,7 @@ class _EntradaAdministracion extends StatefulWidget {
   final RegistroPagosAdminApi registrarPagos;
   final PagosAdminApi pagos;
   final DeudaAdminApi deuda;
+  final ReservasAdminApi reservas;
   final ConfiguracionMapa? configuracionMapa;
   final PrepararMapa? prepararMapa;
   final ConstructorVisorMapa? crearVisorMapa;
@@ -287,14 +294,19 @@ class _EntradaAdministracionState extends State<_EntradaAdministracion> {
                       child: const Text('Pagos pendientes'),
                     ),
                     OutlinedButton(
-                      key: const Key('admin-consultar-deuda'),
-                      onPressed: _abrirDeuda,
-                      child: const Text('Consultar deuda'),
+                      key: const Key('admin-consultar-reservas'),
+                      onPressed: _abrirReservas,
+                      child: const Text('Consultar reservas'),
                     ),
                     OutlinedButton(
                       key: const Key('admin-registrar-pago'),
                       onPressed: _abrirRegistroPago,
                       child: const Text('Registrar pago'),
+                    ),
+                    OutlinedButton(
+                      key: const Key('admin-consultar-deuda'),
+                      onPressed: _abrirDeuda,
+                      child: const Text('Consultar deuda'),
                     ),
                     ElevatedButton.icon(
                       key: const Key('admin-crear-viaje'),
@@ -342,6 +354,36 @@ class _EntradaAdministracionState extends State<_EntradaAdministracion> {
             if (!vigente()) throw StateError('La sesión ya no está vigente.');
             return pago;
           },
+    );
+    Navigator.of(context)
+        .push(MaterialPageRoute<void>(builder: (_) => pantalla));
+  }
+
+  void _abrirReservas() {
+    final controller = widget.controller;
+    final generacion = controller.generacion;
+    final token = controller.token;
+    final api = widget.reservas;
+    bool vigente() =>
+        mounted &&
+        !_accesoDenegado &&
+        token != null &&
+        controller.generacion == generacion &&
+        controller.token == token;
+    if (!vigente()) return;
+    final consulta = ConsultaReservasAdminProtegida(() async {
+      if (!vigente()) throw StateError('La sesión ya no está vigente.');
+      final resultado = await _protegerAcceso(
+        controller: controller,
+        solicitud: api.listar,
+        onAccesoDenegado: _denegarAcceso,
+      );
+      if (!vigente()) throw StateError('La sesión ya no está vigente.');
+      return resultado;
+    });
+    final pantalla = ConsultarReservasAdminScreen(
+      consulta: consulta,
+      alcance: Object(),
     );
     Navigator.of(context)
         .push(MaterialPageRoute<void>(builder: (_) => pantalla));

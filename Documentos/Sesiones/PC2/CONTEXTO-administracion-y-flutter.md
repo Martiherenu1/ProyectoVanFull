@@ -64,7 +64,7 @@ La línea funcional vigente es la especificación de Casos de Uso v1.3. Según e
 - OpenAPI `Viaje` no declara propiedades obligatorias, mientras el backend y `ViajeResumen` esperan los campos
   públicos base. El adaptador rechaza respuestas incompletas y no inventa valores.
 
-### CU-027 · Consultar reservas por administración — CONSULTA CONECTADA LOCALMENTE
+### CU-027 · Consultar reservas por administración — CONSULTA PUBLICADA EN #217
 
 **Continuación #211/#217:** contrato real de #224 mergeado, GET `/api/reservas` solo
 administrador/dueno, todas las reservas por id_reserva ascendente, schema Reserva con id_pasajero.
@@ -74,11 +74,15 @@ local del resultado: no se llama GET /reservas/{id}, que mantiene propiedad del 
 Adaptador HTTP reutiliza sesión y protección común 401/403. ReservaAdmin compone Reserva
 existente y conserva id_pasajero en listado/detalle sin tocar el modelo del pasajero.
 Carga/vacío/error/reintento y descarte de respuestas tardías conservados. Navegación CU-014,
-CU-016 y #222 intacta; CU-015/#218 todavía Draft, fuera de main, sin incorporar esa rama.
-Main a01df1e integrado localmente, conflictos documentales resueltos conservando aportes.
+CU-016 y #222 intacta. Al preparar esta rama, CU-015/#218 estaba Draft fuera de main;
+referencia histórica de aislamiento, no estado vigente de #218.
+Main a01df1e incorporado en la rama publicada; conflictos documentales resueltos conservando aportes.
 54 pruebas focalizadas Flutter aprobadas (contrato HTTP, identidad, sesión, estados, detalle,
 responsive y navegación); analyze y diff check correctos. Sin backend modificado ni Ruff aplicable.
-Sin commit/push; la consulta local no acredita filtros futuros ni despliegue operativo.
+Publicada en #217, sin merge ni ensayo real del despliegue. CI #302 sobre 2829032 aprobada:
+https://github.com/Martiherenu1/ProyectoVanFull/actions/runs/40904507118.
+Suite Flutter local de publicación informada: 724/724. No se repitieron checks locales
+para esta corrección documental. La consulta conserva cobertura parcial y no acredita filtros futuros.
 Los párrafos inferiores conservan el historial de preparación anterior al contrato #224.
 
 **Continuación local #211 (29/10/2026):** recuperados únicamente sus documentos del stash

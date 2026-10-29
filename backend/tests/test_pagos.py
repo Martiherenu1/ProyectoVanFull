@@ -17,6 +17,57 @@ RUTA_REGISTRO = "/api/pagos"
 RUTA = "/api/pagos/{}/confirmacion"
 
 
+@pytest.mark.parametrize("rol", ["administrador", "dueno"])
+def test_lista_pendientes_sin_efectos_y_excluye_decididos(entorno, rol):
+    base, cliente, pagos = entorno
+    cliente.post(
+        RUTA.format(pagos["principal"]), json={"decision": "CONFIRMADO"}, headers=_con_rol(rol)
+    )
+    cliente.post(RUTA.format(pagos["otro"]), json={"decision": "RECHAZADO"}, headers=_con_rol(rol))
+    antes = asyncio.run(
+        consultar(
+            base,
+            "SELECT (SELECT count(*) FROM comprobante), (SELECT count(*) FROM movimiento_cuenta), (SELECT count(*) FROM evento_operativo)",
+        )
+    )
+    respuesta = cliente.get("/api/pagos/pendientes", headers=_con_rol(rol))
+    assert respuesta.status_code == 200
+    assert [p["id_pago"] for p in respuesta.json()] == [pagos["atomico"]]
+    assert respuesta.json()[0]["estado"] == "PENDIENTE"
+    assert respuesta.json()[0]["id_cliente"] == pagos["id_cliente"]
+    assert (
+        asyncio.run(
+            consultar(
+                base,
+                "SELECT (SELECT count(*) FROM comprobante), (SELECT count(*) FROM movimiento_cuenta), (SELECT count(*) FROM evento_operativo)",
+            )
+        )
+        == antes
+    )
+
+
+def test_lista_pendientes_vacia_y_orden_estable(entorno):
+    base, cliente, pagos = entorno
+    respuesta = cliente.get("/api/pagos/pendientes", headers=_con_rol("administrador"))
+    assert [p["id_pago"] for p in respuesta.json()] == [
+        pagos[n] for n in ("principal", "otro", "atomico")
+    ]
+    for nombre in ("principal", "otro", "atomico"):
+        cliente.post(
+            RUTA.format(pagos[nombre]),
+            json={"decision": "RECHAZADO"},
+            headers=_con_rol("administrador"),
+        )
+    assert cliente.get("/api/pagos/pendientes", headers=_con_rol("administrador")).json() == []
+
+
+def test_listado_pendientes_exige_permiso(entorno):
+    _, cliente, _ = entorno
+    assert cliente.get("/api/pagos/pendientes").status_code == 401
+    for rol in ("pasajero", "chofer"):
+        assert cliente.get("/api/pagos/pendientes", headers=_con_rol(rol)).status_code == 403
+
+
 def _con_rol(rol: str) -> dict[str, str]:
     token = crear_token(1, 1, [rol])
     return {"Authorization": f"Bearer {token}"}

@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../core/api/pasajero_api.dart';
 import '../../models/pasajero/deuda.dart';
 import '../../models/pasajero/disponibilidad_viaje.dart';
+import '../../models/pasajero/reserva.dart';
 import 'asistente_screen.dart';
 import 'buscar_servicio_screen.dart';
 import 'confirmar_reserva_screen.dart';
@@ -13,10 +14,19 @@ import 'perfil_screen.dart';
 /// Entrada del pasajero: une sus pantallas con la API y la navegación.
 /// No decide reglas; solo lleva al pasajero de una pantalla a la siguiente.
 class PasajeroShell extends StatefulWidget {
-  const PasajeroShell({super.key, required this.api, required this.onSalir});
+  const PasajeroShell({
+    super.key,
+    required this.api,
+    required this.onSalir,
+    this.pantallaUbicacion,
+  });
 
   final PasajeroApi api;
   final VoidCallback onSalir;
+
+  /// Arma la pantalla de ubicación de un viaje. La compone `main.dart`, que
+  /// conoce la sesión y el mapa; sin ella Mis reservas no ofrece «Ver ubicación».
+  final Widget Function(int idViaje)? pantallaUbicacion;
 
   @override
   State<PasajeroShell> createState() => _PasajeroShellState();
@@ -55,6 +65,12 @@ class _PasajeroShellState extends State<PasajeroShell> {
     );
   }
 
+  void _verUbicacion(Reserva reserva) {
+    final pantalla = widget.pantallaUbicacion!(reserva.idViaje);
+    Navigator.of(context)
+        .push(MaterialPageRoute<void>(builder: (_) => pantalla));
+  }
+
   void _registrarPago(Deuda deuda) {
     Navigator.of(context).push(
       MaterialPageRoute<void>(
@@ -88,6 +104,9 @@ class _PasajeroShellState extends State<PasajeroShell> {
             cancelarReserva: widget.api.cancelarReserva,
             onBuscarServicio: () => _ir(_buscar),
             onRegistrarPago: _registrarPago,
+            onVerUbicacion: widget.pantallaUbicacion == null
+                ? null
+                : _verUbicacion,
           ),
           AsistenteScreen(enviarMensaje: widget.api.enviarMensaje),
           PerfilScreen(

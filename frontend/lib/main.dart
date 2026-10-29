@@ -142,11 +142,42 @@ class _VanFullBootstrapState extends State<VanFullBootstrap> {
     super.dispose();
   }
 
+  /// Ubicación del viaje de una reserva consolidada (RN-030). A diferencia de
+  /// Administración, un 403 acá no cierra la sesión: significa que esa reserva
+  /// no da acceso, y la pantalla lo muestra como «ubicación no disponible».
+  Widget _pantallaUbicacionPasajero(SesionController controller, int idViaje) {
+    final sesion = controller.sesion;
+    final generacion = controller.generacion;
+    bool vigente() =>
+        mounted &&
+        controller.generacion == generacion &&
+        identical(controller.sesion, sesion);
+    return UbicacionScreen(
+      idViaje: idViaje,
+      consultar: (viaje) {
+        if (!vigente()) {
+          throw StateError('La sesión de esta vista ya no está vigente.');
+        }
+        return _gpsApi.consultar(viaje);
+      },
+      alcance: Object(),
+      invalidaciones: controller,
+      contextoVigente: vigente,
+      configuracionMapa: widget.configuracionMapa,
+      prepararMapa: widget.prepararMapa,
+      crearVisorMapa: widget.crearVisorMapa,
+    );
+  }
+
   @override
   Widget build(BuildContext context) => SesionApp(
     controller: _sesion,
-    entradaPasajero: (controller) =>
-        PasajeroShell(api: _pasajero, onSalir: controller.salir),
+    entradaPasajero: (controller) => PasajeroShell(
+      api: _pasajero,
+      onSalir: controller.salir,
+      pantallaUbicacion: (idViaje) =>
+          _pantallaUbicacionPasajero(controller, idViaje),
+    ),
     entradaAdministrador: (controller) => _EntradaAdministracion(
       controller: controller,
       listar: _viajesDiaAdmin,

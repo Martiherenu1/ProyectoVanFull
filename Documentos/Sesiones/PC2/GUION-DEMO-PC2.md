@@ -38,10 +38,10 @@ reservar uno `en_curso`), y ve la ubicación solo con una reserva propia consoli
 
 | # | Quién | Qué se muestra | Estado |
 |---|---|---|---|
-| 1 | Pasajero | Login → **Buscar** (30/10, ida: 3 viajes) → **Confirmar reserva** del viaje 1 (pide «¿Dónde subís?») → **Mis reservas** | Verificado en Render el 28 y 29/10 hasta Confirmar (sin crear). **Crear la reserva** no se probó en Render |
+| 1 | Pasajero | Login → **Buscar** (30/10, ida: 3 viajes) → **Confirmar reserva** del viaje 1 (pide «¿Dónde subís?») → **Mis reservas** | **Verificado en Render el 29/10** por API (viaje 3, `pasajero2`): crear la reserva (201, queda `consolidada`), el cupo baja en 1, aparece en Mis reservas, y cancelarla devuelve el lugar. Falta verlo en la pantalla |
 | 2 | Pasajero | **Asistente**: una consulta de disponibilidad y la derivación a una persona | Verificado el 29/10 con el modelo real. Reservar y cancelar por el chat **no se probó** con el modelo real |
 | 3 | Admin | **Viajes del día** y asignación de chofer y vehículo (CU-018) | Integrado en `main`; no probado en Render con datos reales |
-| 4 | Pasajero → Admin | Registrar el pago (pasajero) → **Pagos a confirmar** (admin, CU-016) → **Deuda por cliente** (CU-015) y **Reservas** (CU-027) | Integrado en `main`; el circuito completo no se probó en Render |
+| 4 | Pasajero → Admin | Registrar el pago (pasajero) → **Pagos a confirmar** (admin, CU-016) → **Deuda por cliente** (CU-015) y **Reservas** (CU-027) | Integrado en `main`; el circuito completo no se probó en Render. **Ojo con la deuda:** reservar NO genera deuda (la tarifa, RF-028/#9, está fuera por decisiones pendientes): el saldo quedó en `0.0 al_dia` antes, durante y después de reservar y cancelar. Solo sube con un movimiento `DEUDOR`, que ninguna pantalla crea. Para mostrar una deuda que baja hay que cargar ese movimiento a mano; si no, presentar el paso como «registro y confirmación del pago» |
 | 5 | Chofer | **Lista del viaje** → iniciar el viaje 1 → publicar posición (GPS) | Ensayo parcial; el circuito real con el celular sigue pendiente (ensayo de Martín) |
 | 6 | Pasajero | **Mis reservas → Ver ubicación** del viaje 1 | Implementado (#222); falta verlo con una posición real. Sin posición responde «Todavía no hay una posición disponible» |
 
@@ -57,6 +57,7 @@ los 17 CU sin contrato (CU-013, 017, 019 a 026, 028, 031 a 035, 037). Detalle en
 | Falla | Qué hacer |
 |---|---|
 | El asistente responde «alcanzó su límite» o deriva | Es el cupo diario o el modelo gratuito: seguir con Buscar y Mis reservas, que no dependen de él |
+| Cancelar una reserva no aplica penalidad | Es lo esperado: RN-017 fuera de término «no está definido» (#75). El mensaje de la API lo dice |
 | Primer login o primera pantalla lentos | Es el arranque en frío de Render: esperar 30 a 50 s, no recargar varias veces |
 | La web muestra una pantalla vieja | Ctrl+Shift+R; si sigue, Clear site data |
 | «Ver ubicación» dice que no hay posición | El chofer todavía no publicó: pedir que envíe una posición y actualizar |

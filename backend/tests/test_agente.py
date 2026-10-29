@@ -620,6 +620,9 @@ def test_el_modelo_sabe_que_la_reserva_guarda_solo_la_parada_de_subida(entorno, 
     assert "Nunca le pidas al pasajero el id ni el nombre de un recorrido" in prompt
     assert "No inventes nombres de recorridos ni de paradas" in prompt
     assert "conocer el recorrido" in prompt
+    # Prueba en Render del 29/10: agregó «en la práctica, si la parada está en el recorrido, sí se puede».
+    assert "No afirmes ni prometas que podrá bajar ahí" in prompt
+    assert "no se sabe" in prompt
     (crear,) = [
         t["function"]
         for t in guion.llamadas[0]["tools"]

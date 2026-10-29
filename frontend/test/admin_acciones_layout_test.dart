@@ -55,11 +55,16 @@ void main() {
         expect(rect.right, lessThanOrEqualTo(ancho));
       }
       expect(tester.takeException(), isNull);
-      // La prueba angosta cubre solo los controles integrados del inicio.
-      if (ancho == 320) return;
       await tester.tap(find.byKey(const Key('admin-registrar-pago')));
       await tester.pumpAndSettle();
       expect(find.byType(RegistrarPagoAdminScreen), findsOneWidget);
+      expect(tester.takeException(), isNull);
+      final medio = find.byKey(const Key('pago-medio'));
+      await tester.tap(medio);
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Transferencia').last);
+      await tester.pumpAndSettle();
+      expect(tester.takeException(), isNull);
       await tester.pageBack();
       await tester.pumpAndSettle();
       await tester.tap(find.byKey(const Key('admin-pagos-pendientes')));

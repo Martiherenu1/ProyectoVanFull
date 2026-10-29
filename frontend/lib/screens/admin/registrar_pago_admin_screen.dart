@@ -144,6 +144,7 @@ class _RegistrarPagoAdminScreenState extends State<RegistrarPagoAdminScreen> {
             ),
             DropdownButtonFormField<MedioPago>(
               key: const Key('pago-medio'),
+              isExpanded: true,
               decoration: const InputDecoration(labelText: 'Medio de pago'),
               items: [
                 for (final medio in [

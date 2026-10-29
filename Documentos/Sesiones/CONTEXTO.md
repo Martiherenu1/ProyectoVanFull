@@ -1,5 +1,15 @@
 # CONTEXTO VANFULL — Carga rápida de sesión
 
+> **Corte Pasajero y base común — 2026-10-29 (noche).** Entró a `main`: «Ver ubicación» en Mis reservas (#222),
+> `GET /reservas` de CU-027 (#224), fechas del asistente como DD/MM/AAAA (#232), aviso al agotarse el cupo diario
+> de OpenRouter (#234), guion de la demo (#235/#236) y una prueba que dependía de la hora (#239). **Verificado en
+> Render por API (viaje 3, `pasajero2`): crear una reserva (queda consolidada), el cupo baja y vuelve al cancelar,
+> y la ubicación responde 404 con el viaje sin iniciar.** **Asistente:** la cuenta gratuita de OpenRouter permite
+> **50 pedidos por día** (se renueva 21:00 Argentina); reservar/cancelar por el chat con el modelo real **no se
+> verificó**. Reservar no genera deuda (tarifa pendiente, #9): el saldo queda en 0. El cliente Flutter no tiene
+> timeout y el servidor corta a los 60 s. Protección de `main`: 0 approvals y las 2 CI exigidas. Neon sigue sin
+> re-sembrar (espera a Martín). Detalle y decisiones: PC2/CONTEXTO-pasajero-y-base-comun.md y PC2/GUION-DEMO-PC2.md.
+
 > Integración Flutter #229, 2026-10-29: test/admin-flutter-integracion-pc2-229 desde main
 > 8e16205 (#228 integrado). Tres circuitos UI nuevos; 32 focalizadas y analyze aprobados.
 > Solo pruebas/contextos, sin cambios productivos ni Neon/Render. Sin commit/push/PR.

@@ -71,6 +71,36 @@ interfaz continúan pendientes. No debe confundirse con las reservas propias del
 
 ### CU-014 · Registrar pagos y comprobantes — PARCIAL
 
+**Avance local #213, 29/10/2026:** rama `feat/admin-registrar-pago-cu014-213` desde main
+`a8696de`, sin cambios de #210/CU-015/CU-027. Los trabajos locales #212 y #211 se preservaron
+en stashes separados con sus nombres de rama; no aplicarlos sobre esta rama.
+
+Leídos CU-014 v1.3 aprobado, RN-011/013/014/015/016 y contrato/servicio POST /pagos.
+Formulario administrativo integrado al endpoint existente: ID cliente destinatario con cuenta
+existente, importe recibido, transferencia o billetera. Confirma destinatario/importe antes
+de enviar y muestra el estado real devuelto; no confirma pagos ni genera recibos/movimientos.
+Reutiliza HTTP/sesión, Pago, MedioPago y formato de importes; main.dart solo conecta el registro.
+Muestra errores de cliente/cuenta/permiso/validación; evita doble envío y efectos de sesión vieja.
+
+Preparación aislada: BorradorImputacionPago y formulario local para tipo/referencia de respaldo,
+sin serialización, persistencia, subida de archivos ni conexión al registro real. El adaptador
+rechaza borradores con datos antes de HTTP: no los descarta silenciosamente. No determina tipo,
+seña mínima o condiciones empresariales; estos campos son candidatos a integración, no decisiones.
+
+**Para integrar lo restante (#84):** acordar almacenamiento y validación de tipo/evidencia con
+Martiniano/Martín; definir tarifa aplicable e imputación del 15 % antes de habilitar efectivo;
+vinculación con contratación/acuerdos y validación backend de seña general 50 %/excepciones
+empresariales; definir semántica CUENTA_CORRIENTE y conectar CU-036 para Mercado Pago cuando
+corresponda. Cliente sin cuenta conserva 404: no hay alta automática. No cambiar permisos.
+La UI identifica este registro como parcial y no habilita efectivo, señas/acuerdos especiales
+ni adjuntos. Sin cambios backend/OpenAPI/BD ni módulos Pasajero/Chofer/GPS. CU-014 sigue parcial.
+
+Validación local: 26 pruebas Flutter focalizadas aprobadas (adaptador, formulario/borrador,
+sesión y composición existente), flutter analyze sin problemas y diff check correcto.
+No se registraron pagos reales; sin commit/push/PR.
+
+Fuente CU: https://drive.google.com/file/d/1Kc4m4e2LH5xRc1J9HY-2hTQaiLNeRA7y/view
+
 **Implementado**
 
 - `POST /pagos`, integrado por #85 y ampliado por #141.

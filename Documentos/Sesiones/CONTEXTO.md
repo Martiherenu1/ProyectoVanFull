@@ -1,5 +1,9 @@
 # CONTEXTO VANFULL — Carga rápida de sesión
 
+> 29/10/2026 — #213/CU-014: registro administrativo parcial Flutter preparado con endpoint
+> existente y borrador aislado para tipo/respaldo. 26 pruebas focalizadas aprobadas; bloqueos #84
+> detallados en contexto administrativo. Sin publicar; CU-015/CU-027 preservados aparte.
+
 > 29/10/2026 — #207: interfaz administrativa de cancelación CU-018 preparada localmente desde
 > main con #186/#189/#192. 30 pruebas Flutter focalizadas aprobadas, analyze sin problemas.
 > Sin publicar; detalle y alcance parcial en CONTEXTO-administracion-y-flutter.md.

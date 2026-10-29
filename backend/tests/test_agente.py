@@ -11,6 +11,7 @@ import asyncio
 import copy
 import json
 import time
+from datetime import date, datetime, timedelta
 from pathlib import Path
 
 import pytest
@@ -18,6 +19,7 @@ import pytest
 from app.agent import openrouter_client
 from app.core.security import UsuarioActual, crear_token
 from app.services import agente
+from app.services.reservas import ZONA_ARGENTINA
 from tests._bd import base_migrada, cliente_api, consultar, ejecutar_sql
 
 CHAT = "/api/chat"
@@ -140,15 +142,16 @@ def entorno():
             servicio,
         )
 
-        def viaje(sentido: str) -> int:
+        def viaje(sentido: str, fecha: date = date(2026, 10, 30)) -> int:
             return _uno(
                 base,
                 "INSERT INTO viaje (id_servicio, id_recorrido, fecha, horario, sentido, "
-                "capacidad_planificada) VALUES ($1, $2, DATE '2026-10-30', TIME '07:30', $3, 10) "
+                "capacidad_planificada) VALUES ($1, $2, $4, TIME '07:30', $3, 10) "
                 "RETURNING id_viaje",
                 servicio,
                 recorrido,
                 sentido,
+                fecha,
             )
 
         def persona(dni: str, *, pasajero: bool = True) -> int:
@@ -322,7 +325,10 @@ def test_el_pasajero_reserva_por_el_chat(entorno, hablar):
 
 def test_el_pasajero_cancela_por_el_chat(entorno, hablar):
     """CU-004 por el chat: el modelo recibe el motivo y no se le oculta que no hay crédito."""
-    hugo, id_viaje = entorno["persona"]("41"), entorno["viaje"]("VUELTA")
+    # Fecha relativa a hoy: con una fija, el plazo de RN-017 (18:00 del día anterior) vence y la
+    # prueba pasa a fallar según la hora a la que corre (Issue #237).
+    lejos = datetime.now(ZONA_ARGENTINA).date() + timedelta(days=10)
+    hugo, id_viaje = entorno["persona"]("41"), entorno["viaje"]("VUELTA", lejos)
     id_reserva = entorno["reserva"](hugo, id_viaje)
     guion = hablar(
         _llamada(("cancelar_reserva", {"reserva_id": str(id_reserva)})),

@@ -16,7 +16,7 @@ import re
 import time
 from collections import OrderedDict
 from dataclasses import dataclass
-from datetime import datetime, timedelta, timezone
+from datetime import date, datetime, timedelta, timezone
 from uuid import uuid4
 
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -69,6 +69,26 @@ def a_texto_plano(texto: str) -> str:
     texto = _NEGRITA.sub(r"\2", texto)
     texto = _CURSIVA.sub(r"\1", texto)
     return texto.replace("**", "").replace("`", "")
+
+
+# El modelo repite a veces las fechas como las recibe de las tools (AAAA-MM-DD) y al pasajero le
+# llegan así (Issue #231). Se convierten solo en lo que ve el pasajero: el historial del modelo
+# conserva el formato ISO, para que no empiece a mandarle DD/MM/AAAA a las tools.
+_FECHA_ISO = re.compile(r"(?<![\d-])(\d{4})-(\d{2})-(\d{2})(?![\dT-])")
+
+
+def fechas_legibles(texto: str) -> str:
+    """Convierte las fechas AAAA-MM-DD en DD/MM/AAAA; lo que no es una fecha válida queda igual."""
+
+    def _convertir(coincidencia: re.Match[str]) -> str:
+        anio, mes, dia = (int(g) for g in coincidencia.groups())
+        try:
+            date(anio, mes, dia)
+        except ValueError:
+            return coincidencia.group(0)
+        return f"{dia:02d}/{mes:02d}/{anio}"
+
+    return _FECHA_ISO.sub(_convertir, texto)
 
 
 @dataclass
@@ -166,7 +186,7 @@ async def responder(db: AsyncSession, usuario: UsuarioActual, datos: ChatRequest
             mensajes.append({"role": "assistant", "content": respuesta})
             _guardar(conversacion_id, usuario, mensajes)
             return ChatResponse(
-                respuesta=respuesta,
+                respuesta=fechas_legibles(respuesta),
                 conversacion_id=conversacion_id,
                 derivar_humano=derivar,
                 tool_usada=tool_usada,

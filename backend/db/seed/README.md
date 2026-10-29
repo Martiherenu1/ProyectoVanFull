@@ -27,13 +27,13 @@ verifica, incluido que se pueda iniciar sesión con cada cuenta.
 
 | Archivo | Contenido |
 |---|---|
-| `persona`, `pasajero`, `cliente`, `cliente_individual` | 4 personas: 2 pasajeros (con su cliente individual), 1 chofer y 1 administrador |
-| `chofer` | La persona 3, asociada a la cuenta `chofer1@vanfull.test`. `chofer` usa `id_persona` como PK/FK; no tiene otro identificador |
+| `persona`, `pasajero`, `cliente`, `cliente_individual` | 5 personas: 2 pasajeros (con su cliente individual), 2 choferes y 1 administrador |
+| `chofer` | Las personas 3 y 5. La 3 tiene la cuenta `chofer1@vanfull.test`; la 5 ("Chofer Dos") **no tiene cuenta de acceso**: existe solo para probar la reasignación de CU-018. `chofer` usa `id_persona` como PK/FK; no tiene otro identificador |
 | `cuenta_corriente` | Una cuenta corriente para cada uno de los 2 clientes individuales |
 | `cuenta_acceso`, `cuenta_rol` | Una cuenta por persona. Roles: `pasajero` ×2, `chofer`, `administrador` |
 | `servicio` | Un servicio universitario y uno laboral |
 | `recorrido`, `parada`, `parada_recorrido` | Un recorrido con 3 paradas (nombres y sin coordenadas: son de prueba) |
-| `vehiculo` | Vehículo 1, patente sintética `VF029AA`, capacidad 20 |
+| `vehiculo` | Vehículos 1 y 2, patentes sintéticas `VF029AA` y `VF030AA`, capacidad 20 cada uno (el 2 es para probar la reasignación) |
 | `viaje` | Viajes 1 a 3 del 30/10/2026 sobre servicio y recorrido 1; horarios 07:30, 12:30 y 18:00, capacidad planificada 18 |
 | `contrasenas-de-prueba.csv` | Contraseña de cada cuenta. **No es una tabla**: el cargador la hashea con bcrypt y la guarda en `cuenta_acceso.hash_contrasena` |
 

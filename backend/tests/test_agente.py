@@ -581,6 +581,15 @@ def test_al_modelo_se_le_ofrece_buscar_por_parada_de_destino(entorno, hablar):
         ("Subís en *Parada 1* y bajás en `Parada 3`", "Subís en Parada 1 y bajás en Parada 3"),
         ("**Viaje:** ID 3\n**Hora:** 18:00", "Viaje: ID 3\nHora: 18:00"),
         ("Un ** suelto", "Un  suelto"),
+        # Observado en la app el 29/10: el modelo destaca la aclaración con una cita.
+        (
+            "Viajes:\n\n> Aclaración: no garantiza\n\n¿Dónde subís?",
+            "Viajes:\n\nAclaración: no garantiza\n\n¿Dónde subís?",
+        ),
+        (">> Doble\n>Sin espacio", "Doble\nSin espacio"),
+        ("  > Con sangría", "Con sangría"),
+        # Un signo mayor o una flecha en medio del texto no es una cita.
+        ("Si 3 > 2 entonces A -> B", "Si 3 > 2 entonces A -> B"),
         # Lo que no es formato se respeta.
         ("2 * 3 = 6 y id_viaje 3", "2 * 3 = 6 y id_viaje 3"),
         ("- Uno\n- Dos", "- Uno\n- Dos"),

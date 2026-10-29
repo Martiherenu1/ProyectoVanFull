@@ -1,6 +1,6 @@
 """Endpoint de consulta de deuda propia (CU-006)."""
 
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, Path
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.database import get_db
@@ -17,3 +17,12 @@ async def consultar_deuda_propia(
     db: AsyncSession = Depends(get_db),
 ):
     return await servicio.consultar_deuda_propia(db, usuario)
+
+
+@router.get("/clientes/{id_cliente}/deuda", response_model=Deuda, tags=["administracion"])
+async def consultar_deuda_cliente(
+    id_cliente: int = Path(gt=0),
+    usuario: UsuarioActual = Depends(requiere_rol("administrador", "dueno")),
+    db: AsyncSession = Depends(get_db),
+):
+    return await servicio.consultar_deuda_cliente(db, id_cliente)

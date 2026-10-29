@@ -43,6 +43,7 @@ void main() {
       await tester.tap(find.text('Ingresar'));
       await tester.pumpAndSettle();
       for (final key in [
+        'admin-consultar-deuda',
         'admin-salir',
         'admin-registrar-pago',
         'admin-pagos-pendientes',

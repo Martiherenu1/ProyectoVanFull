@@ -1,4 +1,4 @@
-"""Endpoints de reservas del pasajero: consulta (CU-010), creación (CU-003) y cancelación (CU-004).
+"""Endpoints de reservas del pasajero: consulta (CU-010), creación (CU-003), cancelación (CU-004) y cambio de parada (CU-005).
 Más el listado de solo lectura de administración (CU-027).
 
 Las rutas se declaran completas porque este router mezcla dos prefijos del contrato
@@ -13,7 +13,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.database import get_db
 from app.core.security import UsuarioActual, requiere_rol
-from app.schemas.reservas import Reserva, ReservaCreate, ResultadoCancelacion
+from app.schemas.reservas import CambioParada, Reserva, ReservaCreate, ResultadoCancelacion
 from app.services import reservas as servicio
 
 router = APIRouter(tags=["reservas"])
@@ -60,3 +60,13 @@ async def cancelar_reserva(
     db: AsyncSession = Depends(get_db),
 ):
     return await servicio.cancelar_reserva(db, usuario, id_reserva)
+
+
+@router.post("/reservas/{id_reserva}/cambio-parada", response_model=Reserva)
+async def cambiar_parada(
+    id_reserva: int,
+    datos: CambioParada,
+    usuario: UsuarioActual = Depends(requiere_rol("pasajero")),
+    db: AsyncSession = Depends(get_db),
+):
+    return await servicio.cambiar_parada(db, usuario, id_reserva, datos)

@@ -98,7 +98,7 @@ y frontend continúa pendiente; documentar el contrato no implementa los servici
 | RF-028 Tarifa aplicable *(requisito, no CU: se marca `x-rf`)* | `GET /tarifas` | RN-010..014 |
 | CU-003 Crear reserva ⚠️ *parcial* | `POST /reservas` | RF-005, RN-001/002/031 |
 | CU-004 Cancelar reserva | `POST /reservas/{id}/cancelacion` | RF-006, RN-017/018/019 |
-| CU-005 Cambio de parada | `POST /reservas/{id}/cambio-parada` | RF-008, RN-020 |
+| CU-005 Cambio de parada | `POST /reservas/{id}/cambio-parada` | RF-008, RN-020 — implementado; «disponibilidad compatible» = parada del mismo recorrido, interpretación pendiente de validación (#242) |
 | CU-006 Consultar deuda | `GET /pasajeros/me/deuda` | RF-010 |
 | CU-007 Abordaje QR | `POST /abordajes` | RF-014/015, RN-023, RNF-011/012 |
 | CU-008 Informar ausencia | `POST /ausencias` | RF-016, RN-024/025 |

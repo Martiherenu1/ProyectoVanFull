@@ -12,6 +12,13 @@ class ReservaCreate(BaseModel):
     orden_parada: int = Field(ge=1)
 
 
+class CambioParada(BaseModel):
+    """Cuerpo de `POST /reservas/{id}/cambio-parada` (CU-005)."""
+
+    # Orden de la nueva parada de ascenso dentro del recorrido del viaje. Los órdenes empiezan en 1.
+    orden_parada: int = Field(ge=1)
+
+
 class Reserva(BaseModel):
     """Una reserva con los datos del viaje que el pasajero necesita para reconocerla.
 

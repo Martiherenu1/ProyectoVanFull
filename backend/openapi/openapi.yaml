@@ -577,7 +577,16 @@ paths:
     post:
       tags: [reservas]
       summary: Solicitar cambio de parada
-      description: Cambia la parada sujeto a disponibilidad compatible (RN-020). (CU-005, RF-008)
+      description: |
+        Cambia la parada de ascenso de una reserva propia, sujeto a disponibilidad compatible
+        (RN-020). (CU-005, RF-008)
+
+        Con el modelo actual la capacidad se calcula por viaje y la reserva ya ocupa su lugar en él:
+        cambiar de parada dentro del mismo viaje mantiene horario, recorrido y unidad y no consume
+        otro lugar. Es compatible la parada que pertenece al recorrido del viaje. Interpretación
+        mínima, pendiente de validación del equipo (Issue #242). Solo se cambia la parada de una
+        reserva no cancelada de un viaje todavía `programado`. Si el cambio no procede, la parada
+        original se conserva (A1). No lo ofrece el chatbot: CU-005 no lo asigna a ese canal.
       x-cu: CU-005
       parameters:
         - $ref: '#/components/parameters/IdReserva'
@@ -591,6 +600,7 @@ paths:
               properties:
                 orden_parada:
                   type: integer
+                  minimum: 1
                   description: Orden de la nueva parada dentro del recorrido.
       responses:
         '200':
@@ -599,8 +609,25 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Reserva'
+        '400':
+          description: >-
+            Cuerpo inválido, o `orden_parada` que no pertenece al recorrido del viaje
+            (`PARADA_NO_VALIDA`).
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          $ref: '#/components/responses/NoAutenticado'
+        '403':
+          $ref: '#/components/responses/SinPermiso'
+        '404':
+          $ref: '#/components/responses/NoEncontrado'
         '409':
-          description: Sin disponibilidad compatible
+          description: >-
+            Sin disponibilidad compatible: la reserva está cancelada (`RESERVA_NO_MODIFICABLE`),
+            el viaje ya no está programado (`VIAJE_NO_MODIFICABLE`) o la reserva ya tiene esa
+            parada (`PARADA_SIN_CAMBIOS`).
           content:
             application/json:
               schema:

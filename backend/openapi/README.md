@@ -36,6 +36,11 @@ tres. Router condicional desactivado por defecto, solo DB local dedicada; live_m
 sigue rechazado. Modelo/DDL/migración optativos bajo `backend/sandbox/mercadopago`,
 fuera del head normal; esquema base intacto. No es autorización de despliegue.
 Matriz y validaciones: `Documentos/Sesiones/PC2/ENSAYO-CU036-AISLADO.md`.
+Ampliación candidata Checkout Pro: inicio autenticado, consulta propia y retorno
+informativo, ausentes por defecto. Nueva intención optativa `mp_0002`, fuera del
+arranque habitual; conserva pagos manuales y CU-016. Contrato/modelo/Flutter
+compartidos PENDIENTES DE VALIDACIÓN; no acredita integración real.
+Detalle: `Documentos/Sesiones/PC2/CHECKOUT-PRO-CU014-CU036-CANDIDATO.md`.
 La tabla de cortes técnicos posteriores conserva el estado integrado previo.
 
 Actualización CU-015/#212: `GET /clientes/{id_cliente}/deuda` agrega consulta administrativa

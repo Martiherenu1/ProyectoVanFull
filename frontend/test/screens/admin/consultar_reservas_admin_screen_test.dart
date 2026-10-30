@@ -37,6 +37,124 @@ ReservaAdmin reserva(
 });
 
 void main() {
+  testWidgets('volver conserva posición y permite seleccionar otra reserva', (
+    tester,
+  ) async {
+    final consulta = ConsultaSimulada(
+      () async => List.generate(50, (i) => reserva(i + 1)),
+    );
+    await tester.pumpWidget(
+      MaterialApp(
+        home: ConsultarReservasAdminScreen(
+          consulta: consulta,
+          alcance: consulta,
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+    await tester.scrollUntilVisible(find.byKey(const Key('reserva-30')), 300);
+    final antes = tester
+        .state<ScrollableState>(find.byType(Scrollable))
+        .position
+        .pixels;
+    await tester.tap(find.byKey(const Key('reserva-30')));
+    await tester.pumpAndSettle();
+    await tester.binding.handlePopRoute();
+    await tester.pumpAndSettle();
+    expect(
+      tester.state<ScrollableState>(find.byType(Scrollable)).position.pixels,
+      antes,
+    );
+    await tester.tap(find.byKey(const Key('reserva-30')));
+    await tester.pumpAndSettle();
+    expect(find.byKey(const Key('detalle-reserva-30')), findsOneWidget);
+    await tester.tap(find.byType(BackButton));
+    await tester.pumpAndSettle();
+    expect(consulta.llamadas, 1);
+  });
+
+  testWidgets('cambio de sesión desde detalle elimina historial anterior', (
+    tester,
+  ) async {
+    final consulta = ConsultaSimulada(() async => [reserva(7)]);
+    final navigator = GlobalKey<NavigatorState>();
+    await tester.pumpWidget(
+      MaterialApp(
+        navigatorKey: navigator,
+        home: ConsultarReservasAdminScreen(
+          consulta: consulta,
+          alcance: Object(),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const Key('reserva-7')));
+    await tester.pumpAndSettle();
+    await tester.pumpWidget(
+      MaterialApp(
+        navigatorKey: navigator,
+        home: ConsultarReservasAdminScreen(
+          consulta: consulta,
+          alcance: Object(),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+    expect(find.byKey(const Key('detalle-reserva-7')), findsNothing);
+    expect(
+      ModalRoute.of(tester.element(find.byType(ConsultarReservasAdminScreen)))!
+          .willHandlePopInternally,
+      isFalse,
+    );
+    expect(find.byKey(const Key('reserva-7')), findsOneWidget);
+    expect(tester.takeException(), isNull);
+  });
+
+  for (final flecha in [false, true]) {
+    testWidgets(
+      'volver al listado y luego salir (${flecha ? 'flecha' : 'sistema'})',
+      (tester) async {
+        final consulta = ConsultaSimulada(() async => [reserva(7), reserva(8)]);
+        await tester.pumpWidget(
+          MaterialApp(
+            home: Builder(
+              builder: (context) => Scaffold(
+                body: TextButton(
+                  onPressed: () => Navigator.of(context).push(
+                    MaterialPageRoute<void>(
+                      builder: (_) => ConsultarReservasAdminScreen(
+                        consulta: consulta,
+                        alcance: consulta,
+                      ),
+                    ),
+                  ),
+                  child: const Text('Administración'),
+                ),
+              ),
+            ),
+          ),
+        );
+        await tester.tap(find.text('Administración'));
+        await tester.pumpAndSettle();
+        await tester.tap(find.byKey(const Key('reserva-7')));
+        await tester.pumpAndSettle();
+        expect(find.byKey(const Key('detalle-reserva-7')), findsOneWidget);
+        if (flecha) {
+          await tester.tap(find.byType(BackButton));
+        } else {
+          await tester.binding.handlePopRoute();
+        }
+        await tester.pumpAndSettle();
+        expect(find.byKey(const Key('reserva-8')), findsOneWidget);
+        expect(find.byKey(const Key('detalle-reserva-7')), findsNothing);
+        expect(consulta.llamadas, 1);
+        await tester.binding.handlePopRoute();
+        await tester.pumpAndSettle();
+        expect(find.text('Administración'), findsOneWidget);
+        expect(find.byType(ConsultarReservasAdminScreen), findsNothing);
+      },
+    );
+  }
   Future<void> mostrar(
     WidgetTester tester,
     ConsultaReservasAdmin consulta,

@@ -447,3 +447,10 @@ Sin commit/push de B. D1–D6 y Checkout siguen pendientes de aprobación escrit
 Ruff/formato, contrato y revalidación de Checkout correctos; revisión técnica por solicitar al equipo.
 D1–D6 y ampliación siguen pendientes de aprobación escrita de Martín, Martiniano y Facundo.
 Sin merge, despliegue, migraciones remotas ni activación. Flags false y live_mode=true rechazado.
+
+30/10/2026 — CU-027 #255: corrección local de Atrás en rama fix/admin-atras-reservas-cu027-255
+sobre cbcbf12. Defecto reproducido antes del cambio; LocalHistoryEntry y conservación del
+scroll solo en la pantalla administrativa. 784 pruebas Flutter aprobadas y analyze limpio.
+Atrás físico de Chrome/historial externo no certificado; detalles en contexto de Administración.
+Diff revisado y publicación autorizada por el usuario: commit, push y PR Draft contra main,
+con revisión solicitada. Sin merge ni despliegue; Chrome real pendiente antes de aprobar integración.

@@ -172,3 +172,17 @@ Sin commit/push de B. D1–D6 y Checkout siguen pendientes de aprobación escrit
 Ruff/formato, contrato y revalidación de Checkout correctos; revisión técnica por solicitar al equipo.
 D1–D6 y ampliación siguen pendientes de aprobación escrita de Martín, Martiniano y Facundo.
 Sin merge, despliegue, migraciones remotas ni activación. Flags false y live_mode=true rechazado.
+
+30/10/2026 — CU-027 / #255, rama fix/admin-atras-reservas-cu027-255, base cbcbf12.
+Reproducido: Atrás del sistema desde detalle abandona consulta; flecha sí vuelve al listado.
+Corrección local: LocalHistoryEntry reutiliza pop de la ruta y flecha automática AppBar;
+PageStorageKey conserva desplazamiento del listado por alcance de sesión. Carga/cambio de
+sesión/desmontaje eliminan historial local. No se agregan filtros ni rutas/API/modelos.
+Pruebas: reproducción inicial falla solo para sistema; después 784 Flutter aprobadas,
+analyze sin incidencias y diff check correcto. Incluye cuatro regresiones nuevas:
+flecha/sistema, segunda pulsación sale, desplazamiento/reapertura y cambio de sesión.
+Límite: handlePopRoute prueba el evento recibido por Flutter; NO certifica el botón físico
+Atrás de Chrome ni su historial externo. Esa comprobación real sigue pendiente.
+Usuario autoriza commit/push y PR Draft contra main, con revisión solicitada; no merge ni despliegue.
+Checkout/CU-008 intactos. Intento visual detenido: la herramienta no pudo identificar con certeza
+la URL de Chrome. No se acredita aprobación de esa prueba; registrar resultado antes del merge.

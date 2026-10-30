@@ -17,7 +17,7 @@ if context.get_x_argument(as_dictionary=True).get("autorizar_cu036") != "SI":
 
 
 def solo_candidato_mp(objeto, nombre, tipo, reflejado, comparado):
-    return tipo != "table" or nombre == "pago_mercadopago"
+    return tipo != "table" or nombre in {"pago_mercadopago", "checkout_mercadopago"}
 
 
 def ejecutar(conexion=None):

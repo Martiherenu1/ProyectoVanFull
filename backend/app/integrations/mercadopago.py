@@ -69,6 +69,8 @@ class PagoProveedor:
     importe: Decimal
     moneda: str
     id_receptor: int
+    id_orden: str | None = None
+    referencia: str | None = None
 
 
 class ClienteMercadoPagoPruebas:
@@ -109,7 +111,24 @@ class ClienteMercadoPagoPruebas:
                 raise ValueError
             if type(receptor) is not int or receptor <= 0:
                 raise ValueError
-            return PagoProveedor(id_operacion, estado, importe, moneda, receptor)
+            orden = datos.get("order")
+            id_orden = (
+                str(orden.get("id"))
+                if isinstance(orden, dict) and orden.get("type") == "mercadopago"
+                else None
+            )
+            if id_orden is not None and not re.fullmatch(r"[0-9]{1,64}", id_orden):
+                raise ValueError
+            referencia = datos.get("external_reference")
+            return PagoProveedor(
+                id_operacion,
+                estado,
+                importe,
+                moneda,
+                receptor,
+                id_orden,
+                referencia if isinstance(referencia, str) else None,
+            )
         except httpx.HTTPError:
             raise ProveedorNoDisponible("No se pudo consultar al proveedor.") from None
         except (KeyError, TypeError, ValueError, InvalidOperation):

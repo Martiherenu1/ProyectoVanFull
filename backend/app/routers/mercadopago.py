@@ -9,6 +9,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.config import Settings, get_settings
 from app.core.database import get_db
+from app.integrations.checkout import ClienteCheckoutPruebas
 from app.integrations.mercadopago import ClienteMercadoPagoPruebas
 from app.schemas.mercadopago import NotificacionMP
 from app.services.mercadopago_sandbox import exigir_habilitado, procesar_webhook
@@ -20,7 +21,12 @@ async def proveedor_mp(
     ajustes: Settings = Depends(get_settings),
 ) -> AsyncGenerator[ClienteMercadoPagoPruebas]:
     async with httpx.AsyncClient(follow_redirects=False) as cliente:
-        yield ClienteMercadoPagoPruebas(cliente, ajustes.mercadopago_access_token)
+        tipo = (
+            ClienteCheckoutPruebas
+            if ajustes.mercadopago_checkout_enabled
+            else ClienteMercadoPagoPruebas
+        )
+        yield tipo(cliente, ajustes.mercadopago_access_token)
 
 
 def reloj_mp() -> float:

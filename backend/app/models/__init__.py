@@ -6,6 +6,22 @@ Un archivo por bloque del modelo relacional. Importarlos acá es lo que registra
 Quién escribe en cada tabla está en `Documentos/Sesiones/PC2/REPARTO-PC2.md`.
 """
 
-from app.models import cuenta_corriente, mercadopago, personas, servicios, trazabilidad, viajes
+from app.models import (
+    checkout,
+    cuenta_corriente,
+    mercadopago,
+    personas,
+    servicios,
+    trazabilidad,
+    viajes,
+)
 
-__all__ = ["cuenta_corriente", "mercadopago", "personas", "servicios", "trazabilidad", "viajes"]
+__all__ = [
+    "checkout",
+    "cuenta_corriente",
+    "mercadopago",
+    "personas",
+    "servicios",
+    "trazabilidad",
+    "viajes",
+]

@@ -1,6 +1,7 @@
 """Configuración central de la app. Lee variables de entorno / .env (pydantic-settings)."""
 
 from functools import lru_cache
+from urllib.parse import urlparse
 
 from pydantic import Field, SecretStr, field_validator, model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
@@ -73,6 +74,9 @@ class Settings(BaseSettings):
     mercadopago_webhook_tolerance_seconds: int = Field(default=300, gt=0, le=3600)
     mercadopago_collector_id: int | None = Field(default=None, gt=0)
     mercadopago_currency: str = ""
+    mercadopago_checkout_enabled: bool = False
+    mercadopago_checkout_return_url: str = ""
+    mercadopago_checkout_webhook_url: str = ""
     google_maps_api_key: str = ""
     whatsapp_token: str = ""
     whatsapp_phone_number_id: str = ""
@@ -89,6 +93,8 @@ class Settings(BaseSettings):
 
     @model_validator(mode="after")
     def validar_mercadopago_sandbox(self):
+        if self.mercadopago_checkout_enabled and not self.mercadopago_sandbox_enabled:
+            raise ValueError("Checkout requiere la integración sandbox explícita.")
         if not self.mercadopago_sandbox_enabled:
             return self
         exigir_destino_mp_local(self.env, self.database_url)
@@ -102,6 +108,24 @@ class Settings(BaseSettings):
             or not self.mercadopago_currency.isupper()
         ):
             raise ValueError("Falta configuración de autenticidad/receptor/moneda de Mercado Pago.")
+        if self.mercadopago_checkout_enabled:
+            for valor in (
+                self.mercadopago_checkout_return_url,
+                self.mercadopago_checkout_webhook_url,
+            ):
+                url = urlparse(valor)
+                if (
+                    url.scheme != "https"
+                    or not url.hostname
+                    or url.username
+                    or url.password
+                    or url.fragment
+                    or url.query
+                    or url.hostname in {"localhost", "127.0.0.1", "::1"}
+                ):
+                    raise ValueError(
+                        "Checkout requiere URLs HTTPS de retorno y webhook autorizadas, sin secretos."
+                    )
         return self
 
 

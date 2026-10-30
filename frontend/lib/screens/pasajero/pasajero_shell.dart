@@ -10,6 +10,7 @@ import 'confirmar_reserva_screen.dart';
 import 'mis_reservas_screen.dart';
 import 'pago_screen.dart';
 import 'perfil_screen.dart';
+import '../../services/checkout_api.dart';
 
 /// Entrada del pasajero: une sus pantallas con la API y la navegación.
 /// No decide reglas; solo lleva al pasajero de una pantalla a la siguiente.
@@ -19,10 +20,16 @@ class PasajeroShell extends StatefulWidget {
     required this.api,
     required this.onSalir,
     this.pantallaUbicacion,
+    this.checkout,
+    this.abrirCheckout,
+    this.contextoPagoVigente,
   });
 
   final PasajeroApi api;
   final VoidCallback onSalir;
+  final CheckoutApi? checkout;
+  final AbrirCheckout? abrirCheckout;
+  final bool Function()? contextoPagoVigente;
 
   /// Arma la pantalla de ubicación de un viaje. La compone `main.dart`, que
   /// conoce la sesión y el mapa; sin ella Mis reservas no ofrece «Ver ubicación».
@@ -72,18 +79,33 @@ class _PasajeroShellState extends State<PasajeroShell> {
   }
 
   void _registrarPago(Deuda deuda) {
-    Navigator.of(context).push(
-      MaterialPageRoute<void>(
-        builder: (contexto) => PagoScreen(
-          saldo: deuda.saldo,
-          registrarPago: widget.api.registrarPago,
-          onTerminar: (_) {
-            Navigator.of(contexto).pop();
-            _ir(_reservas);
-          },
-        ),
-      ),
-    );
+    var finalizo = false;
+    Navigator.of(context)
+        .push(
+          MaterialPageRoute<void>(
+            builder: (contexto) => PagoScreen(
+              saldo: deuda.saldo,
+              registrarPago: widget.api.registrarPago,
+              iniciarCheckout: widget.checkout?.iniciar,
+              consultarPago: widget.checkout?.consultar,
+              abrirCheckout: widget.abrirCheckout,
+              contextoVigente: widget.contextoPagoVigente,
+              onTerminar: (_) {
+                finalizo = true;
+                Navigator.of(contexto).pop();
+                _ir(_reservas);
+              },
+            ),
+          ),
+        )
+        .then((_) {
+          if (!finalizo &&
+              widget.checkout != null &&
+              mounted &&
+              widget.contextoPagoVigente?.call() != false) {
+            setState(() => _versionReservas++);
+          }
+        });
   }
 
   @override

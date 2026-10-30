@@ -1260,6 +1260,91 @@ paths:
   # ---------------------------------------------------------------------------
   # INTEGRACIONES
   # ---------------------------------------------------------------------------
+  /pagos/mercadopago/checkout:
+    post:
+      tags: [pagos]
+      summary: Iniciar Checkout Pro propio (candidato local desactivado)
+      description: |
+        PENDIENTE DE APROBACIÓN del equipo; extensión aislada de CU-014/CU-036.
+        Solo pasajero autenticado con cliente y cuenta corriente existentes. Identidad
+        obtenida de sesión; no admite id_cliente. MERCADO_PAGO no equivale a BILLETERA.
+        Conserva Pago PENDIENTE e intención UUID antes del POST remoto. La misma clave
+        por cliente no crea otro Pago ni repite POST: solo reconcilia la preferencia por GET.
+        Un timeout conserva INCIERTO; no prueba rechazo. Checkout abandonado no acredita.
+        Sin feature flag responde 404. No confirma por retorno ni acepta live_mode=true.
+      x-cobertura: parcial
+      x-estado-aprobacion: PENDIENTE DE VALIDACIÓN
+      security: [{ bearerAuth: [] }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/IniciarCheckout'
+      responses:
+        '200':
+          description: Intención existente/lista, o Pago ya decidido
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/CheckoutOut' }
+        '202':
+          description: Resultado incierto; conservar clave y reconciliar sin nuevo POST remoto
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/CheckoutOut' }
+        '400':
+          description: VALIDACION; importe o método inválidos
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+        '401': { $ref: '#/components/responses/NoAutenticado' }
+        '403': { $ref: '#/components/responses/SinPermiso' }
+        '404':
+          description: Cliente o cuenta corriente inexistentes; ruta inactiva sin habilitación
+        '409':
+          description: CHECKOUT_CLAVE_REUTILIZADA, CHECKOUT_ASOCIACION_AMBIGUA o CHECKOUT_ASOCIACION_INVALIDA
+        '503':
+          description: CHECKOUT_NO_DISPONIBLE; conservar la misma clave ante resultado incierto
+
+  /pagos/mercadopago/retorno:
+    get:
+      tags: [pagos]
+      summary: Retorno informativo de Checkout (candidato local desactivado)
+      description: Página fija, sin sesión ni escrituras. Ignora estados y parámetros de URL; nunca acredita.
+      x-cobertura: parcial
+      x-estado-aprobacion: PENDIENTE DE VALIDACIÓN
+      security: []
+      responses:
+        '200':
+          description: Volver a VanFull y consultar el estado propio
+          content:
+            text/html:
+              schema: { type: string }
+
+  /pagos/{id_pago}:
+    get:
+      tags: [pagos]
+      summary: Consultar estado del pago propio (candidato local desactivado)
+      description: Solo pasajero propietario. Sin escrituras ni consulta externa; ruta ausente por defecto.
+      x-cobertura: parcial
+      x-estado-aprobacion: PENDIENTE DE VALIDACIÓN
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - in: path
+          name: id_pago
+          required: true
+          schema: { type: integer }
+      responses:
+        '200':
+          description: Estado local autoritativo
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Pago' }
+        '401': { $ref: '#/components/responses/NoAutenticado' }
+        '403': { $ref: '#/components/responses/SinPermiso' }
+        '404':
+          description: PAGO_NO_ENCONTRADO si no existe o pertenece a otro cliente
+
   /webhooks/mercadopago:
     post:
       tags: [integraciones]
@@ -1272,8 +1357,13 @@ paths:
         Recibe exclusivamente payment con live_mode=false; el recurso Payments
         también debe tener live_mode=false. El pago ficticio conocido con
         live_mode=true sigue rechazado; no se infiere entorno por prefijo del token.
-        Exige vínculo persistente previo, receptor/moneda configurados e importe
-        coincidente. Valida HMAC-SHA256 y consulta GET /v1/payments/{id}.
+          Exige vínculo persistente previo, o intención Checkout propia persistida
+          (solo con flag Checkout) cuya cadena Payments -> merchant order -> preferencia
+          se comprueba por GET y UUID opaco generado por servidor; no id_pago inferido.
+          Receptor/moneda configurados e importe coincidente. Valida HMAC-SHA256 y
+          consulta GET /v1/payments/{id}. Puede vincular aprobación temprana antes de
+          guardar la respuesta de creación de preferencia. Otra operación aprobada
+          para el mismo Pago produce 409 y requiere conciliación, sin doble asiento.
         Cuando Mercado Pago informa válidamente que una operación fue aprobada
         o acreditada, el sistema actualiza automáticamente el pago correspondiente
         a CONFIRMADO, sin requerir una segunda validación humana.
@@ -1403,6 +1493,23 @@ components:
             $ref: '#/components/schemas/Error'
 
   schemas:
+
+    IniciarCheckout:
+      type: object
+      additionalProperties: false
+      required: [importe, medio_pago, clave_solicitud]
+      properties:
+        importe: { type: number, minimum: 0, exclusiveMinimum: true, maximum: 9999999999.99, multipleOf: 0.01 }
+        medio_pago: { type: string, enum: [MERCADO_PAGO] }
+        clave_solicitud: { type: string, format: uuid }
+
+    CheckoutOut:
+      type: object
+      required: [pago, estado_checkout]
+      properties:
+        pago: { $ref: '#/components/schemas/Pago' }
+        estado_checkout: { type: string, enum: [CREANDO, LISTO, INCIERTO] }
+        checkout_url: { type: string, nullable: true, format: uri, description: Solo sandbox_init_point validado; nulo si no hay enlace seguro o el Pago ya fue decidido }
 
     Error:
       type: object

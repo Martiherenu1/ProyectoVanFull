@@ -6,6 +6,8 @@ import 'controllers/chofer/seguimiento_gps_controller.dart';
 import 'screens/chofer/panel_gps.dart';
 import 'screens/gps/ubicacion_screen.dart';
 import 'services/gps/ubicacion_api.dart';
+import 'services/checkout_api.dart';
+import 'adapters/abrir_checkout.dart';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
@@ -66,10 +68,17 @@ class VanFullBootstrap extends StatefulWidget {
     this.configuracionMapa,
     this.prepararMapa,
     this.crearVisorMapa,
+    this.checkoutEnabled = const bool.fromEnvironment(
+      'CHECKOUT_MP_ENABLED',
+      defaultValue: false,
+    ),
+    this.abrirCheckout,
     super.key,
   });
 
   final String apiBaseUrl;
+  final bool checkoutEnabled;
+  final AbrirCheckout? abrirCheckout;
   final CrearTransporteHttp? crearTransporte;
   final ComprobarUbicacionInicio? comprobarUbicacionInicio;
   final AsistenciaUbicacionInicio? asistenciaUbicacionInicio;
@@ -87,6 +96,7 @@ class _VanFullBootstrapState extends State<VanFullBootstrap> {
   late final http.Client _transporte;
   late final SesionController _sesion;
   late final PasajeroApi _pasajero;
+  late final CheckoutApi _checkout;
   late final ViajesDiaAdminApi _viajesDiaAdmin;
   late final ViajesAdminApi _viajesAdmin;
   late final RegistroPagosAdminApi _registroPagosAdmin;
@@ -118,6 +128,7 @@ class _VanFullBootstrapState extends State<VanFullBootstrap> {
     );
     _sesion = sesion;
     _pasajero = PasajeroApi(httpClient);
+    _checkout = CheckoutApi(httpClient);
     _viajesDiaAdmin = ViajesDiaAdminApi(httpClient);
     _viajesAdmin = ViajesAdminApi(httpClient);
     _registroPagosAdmin = RegistroPagosAdminApi(httpClient);
@@ -189,12 +200,24 @@ class _VanFullBootstrapState extends State<VanFullBootstrap> {
   @override
   Widget build(BuildContext context) => SesionApp(
     controller: _sesion,
-    entradaPasajero: (controller) => PasajeroShell(
-      api: _pasajero,
-      onSalir: controller.salir,
-      pantallaUbicacion: (idViaje) =>
-          _pantallaUbicacionPasajero(controller, idViaje),
-    ),
+    entradaPasajero: (controller) {
+      final generacion = controller.generacion;
+      final sesion = controller.sesion;
+      return PasajeroShell(
+        api: _pasajero,
+        checkout: widget.checkoutEnabled ? _checkout : null,
+        abrirCheckout: widget.checkoutEnabled
+            ? (widget.abrirCheckout ?? abrirCheckoutExterno)
+            : null,
+        contextoPagoVigente: () =>
+            mounted &&
+            controller.generacion == generacion &&
+            identical(controller.sesion, sesion),
+        onSalir: controller.salir,
+        pantallaUbicacion: (idViaje) =>
+            _pantallaUbicacionPasajero(controller, idViaje),
+      );
+    },
     entradaAdministrador: (controller) => _EntradaAdministracion(
       controller: controller,
       listar: _viajesDiaAdmin,

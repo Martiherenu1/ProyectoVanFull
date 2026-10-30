@@ -10,3 +10,18 @@ CREATE TABLE pago_mercadopago (
     CONSTRAINT ck_mp_receptor CHECK (id_receptor > 0),
     CONSTRAINT ck_mp_moneda CHECK (moneda ~ '^[A-Z]{3}$')
 );
+
+-- Candidato Checkout. No representa un nuevo estado contable de Pago.
+CREATE TABLE checkout_mercadopago (
+    id_intento VARCHAR(36) PRIMARY KEY,
+    id_cliente BIGINT NOT NULL,
+    clave_solicitud VARCHAR(36) NOT NULL,
+    id_pago BIGINT NOT NULL UNIQUE,
+    id_preferencia VARCHAR(160) UNIQUE,
+    url_checkout TEXT,
+    estado_tecnico VARCHAR(12) NOT NULL DEFAULT 'CREANDO',
+    creado_en TIMESTAMPTZ NOT NULL DEFAULT now(),
+    UNIQUE (id_cliente, clave_solicitud),
+    FOREIGN KEY (id_pago, id_cliente) REFERENCES pago(id_pago, id_cliente) ON DELETE RESTRICT,
+    CONSTRAINT ck_checkout_estado CHECK (estado_tecnico IN ('CREANDO','LISTO','INCIERTO'))
+);

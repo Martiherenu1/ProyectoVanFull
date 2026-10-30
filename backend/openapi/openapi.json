@@ -1629,13 +1629,157 @@
         }
       }
     },
+    "/pagos/mercadopago/checkout": {
+      "post": {
+        "tags": [
+          "pagos"
+        ],
+        "summary": "Iniciar Checkout Pro propio (candidato local desactivado)",
+        "description": "PENDIENTE DE APROBACIÓN del equipo; extensión aislada de CU-014/CU-036.\nSolo pasajero autenticado con cliente y cuenta corriente existentes. Identidad\nobtenida de sesión; no admite id_cliente. MERCADO_PAGO no equivale a BILLETERA.\nConserva Pago PENDIENTE e intención UUID antes del POST remoto. La misma clave\npor cliente no crea otro Pago ni repite POST: solo reconcilia la preferencia por GET.\nUn timeout conserva INCIERTO; no prueba rechazo. Checkout abandonado no acredita.\nSin feature flag responde 404. No confirma por retorno ni acepta live_mode=true.\n",
+        "x-cobertura": "parcial",
+        "x-estado-aprobacion": "PENDIENTE DE VALIDACIÓN",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/IniciarCheckout"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Intención existente/lista, o Pago ya decidido",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CheckoutOut"
+                }
+              }
+            }
+          },
+          "202": {
+            "description": "Resultado incierto; conservar clave y reconciliar sin nuevo POST remoto",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CheckoutOut"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "VALIDACION; importe o método inválidos",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/NoAutenticado"
+          },
+          "403": {
+            "$ref": "#/components/responses/SinPermiso"
+          },
+          "404": {
+            "description": "Cliente o cuenta corriente inexistentes; ruta inactiva sin habilitación"
+          },
+          "409": {
+            "description": "CHECKOUT_CLAVE_REUTILIZADA, CHECKOUT_ASOCIACION_AMBIGUA o CHECKOUT_ASOCIACION_INVALIDA"
+          },
+          "503": {
+            "description": "CHECKOUT_NO_DISPONIBLE; conservar la misma clave ante resultado incierto"
+          }
+        }
+      }
+    },
+    "/pagos/mercadopago/retorno": {
+      "get": {
+        "tags": [
+          "pagos"
+        ],
+        "summary": "Retorno informativo de Checkout (candidato local desactivado)",
+        "description": "Página fija, sin sesión ni escrituras. Ignora estados y parámetros de URL; nunca acredita.",
+        "x-cobertura": "parcial",
+        "x-estado-aprobacion": "PENDIENTE DE VALIDACIÓN",
+        "security": [],
+        "responses": {
+          "200": {
+            "description": "Volver a VanFull y consultar el estado propio",
+            "content": {
+              "text/html": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/pagos/{id_pago}": {
+      "get": {
+        "tags": [
+          "pagos"
+        ],
+        "summary": "Consultar estado del pago propio (candidato local desactivado)",
+        "description": "Solo pasajero propietario. Sin escrituras ni consulta externa; ruta ausente por defecto.",
+        "x-cobertura": "parcial",
+        "x-estado-aprobacion": "PENDIENTE DE VALIDACIÓN",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id_pago",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Estado local autoritativo",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Pago"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/NoAutenticado"
+          },
+          "403": {
+            "$ref": "#/components/responses/SinPermiso"
+          },
+          "404": {
+            "description": "PAGO_NO_ENCONTRADO si no existe o pertenece a otro cliente"
+          }
+        }
+      }
+    },
     "/webhooks/mercadopago": {
       "post": {
         "tags": [
           "integraciones"
         ],
         "summary": "Webhook de Mercado Pago (pruebas)",
-        "description": "CANDIDATO D3/D6 EN RAMA AISLADA (seguimiento #215; propuesta previa #238/#240), PENDIENTE DE APROBACIÓN\nescrita de los tres integrantes. Desactivado por defecto, solo entorno\nlocal y PostgreSQL vf_test_/vf_sandbox_. Migración optativa fuera del head\nhabitual de despliegue. No activado en main ni desplegado.\nRecibe exclusivamente payment con live_mode=false; el recurso Payments\ntambién debe tener live_mode=false. El pago ficticio conocido con\nlive_mode=true sigue rechazado; no se infiere entorno por prefijo del token.\nExige vínculo persistente previo, receptor/moneda configurados e importe\ncoincidente. Valida HMAC-SHA256 y consulta GET /v1/payments/{id}.\nCuando Mercado Pago informa válidamente que una operación fue aprobada\no acreditada, el sistema actualiza automáticamente el pago correspondiente\na CONFIRMADO, sin requerir una segunda validación humana.\nLos pagos cuyo medio no proporcione una acreditación automática válida\ncontinúan sujetos a confirmación administrativa según RN-015.\nACK 200 vacío únicamente tras procesar/commit. Duplicados no repiten efectos;\nestados distintos de approved no confirman ni rechazan el pago local.\nTimeout transitorio permite nueva entrega; sin cola ni recuperación autónoma.\nPresupuesto propuesto 15 s, consulta 10 s, lock 2 s. Deshabilitado: ruta 404.\n(CU-036, RF-012, RN-015)\n",
+        "description": "CANDIDATO D3/D6 EN RAMA AISLADA (seguimiento #215; propuesta previa #238/#240), PENDIENTE DE APROBACIÓN\nescrita de los tres integrantes. Desactivado por defecto, solo entorno\nlocal y PostgreSQL vf_test_/vf_sandbox_. Migración optativa fuera del head\nhabitual de despliegue. No activado en main ni desplegado.\nRecibe exclusivamente payment con live_mode=false; el recurso Payments\ntambién debe tener live_mode=false. El pago ficticio conocido con\nlive_mode=true sigue rechazado; no se infiere entorno por prefijo del token.\n  Exige vínculo persistente previo, o intención Checkout propia persistida\n  (solo con flag Checkout) cuya cadena Payments -> merchant order -> preferencia\n  se comprueba por GET y UUID opaco generado por servidor; no id_pago inferido.\n  Receptor/moneda configurados e importe coincidente. Valida HMAC-SHA256 y\n  consulta GET /v1/payments/{id}. Puede vincular aprobación temprana antes de\n  guardar la respuesta de creación de preferencia. Otra operación aprobada\n  para el mismo Pago produce 409 y requiere conciliación, sin doble asiento.\nCuando Mercado Pago informa válidamente que una operación fue aprobada\no acreditada, el sistema actualiza automáticamente el pago correspondiente\na CONFIRMADO, sin requerir una segunda validación humana.\nLos pagos cuyo medio no proporcione una acreditación automática válida\ncontinúan sujetos a confirmación administrativa según RN-015.\nACK 200 vacío únicamente tras procesar/commit. Duplicados no repiten efectos;\nestados distintos de approved no confirman ni rechazan el pago local.\nTimeout transitorio permite nueva entrega; sin cola ni recuperación autónoma.\nPresupuesto propuesto 15 s, consulta 10 s, lock 2 s. Deshabilitado: ruta 404.\n(CU-036, RF-012, RN-015)\n",
         "x-cu": "CU-036",
         "x-cobertura": "parcial",
         "x-estado-aprobacion": "PENDIENTE DE APROBACIÓN D1–D6 POR LOS TRES INTEGRANTES",
@@ -1857,6 +2001,60 @@
       }
     },
     "schemas": {
+      "IniciarCheckout": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "importe",
+          "medio_pago",
+          "clave_solicitud"
+        ],
+        "properties": {
+          "importe": {
+            "type": "number",
+            "minimum": 0,
+            "exclusiveMinimum": true,
+            "maximum": 9999999999.99,
+            "multipleOf": 0.01
+          },
+          "medio_pago": {
+            "type": "string",
+            "enum": [
+              "MERCADO_PAGO"
+            ]
+          },
+          "clave_solicitud": {
+            "type": "string",
+            "format": "uuid"
+          }
+        }
+      },
+      "CheckoutOut": {
+        "type": "object",
+        "required": [
+          "pago",
+          "estado_checkout"
+        ],
+        "properties": {
+          "pago": {
+            "$ref": "#/components/schemas/Pago"
+          },
+          "estado_checkout": {
+            "type": "string",
+            "enum": [
+              "CREANDO",
+              "LISTO",
+              "INCIERTO"
+            ]
+          },
+          "checkout_url": {
+            "type": "string",
+            "nullable": true,
+            "format": "uri",
+            "description": "Solo sandbox_init_point validado; nulo si no hay enlace seguro o el Pago ya fue decidido"
+          }
+        }
+      },
       "Error": {
         "type": "object",
         "required": [

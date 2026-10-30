@@ -28,13 +28,13 @@ def sql_mp() -> str:
     return SCHEMA_MP.read_text(encoding="utf-8")
 
 
-def test_hay_35_tablas_base_y_una_optativa(sql, sql_mp):
+def test_hay_35_tablas_base_y_dos_optativas(sql, sql_mp):
     base = set(re.findall(r"^CREATE TABLE (\w+)", sql, flags=re.MULTILINE))
     extension = set(re.findall(r"^CREATE TABLE (\w+)", sql_mp, flags=re.MULTILINE))
     assert len(base) == 35
-    assert extension == {"pago_mercadopago"}
+    assert extension == {"pago_mercadopago", "checkout_mercadopago"}
     assert base.isdisjoint(extension)
-    assert len(Base.metadata.tables) == 36
+    assert len(Base.metadata.tables) == 37
 
 
 def test_las_tablas_son_las_del_schema(sql, sql_mp):
@@ -47,16 +47,17 @@ def test_las_claves_foraneas_son_las_del_schema(sql, sql_mp):
     en_modelos = sum(
         1
         for nombre, tabla in Base.metadata.tables.items()
-        if nombre != "pago_mercadopago"
+        if nombre not in {"pago_mercadopago", "checkout_mercadopago"}
         for c in tabla.constraints
         if isinstance(c, ForeignKeyConstraint)
     )
     assert en_modelos == en_sql == 54
     fks_mp = sum(
         isinstance(c, ForeignKeyConstraint)
-        for c in Base.metadata.tables["pago_mercadopago"].constraints
+        for nombre in ("pago_mercadopago", "checkout_mercadopago")
+        for c in Base.metadata.tables[nombre].constraints
     )
-    assert fks_mp == len(re.findall(r"REFERENCES", sql_mp)) == 1
+    assert fks_mp == len(re.findall(r"REFERENCES", sql_mp)) == 2
 
 
 def test_cada_tabla_tiene_las_columnas_del_schema(sql, sql_mp):

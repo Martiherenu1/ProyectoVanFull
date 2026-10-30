@@ -28,6 +28,7 @@ class _ConsultarReservasAdminScreenState
     extends State<ConsultarReservasAdminScreen> {
   List<ReservaAdmin> _reservas = const [];
   ReservaAdmin? _seleccionada;
+  LocalHistoryEntry? _historialDetalle;
   bool _cargando = true;
   String? _error;
   int _solicitud = 0;
@@ -48,6 +49,7 @@ class _ConsultarReservasAdminScreenState
 
   Future<void> _cargar() async {
     final solicitud = ++_solicitud;
+    _descartarHistorialDetalle();
     setState(() {
       _reservas = const [];
       _seleccionada = null;
@@ -72,6 +74,32 @@ class _ConsultarReservasAdminScreenState
     }
   }
 
+  void _seleccionar(ReservaAdmin item) {
+    // La flecha del AppBar y Navigator.maybePop consumen la misma entrada.
+    final entrada = LocalHistoryEntry(
+      onRemove: () {
+        if (!mounted || _historialDetalle == null) return;
+        _historialDetalle = null;
+        setState(() => _seleccionada = null);
+      },
+    );
+    _historialDetalle = entrada;
+    ModalRoute.of(context)!.addLocalHistoryEntry(entrada);
+    setState(() => _seleccionada = item);
+  }
+
+  void _descartarHistorialDetalle() {
+    final entrada = _historialDetalle;
+    _historialDetalle = null;
+    entrada?.remove();
+  }
+
+  @override
+  void dispose() {
+    _descartarHistorialDetalle();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) => Theme(
     data: AppTheme.admin,
@@ -82,9 +110,6 @@ class _ConsultarReservasAdminScreenState
               ? 'Consultar reservas'
               : 'Reserva ${_seleccionada!.reserva.idReserva}',
         ),
-        leading: _seleccionada == null
-            ? null
-            : BackButton(onPressed: () => setState(() => _seleccionada = null)),
         actions: [
           IconButton(
             tooltip: 'Actualizar reservas',
@@ -121,6 +146,7 @@ class _ConsultarReservasAdminScreenState
     final reserva = _seleccionada?.reserva;
     if (reserva != null) {
       return SingleChildScrollView(
+        key: const PageStorageKey('detalle-reserva-admin'),
         padding: const EdgeInsets.all(AppSpacing.lg),
         child: Column(
           key: ValueKey('detalle-reserva-${reserva.idReserva}'),
@@ -145,6 +171,7 @@ class _ConsultarReservasAdminScreenState
       return const Center(child: Text('No hay reservas para mostrar.'));
     }
     return ListView.separated(
+      key: PageStorageKey(widget.alcance),
       padding: const EdgeInsets.all(AppSpacing.lg),
       itemCount: _reservas.length,
       separatorBuilder: (_, _) => const Divider(),
@@ -160,7 +187,7 @@ class _ConsultarReservasAdminScreenState
             'Pasajero: ${item.idPasajero} · ${fechaLegible(reserva.fecha)} · ${reserva.horario ?? 'Sin horario'} · ${reserva.estado.etiqueta} (${reserva.estado.valorApi})',
           ),
           trailing: const Icon(Icons.chevron_right),
-          onTap: () => setState(() => _seleccionada = item),
+          onTap: () => _seleccionar(item),
         );
       },
     );

@@ -1,5 +1,16 @@
 # CU-036: preparación de integración sandbox — #238
 
+> **Implementación candidata posterior en esta rama aislada:** autorización del usuario
+> para preparar modelo/migración/contrato y pruebas locales, sin aprobar D1–D6 ni integrar
+> a main. Ver [ensayo y matriz vigentes](ENSAYO-CU036-AISLADO.md). Los límites de solo
+> documentación que siguen describen la fase anterior. Webhook desactivado por defecto;
+> live_mode=true rechazado, sin excepción ni despliegue. Se requiere aprobación escrita
+> de los tres antes de integrar cambios compartidos; no se realizó commit/push nuevo.
+> Revisión precommit: #240 ya mergeado (propuesta), #238 cerrado; implementación
+> actual para PR nuevo vinculado a #215. Base 440c578; migración optativa mp_0001
+> separada del head habitual para impedir su aplicación automática en Render.
+> Ese ajuste D6 permanece candidato y no reescribe las decisiones históricas siguientes.
+
 Fecha: 2026-10-29. Base: main `2d03aca`. Relacionados: #215 y #216.
 **PROPUESTA DE IA — PENDIENTE DE VALIDACIÓN.** No autoriza modelos, contrato HTTP,
 migraciones, despliegues ni operaciones externas. CU-036 permanece **PARCIAL**;

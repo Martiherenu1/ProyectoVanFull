@@ -2,6 +2,18 @@
 
 ## Estado
 
+**Trabajo local posterior #238/#240, seguimiento #215:** #240 ya mergeado solo con
+la propuesta; #238 cerrado. Implementación sin publicar, preparada para PR nuevo.
+Base actualizada a main remoto `440c578`, conservando CU-005 y contextos. Candidato de integración HTTP CU-036,
+vínculo SQL 1:1, migración/DDL/contrato propuestos y tests reales contra PostgreSQL temporal
+con Payments simulado. Ruta desactivada por defecto; live_mode=true NO aceptado.
+D1–D6 siguen pendientes de aprobación escrita triple para main. Sin commit/push/merge
+ni activación/despliegue. Migración optativa fuera del head habitual, con guardas;
+DDL base sin cambios. [Ensayo, alcance y matriz](ENSAYO-CU036-AISLADO.md).
+Validación posterior: 177 casos focalizados aprobados, Ruff/formato y OpenAPI correctos;
+incluye regresión CU-005 preservada. No implica validación del proveedor auténtico.
+La cobertura integrada que sigue conserva su corte anterior; CU-036 continúa PARCIAL.
+
 Corte documental **2026-10-29**, main `bceb929` (Issue #225). PR #210/#214/#216/#217/#218
 mergeados, contrastados con código y contratos; no equivalen a CU completos ni a despliegue real.
 IMPLEMENTADO = circuito descrito existente; PARCIAL = obligaciones faltantes; PENDIENTE = parte ausente.
@@ -135,3 +147,11 @@ Usar los endpoints de lectura integrados para deuda/reservas/pagos; respetar las
 CU-006/CU-010. Administración mantiene alta/update/cancelación limitada; ejecución y GPS pertenecen a Martín.
 Roles múltiples/desconocidos/dueno siguen sin portada Flutter específica, según reparto; el backend
 conserva administrador/dueno donde está contratado. No confundir permisos HTTP con interfaz implementada.
+
+Preparación PR A CU-036: Issue #247, rama feat/admin-integracion-cu036-247 desde 440c578.
+Corte exclusivo sin Checkout/Flutter/mp_0002; D1–D6 pendientes de aprobación escrita triple.
+Detalle y límites: Documentos/Sesiones/PC2/PREPARACION-PR-A-CU036.md. Sin commit/publicación/activación.
+
+30/10/2026: PR A #247 actualizado a fb6e422; suite backend completa 731/731, Ruff/formato y OpenAPI correctos.
+Publicación autorizada solo en Draft; D1–D6 pendientes. B se prepara apilado sobre A, sin commit/push.
+Sin merge, activación, migraciones remotas ni despliegue; desarrollo original preservado.

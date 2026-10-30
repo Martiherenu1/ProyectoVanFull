@@ -10,6 +10,13 @@
 > timeout y el servidor corta a los 60 s. Protección de `main`: 0 approvals y las 2 CI exigidas. Neon sigue sin
 > re-sembrar (espera a Martín). Detalle y decisiones: PC2/CONTEXTO-pasajero-y-base-comun.md y PC2/GUION-DEMO-PC2.md.
 
+> **CU-036, seguimiento #215:** #240 mergeado solo con propuesta; #238 cerrado.
+> Implementación local candidata para PR nuevo, main remoto 440c578 preservado.
+> Rama aislada, vínculo persistente y migración optativa fuera del head normal,
+> webhook condicional HMAC/Payments/CU-016 y pruebas PostgreSQL temporales. Flag false;
+> live_mode=true rechazado. D1–D6 NO aprobadas; sin main/commit/push/despliegue.
+> Matriz y ensayo: PC2/ENSAYO-CU036-AISLADO.md. Cortes históricos siguientes no describen esta rama.
+
 > Integración Flutter #229, 2026-10-29: test/admin-flutter-integracion-pc2-229 desde main
 > 8e16205 (#228 integrado). Tres circuitos UI nuevos; 32 focalizadas y analyze aprobados.
 > Solo pruebas/contextos, sin cambios productivos ni Neon/Render. Sin commit/push/PR.
@@ -419,3 +426,11 @@ el 25/10, salvo acuerdo» de REPARTO-PC2 no rige, por decisión de Martiniano):
   la búsqueda por carpeta o por texto no los encuentra. Los `.md` equivalentes de la v1.3 están en la misma carpeta.
 - **En este repo:** `Documentos/Documentacion/01..07`, `Documentos/HITOS.md`,
   `Documentos/Recursos/Stack-y-Referencias.md`, `backend/db/README.md`, `backend/openapi/README.md`
+
+Preparación PR A CU-036: Issue #247, rama feat/admin-integracion-cu036-247 desde 440c578.
+Corte exclusivo sin Checkout/Flutter/mp_0002; D1–D6 pendientes de aprobación escrita triple.
+Detalle y límites: Documentos/Sesiones/PC2/PREPARACION-PR-A-CU036.md. Sin commit/publicación/activación.
+
+30/10/2026: PR A #247 actualizado a fb6e422; suite backend completa 731/731, Ruff/formato y OpenAPI correctos.
+Publicación autorizada solo en Draft; D1–D6 pendientes. B se prepara apilado sobre A, sin commit/push.
+Sin merge, activación, migraciones remotas ni despliegue; desarrollo original preservado.

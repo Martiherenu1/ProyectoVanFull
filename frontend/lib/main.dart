@@ -1,3 +1,5 @@
+import 'services/pasajero/ausencias_api.dart';
+import 'screens/pasajero/accion_informar_ausencia.dart';
 import 'models/gps/ubicacion_viaje.dart';
 import 'core/maps/configuracion_mapa.dart';
 import 'widgets/gps/mapa_ultima_posicion.dart';
@@ -97,6 +99,10 @@ class _VanFullBootstrapState extends State<VanFullBootstrap> {
   late final SesionController _sesion;
   late final PasajeroApi _pasajero;
   late final CheckoutApi _checkout;
+  late final AusenciasApi _ausencias;
+  int? _generacionAusencias;
+  InformarAusencia? _informarAusencia;
+  bool Function()? _ausenciaVigente;
   late final ViajesDiaAdminApi _viajesDiaAdmin;
   late final ViajesAdminApi _viajesAdmin;
   late final RegistroPagosAdminApi _registroPagosAdmin;
@@ -129,6 +135,7 @@ class _VanFullBootstrapState extends State<VanFullBootstrap> {
     _sesion = sesion;
     _pasajero = PasajeroApi(httpClient);
     _checkout = CheckoutApi(httpClient);
+    _ausencias = AusenciasApi(httpClient);
     _viajesDiaAdmin = ViajesDiaAdminApi(httpClient);
     _viajesAdmin = ViajesAdminApi(httpClient);
     _registroPagosAdmin = RegistroPagosAdminApi(httpClient);
@@ -170,6 +177,26 @@ class _VanFullBootstrapState extends State<VanFullBootstrap> {
     super.dispose();
   }
 
+  /// Callbacks estables ligados a la sesión que originó la interacción.
+  void _prepararAusencias(SesionController controller) {
+    if (_generacionAusencias == controller.generacion) return;
+    final generacion = controller.generacion;
+    final sesion = controller.sesion;
+    final token = controller.token;
+    bool vigente() =>
+        mounted &&
+        token != null &&
+        controller.generacion == generacion &&
+        identical(controller.sesion, sesion);
+    _generacionAusencias = generacion;
+    _ausenciaVigente = vigente;
+    _informarAusencia = (idViaje) async {
+      if (!vigente()) throw StateError('La sesión ya no está vigente.');
+      await _ausencias.informar(idViaje, accessToken: token!);
+      if (!vigente()) throw StateError('La sesión ya no está vigente.');
+    };
+  }
+
   /// Ubicación del viaje de una reserva consolidada (RN-030). A diferencia de
   /// Administración, un 403 acá no cierra la sesión: significa que esa reserva
   /// no da acceso, y la pantalla lo muestra como «ubicación no disponible».
@@ -201,10 +228,13 @@ class _VanFullBootstrapState extends State<VanFullBootstrap> {
   Widget build(BuildContext context) => SesionApp(
     controller: _sesion,
     entradaPasajero: (controller) {
+      _prepararAusencias(controller);
       final generacion = controller.generacion;
       final sesion = controller.sesion;
       return PasajeroShell(
         api: _pasajero,
+        informarAusencia: _informarAusencia,
+        contextoAusenciaVigente: _ausenciaVigente,
         checkout: widget.checkoutEnabled ? _checkout : null,
         abrirCheckout: widget.checkoutEnabled
             ? (widget.abrirCheckout ?? abrirCheckoutExterno)

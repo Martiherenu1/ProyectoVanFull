@@ -1,3 +1,5 @@
+import 'accion_informar_ausencia.dart';
+
 import 'package:flutter/material.dart';
 
 import '../../core/api/pasajero_api.dart';
@@ -23,6 +25,8 @@ class PasajeroShell extends StatefulWidget {
     this.checkout,
     this.abrirCheckout,
     this.contextoPagoVigente,
+    this.informarAusencia,
+    this.contextoAusenciaVigente,
   });
 
   final PasajeroApi api;
@@ -30,6 +34,8 @@ class PasajeroShell extends StatefulWidget {
   final CheckoutApi? checkout;
   final AbrirCheckout? abrirCheckout;
   final bool Function()? contextoPagoVigente;
+  final InformarAusencia? informarAusencia;
+  final bool Function()? contextoAusenciaVigente;
 
   /// Arma la pantalla de ubicación de un viaje. La compone `main.dart`, que
   /// conoce la sesión y el mapa; sin ella Mis reservas no ofrece «Ver ubicación».
@@ -44,6 +50,27 @@ class _PasajeroShellState extends State<PasajeroShell> {
   static const _reservas = 1;
 
   int _pestana = _buscar;
+  Object _alcanceAusencia = Object();
+  int _rutasAbiertas = 0;
+
+  void _invalidarAusencia() => _alcanceAusencia = Object();
+
+  Future<T?> _abrirRuta<T>(Route<T> ruta) async {
+    setState(() {
+      _invalidarAusencia();
+      _rutasAbiertas++;
+    });
+    try {
+      return await Navigator.of(context).push(ruta);
+    } finally {
+      if (mounted) {
+        setState(() {
+          _rutasAbiertas--;
+          _invalidarAusencia();
+        });
+      }
+    }
+  }
 
   /// Cambia al reservar o cancelar fuera de Mis reservas (el asistente puede
   /// hacerlo), para que la lista se recargue al volver a ella.
@@ -51,13 +78,14 @@ class _PasajeroShellState extends State<PasajeroShell> {
 
   void _ir(int pestana) {
     setState(() {
+      if (pestana != _pestana || pestana == _reservas) _invalidarAusencia();
       if (pestana == _reservas) _versionReservas++;
       _pestana = pestana;
     });
   }
 
   void _reservar(DisponibilidadViaje viaje) {
-    Navigator.of(context).push(
+    _abrirRuta(
       MaterialPageRoute<void>(
         builder: (contexto) => ConfirmarReservaScreen(
           viaje: viaje,
@@ -74,42 +102,46 @@ class _PasajeroShellState extends State<PasajeroShell> {
 
   void _verUbicacion(Reserva reserva) {
     final pantalla = widget.pantallaUbicacion!(reserva.idViaje);
-    Navigator.of(context)
-        .push(MaterialPageRoute<void>(builder: (_) => pantalla));
+    _abrirRuta(MaterialPageRoute<void>(builder: (_) => pantalla));
   }
 
   void _registrarPago(Deuda deuda) {
     var finalizo = false;
-    Navigator.of(context)
-        .push(
-          MaterialPageRoute<void>(
-            builder: (contexto) => PagoScreen(
-              saldo: deuda.saldo,
-              registrarPago: widget.api.registrarPago,
-              iniciarCheckout: widget.checkout?.iniciar,
-              consultarPago: widget.checkout?.consultar,
-              abrirCheckout: widget.abrirCheckout,
-              contextoVigente: widget.contextoPagoVigente,
-              onTerminar: (_) {
-                finalizo = true;
-                Navigator.of(contexto).pop();
-                _ir(_reservas);
-              },
-            ),
-          ),
-        )
-        .then((_) {
-          if (!finalizo &&
-              widget.checkout != null &&
-              mounted &&
-              widget.contextoPagoVigente?.call() != false) {
-            setState(() => _versionReservas++);
-          }
-        });
+    _abrirRuta(
+      MaterialPageRoute<void>(
+        builder: (contexto) => PagoScreen(
+          saldo: deuda.saldo,
+          registrarPago: widget.api.registrarPago,
+          iniciarCheckout: widget.checkout?.iniciar,
+          consultarPago: widget.checkout?.consultar,
+          abrirCheckout: widget.abrirCheckout,
+          contextoVigente: widget.contextoPagoVigente,
+          onTerminar: (_) {
+            finalizo = true;
+            Navigator.of(contexto).pop();
+            _ir(_reservas);
+          },
+        ),
+      ),
+    ).then((_) {
+      if (!finalizo &&
+          widget.checkout != null &&
+          mounted &&
+          widget.contextoPagoVigente?.call() != false) {
+        setState(() => _versionReservas++);
+      }
+    });
   }
 
   @override
   Widget build(BuildContext context) {
+    final alcance = _alcanceAusencia;
+    bool ausenciaVigente() =>
+        mounted &&
+        identical(alcance, _alcanceAusencia) &&
+        _pestana == _reservas &&
+        _rutasAbiertas == 0 &&
+        widget.contextoAusenciaVigente?.call() == true;
     return Scaffold(
       body: IndexedStack(
         index: _pestana,
@@ -120,7 +152,10 @@ class _PasajeroShellState extends State<PasajeroShell> {
             onReservar: _reservar,
           ),
           MisReservasScreen(
-            key: ValueKey(_versionReservas),
+            versionReservas: _versionReservas,
+            informarAusencia: widget.informarAusencia,
+            alcanceAusencia: alcance,
+            contextoAusenciaVigente: ausenciaVigente,
             cargarReservas: widget.api.cargarReservas,
             cargarDeuda: widget.api.cargarDeuda,
             cancelarReserva: widget.api.cancelarReserva,

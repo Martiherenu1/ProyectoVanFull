@@ -1,3 +1,5 @@
+import 'accion_informar_ausencia.dart';
+
 import 'package:flutter/material.dart';
 
 import '../../core/format/fecha_legible.dart';
@@ -32,11 +34,22 @@ class MisReservasScreen extends StatefulWidget {
     required this.onBuscarServicio,
     this.onRegistrarPago,
     this.onVerUbicacion,
+    this.informarAusencia,
+    this.alcanceAusencia,
+    this.contextoAusenciaVigente,
+    this.versionReservas = 0,
   });
 
   final CargarReservas cargarReservas;
   final CargarDeuda cargarDeuda;
   final CancelarReserva cancelarReserva;
+
+  final InformarAusencia? informarAusencia;
+  final Object? alcanceAusencia;
+  final bool Function()? contextoAusenciaVigente;
+
+  /// Solicita la recarga existente sin destruir el estado de la pantalla.
+  final int versionReservas;
 
   /// Sin reservas, el pasajero sigue a Buscar servicio.
   final VoidCallback onBuscarServicio;
@@ -78,8 +91,14 @@ class _MisReservasScreenState extends State<MisReservasScreen> {
   @override
   void didUpdateWidget(covariant MisReservasScreen oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (oldWidget.cargarReservas != widget.cargarReservas) _cargarReservas();
-    if (oldWidget.cargarDeuda != widget.cargarDeuda) _cargarDeuda();
+    if (oldWidget.cargarReservas != widget.cargarReservas ||
+        oldWidget.versionReservas != widget.versionReservas) {
+      _cargarReservas();
+    }
+    if (oldWidget.cargarDeuda != widget.cargarDeuda ||
+        oldWidget.versionReservas != widget.versionReservas) {
+      _cargarDeuda();
+    }
   }
 
   Future<void> _cargarReservas() async {
@@ -88,6 +107,7 @@ class _MisReservasScreenState extends State<MisReservasScreen> {
       _cargandoReservas = true;
       _errorReservas = false;
       _reservaAbierta = null;
+      _cancelando.clear();
     });
     try {
       final reservas = await widget.cargarReservas();
@@ -130,6 +150,7 @@ class _MisReservasScreenState extends State<MisReservasScreen> {
   }
 
   Future<void> _cancelar(Reserva reserva) async {
+    final solicitud = _solicitudReservas;
     final confirmada = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
@@ -152,7 +173,9 @@ class _MisReservasScreenState extends State<MisReservasScreen> {
         ],
       ),
     );
-    if (confirmada != true || !mounted) return;
+    if (confirmada != true || !mounted || solicitud != _solicitudReservas) {
+      return;
+    }
 
     final id = reserva.idReserva;
     setState(() {
@@ -161,7 +184,7 @@ class _MisReservasScreenState extends State<MisReservasScreen> {
     });
     try {
       final resultado = await widget.cancelarReserva(id);
-      if (!mounted) return;
+      if (!mounted || solicitud != _solicitudReservas) return;
       setState(() {
         _cancelando.remove(id);
         _reservas = [
@@ -170,7 +193,7 @@ class _MisReservasScreenState extends State<MisReservasScreen> {
         _motivos[id] = resultado.motivo;
       });
     } catch (error) {
-      if (!mounted) return;
+      if (!mounted || solicitud != _solicitudReservas) return;
       setState(() {
         _cancelando.remove(id);
         _avisos[id] = _avisoDeCancelacion(error);
@@ -326,6 +349,21 @@ class _MisReservasScreenState extends State<MisReservasScreen> {
                     minimumSize: const Size(0, AppSpacing.touchTarget),
                   ),
                   child: const Text('Ver ubicación'),
+                ),
+              ),
+            if (abierta &&
+                reserva.estado == EstadoReserva.consolidada &&
+                widget.informarAusencia != null &&
+                widget.alcanceAusencia != null &&
+                widget.contextoAusenciaVigente != null)
+              Padding(
+                padding: const EdgeInsets.only(bottom: AppSpacing.sm),
+                child: AccionInformarAusencia(
+                  key: ValueKey('ausencia-$id'),
+                  idViaje: reserva.idViaje,
+                  alcance: widget.alcanceAusencia!,
+                  contextoVigente: widget.contextoAusenciaVigente!,
+                  informar: widget.informarAusencia!,
                 ),
               ),
             if (abierta && reserva.estado != EstadoReserva.cancelada)

@@ -1,5 +1,9 @@
 # Contexto vivo · Chofer y viaje en curso (Martín)
 
+## Consolidación documental publicada — PR #260, 2026-10-30
+
+- Primer HEAD publicado `1720b35dc1aeb14c25c5a4f04dd1c3c5bd91e3ec`, push normal y [PR #260](https://github.com/Martiherenu1/ProyectoVanFull/pull/260) abierta; base `f55ecf271aba9645582fcf1910b6a7da0084c6f7`, solo tres documentos. Único cierre automático #259. CI inicial [41075388445](https://github.com/Martiherenu1/ProyectoVanFull/actions/runs/41075388445) observada en curso, sin aprobación inferida; resultado/SHA del HEAD final se registra en PR/Issue tras observarlo, separado de evidencias históricas. Esta nota actualiza publicación efectiva mediante commit/push documental normal; no hay merge, despliegue ni operaciones reales. CU-029/CU-030 y pendientes siguen abiertos en su alcance; preparación/autorización e históricos siguientes intactos.
+
 ## Consolidación documental autorizada — Issue #259, 2026-10-30
 
 - Publicación autorizada por Martín tras revisión; búsqueda sin equivalente y [Issue #259](https://github.com/Martiherenu1/ProyectoVanFull/issues/259) creado para esta entrega exclusivamente documental. Base actualizada por fast-forward a `f55ecf271aba9645582fcf1910b6a7da0084c6f7` (#257), conservando íntegros CU-008 y los registros entrantes. Solo los tres documentos revisados cambian respecto de esa base; RNF-010/cierre forzado y pendientes de CU-029/CU-030 preservados. Sin suites locales nuevas ni operaciones reales. Al preparar este registro: commit/push/PR y CI propia pendientes; se informarán después de observarlos. Único cierre previsto #259; sin merge/despliegue autorizado. Las notas siguientes conservan sus estados históricos de preparación.

@@ -1,5 +1,17 @@
 # Contexto vivo · Chofer y viaje en curso (Martín)
 
+## Consolidación documental publicada — PR #260, 2026-10-30
+
+- Primer HEAD publicado `1720b35dc1aeb14c25c5a4f04dd1c3c5bd91e3ec`, push normal y [PR #260](https://github.com/Martiherenu1/ProyectoVanFull/pull/260) abierta; base `f55ecf271aba9645582fcf1910b6a7da0084c6f7`, solo tres documentos. Único cierre automático #259. CI inicial [41075388445](https://github.com/Martiherenu1/ProyectoVanFull/actions/runs/41075388445) observada en curso, sin aprobación inferida; resultado/SHA del HEAD final se registra en PR/Issue tras observarlo, separado de evidencias históricas. Esta nota actualiza publicación efectiva mediante commit/push documental normal; no hay merge, despliegue ni operaciones reales. CU-029/CU-030 y pendientes siguen abiertos en su alcance; preparación/autorización e históricos siguientes intactos.
+
+## Consolidación documental autorizada — Issue #259, 2026-10-30
+
+- Publicación autorizada por Martín tras revisión; búsqueda sin equivalente y [Issue #259](https://github.com/Martiherenu1/ProyectoVanFull/issues/259) creado para esta entrega exclusivamente documental. Base actualizada por fast-forward a `f55ecf271aba9645582fcf1910b6a7da0084c6f7` (#257), conservando íntegros CU-008 y los registros entrantes. Solo los tres documentos revisados cambian respecto de esa base; RNF-010/cierre forzado y pendientes de CU-029/CU-030 preservados. Sin suites locales nuevas ni operaciones reales. Al preparar este registro: commit/push/PR y CI propia pendientes; se informarán después de observarlos. Único cierre previsto #259; sin merge/despliegue autorizado. Las notas siguientes conservan sus estados históricos de preparación.
+
+## Cierre documental preparado para revisión — 2026-10-30
+
+- Consolidación en [CIERRE-DOCUMENTAL-CU029-CU030.md](CIERRE-DOCUMENTAL-CU029-CU030.md), rama local `docs/chofer-cierre-documental-cu029-cu030`, base main `cbcbf1243370649add1b30fb2f1908bdb54962a5`; sin commit ni publicación. SHA/evidencias históricos conservados y guion manual sin seguimiento identificado como solo local. No declara completos CU-029/CU-030 ni cierra C12, fotografía, avisos/incidentes, GPS, ETA o CU-007. RNF-010 distingue pérdida temporal de señal/conectividad de fin/error del stream por analizar; cierre forzado es capacidad no acreditada, sin obligación específica identificada. Registros siguientes intactos; sin nuevas pruebas ni operaciones reales. Issue específico pendiente de identificar antes de publicar.
+
 ## Publicación autorizada — Issue #256, 30/10/2026
 
 - Martín informó revisión de Martiniano sin bloqueos sobre Mis reservas, PasajeroShell y main.dart, y su solicitud de publicar la PR completa para revisar también ausencias_api.dart y accion_informar_ausencia.dart. No se atribuye revisión integral del adaptador/componente ni aprobación final de toda la entrega. El usuario autorizó commit, push normal y PR con código, pruebas y documentación.

@@ -24,6 +24,9 @@ def test_arranque_habitual_no_crea_tabla_aun_si_modelo_importado():
     with base_migrada() as base:
         assert alembic(base, "upgrade", "head").returncode == 0
         assert asyncio.run(consultar(base, "SELECT to_regclass('pago_mercadopago')")) == [(None,)]
+        assert asyncio.run(consultar(base, "SELECT to_regclass('checkout_mercadopago')")) == [
+            (None,)
+        ]
         assert alembic(base, "check").returncode == 0
         denegado = alembic_mp(base, "upgrade", "head", autorizar=False)
         assert denegado.returncode != 0 and "Falta autorización explícita" in denegado.stderr
@@ -82,3 +85,21 @@ def test_extension_migrada_coincide_con_ddl_optativo(bases, que):
     # La segunda tabla de versión es infraestructura del circuito optativo.
     obtenido = [fila for fila in obtenido if fila[0] != "alembic_version_mercadopago"]
     assert esperado == obtenido
+
+
+def test_checkout_upgrade_downgrade_y_reupgrade_solo_extension():
+    with base_migrada() as base:
+        for destino, existe in [("head", True), ("mp_0001", False), ("head", True)]:
+            comando = "downgrade" if destino == "mp_0001" else "upgrade"
+            r = alembic_mp(base, comando, destino)
+            assert r.returncode == 0, r.stderr
+            assert (
+                bool(
+                    asyncio.run(consultar(base, "SELECT to_regclass('checkout_mercadopago')"))[0][0]
+                )
+                is existe
+            )
+            assert (
+                asyncio.run(consultar(base, "SELECT to_regclass('pago_mercadopago')"))[0][0]
+                is not None
+            )

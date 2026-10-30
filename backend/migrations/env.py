@@ -30,7 +30,10 @@ target_metadata = Base.metadata
 def excluir_candidato_mp(objeto, nombre, tipo, reflejado, comparado):
     # CU-036 tiene su propio circuito optativo. Nunca autogenerar su CREATE/DROP
     # desde el Alembic normal que usa arrancar.sh, aunque el modelo esté importado.
-    return not (tipo == "table" and nombre in {"pago_mercadopago", "alembic_version_mercadopago"})
+    return not (
+        tipo == "table"
+        and nombre in {"pago_mercadopago", "checkout_mercadopago", "alembic_version_mercadopago"}
+    )
 
 
 # other values from the config, defined by the needs of env.py,

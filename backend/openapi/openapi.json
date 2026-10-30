@@ -1635,15 +1635,90 @@
           "integraciones"
         ],
         "summary": "Webhook de Mercado Pago (pruebas)",
-        "description": "Recibe notificaciones de Mercado Pago en entorno de pruebas.\nCuando Mercado Pago informa válidamente que una operación fue aprobada\no acreditada, el sistema actualiza automáticamente el pago correspondiente\na CONFIRMADO, sin requerir una segunda validación humana.\nLos pagos cuyo medio no proporcione una acreditación automática válida\ncontinúan sujetos a confirmación administrativa según RN-015.\n(CU-036, RF-012, RN-015)\n",
+        "description": "CANDIDATO D3/D6 EN RAMA AISLADA (seguimiento #215; propuesta previa #238/#240), PENDIENTE DE APROBACIÓN\nescrita de los tres integrantes. Desactivado por defecto, solo entorno\nlocal y PostgreSQL vf_test_/vf_sandbox_. Migración optativa fuera del head\nhabitual de despliegue. No activado en main ni desplegado.\nRecibe exclusivamente payment con live_mode=false; el recurso Payments\ntambién debe tener live_mode=false. El pago ficticio conocido con\nlive_mode=true sigue rechazado; no se infiere entorno por prefijo del token.\nExige vínculo persistente previo, receptor/moneda configurados e importe\ncoincidente. Valida HMAC-SHA256 y consulta GET /v1/payments/{id}.\nCuando Mercado Pago informa válidamente que una operación fue aprobada\no acreditada, el sistema actualiza automáticamente el pago correspondiente\na CONFIRMADO, sin requerir una segunda validación humana.\nLos pagos cuyo medio no proporcione una acreditación automática válida\ncontinúan sujetos a confirmación administrativa según RN-015.\nACK 200 vacío únicamente tras procesar/commit. Duplicados no repiten efectos;\nestados distintos de approved no confirman ni rechazan el pago local.\nTimeout transitorio permite nueva entrega; sin cola ni recuperación autónoma.\nPresupuesto propuesto 15 s, consulta 10 s, lock 2 s. Deshabilitado: ruta 404.\n(CU-036, RF-012, RN-015)\n",
         "x-cu": "CU-036",
+        "x-cobertura": "parcial",
+        "x-estado-aprobacion": "PENDIENTE DE APROBACIÓN D1–D6 POR LOS TRES INTEGRANTES",
         "security": [],
+        "parameters": [
+          {
+            "name": "data.id",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "pattern": "^[0-9]{1,64}$",
+              "maxLength": 64
+            }
+          },
+          {
+            "name": "x-request-id",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9_-]{1,128}$",
+              "maxLength": 128
+            }
+          },
+          {
+            "name": "x-signature",
+            "in": "header",
+            "required": true,
+            "description": "ts y v1 HMAC-SHA256 del manifest id:{data.id};request-id:{x-request-id};ts:{ts};. Ventana candidata 300 s.",
+            "schema": {
+              "type": "string",
+              "maxLength": 256
+            }
+          }
+        ],
         "requestBody": {
           "required": true,
           "content": {
             "application/json": {
               "schema": {
                 "type": "object",
+                "required": [
+                  "type",
+                  "live_mode",
+                  "data"
+                ],
+                "properties": {
+                  "type": {
+                    "type": "string",
+                    "enum": [
+                      "payment"
+                    ],
+                    "maxLength": 32
+                  },
+                  "live_mode": {
+                    "type": "boolean",
+                    "enum": [
+                      false
+                    ]
+                  },
+                  "data": {
+                    "type": "object",
+                    "required": [
+                      "id"
+                    ],
+                    "properties": {
+                      "id": {
+                        "oneOf": [
+                          {
+                            "type": "string",
+                            "pattern": "^[0-9]{1,64}$"
+                          },
+                          {
+                            "type": "integer",
+                            "minimum": 0
+                          }
+                        ]
+                      }
+                    },
+                    "additionalProperties": true
+                  }
+                },
                 "additionalProperties": true
               }
             }
@@ -1651,7 +1726,57 @@
         },
         "responses": {
           "200": {
-            "description": "Notificación recibida"
+            "description": "Procesada, duplicada o no aprobada sin transición contable; cuerpo vacío"
+          },
+          "400": {
+            "description": "VALIDACION o WEBHOOK_INVALIDO; cuerpo/IDs/tópico/entorno inválidos",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "FIRMA_WEBHOOK_INVALIDA; autenticidad o ventana temporal inválida",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "VINCULO_PAGO_INVALIDO; sin vínculo, estado local incompatible o recurso/importe/moneda/receptor/modo no válidos",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "PROVEEDOR_NO_DISPONIBLE o INTEGRACION_NO_DISPONIBLE; fallo transitorio/configuración/DB/timeout, sin ACK de éxito",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "ERROR_INTERNO; rollback y mensaje sanitizado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
           }
         }
       }

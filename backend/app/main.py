@@ -21,6 +21,7 @@ from app.routers import (
     servicios,
     viajes,
 )
+from app.routers.checkout import registrar_checkout_si_habilitado
 from app.routers.mercadopago import registrar_si_habilitado
 
 settings = get_settings()
@@ -58,6 +59,7 @@ app.include_router(chofer.router, prefix=settings.api_prefix)
 app.include_router(chat.router, prefix=settings.api_prefix)
 app.include_router(ejecucion_viajes.router, prefix=settings.api_prefix)
 registrar_si_habilitado(app, settings)
+registrar_checkout_si_habilitado(app, settings)
 
 
 @app.get("/")

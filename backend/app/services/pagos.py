@@ -130,17 +130,31 @@ async def registrar_pago(db: AsyncSession, usuario: UsuarioActual, datos: PagoCr
     else:
         id_cliente = await _cliente_del_pasajero(db, usuario, datos.id_cliente)
 
+    pago = await preparar_pago_pendiente(
+        db, id_cliente=id_cliente, importe=datos.importe, medio_pago=datos.medio_pago
+    )
+    await db.commit()
+    return _a_schema(pago)
+
+
+async def preparar_pago_pendiente(
+    db: AsyncSession, *, id_cliente: int, importe, medio_pago: str
+) -> PagoModelo:
+    """Preparación común sin commit: el llamador ya validó identidad/cuenta/contrato.
+
+    Permite guardar intención+Pago atómicamente sin duplicar evento ni reglas contables.
+    El registro manual conserva su commit y comportamiento anteriores.
+    """
     pago = PagoModelo(
         id_cliente=id_cliente,
-        importe=datos.importe,
-        medio_pago=datos.medio_pago,
+        importe=importe,
+        medio_pago=medio_pago,
         estado="PENDIENTE",
     )
     db.add(pago)
     await db.flush()
     await registrar_evento(db, tipo_evento=TIPO_PAGO_REGISTRADO, id_pago=pago.id_pago)
-    await db.commit()
-    return _a_schema(pago)
+    return pago
 
 
 async def decidir_pago_pendiente(db: AsyncSession, id_pago: int, decision: str) -> Pago:

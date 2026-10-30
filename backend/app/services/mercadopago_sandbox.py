@@ -142,6 +142,12 @@ async def procesar_webhook(
 
     async def resolver(id_operacion: str):
         vinculo = await db.get(PagoMercadoPago, id_operacion)
+        if vinculo is None and ajustes.mercadopago_checkout_enabled:
+            from app.services.checkout import resolver_checkout
+
+            return await resolver_checkout(
+                db, await consulta.consultar(id_operacion), proveedor, ajustes
+            )
         if vinculo is None or (
             vinculo.moneda != ajustes.mercadopago_currency
             or vinculo.id_receptor != ajustes.mercadopago_collector_id
@@ -151,6 +157,16 @@ async def procesar_webhook(
             id_operacion, vinculo.id_pago, vinculo.moneda, vinculo.id_receptor
         )
 
+    class ConsultaUnica:
+        # Cache solo de esta entrega; nunca cache global del estado del proveedor.
+        recurso = None
+
+        async def consultar(self, id_operacion):
+            if self.recurso is None:
+                self.recurso = await proveedor.consultar(id_operacion)
+            return self.recurso
+
+    consulta = ConsultaUnica()
     try:
         async with asyncio.timeout(PRESUPUESTO_SEGUNDOS):
             await db.execute(text("SET LOCAL lock_timeout = '2s'"))
@@ -163,7 +179,7 @@ async def procesar_webhook(
                 secreto=ajustes.mercadopago_webhook_secret.get_secret_value(),
                 ahora=ahora,
                 tolerancia_segundos=ajustes.mercadopago_webhook_tolerance_seconds,
-                proveedor=proveedor,
+                proveedor=consulta,
                 resolver=resolver,
             )
             # El no_acreditado no escribe; finalizar igualmente su transacción antes del ACK.

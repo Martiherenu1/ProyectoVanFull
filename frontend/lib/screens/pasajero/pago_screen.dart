@@ -6,6 +6,8 @@ import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_spacing.dart';
 import '../../core/theme/app_theme.dart';
 import '../../models/pasajero/pago.dart';
+import '../../services/checkout_api.dart';
+import 'checkout_pago_screen.dart';
 
 /// POST /pagos sin `id_cliente`: el backend usa la cuenta del pasajero. Los
 /// rechazos del contrato llegan como [ApiException]; el resto, tal cual.
@@ -20,9 +22,17 @@ class PagoScreen extends StatefulWidget {
     required this.registrarPago,
     required this.onTerminar,
     this.saldo,
+    this.iniciarCheckout,
+    this.consultarPago,
+    this.abrirCheckout,
+    this.contextoVigente,
   });
 
   final RegistrarPago registrarPago;
+  final IniciarCheckout? iniciarCheckout;
+  final ConsultarPagoPropio? consultarPago;
+  final AbrirCheckout? abrirCheckout;
+  final bool Function()? contextoVigente;
 
   /// El pasajero vio su pago registrado y vuelve.
   final ValueChanged<Pago> onTerminar;
@@ -40,6 +50,8 @@ class _PagoScreenState extends State<PagoScreen> {
   bool _enviando = false;
   _Aviso? _aviso;
   Pago? _pago;
+  String? _claveCheckout;
+  double? _importeCheckout;
 
   @override
   void initState() {
@@ -65,6 +77,43 @@ class _PagoScreenState extends State<PagoScreen> {
     final importe = _importeValido;
     final medio = _medio;
     if (importe == null || medio == null || _enviando) return;
+    if (medio == MedioPago.mercadoPago) {
+      final iniciar = widget.iniciarCheckout;
+      final consultar = widget.consultarPago;
+      final abrir = widget.abrirCheckout;
+      if (iniciar == null ||
+          consultar == null ||
+          abrir == null ||
+          widget.contextoVigente?.call() == false) {
+        return;
+      }
+      if (_importeCheckout != importe) {
+        _claveCheckout = nuevaClaveCheckout();
+        _importeCheckout = importe;
+      }
+      setState(() => _enviando = true);
+      final resultado = await Navigator.of(context).push<Pago>(
+        MaterialPageRoute(
+          builder: (_) => CheckoutPagoScreen(
+            importe: importe,
+            clave: _claveCheckout!,
+            iniciar: iniciar,
+            consultar: consultar,
+            abrir: abrir,
+            contextoVigente: widget.contextoVigente ?? () => mounted,
+          ),
+        ),
+      );
+      if (mounted && widget.contextoVigente?.call() != false) {
+        setState(() {
+          _enviando = false;
+          if (resultado != null && resultado.estado != EstadoPago.pendiente) {
+            _pago = resultado;
+          }
+        });
+      }
+      return;
+    }
     setState(() {
       _enviando = true;
       _aviso = null;
@@ -140,7 +189,12 @@ class _PagoScreenState extends State<PagoScreen> {
           child: ListView(
             padding: const EdgeInsets.all(AppSpacing.lg),
             children: [
-              Text('¿CUÁNTO PAGASTE?', style: textTheme.labelSmall),
+              Text(
+                _medio == MedioPago.mercadoPago
+                    ? '¿CUÁNTO QUERÉS PAGAR?'
+                    : '¿CUÁNTO PAGASTE?',
+                style: textTheme.labelSmall,
+              ),
               const SizedBox(height: AppSpacing.sm),
               TextField(
                 key: const ValueKey('importe-pago'),
@@ -164,20 +218,25 @@ class _PagoScreenState extends State<PagoScreen> {
               Text('¿CÓMO PAGASTE?', style: textTheme.labelSmall),
               const SizedBox(height: AppSpacing.sm),
               for (final medio in MedioPago.values)
-                _FilaMedio(
-                  medio: medio,
-                  elegido: medio == _medio,
-                  onTap: _enviando
-                      ? null
-                      : () => setState(() {
-                          _medio = medio;
-                          if (!bloqueado) _aviso = null;
-                        }),
-                ),
+                if (medio != MedioPago.mercadoPago ||
+                    (widget.iniciarCheckout != null &&
+                        widget.consultarPago != null &&
+                        widget.abrirCheckout != null))
+                  _FilaMedio(
+                    medio: medio,
+                    elegido: medio == _medio,
+                    onTap: _enviando
+                        ? null
+                        : () => setState(() {
+                            _medio = medio;
+                            if (!bloqueado) _aviso = null;
+                          }),
+                  ),
               const SizedBox(height: AppSpacing.lg),
               Text(
-                'Administración revisa el pago y lo confirma. Hasta entonces '
-                'tu saldo no cambia.',
+                _medio == MedioPago.mercadoPago
+                    ? 'Abrirás Mercado Pago para pagar. El saldo cambia cuando el backend verifica la acreditación.'
+                    : 'Administración revisa el pago y lo confirma. Hasta entonces tu saldo no cambia.',
                 style: textTheme.bodySmall,
               ),
             ],
@@ -200,7 +259,13 @@ class _PagoScreenState extends State<PagoScreen> {
             style: ElevatedButton.styleFrom(
               minimumSize: const Size(0, AppSpacing.touchTarget),
             ),
-            child: Text(_enviando ? 'Registrando…' : 'Registrar pago'),
+            child: Text(
+              _enviando
+                  ? 'Registrando…'
+                  : _medio == MedioPago.mercadoPago
+                  ? 'Iniciar Checkout Pro'
+                  : 'Registrar pago',
+            ),
           ),
         ),
       ],

@@ -1,6 +1,6 @@
 # Guion de la demo del PC2 y checklist previo
 
-> **Presentación: viernes 30/10/2026, ~18:00.** Borrador del 29/10 para acordar entre los tres: el orden y
+> **Presentación: viernes 30/10/2026, reunión a las 18:30.** Borrador del 29/10, actualizado el 30/10 para acordar entre los tres: el orden y
 > los tiempos son una propuesta. Cada afirmación dice si está verificada; lo que no, figura como tal.
 > Las contraseñas **no** van acá: están en `backend/db/seed/contrasenas-de-prueba.csv` (y en el archivo
 > fuera del repo con el que se re-sembró Neon).
@@ -30,11 +30,26 @@ que se van a usar en vivo**; usar otra cuenta u otro viaje.
 - **Viaje 1 y `pasajero1`:** en el ensayo GPS integrado con el celular, Martín reservó con `pasajero1`, inició el viaje 1 y lo
   **finalizó** (`frontend/technical/gps-probe.md`, #250). Un viaje finalizado no se puede volver a iniciar, así que **con la base
   como está no se puede repetir en vivo iniciar viaje + GPS + ver ubicación**.
-- Siguen vírgenes: el viaje 3 y `pasajero2` en los viajes 1 y 3.
+- **Ensayo de CU-008 (30/10), hecho por Martiniano con `pasajero2` en el viaje 3.** Consulta de solo lectura a Neon (hora de
+  Argentina): reserva 3 creada 13:27:24, **ausencia 1 informada 13:27:38**, reserva 3 cancelada 13:31:21 por Martiniano (la
+  cancelación no formaba parte del ensayo). Con eso `pasajero2` queda quemado también en el viaje 3: dos reservas canceladas
+  (la 2 del viaje 2 y la 3 del viaje 3). Una sola fila de ausencia, un solo evento `ausencia_informada` y cero pares
+  pasajero+viaje repetidos. No se comprobó a mano el HTTP 200 del reintento, y el cupo no sirve de prueba de la ausencia
+  porque la cancelación posterior también lo libera.
+- Los viajes 2 y 3 tienen un evento `viaje_actualizado` el 30/10 a la 01:02 y la 01:03 (alguien los modificó; sin atribuir
+  ni detalle). El reinicio los devuelve al seed.
+- El ensayo GPS del 29/10 se da por bueno con sus limitaciones documentadas: no se hace otra pasada y no se toca el viaje 1.
 
 **Para dejarla lista: reiniciar Neon DESPUÉS del último ensayo de Martín y antes de la demo.** Lo corre Martiniano con su
-script (vuelve el viaje 1 a programado con chofer 3 y vehículo 1, y vacía reservas, pagos y posiciones). Hay que avisar a los
-otros dos cuando termine, y no ensayar nada más sobre la base después.
+script (vuelve el viaje 1 a programado con chofer 3 y vehículo 1, y vacía reservas, pagos y posiciones; el reinicio deja
+vírgenes también el viaje 3 y `pasajero2`). Hay que avisar a los otros dos cuando termine, y no ensayar nada más sobre la
+base después.
+
+**Única escritura permitida después del reinicio (para la demo del GPS de Martín):** una reserva consolidada de `pasajero1`
+en el **viaje 1**, hecha por Martiniano en la web hacia las 17:35 y comprobada en Mis reservas. **El viaje 1 no se inicia**:
+el inicio, el mapa del pasajero y la finalización los muestra Martín durante su exposición, con el Samsung y la ubicación
+precisa activada. El reinicio deja el viaje 1 programado, con `chofer1` y el vehículo 1, y sin posiciones, así que no hace
+falta preparar ningún otro viaje. El viaje 3 **no** se reserva para esto: el reinicio lo devuelve al seed (sin vehículo).
 
 ## 2. Una hora antes: checklist
 
@@ -50,31 +65,47 @@ otros dos cuando termine, y no ensayar nada más sobre la base después.
    (el workflow `Web` se corre **desde `main`**). Después del último merge, relanzar `Web` una vez.
    **Qué redeploya qué** (`render.yaml`): la API se redespliega solo si cambió algo bajo `backend/` y la CI de `main`
    está en verde; la documentación y el frontend **no** la tocan. El sitio (`sitio-web`) solo cambia cuando alguien corre
-   `Web`. Para el corte de las 12:00, lo que hay que vigilar es `backend/`.
+   `Web`. **Horario acordado (30/10):** último merge que toque `frontend/` o `backend/` a las **17:15**; de 17:15 a 17:30
+   se relanza `Web` desde `main` y se ensaya CU-008 y el circuito del pasajero; a las **17:30** el reinicio de Neon, y
+   después, su verificación; a las **17:40** se despierta Render, se envía un solo mensaje al asistente y se lee el commit
+   desplegado; silencio desde las 18:00. Web publicada al mediodía: `sitio-web` `f104f03`, compilado de `main` `67b5fa4`
+   (incluye CU-008, #257).
 4. **Recargar con Ctrl+Shift+R** en cada navegador de la demo: Flutter Web guarda el sitio en caché y puede mostrar
    la versión anterior.
-5. **El viaje 1 sin tocar.** Nadie lo modifica ni lo reasigna hasta el ensayo de GPS.
+5. **El viaje 1 sin tocar.** Nadie lo modifica, lo reasigna ni lo inicia antes de la exposición de Martín. Lo único previsto es
+   la reserva consolidada de `pasajero1` (sección 1), hecha después del reinicio.
+6. **APK del chofer.** Compilada sobre `8217c9c` (`frontend/technical/gps-probe.md`). Comparando el backend desde ese commit
+   hasta `main`, solo cambian Checkout, Mercado Pago y `pagos.py` (3 rutas nuevas del contrato); no cambió nada de login, viajes
+   del chofer ni GPS. **Es una comparación de código, no una prueba.** Martín la confirma antes de las 17:30: abrir la APK,
+   entrar con `chofer1` y ver la lista del 30/10 y el detalle del viaje 1, sin iniciarlo.
 
 ## 3. Circuito propuesto (en este orden)
 
 El orden importa por una regla: **el pasajero reserva ANTES de que el chofer inicie el viaje** (no se puede
-reservar uno `en_curso`), y ve la ubicación solo con una reserva propia consolidada (RN-030).
+reservar uno `en_curso`), y ve la ubicación solo con una reserva propia consolidada (RN-030). **Reparto de cuentas y
+viajes (acordado el 30/10):** la reserva de `pasajero1` en el viaje 1 ya está preparada (sección 1) y se usa para el GPS; la
+reserva que se hace en vivo es la de `pasajero2` en el viaje 3, así no se gasta la del GPS.
 
 | # | Quién | Qué se muestra | Estado |
 |---|---|---|---|
-| 1 | Pasajero | Login → **Buscar** (30/10, ida: 3 viajes) → **Confirmar reserva** del viaje 1 (pide «¿Dónde subís?») → **Mis reservas** | **Verificado en Render el 29/10** por API (viaje 3, `pasajero2`): crear la reserva (201, queda `consolidada`), el cupo baja en 1, aparece en Mis reservas, y cancelarla devuelve el lugar. **Visto en la web publicada** por Martiniano (29/10, noche; `pasajero2`, viaje 2): login, Buscar, Confirmar reserva, Mis reservas, Ver ubicación (sin sesión cerrada) y cancelación, sin diferencias con lo esperado |
+| 1 | Pasajero | Login con **`pasajero2`** → **Buscar** (30/10, ida: 3 viajes) → **Confirmar reserva** del **viaje 3** (pide «¿Dónde subís?») → **Mis reservas** | **Verificado en Render el 29/10** por API (viaje 3, `pasajero2`): crear la reserva (201, queda `consolidada`), el cupo baja en 1, aparece en Mis reservas, y cancelarla devuelve el lugar. **Visto en la web publicada** por Martiniano (29/10, noche; `pasajero2`, viaje 2): login, Buscar, Confirmar reserva, Mis reservas, Ver ubicación (sin sesión cerrada) y cancelación, sin diferencias con lo esperado |
 | 2 | Pasajero | **Asistente**: una consulta de disponibilidad y la derivación a una persona | Verificado el 29/10 con el modelo real. Reservar y cancelar por el chat **no se probó** con el modelo real |
+| 2b | Pasajero | **Informar ausencia** (CU-008) desde **Mis reservas**, con la reserva abierta y consolidada | Implementado (#257). **Ensayado el 30/10** por Martiniano en la web publicada, y la base confirma una ausencia registrada (ver sección 1). El botón queda activo después de avisar: la pantalla solo muestra el mensaje «Tu aviso de ausencia está registrado»; repetir el aviso no duplica (una fila y un evento). No cancela la reserva ni tiene efecto económico. Para mostrarlo en vivo se usa la reserva de `pasajero2` en el viaje 3 recién hecha en el paso 1 (no la de `pasajero1`, que se reserva para el GPS) |
 | 3 | Admin | **Viajes del día** y asignación de chofer y vehículo (CU-018) | **Visto en la web publicada** (Viajes del día del 30/10, con el selector de fecha). Asignar o reasignar chofer y vehículo **no se probó** en Render |
 | 4 | Pasajero → Admin | Registrar el pago (pasajero) → **Pagos a confirmar** (admin, CU-016) → **Deuda por cliente** (CU-015) y **Reservas** (CU-027) | **Probado en la web publicada** por Martiniano (registrar el pago como pasajero, Pagos pendientes, confirmar, Consultar reservas y Consultar deuda), sin diferencias con lo esperado. **Ojo con la deuda:** reservar NO genera deuda (la tarifa, RF-028/#9, está fuera por decisiones pendientes): el saldo quedó en `0.0 al_dia` antes, durante y después de reservar y cancelar. Solo sube con un movimiento `DEUDOR`, que ninguna pantalla crea. Para mostrar una deuda que baja hay que cargar ese movimiento a mano; si no, presentar el paso como «registro y confirmación del pago» |
-| 5 | Chofer | **Lista del viaje** → iniciar el viaje 1 → publicar posición (GPS) | **Visto en solo lectura** (`chofer1`: lista del 30/10 y detalle del viaje 1, sin iniciarlo). **Ensayo con el celular informado por Martín (29/10, #250):** iniciar el viaje y publicar posición contra Render. Con ubicación precisa la Web avanzó cada ~10 s, siguió avanzando con el celular bloqueado en una prueba breve y, al finalizar, retiró el mapa. Con ubicación solo aproximada la posición no avanzaba (limitación observada en ese dispositivo). Es evidencia manual, no una medición de RNF-008. **Requiere que el chofer active la ubicación precisa antes de la demo** |
-| 6 | Pasajero | **Mis reservas → Ver ubicación** del viaje 1 | Implementado (#222). Con el viaje sin iniciar se vio en pantalla «Ubicación no disponible para esta sesión o viaje» (RN-030). Martín lo vio con una posición real (ensayo del 29/10); con viaje en curso y sin posición responde «Todavía no hay una posición disponible». Para repetirlo en vivo hace falta el reinicio de Neon |
+| 5 | Chofer | **Lista del viaje** → iniciar el viaje 1 (con la reserva consolidada de `pasajero1` ya preparada) → publicar posición (GPS) → finalizar | **Visto en solo lectura** (`chofer1`: lista del 30/10 y detalle del viaje 1, sin iniciarlo). **Ensayo con el celular informado por Martín (29/10, #250):** iniciar el viaje y publicar posición contra Render. Con ubicación precisa la Web avanzó cada ~10 s, siguió avanzando con el celular bloqueado en una prueba breve y, al finalizar, retiró el mapa. Con ubicación solo aproximada la posición no avanzaba (limitación observada en ese dispositivo). Es evidencia manual, no una medición de RNF-008. **Requiere que el chofer active la ubicación precisa antes de la demo** |
+| 6 | Pasajero | Con **`pasajero1`**: **Mis reservas → Ver ubicación** del viaje 1 | Implementado (#222). Con el viaje sin iniciar se vio en pantalla «Ubicación no disponible para esta sesión o viaje» (RN-030). Martín lo vio con una posición real (ensayo del 29/10); con viaje en curso y sin posición responde «Todavía no hay una posición disponible». Para repetirlo en vivo hace falta el reinicio de Neon |
 
 ## 4. Qué se declara parcial (no se muestra como completo)
 
 CU-003 sin lista de espera · CU-007 en el contrato pero **sin implementar**, y CU-005 con backend (#243, con la interpretación de «disponibilidad compatible» pendiente de validar, #242) pero **sin pantalla** · CU-014 sin comprobantes ni adjuntos ·
 CU-015 solo lectura (RN-004/005/006 pendientes) · CU-018 sin reintegros (RN-019) · CU-027 sin filtros ·
-CU-030 sin avisos de demora · CU-036 y Checkout Pro (#251, #253) entraron a `main` **apagados por flag**: no se muestran ni se
-usan en la demo · ETA vacío en CU-009 (pendiente explícito: faltan definiciones de destino, coordenadas de paradas y proveedor) ·
+CU-030 sin avisos de demora · CU-008 sin estado visible tras avisar (el botón sigue activo) y sin recuperar el lugar ·
+**Mercado Pago:** CU-036 y Checkout Pro (#251, #253) están implementados y probados con un simulador local, y entraron a
+`main` **apagados por flag**: no se muestran ni se usan en la demo. Facu informó una compra con cuentas ficticias (no
+verificada por el resto del equipo). El webhook auténtico y la confirmación integrada están **pendientes** (decisiones
+D1 a D6, entre ellas D5 sobre `live_mode`) y no se tocan antes de la demo; no se presenta como «circuito completo». El pago
+que se muestra en vivo es el manual (el pasajero lo registra y administración lo confirma) · ETA vacío en CU-009 (pendiente explícito: faltan definiciones de destino, coordenadas de paradas y proveedor) ·
 RNF-008 parcial (dos brechas de borde reproducidas en 29/30/31 s, a definir por #39 después de la demo) ·
 los 17 CU sin contrato (CU-013, 017, 019 a 026, 028, 031 a 035, 037). Detalle en `backend/openapi/README.md`.
 

@@ -1,5 +1,14 @@
 # Contexto vivo · Chofer y viaje en curso (Martín)
 
+## Observación manual del ensayo integrado — 2026-10-29
+
+- APK fuente 8217c9c923755292d4096caaff4f9f4dad36a113; informe externo F:/dev/vf-gps-demo-apk-informe.json y detalle en frontend/technical/gps-probe.md. Registros inferiores se conservan como históricos; este ensayo no se atribuye a otras compilaciones ni confirma el SHA backend desplegado.
+- Martín informó que pasajero1 tenía reserva consolidada antes de iniciar viaje 1, comprobada en Mis reservas y en las reservas consolidadas del chofer; abrió el mapa desde Mis reservas → Ver ubicación. Horas del ensayo expresadas en hora argentina (UTC−03:00).
+- Martín informó que, tras activar precisa manualmente sin repetir inicio, la Web avanzó hora/coordenadas y marcador aproximadamente cada 10 segundos, sin advertencia. Con Samsung bloqueado siguió avanzando durante una prueba breve de duración no medida. Finalmente pulsó Finalizar: Samsung Finalizado; Web retiró mapa/coordenadas y mostró «Ubicación no disponible para esta sesión o viaje». Viaje 1 finalizado según el usuario.
+- Diagnóstico anterior preservado: aproximada y solicitud COARSE de 10 minutos observadas por ADB; UI «Envío GPS procesado» no distingue actualizada true/false. Comparación favorable a una limitación con aproximada en ese dispositivo, sin demostrar causa universal. Permiso aproximado sigue admitido para iniciar, sin primera posición ni nueva precisión mínima.
+- Procedencia ADB detallada en el procedimiento: permisos y listener COARSE/FINE leídos y filtrados en memoria durante el diagnóstico previo. No se conservó evidencia sanitizada local; no se reconstruyen registros ni se repiten lecturas.
+- Evidencia manual, no medición de frecuencia/consumo ni validación completa RNF-008; ETA y observabilidad callback/POST/actualizada pendientes. Registro documental únicamente, sin código, operaciones de negocio, Neon, commit o push.
+
 ## Estado vigente tras integrar main en PR #206 — 29/10/2026
 
 - Merge de origin/main 4d5c4ff6ac22695cb03afc501ee257a88f827e9d en feat/chofer-gps-permiso-pasajero-cu009 autorizado por el usuario, sin rebase/force ni merge de la PR hacia main. Único conflicto: este contexto; se conservan literalmente ambas entregas y sus históricos. Mapa #192 y variables Web #204 ya integrados; sus frases inferiores de PR abierta/sin merge describen etapas previas.

@@ -1,3 +1,89 @@
+# Ensayo GPS integrado y diagnóstico — 2026-10-29
+
+Registro local documental, sin cambios productivos ni repetición de pruebas.
+APK fuente `8217c9c923755292d4096caaff4f9f4dad36a113`, paquete
+`com.vanfull.frontend`, variante debug. Informe asociado:
+`F:/dev/vf-gps-demo-apk-informe.json`; SHA-256 de la APK:
+`a59d6d308658a8dfe8e645acb8575c0d2e0786cf86abe450f8ca2981512c705f`.
+API configurada: `https://vanfull-api.onrender.com/api`. SHA exacto del backend
+que atendió el ensayo pendiente de verificar en Render Events; no se equipara
+la fuente de la APK con la versión desplegada. Samsung Galaxy S20+ 5G, Android 13.
+
+Todas las horas del ensayo indicadas en este registro están expresadas en hora
+argentina (America/Argentina/Buenos_Aires, UTC−03:00).
+
+## Historial previo conservado
+
+- Martín informó que pasajero1 tenía una reserva consolidada antes de iniciar
+  el viaje 1, comprobada en Mis reservas y en las reservas consolidadas del
+  chofer. El mapa se abrió desde Mis reservas → Ver ubicación.
+- Observaciones informadas por Martín: al iniciar se mostró «Envío GPS procesado»
+  y la Web recibió posición de las 19:26:11.479, que luego no avanzó. Tras cerrar
+  y reabrir, apareció «GPS detenido». La reactivación explícita pasó por
+  «Esperando ubicación» y «Envío GPS procesado» y la Web recibió hora
+  21:43:33.972. Permaneció igual incluso tras caminar unos 60 metros con la
+  app visible y pantalla encendida; el polling Web no acreditaba posiciones nuevas.
+- Diagnóstico ADB de lectura previo: permiso aproximado concedido y preciso
+  denegado; servicio foreground y app visible. El listener atribuido a VanFull
+  en el proveedor fusionado figuraba COARSE, HIGH_ACCURACY e intervalo de
+  10 minutos, frente a los 10 segundos solicitados por el código. Es evidencia
+  del proveedor en ese dispositivo/estado, no una regla universal de Android.
+  Lecturas posteriores mostraron permiso preciso, listener FINE de 10 segundos
+  y nuevas entregas nativas; no se cambiaron permisos mediante ADB. Las entregas
+  nativas no prueban por sí solas callbacks Dart, POST ni aceptación backend.
+- Procedencia y límite de las observaciones ADB: lecturas del diagnóstico previo
+  de `dumpsys package com.vanfull.frontend` y `cmd appops get` para permisos,
+  y de `dumpsys activity service
+  com.google.android.gms/com.google.android.location.internal.GoogleLocationManagerService`
+  para el listener COARSE/FINE y sus intervalos. Las salidas se capturaron y
+  filtraron en memoria; solo se comunicaron datos sanitizados en la conversación.
+  No se conservó un archivo local de evidencia sanitizada ni un volcado ADB.
+  Este resumen es un registro retrospectivo del diagnóstico comunicado, no una
+  transcripción verificable de registros conservados. No se reconstruyen registros
+  ni se realizan nuevas lecturas ADB para este ajuste documental.
+- Código de esta APK: una suscripción continua, precisión high, distancia 0 e
+  intervalo solicitado de 10 segundos; no se exige primera posición para iniciar.
+  El envío no se solapa y descarta eventos mientras hay un POST pendiente.
+  «Envío GPS procesado» no distingue `actualizada: true/false`: el cliente valida
+  la respuesta pero descarta ese resultado. No se pudo observar desde esa UI
+  el contador de callbacks, POST pendiente ni la respuesta individual; un envío
+  pendiente y el descarte temporal del backend eran hipótesis, no causas probadas.
+
+## Comparación manual informada por Martín
+
+- Activó ubicación precisa en los permisos de VanFull, sin modificar código ni
+  repetir Iniciar viaje.
+- La Web actualizó hora y coordenadas sucesivamente, aproximadamente cada
+  10 segundos; cambió el marcador y desapareció la advertencia de desactualización.
+- En una prueba breve con el Samsung bloqueado la hora siguió avanzando y no
+  apareció advertencia. No se midió la duración exacta.
+- Pulsó Finalizar viaje: Samsung mostró «Finalizado». En la Web desaparecieron
+  mapa y coordenadas y apareció «Ubicación no disponible para esta sesión o viaje».
+- Viaje 1 finalizado, según lo informado por el usuario. No se consultó ni modificó
+  Neon ni se ejecutaron operaciones de negocio durante este registro documental.
+
+## Alcance y pendientes
+
+Observaciones manuales informadas, no mediciones instrumentadas ni prueba repetida
+por el agente. La comparación apunta a una limitación de ubicación aproximada en
+este dispositivo y configuración; no demuestra una causa universal ni excluye
+otras fallas. El avance observado de la Web es favorable al circuito de esta tanda,
+pero no documenta cada callback, envío o valor de `actualizada`.
+
+Ubicación precisa NO se convierte en requisito de inicio: se conserva permiso
+concedido (incluido aproximado) y servicio activo, sin primera posición, precisión
+mínima ni nuevos umbrales. El cierre observado no demuestra por sí solo la baja
+interna de toda suscripción/servicio ni ausencia absoluta de envíos posteriores.
+ETA y validación completa de RNF-008 siguen pendientes; tampoco se acredita
+frecuencia garantizada, consumo, continuidad general o recuperación tras cierre
+forzado. Queda pendiente mejorar la observabilidad de `actualizada` y del flujo
+callback/POST si se autoriza una tarea de código; aquí no se implementa.
+
+Los procedimientos y observaciones de APK técnicas anteriores que siguen debajo
+se conservan como históricos de sus respectivas versiones.
+
+---
+
 # Control previo Android con operaciones simuladas — 2026-10-22
 
 ## Preparación editorial y publicación autorizada — 2026-10-23

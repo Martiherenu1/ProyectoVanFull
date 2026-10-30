@@ -1,13 +1,12 @@
 import asyncio
 from logging.config import fileConfig
 
+from alembic import context
 from sqlalchemy import pool
 from sqlalchemy.engine import Connection
 from sqlalchemy.ext.asyncio import async_engine_from_config
 
-from alembic import context
-
-import app.models  # noqa: F401  (registra las 35 tablas en Base.metadata)
+import app.models  # noqa: F401  (registra modelos; CU-036 se excluye del circuito normal)
 from app.core.config import get_settings
 from app.core.database import Base
 
@@ -26,6 +25,13 @@ config.set_main_option("sqlalchemy.url", get_settings().database_url)
 
 # Los modelos son la referencia de `alembic revision --autogenerate` y de `alembic check`.
 target_metadata = Base.metadata
+
+
+def excluir_candidato_mp(objeto, nombre, tipo, reflejado, comparado):
+    # CU-036 tiene su propio circuito optativo. Nunca autogenerar su CREATE/DROP
+    # desde el Alembic normal que usa arrancar.sh, aunque el modelo esté importado.
+    return not (tipo == "table" and nombre in {"pago_mercadopago", "alembic_version_mercadopago"})
+
 
 # other values from the config, defined by the needs of env.py,
 # can be acquired:
@@ -52,6 +58,7 @@ def run_migrations_offline() -> None:
         literal_binds=True,
         compare_type=True,
         dialect_opts={"paramstyle": "named"},
+        include_object=excluir_candidato_mp,
     )
 
     with context.begin_transaction():
@@ -59,7 +66,12 @@ def run_migrations_offline() -> None:
 
 
 def do_run_migrations(connection: Connection) -> None:
-    context.configure(connection=connection, target_metadata=target_metadata, compare_type=True)
+    context.configure(
+        connection=connection,
+        target_metadata=target_metadata,
+        compare_type=True,
+        include_object=excluir_candidato_mp,
+    )
 
     with context.begin_transaction():
         context.run_migrations()

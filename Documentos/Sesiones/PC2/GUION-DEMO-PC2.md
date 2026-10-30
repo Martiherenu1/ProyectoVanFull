@@ -96,6 +96,24 @@ reserva que se hace en vivo es la de `pasajero2` en el viaje 3, así no se gasta
 | 5 | Chofer | **Lista del viaje** → iniciar el viaje 1 (con la reserva consolidada de `pasajero1` ya preparada) → publicar posición (GPS) → finalizar | **Visto en solo lectura** (`chofer1`: lista del 30/10 y detalle del viaje 1, sin iniciarlo). **Ensayo con el celular informado por Martín (29/10, #250):** iniciar el viaje y publicar posición contra Render. Con ubicación precisa la Web avanzó cada ~10 s, siguió avanzando con el celular bloqueado en una prueba breve y, al finalizar, retiró el mapa. Con ubicación solo aproximada la posición no avanzaba (limitación observada en ese dispositivo). Es evidencia manual, no una medición de RNF-008. **Requiere que el chofer active la ubicación precisa antes de la demo** |
 | 6 | Pasajero | Con **`pasajero1`**: **Mis reservas → Ver ubicación** del viaje 1 | Implementado (#222). Con el viaje sin iniciar se vio en pantalla «Ubicación no disponible para esta sesión o viaje» (RN-030). Martín lo vio con una posición real (ensayo del 29/10); con viaje en curso y sin posición responde «Todavía no hay una posición disponible». Para repetirlo en vivo hace falta el reinicio de Neon |
 
+### Turnos (acordado el 30/10)
+
+Cada integrante comparte su pantalla, muestra **todo lo suyo** y pasa el turno. Cada uno usa una ventana de incógnito o un
+perfil propio, con la cuenta ya iniciada **antes** de compartir (la web guarda la sesión en el navegador: dos cuentas en la
+misma ventana se pisan, y el primer login en frío tardó 35 s).
+
+| Turno | Quién | Qué muestra | Cuentas | Depende de |
+|---|---|---|---|---|
+| 1 | Martiniano | Apertura y arquitectura (FastAPI es la autoridad; la IA no toca la base, invoca tools). Pasajero: Buscar → reservar el viaje 3 → Mis reservas → **Informar ausencia** (CU-008) → **asistente** (una consulta de disponibilidad y la derivación a una persona) → **registrar el pago** | `pasajero2` | Render despierto; un solo mensaje al asistente |
+| 2 | Martín | Chofer y GPS: lista del viaje → inicia el viaje 1 desde el Samsung → publica posición → **abre el mapa del pasajero** → finaliza | `chofer1` y `pasajero1` | La reserva de `pasajero1` en el viaje 1 (sección 1) y la ubicación precisa activada |
+| 3 | Facundo | Administración: **Pagos a confirmar** (confirma el pago registrado en el turno 1), Deuda por cliente, Reservas, Viajes del día. Después Mercado Pago, **explicado y no en vivo** (sección 4) | `admin1` | El pago de `pasajero2` registrado al final del turno 1 |
+| 4 | Martiniano | Cierre: lo que se declara parcial (sección 4) y lo que sigue | — | — |
+
+**Dependencia que no se puede olvidar:** el turno 1 termina con el pago de `pasajero2` registrado; si no, el turno 3 abre
+Pagos a confirmar vacío. **Límite del turno 3:** confirmar pagos y consultar deuda y reservas está probado en la web
+publicada; asignar o reasignar chofer y vehículo en Viajes del día **no se probó en Render**, así que se muestra solo
+lectura salvo que se pruebe antes de las 17:15.
+
 ## 4. Qué se declara parcial (no se muestra como completo)
 
 CU-003 sin lista de espera · CU-007 en el contrato pero **sin implementar**, y CU-005 con backend (#243, con la interpretación de «disponibilidad compatible» pendiente de validar, #242) pero **sin pantalla** · CU-014 sin comprobantes ni adjuntos ·

@@ -25,6 +25,10 @@ cancelada, y reactivarla no está definido (MR-R15). Si un pasajero cancela una 
 viaje de nuevo (`RESERVA_CANCELADA_PREVIA`, 409). Para la demo, **no probar reserva y cancelación con la cuenta y el viaje
 que se van a usar en vivo**; usar otra cuenta u otro viaje.
 
+**Ya quemado por las pruebas del 29/10 (noche):** el par **`pasajero2` + viaje 2** (reservó y canceló) y, además, quedaron
+pagos de prueba registrados y confirmados para el cliente 2. **`pasajero1` y los viajes 1 y 3 están vírgenes.** Si hace falta
+dejar todo limpio, volver a correr el reinicio.
+
 ## 2. Una hora antes: checklist
 
 1. **Despertar Render.** La API y el modelo duermen: el login tardó 35 s y el primer mensaje del asistente 27 a 51 s
@@ -48,12 +52,12 @@ reservar uno `en_curso`), y ve la ubicación solo con una reserva propia consoli
 
 | # | Quién | Qué se muestra | Estado |
 |---|---|---|---|
-| 1 | Pasajero | Login → **Buscar** (30/10, ida: 3 viajes) → **Confirmar reserva** del viaje 1 (pide «¿Dónde subís?») → **Mis reservas** | **Verificado en Render el 29/10** por API (viaje 3, `pasajero2`): crear la reserva (201, queda `consolidada`), el cupo baja en 1, aparece en Mis reservas, y cancelarla devuelve el lugar. Falta verlo en la pantalla |
+| 1 | Pasajero | Login → **Buscar** (30/10, ida: 3 viajes) → **Confirmar reserva** del viaje 1 (pide «¿Dónde subís?») → **Mis reservas** | **Verificado en Render el 29/10** por API (viaje 3, `pasajero2`): crear la reserva (201, queda `consolidada`), el cupo baja en 1, aparece en Mis reservas, y cancelarla devuelve el lugar. **Visto en la web publicada** por Martiniano (29/10, noche; `pasajero2`, viaje 2): login, Buscar, Confirmar reserva, Mis reservas, Ver ubicación (sin sesión cerrada) y cancelación, sin diferencias con lo esperado |
 | 2 | Pasajero | **Asistente**: una consulta de disponibilidad y la derivación a una persona | Verificado el 29/10 con el modelo real. Reservar y cancelar por el chat **no se probó** con el modelo real |
-| 3 | Admin | **Viajes del día** y asignación de chofer y vehículo (CU-018) | Integrado en `main`; no probado en Render con datos reales |
-| 4 | Pasajero → Admin | Registrar el pago (pasajero) → **Pagos a confirmar** (admin, CU-016) → **Deuda por cliente** (CU-015) y **Reservas** (CU-027) | Integrado en `main`; el circuito completo no se probó en Render. **Ojo con la deuda:** reservar NO genera deuda (la tarifa, RF-028/#9, está fuera por decisiones pendientes): el saldo quedó en `0.0 al_dia` antes, durante y después de reservar y cancelar. Solo sube con un movimiento `DEUDOR`, que ninguna pantalla crea. Para mostrar una deuda que baja hay que cargar ese movimiento a mano; si no, presentar el paso como «registro y confirmación del pago» |
-| 5 | Chofer | **Lista del viaje** → iniciar el viaje 1 → publicar posición (GPS) | Ensayo parcial; el circuito real con el celular sigue pendiente (ensayo de Martín) |
-| 6 | Pasajero | **Mis reservas → Ver ubicación** del viaje 1 | Implementado (#222); falta verlo con una posición real. Sin posición responde «Todavía no hay una posición disponible» |
+| 3 | Admin | **Viajes del día** y asignación de chofer y vehículo (CU-018) | **Visto en la web publicada** (Viajes del día del 30/10, con el selector de fecha). Asignar o reasignar chofer y vehículo **no se probó** en Render |
+| 4 | Pasajero → Admin | Registrar el pago (pasajero) → **Pagos a confirmar** (admin, CU-016) → **Deuda por cliente** (CU-015) y **Reservas** (CU-027) | **Probado en la web publicada** por Martiniano (registrar el pago como pasajero, Pagos pendientes, confirmar, Consultar reservas y Consultar deuda), sin diferencias con lo esperado. **Ojo con la deuda:** reservar NO genera deuda (la tarifa, RF-028/#9, está fuera por decisiones pendientes): el saldo quedó en `0.0 al_dia` antes, durante y después de reservar y cancelar. Solo sube con un movimiento `DEUDOR`, que ninguna pantalla crea. Para mostrar una deuda que baja hay que cargar ese movimiento a mano; si no, presentar el paso como «registro y confirmación del pago» |
+| 5 | Chofer | **Lista del viaje** → iniciar el viaje 1 → publicar posición (GPS) | **Visto en solo lectura** (`chofer1`: lista del 30/10 y detalle del viaje 1, sin iniciarlo). Iniciar el viaje y publicar posición: ensayo parcial; el circuito real con el celular sigue pendiente (ensayo de Martín) |
+| 6 | Pasajero | **Mis reservas → Ver ubicación** del viaje 1 | Implementado (#222). Con el viaje sin iniciar se vio en pantalla «Ubicación no disponible para esta sesión o viaje» (RN-030). Falta verlo con una posición real; con viaje en curso y sin posición responde «Todavía no hay una posición disponible» |
 
 ## 4. Qué se declara parcial (no se muestra como completo)
 

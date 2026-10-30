@@ -49,7 +49,13 @@ void main() {
     });
     await confirmar(tester);
     expect(llamadas, 1);
-    expect(find.text('Estado: Cancelado'), findsOneWidget);
+    expect(
+      find.descendant(
+        of: find.byKey(const ValueKey('dato-viaje-Estado')),
+        matching: find.text('Cancelado'),
+      ),
+      findsOneWidget,
+    );
     expect(find.byKey(const Key('cancelar-viaje')), findsNothing);
     await tester.tap(find.text('Cerrar'));
     await tester.pumpAndSettle();
@@ -79,7 +85,13 @@ void main() {
       );
       await confirmar(tester);
       expect(find.text(codigo), findsOneWidget);
-      expect(find.text('Estado: Programado'), findsOneWidget);
+      expect(
+        find.descendant(
+          of: find.byKey(const ValueKey('dato-viaje-Estado')),
+          matching: find.text('Programado'),
+        ),
+        findsOneWidget,
+      );
     });
   }
   testWidgets('oculta botón en cancelado', (tester) async {

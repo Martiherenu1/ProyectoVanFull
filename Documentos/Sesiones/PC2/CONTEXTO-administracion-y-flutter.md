@@ -186,3 +186,16 @@ Atrás de Chrome ni su historial externo. Esa comprobación real sigue pendiente
 Usuario autoriza commit/push y PR Draft contra main, con revisión solicitada; no merge ni despliegue.
 Checkout/CU-008 intactos. Intento visual detenido: la herramienta no pudo identificar con certeza
 la URL de Chrome. No se acredita aprobación de esa prueba; registrar resultado antes del merge.
+
+30/10/2026 — CU-018 / #262: mejora exclusivamente visual de Viajes del día y su detalle.
+Título/fecha, márgenes, cabecera de tabla, ancho adaptable, números IBM Plex Mono,
+estados con texto/colores existentes y acciones diferenciadas. Filas 36 px, bordes y radio 2 px,
+sin sombras. Solo viajes_dia_admin_screen.dart cambia código productivo; tres tests adaptan
+expectativas de etiquetas/valores separados. Carga, selección, callbacks, condiciones,
+formulario de edición y confirmación de cancelación conservan su código original.
+Verificación local: analyze/formato/diff correctos y 23 pruebas relevantes aprobadas.
+Cuatro capturas reales del motor Flutter, con datos ficticios, revisadas a 1440 y 360 px:
+evidencias/admin-visual-262/. No son una prueba manual de Chrome ni evidencia productiva.
+Sin cambios de API/modelo/tema compartido/Pasajero/Chofer/CU-008/Mercado Pago.
+Publicación y merge commit autorizados por Facundo solo con CI completa verde, sin conflictos
+y antes del corte 17:15; sin despliegues manuales ni cambios en Render/Neon/sitio-web.

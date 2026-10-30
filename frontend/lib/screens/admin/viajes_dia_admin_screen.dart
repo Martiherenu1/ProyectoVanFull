@@ -2,8 +2,10 @@ import 'package:flutter/material.dart';
 
 import '../../core/api/api_error.dart';
 import '../../core/format/fecha_legible.dart';
+import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_spacing.dart';
 import '../../core/theme/app_theme.dart';
+import '../../core/theme/app_typography.dart';
 import '../../models/admin/viaje_admin_resumen.dart';
 import '../../models/admin/viaje_update.dart';
 import '../../models/chofer/viaje_resumen.dart';
@@ -129,7 +131,7 @@ class _ViajesDiaAdminScreenState extends State<ViajesDiaAdminScreen> {
     data: AppTheme.admin,
     child: Builder(
       builder: (context) => Scaffold(
-        appBar: AppBar(title: const Text('Viajes del día')),
+        appBar: AppBar(title: Text('Viajes del día', style: AppTypography.h1)),
         body: SafeArea(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -137,7 +139,7 @@ class _ViajesDiaAdminScreenState extends State<ViajesDiaAdminScreen> {
               Padding(
                 padding: const EdgeInsets.fromLTRB(
                   AppSpacing.lg,
-                  AppSpacing.lg,
+                  AppSpacing.xl,
                   AppSpacing.lg,
                   AppSpacing.sm,
                 ),
@@ -149,7 +151,7 @@ class _ViajesDiaAdminScreenState extends State<ViajesDiaAdminScreen> {
                   children: [
                     Text(
                       'Fecha: ${fechaLegible(_fecha)}',
-                      style: Theme.of(context).textTheme.headlineSmall,
+                      style: AppTypography.h2.copyWith(color: AppColors.ink900),
                     ),
                     OutlinedButton.icon(
                       key: const ValueKey('seleccionar-fecha-viajes'),
@@ -209,55 +211,97 @@ class _ViajesDiaAdminScreenState extends State<ViajesDiaAdminScreen> {
       );
     }
 
-    return Scrollbar(
-      child: SingleChildScrollView(
-        padding: const EdgeInsets.all(AppSpacing.lg),
+    return LayoutBuilder(
+      builder: (context, constraints) => Scrollbar(
         child: SingleChildScrollView(
-          scrollDirection: Axis.horizontal,
-          child: DataTable(
-            headingRowHeight: AppSpacing.adminRowHeight,
-            dataRowMinHeight: AppSpacing.adminRowHeight,
-            dataRowMaxHeight: AppSpacing.adminRowHeight,
-            showCheckboxColumn: false,
-            columns: const [
-              DataColumn(label: Text('Hora')),
-              DataColumn(label: Text('Viaje')),
-              DataColumn(label: Text('Sentido')),
-              DataColumn(label: Text('Estado')),
-              DataColumn(label: Text('Servicio')),
-              DataColumn(label: Text('Recorrido')),
-              DataColumn(label: Text('Vehículo')),
-              DataColumn(label: Text('Chofer')),
-            ],
-            rows: [
-              for (final viaje in _viajes)
-                DataRow(
-                  key: ValueKey('viaje-${viaje.idViaje}'),
-                  onSelectChanged: (_) => _seleccionarViaje(viaje),
-                  cells: [
-                    DataCell(Text(viaje.horario ?? 'Sin horario')),
-                    DataCell(Text(viaje.idViaje.toString())),
-                    DataCell(Text(viaje.sentido.etiqueta)),
-                    DataCell(Text(viaje.estado.etiqueta)),
-                    DataCell(Text('ID ${viaje.idServicio}')),
-                    DataCell(Text('ID ${viaje.idRecorrido}')),
-                    DataCell(
-                      _asignacion(
-                        tipo: 'Vehículo',
-                        id: viaje.idVehiculo,
-                        viaje: viaje.idViaje,
-                      ),
-                    ),
-                    DataCell(
-                      _asignacion(
-                        tipo: 'Chofer',
-                        id: viaje.idChofer,
-                        viaje: viaje.idViaje,
-                      ),
-                    ),
-                  ],
+          padding: const EdgeInsets.all(AppSpacing.lg),
+          child: SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+            child: ConstrainedBox(
+              constraints: BoxConstraints(
+                minWidth: constraints.maxWidth - AppSpacing.lg * 2,
+              ),
+              child: DataTable(
+                decoration: BoxDecoration(
+                  color: AppColors.paper,
+                  border: Border.all(color: AppColors.ink200, width: 2),
+                  borderRadius: BorderRadius.circular(AppSpacing.borderRadius),
                 ),
-            ],
+                headingRowColor: const WidgetStatePropertyAll(AppColors.ink100),
+                headingTextStyle: AppTypography.small.copyWith(
+                  color: AppColors.ink600,
+                  fontWeight: FontWeight.w600,
+                ),
+                dataTextStyle: AppTypography.small.copyWith(
+                  color: AppColors.ink900,
+                ),
+                columnSpacing: AppSpacing.xl,
+                horizontalMargin: AppSpacing.lg,
+                headingRowHeight: AppSpacing.adminRowHeight,
+                dataRowMinHeight: AppSpacing.adminRowHeight,
+                dataRowMaxHeight: AppSpacing.adminRowHeight,
+                showCheckboxColumn: false,
+                columns: const [
+                  DataColumn(label: Text('Hora')),
+                  DataColumn(label: Text('Viaje'), numeric: true),
+                  DataColumn(label: Text('Sentido')),
+                  DataColumn(label: Text('Estado')),
+                  DataColumn(label: Text('Servicio'), numeric: true),
+                  DataColumn(label: Text('Recorrido'), numeric: true),
+                  DataColumn(label: Text('Vehículo'), numeric: true),
+                  DataColumn(label: Text('Chofer'), numeric: true),
+                ],
+                rows: [
+                  for (final viaje in _viajes)
+                    DataRow(
+                      key: ValueKey('viaje-${viaje.idViaje}'),
+                      onSelectChanged: (_) => _seleccionarViaje(viaje),
+                      cells: [
+                        DataCell(
+                          Text(
+                            viaje.horario ?? 'Sin horario',
+                            style: AppTypography.data,
+                          ),
+                        ),
+                        DataCell(
+                          Text(
+                            viaje.idViaje.toString(),
+                            style: AppTypography.data,
+                          ),
+                        ),
+                        DataCell(Text(viaje.sentido.etiqueta)),
+                        DataCell(_EstadoViajeAdmin(viaje.estado)),
+                        DataCell(
+                          Text(
+                            'ID ${viaje.idServicio}',
+                            style: AppTypography.data,
+                          ),
+                        ),
+                        DataCell(
+                          Text(
+                            'ID ${viaje.idRecorrido}',
+                            style: AppTypography.data,
+                          ),
+                        ),
+                        DataCell(
+                          _asignacion(
+                            tipo: 'Vehículo',
+                            id: viaje.idVehiculo,
+                            viaje: viaje.idViaje,
+                          ),
+                        ),
+                        DataCell(
+                          _asignacion(
+                            tipo: 'Chofer',
+                            id: viaje.idChofer,
+                            viaje: viaje.idViaje,
+                          ),
+                        ),
+                      ],
+                    ),
+                ],
+              ),
+            ),
           ),
         ),
       ),
@@ -269,7 +313,7 @@ class _ViajesDiaAdminScreenState extends State<ViajesDiaAdminScreen> {
     required int? id,
     required int viaje,
   }) {
-    if (id != null) return Text('ID $id');
+    if (id != null) return Text('ID $id', style: AppTypography.data);
     return Semantics(
       label: '$tipo sin asignar',
       child: Row(
@@ -281,6 +325,33 @@ class _ViajesDiaAdminScreenState extends State<ViajesDiaAdminScreen> {
           Text('Sin asignar'),
         ],
       ),
+    );
+  }
+}
+
+class _EstadoViajeAdmin extends StatelessWidget {
+  const _EstadoViajeAdmin(this.estado);
+
+  final EstadoViaje estado;
+
+  @override
+  Widget build(BuildContext context) {
+    final color = switch (estado) {
+      EstadoViaje.programado => AppColors.waitLight,
+      EstadoViaje.enCurso => AppColors.okLight,
+      EstadoViaje.finalizado => AppColors.ink600,
+      EstadoViaje.cancelado => AppColors.alertLight,
+    };
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        ExcludeSemantics(child: Icon(Icons.circle, size: 6, color: color)),
+        const SizedBox(width: AppSpacing.sm),
+        Text(
+          estado.etiqueta,
+          style: AppTypography.small.copyWith(color: color),
+        ),
+      ],
     );
   }
 }
@@ -379,7 +450,19 @@ class _DetalleViajeAdminDialogState extends State<_DetalleViajeAdminDialog> {
 
   @override
   Widget build(BuildContext context) => AlertDialog(
-    title: Text('Viaje ${_viaje.idViaje}'),
+    title: Text('Viaje ${_viaje.idViaje}', style: AppTypography.h2),
+    shape: RoundedRectangleBorder(
+      side: const BorderSide(color: AppColors.ink200, width: 2),
+      borderRadius: BorderRadius.circular(AppSpacing.borderRadius),
+    ),
+    titlePadding: const EdgeInsets.fromLTRB(
+      AppSpacing.xl,
+      AppSpacing.xl,
+      AppSpacing.xl,
+      AppSpacing.lg,
+    ),
+    contentPadding: const EdgeInsets.symmetric(horizontal: AppSpacing.xl),
+    actionsPadding: const EdgeInsets.all(AppSpacing.lg),
     content: SingleChildScrollView(
       child: Column(
         key: ValueKey('detalle-viaje-${_viaje.idViaje}'),
@@ -413,6 +496,13 @@ class _DetalleViajeAdminDialogState extends State<_DetalleViajeAdminDialog> {
           widget.actualizarViaje != null)
         FilledButton(
           key: const Key('editar-viaje'),
+          style: FilledButton.styleFrom(
+            backgroundColor: AppColors.gold,
+            foregroundColor: AppColors.ink900,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(AppSpacing.borderRadius),
+            ),
+          ),
           onPressed: _cancelando ? null : _editar,
           child: const Text('Editar'),
         ),
@@ -420,10 +510,12 @@ class _DetalleViajeAdminDialogState extends State<_DetalleViajeAdminDialog> {
           widget.cancelarViaje != null)
         TextButton(
           key: const Key('cancelar-viaje'),
+          style: TextButton.styleFrom(foregroundColor: AppColors.alertLight),
           onPressed: _cancelando ? null : _cancelar,
           child: const Text('Cancelar viaje'),
         ),
       TextButton(
+        style: TextButton.styleFrom(foregroundColor: AppColors.ink600),
         onPressed: () => Navigator.of(context).pop(),
         child: const Text('Cerrar'),
       ),
@@ -431,8 +523,31 @@ class _DetalleViajeAdminDialogState extends State<_DetalleViajeAdminDialog> {
   );
 
   Widget _dato(String etiqueta, String valor) => Padding(
-    padding: const EdgeInsets.only(bottom: AppSpacing.sm),
-    child: Text('$etiqueta: $valor'),
+    padding: const EdgeInsets.only(bottom: AppSpacing.md),
+    child: Semantics(
+      label: '$etiqueta: $valor',
+      excludeSemantics: true,
+      child: Row(
+        key: ValueKey('dato-viaje-$etiqueta'),
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          SizedBox(
+            width: 88,
+            child: Text(
+              '$etiqueta:',
+              style: AppTypography.small.copyWith(color: AppColors.ink600),
+            ),
+          ),
+          const SizedBox(width: AppSpacing.md),
+          Flexible(
+            child: Text(
+              valor,
+              style: AppTypography.body.copyWith(color: AppColors.ink900),
+            ),
+          ),
+        ],
+      ),
+    ),
   );
 
   static int? _capacidad(ViajeResumen viaje) =>

@@ -143,38 +143,59 @@ void main() {
     final detalle = find.byKey(const ValueKey('detalle-viaje-42'));
     expect(detalle, findsOneWidget);
     expect(
-      find.descendant(of: detalle, matching: find.text('Fecha: 30/10/2026')),
-      findsOneWidget,
-    );
-    expect(
-      find.descendant(of: detalle, matching: find.text('Horario: Sin horario')),
-      findsOneWidget,
-    );
-    expect(
-      find.descendant(of: detalle, matching: find.text('Estado: Cancelado')),
-      findsOneWidget,
-    );
-    expect(
-      find.descendant(of: detalle, matching: find.text('Sentido: Vuelta')),
-      findsOneWidget,
-    );
-    expect(
-      find.descendant(of: detalle, matching: find.text('Servicio: ID 2')),
-      findsOneWidget,
-    );
-    expect(
-      find.descendant(of: detalle, matching: find.text('Recorrido: ID 3')),
-      findsOneWidget,
-    );
-    expect(
       find.descendant(
-        of: detalle,
-        matching: find.text('Vehículo: Sin asignar'),
+        of: find.byKey(const ValueKey('dato-viaje-Fecha')),
+        matching: find.text('30/10/2026'),
       ),
       findsOneWidget,
     );
     expect(
-      find.descendant(of: detalle, matching: find.text('Chofer: Sin asignar')),
+      find.descendant(
+        of: find.byKey(const ValueKey('dato-viaje-Horario')),
+        matching: find.text('Sin horario'),
+      ),
+      findsOneWidget,
+    );
+    expect(
+      find.descendant(
+        of: find.byKey(const ValueKey('dato-viaje-Estado')),
+        matching: find.text('Cancelado'),
+      ),
+      findsOneWidget,
+    );
+    expect(
+      find.descendant(
+        of: find.byKey(const ValueKey('dato-viaje-Sentido')),
+        matching: find.text('Vuelta'),
+      ),
+      findsOneWidget,
+    );
+    expect(
+      find.descendant(
+        of: find.byKey(const ValueKey('dato-viaje-Servicio')),
+        matching: find.text('ID 2'),
+      ),
+      findsOneWidget,
+    );
+    expect(
+      find.descendant(
+        of: find.byKey(const ValueKey('dato-viaje-Recorrido')),
+        matching: find.text('ID 3'),
+      ),
+      findsOneWidget,
+    );
+    expect(
+      find.descendant(
+        of: find.byKey(const ValueKey('dato-viaje-Vehículo')),
+        matching: find.text('Sin asignar'),
+      ),
+      findsOneWidget,
+    );
+    expect(
+      find.descendant(
+        of: find.byKey(const ValueKey('dato-viaje-Chofer')),
+        matching: find.text('Sin asignar'),
+      ),
       findsOneWidget,
     );
     expect(find.byType(TextField), findsNothing);
@@ -300,8 +321,20 @@ void main() {
       'id_vehiculo': null,
     });
     expect(cargas, 2);
-    expect(find.text('Fecha: 31/10/2026'), findsOneWidget);
-    expect(find.text('Capacidad: Sin definir'), findsOneWidget);
+    expect(
+      find.descendant(
+        of: find.byKey(const ValueKey('dato-viaje-Fecha')),
+        matching: find.text('31/10/2026'),
+      ),
+      findsOneWidget,
+    );
+    expect(
+      find.descendant(
+        of: find.byKey(const ValueKey('dato-viaje-Capacidad')),
+        matching: find.text('Sin definir'),
+      ),
+      findsOneWidget,
+    );
   });
 
   testWidgets('muestra el mensaje contractual del backend al guardar', (

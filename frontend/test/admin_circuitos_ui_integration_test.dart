@@ -197,7 +197,13 @@ void main() {
     await tester.enterText(find.byKey(const Key('editar-horario')), '09:15');
     await tester.ensureVisible(find.byKey(const Key('guardar-viaje')));
     await abrir(tester, 'guardar-viaje');
-    expect(find.text('Horario: 09:15'), findsOneWidget);
+    expect(
+      find.descendant(
+        of: find.byKey(const ValueKey('dato-viaje-Horario')),
+        matching: find.text('09:15'),
+      ),
+      findsOneWidget,
+    );
     expect(actualizaciones, 1);
     expect(listados, 2);
     await tester.tap(find.text('Cerrar'));

@@ -2,6 +2,26 @@
 
 ## Estado
 
+**Trabajo local posterior #238/#240, seguimiento #215:** #240 ya mergeado solo con
+la propuesta; #238 cerrado. Implementación sin publicar, preparada para PR nuevo.
+Base actualizada a main remoto `440c578`, conservando CU-005 y contextos. Candidato de integración HTTP CU-036,
+vínculo SQL 1:1, migración/DDL/contrato propuestos y tests reales contra PostgreSQL temporal
+con Payments simulado. Ruta desactivada por defecto; live_mode=true NO aceptado.
+D1–D6 siguen pendientes de aprobación escrita triple para main. Sin commit/push/merge
+ni activación/despliegue. Migración optativa fuera del head habitual, con guardas;
+DDL base sin cambios. [Ensayo, alcance y matriz](ENSAYO-CU036-AISLADO.md).
+Validación posterior: 177 casos focalizados aprobados, Ruff/formato y OpenAPI correctos;
+incluye regresión CU-005 preservada. No implica validación del proveedor auténtico.
+La cobertura integrada que sigue conserva su corte anterior; CU-036 continúa PARCIAL.
+
+**Ampliación Checkout Pro local:** conserva la preparación anterior y propone intención
+UUID/preferencia única, inicio/consulta propios y retorno informativo. Flutter candidato
+Web/Mobile, sesión/doble envío y registro manual conservados; todas las rutas nuevas
+inactivas por defecto. `mp_0002` optativa, esquema base/Render intactos. Pendientes de
+aprobación compartida y coordinación con Martiniano; live_mode=true sigue rechazado.
+[Circuito, archivos compartidos, ensayo y riesgos](CHECKOUT-PRO-CU014-CU036-CANDIDATO.md).
+No certifica operación real ni modifica los estados integrados de la tabla siguiente.
+
 Corte documental **2026-10-29**, main `bceb929` (Issue #225). PR #210/#214/#216/#217/#218
 mergeados, contrastados con código y contratos; no equivalen a CU completos ni a despliegue real.
 IMPLEMENTADO = circuito descrito existente; PARCIAL = obligaciones faltantes; PENDIENTE = parte ausente.
@@ -135,3 +155,20 @@ Usar los endpoints de lectura integrados para deuda/reservas/pagos; respetar las
 CU-006/CU-010. Administración mantiene alta/update/cancelación limitada; ejecución y GPS pertenecen a Martín.
 Roles múltiples/desconocidos/dueno siguen sin portada Flutter específica, según reparto; el backend
 conserva administrador/dueno donde está contratado. No confundir permisos HTTP con interfaz implementada.
+
+Preparación PR A CU-036: Issue #247, rama feat/admin-integracion-cu036-247 desde 440c578.
+Corte exclusivo sin Checkout/Flutter/mp_0002; D1–D6 pendientes de aprobación escrita triple.
+Detalle y límites: Documentos/Sesiones/PC2/PREPARACION-PR-A-CU036.md. Sin commit/publicación/activación.
+
+30/10/2026: PR A #247 actualizado a fb6e422; suite backend completa 731/731, Ruff/formato y OpenAPI correctos.
+Publicación autorizada solo en Draft; D1–D6 pendientes. B se prepara apilado sobre A, sin commit/push.
+Sin merge, activación, migraciones remotas ni despliegue; desarrollo original preservado.
+
+30/10/2026: A publicado en Draft #251, CI backend/Flutter verde. B preparado local en #252 sobre 10dd5bf.
+B: 763 backend, 780 Flutter, analyze y build Web correctos; Android/iOS nativos pendientes por herramientas.
+Sin commit/push de B. D1–D6 y Checkout siguen pendientes de aprobación escrita del equipo.
+
+30/10/2026: publicación B autorizada únicamente en Draft con base en A #251 (10dd5bf), Issue #252.
+Ruff/formato, contrato y revalidación de Checkout correctos; revisión técnica por solicitar al equipo.
+D1–D6 y ampliación siguen pendientes de aprobación escrita de Martín, Martiniano y Facundo.
+Sin merge, despliegue, migraciones remotas ni activación. Flags false y live_mode=true rechazado.

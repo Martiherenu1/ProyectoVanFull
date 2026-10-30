@@ -10,6 +10,17 @@
 > timeout y el servidor corta a los 60 s. Protección de `main`: 0 approvals y las 2 CI exigidas. Neon sigue sin
 > re-sembrar (espera a Martín). Detalle y decisiones: PC2/CONTEXTO-pasajero-y-base-comun.md y PC2/GUION-DEMO-PC2.md.
 
+> **CU-036, seguimiento #215:** #240 mergeado solo con propuesta; #238 cerrado.
+> Implementación local candidata para PR nuevo, main remoto 440c578 preservado.
+> Rama aislada, vínculo persistente y migración optativa fuera del head normal,
+> webhook condicional HMAC/Payments/CU-016 y pruebas PostgreSQL temporales. Flag false;
+> live_mode=true rechazado. D1–D6 NO aprobadas; sin main/commit/push/despliegue.
+> Matriz y ensayo: PC2/ENSAYO-CU036-AISLADO.md. Cortes históricos siguientes no describen esta rama.
+> Ampliación local Checkout Pro: intención persistente, inicio/consulta propios y Flutter
+> detrás de flags false; reutiliza webhook/CU-016. Modelo/contrato/área pasajero pendientes
+> de aprobación del equipo; efectivo/transferencia conservados. Detalle y riesgos:
+> PC2/CHECKOUT-PRO-CU014-CU036-CANDIDATO.md. Sin llamadas a MP, commit ni despliegue.
+
 > Integración Flutter #229, 2026-10-29: test/admin-flutter-integracion-pc2-229 desde main
 > 8e16205 (#228 integrado). Tres circuitos UI nuevos; 32 focalizadas y analyze aprobados.
 > Solo pruebas/contextos, sin cambios productivos ni Neon/Render. Sin commit/push/PR.
@@ -419,3 +430,20 @@ el 25/10, salvo acuerdo» de REPARTO-PC2 no rige, por decisión de Martiniano):
   la búsqueda por carpeta o por texto no los encuentra. Los `.md` equivalentes de la v1.3 están en la misma carpeta.
 - **En este repo:** `Documentos/Documentacion/01..07`, `Documentos/HITOS.md`,
   `Documentos/Recursos/Stack-y-Referencias.md`, `backend/db/README.md`, `backend/openapi/README.md`
+
+Preparación PR A CU-036: Issue #247, rama feat/admin-integracion-cu036-247 desde 440c578.
+Corte exclusivo sin Checkout/Flutter/mp_0002; D1–D6 pendientes de aprobación escrita triple.
+Detalle y límites: Documentos/Sesiones/PC2/PREPARACION-PR-A-CU036.md. Sin commit/publicación/activación.
+
+30/10/2026: PR A #247 actualizado a fb6e422; suite backend completa 731/731, Ruff/formato y OpenAPI correctos.
+Publicación autorizada solo en Draft; D1–D6 pendientes. B se prepara apilado sobre A, sin commit/push.
+Sin merge, activación, migraciones remotas ni despliegue; desarrollo original preservado.
+
+30/10/2026: A publicado en Draft #251, CI backend/Flutter verde. B preparado local en #252 sobre 10dd5bf.
+B: 763 backend, 780 Flutter, analyze y build Web correctos; Android/iOS nativos pendientes por herramientas.
+Sin commit/push de B. D1–D6 y Checkout siguen pendientes de aprobación escrita del equipo.
+
+30/10/2026: publicación B autorizada únicamente en Draft con base en A #251 (10dd5bf), Issue #252.
+Ruff/formato, contrato y revalidación de Checkout correctos; revisión técnica por solicitar al equipo.
+D1–D6 y ampliación siguen pendientes de aprobación escrita de Martín, Martiniano y Facundo.
+Sin merge, despliegue, migraciones remotas ni activación. Flags false y live_mode=true rechazado.

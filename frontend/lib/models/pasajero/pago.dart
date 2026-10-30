@@ -1,10 +1,10 @@
-/// Medios de PagoCreate.medio_pago que el pasajero puede informar. Quedan
-/// afuera MERCADO_PAGO (CU-036 no está integrado) y CUENTA_CORRIENTE (no es un
-/// pago del pasajero sino un cargo a su cuenta).
+/// BILLETERA es independiente de MERCADO_PAGO. Checkout solo se ofrece con
+/// activación explícita; CUENTA_CORRIENTE no es un pago del pasajero.
 enum MedioPago {
   efectivo('EFECTIVO', 'Efectivo'),
   transferencia('TRANSFERENCIA', 'Transferencia'),
-  billetera('BILLETERA', 'Billetera virtual');
+  billetera('BILLETERA', 'Billetera virtual'),
+  mercadoPago('MERCADO_PAGO', 'Mercado Pago (Checkout Pro)');
 
   const MedioPago(this.valorApi, this.etiqueta);
 

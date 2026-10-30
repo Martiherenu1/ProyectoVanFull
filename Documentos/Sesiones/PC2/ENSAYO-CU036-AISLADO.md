@@ -1,5 +1,11 @@
 # CU-036 — implementación candidata y ensayo local (seguimiento #215)
 
+> **Ampliación local posterior:** [Checkout Pro + CU-014/CU-036](CHECKOUT-PRO-CU014-CU036-CANDIDATO.md)
+> agrega intención UUID/preferencia y Flutter optativos. El flujo explícito/CLI que
+> sigue se conserva como alternativa. El head optativo ahora es `mp_0002`, después
+> de `mp_0001`; ninguna revisión integra el head de despliegue. Todas las decisiones
+> compartidas siguen pendientes, sin activar flags ni aceptar live_mode=true.
+
 ## Estado y autorización
 
 Trabajo local sobre `feat/admin-preparar-mercadopago-cu036-238`, base de rama

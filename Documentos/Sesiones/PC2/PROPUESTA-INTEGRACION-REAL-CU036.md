@@ -10,6 +10,10 @@
 > actual para PR nuevo vinculado a #215. Base 440c578; migración optativa mp_0001
 > separada del head habitual para impedir su aplicación automática en Render.
 > Ese ajuste D6 permanece candidato y no reescribe las decisiones históricas siguientes.
+> Ampliación Checkout Pro posterior: intención UUID, preferencia, contrato y Flutter
+> preparados localmente sin activación. D1–D6 continúan PENDIENTES DE APROBACIÓN;
+> también requieren decisión los endpoints, asociación opaca y cambios del área pasajero.
+> Ver [candidato y decisiones adicionales](CHECKOUT-PRO-CU014-CU036-CANDIDATO.md).
 
 Fecha: 2026-10-29. Base: main `2d03aca`. Relacionados: #215 y #216.
 **PROPUESTA DE IA — PENDIENTE DE VALIDACIÓN.** No autoriza modelos, contrato HTTP,

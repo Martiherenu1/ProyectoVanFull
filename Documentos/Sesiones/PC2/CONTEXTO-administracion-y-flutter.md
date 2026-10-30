@@ -14,6 +14,14 @@ Validación posterior: 177 casos focalizados aprobados, Ruff/formato y OpenAPI c
 incluye regresión CU-005 preservada. No implica validación del proveedor auténtico.
 La cobertura integrada que sigue conserva su corte anterior; CU-036 continúa PARCIAL.
 
+**Ampliación Checkout Pro local:** conserva la preparación anterior y propone intención
+UUID/preferencia única, inicio/consulta propios y retorno informativo. Flutter candidato
+Web/Mobile, sesión/doble envío y registro manual conservados; todas las rutas nuevas
+inactivas por defecto. `mp_0002` optativa, esquema base/Render intactos. Pendientes de
+aprobación compartida y coordinación con Martiniano; live_mode=true sigue rechazado.
+[Circuito, archivos compartidos, ensayo y riesgos](CHECKOUT-PRO-CU014-CU036-CANDIDATO.md).
+No certifica operación real ni modifica los estados integrados de la tabla siguiente.
+
 Corte documental **2026-10-29**, main `bceb929` (Issue #225). PR #210/#214/#216/#217/#218
 mergeados, contrastados con código y contratos; no equivalen a CU completos ni a despliegue real.
 IMPLEMENTADO = circuito descrito existente; PARCIAL = obligaciones faltantes; PENDIENTE = parte ausente.
@@ -155,3 +163,12 @@ Detalle y límites: Documentos/Sesiones/PC2/PREPARACION-PR-A-CU036.md. Sin commi
 30/10/2026: PR A #247 actualizado a fb6e422; suite backend completa 731/731, Ruff/formato y OpenAPI correctos.
 Publicación autorizada solo en Draft; D1–D6 pendientes. B se prepara apilado sobre A, sin commit/push.
 Sin merge, activación, migraciones remotas ni despliegue; desarrollo original preservado.
+
+30/10/2026: A publicado en Draft #251, CI backend/Flutter verde. B preparado local en #252 sobre 10dd5bf.
+B: 763 backend, 780 Flutter, analyze y build Web correctos; Android/iOS nativos pendientes por herramientas.
+Sin commit/push de B. D1–D6 y Checkout siguen pendientes de aprobación escrita del equipo.
+
+30/10/2026: publicación B autorizada únicamente en Draft con base en A #251 (10dd5bf), Issue #252.
+Ruff/formato, contrato y revalidación de Checkout correctos; revisión técnica por solicitar al equipo.
+D1–D6 y ampliación siguen pendientes de aprobación escrita de Martín, Martiniano y Facundo.
+Sin merge, despliegue, migraciones remotas ni activación. Flags false y live_mode=true rechazado.

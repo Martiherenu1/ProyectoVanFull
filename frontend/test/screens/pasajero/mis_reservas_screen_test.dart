@@ -42,6 +42,7 @@ ReservaRechazada rechazo(String codigo, [String mensaje = 'Mensaje']) =>
 
 Future<void> mostrar(
   WidgetTester tester, {
+  int version = 0,
   CargarReservas? reservas,
   CargarDeuda? saldo,
   CancelarReserva? cancelar,
@@ -51,6 +52,7 @@ Future<void> mostrar(
 }) => tester.pumpWidget(
   MaterialApp(
     home: MisReservasScreen(
+      versionReservas: version,
       cargarReservas: reservas ?? () async => [reserva(1)],
       cargarDeuda: saldo ?? () async => deuda(),
       cancelarReserva: cancelar ?? (id) async => cancelada(id),
@@ -401,4 +403,58 @@ void main() {
       expect(find.byKey(const ValueKey('ubicacion-1')), findsNothing);
     });
   });
+  for (final falla in [false, true]) {
+    testWidgets(
+      'recarga conserva State y descarta cancelación anterior, falla=$falla',
+      (tester) async {
+        final pendiente = Completer<ResultadoCancelacion>();
+        Future<List<Reserva>> cargar() async => [reserva(1)];
+        Future<Deuda> cargarSaldo() async => deuda();
+        Future<ResultadoCancelacion> cancelar(int _) => pendiente.future;
+        await mostrar(
+          tester,
+          reservas: cargar,
+          saldo: cargarSaldo,
+          cancelar: cancelar,
+        );
+        await tester.pumpAndSettle();
+        final estado = tester.state(find.byType(MisReservasScreen));
+        await tester.tap(find.byKey(const ValueKey('reserva-1')));
+        await tester.pumpAndSettle();
+        await tester.tap(find.byKey(const ValueKey('cancelar-1')));
+        await tester.pumpAndSettle();
+        await tester.tap(find.byKey(const ValueKey('confirmar-cancelacion')));
+        await tester.pumpAndSettle();
+        await mostrar(
+          tester,
+          reservas: cargar,
+          saldo: cargarSaldo,
+          cancelar: cancelar,
+          version: 1,
+        );
+        await tester.pumpAndSettle();
+        if (falla) {
+          pendiente.completeError(Exception('tardío'));
+        } else {
+          pendiente.complete(cancelada(1, motivo: 'Obsoleto'));
+        }
+        await tester.pumpAndSettle();
+        expect(
+          identical(estado, tester.state(find.byType(MisReservasScreen))),
+          isTrue,
+        );
+        expect(find.text('Obsoleto'), findsNothing);
+        expect(find.text('Confirmada'), findsOneWidget);
+        await tester.tap(find.byKey(const ValueKey('reserva-1')));
+        await tester.pumpAndSettle();
+        expect(
+          tester
+              .widget<OutlinedButton>(find.byKey(const ValueKey('cancelar-1')))
+              .onPressed,
+          isNotNull,
+        );
+        expect(tester.takeException(), isNull);
+      },
+    );
+  }
 }

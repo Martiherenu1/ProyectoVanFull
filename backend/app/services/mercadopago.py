@@ -68,17 +68,17 @@ async def procesar_notificacion_prueba(
         operacion = await proveedor.consultar(data_id)
         if operacion.moneda != vinculo.moneda or operacion.id_receptor != vinculo.id_receptor:
             raise NotificacionNoValida("La operación no corresponde al vínculo configurado.")
-        if operacion.estado != "approved":
-            # No mapear pending/rejected/refunded a estados contables locales.
-            logger.info("mercadopago_resultado=no_acreditado")
-            return "no_acreditado"
-
         # Mismo lock que CU-016, sin adquirir locks de otras áreas después.
         pago = await db.scalar(
             select(Pago).where(Pago.id_pago == vinculo.id_pago).with_for_update()
         )
         if pago is None or pago.medio_pago != "MERCADO_PAGO" or pago.importe != operacion.importe:
             raise NotificacionNoValida("El pago no coincide con la operación vinculada.")
+        if operacion.estado != "approved":
+            # Revalidar identidad/monto local aun cuando no haya transición contable.
+            # No mapear pending/rejected/refunded a estados contables locales.
+            logger.info("mercadopago_resultado=no_acreditado")
+            return "no_acreditado"
         if pago.estado == "CONFIRMADO":
             await db.commit()
             logger.info("mercadopago_resultado=duplicado")

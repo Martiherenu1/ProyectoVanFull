@@ -460,3 +460,9 @@ scroll solo en la pantalla administrativa. 784 pruebas Flutter aprobadas y analy
 Atrás físico de Chrome/historial externo no certificado; detalles en contexto de Administración.
 Diff revisado y publicación autorizada por el usuario: commit, push y PR Draft contra main,
 con revisión solicitada. Sin merge ni despliegue; Chrome real pendiente antes de aprobar integración.
+
+30/10/2026 — Administración #262: presentación visual de Viajes del día y detalle, sin cambios
+funcionales ni compartidos. 23 pruebas locales aprobadas, analyze/formato correctos y cuatro
+capturas Flutter de 1440/360 px revisadas. Detalle/evidencia en el contexto de Administración.
+Facundo autoriza publicación y merge commit condicionado a CI verde antes del corte 17:15.
+Sin despliegues manuales ni cambios de backend, API, modelo o infraestructura; Mercado Pago congelado.

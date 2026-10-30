@@ -100,50 +100,52 @@ reserva que se hace en vivo es la de `pasajero2` en el viaje 3, así no se gasta
 
 Cada integrante comparte su pantalla, muestra **todo lo suyo** y pasa el turno. La historia es **el ciclo de un viaje**:
 reservar → viajar → cobrar y controlar. Cada uno usa una ventana de incógnito o un perfil propio, con la cuenta ya iniciada
-**antes** de compartir (la web guarda la sesión en el navegador: dos cuentas en la misma ventana se pisan, y el primer login
-en frío tardó 35 s).
+**antes** de compartir, salvo el login de Martiniano, que se muestra en vivo en la apertura (la web guarda la sesión en el
+navegador: dos cuentas en la misma ventana se pisan, y el primer login en frío tardó 35 s).
 
 | Turno | Quién | Etapa | Qué muestra | Cuentas | Depende de |
 |---|---|---|---|---|---|
-| 1 | Martiniano | Reservar | Apertura y arquitectura, y el pasajero completo (detalle abajo) | `pasajero2` | Render despierto; un solo mensaje de calentamiento al asistente |
+| 1 | Martiniano | Reservar | Apertura y arquitectura, login en vivo y el pasajero: Buscar, reservar, Mis reservas, Informar ausencia y asistente (detalle abajo) | `pasajero2` | Render despierto; un solo mensaje de calentamiento al asistente |
 | 2 | Martín | Viajar | Chofer y GPS: lista del viaje → inicia el viaje 1 desde el Samsung → publica posición → **abre el mapa del pasajero** → finaliza | `chofer1` y `pasajero1` | La reserva de `pasajero1` en el viaje 1 (sección 1) y la ubicación precisa activada |
-| 3 | Facundo | Cobrar y controlar | Administración: **Pagos a confirmar** (confirma el pago registrado en el turno 1), Deuda por cliente, Reservas, Viajes del día. Después Mercado Pago, **explicado y no en vivo** (sección 4) | `admin1` | El pago de `pasajero2` registrado al final del turno 1 |
+| 3 | Facundo | Cobrar y controlar | **Registra el pago** como pasajero (Mis reservas → «Registrar un pago») y lo **confirma** como administración (Pagos a confirmar); después Deuda por cliente, Reservas y Viajes del día. Mercado Pago, **explicado y no en vivo** (sección 4) | `pasajero2` (en su propia ventana) y `admin1` | Nada de los turnos anteriores: él mismo registra el pago que confirma |
 | 4 | Quien tenga la palabra | Cierre | Lo que se declara parcial (sección 4) y lo que sigue | — | — |
 
-**Dependencia que no se puede olvidar:** el turno 1 termina con el pago de `pasajero2` registrado; si no, el turno 3 abre
-Pagos a confirmar vacío. **Límite del turno 3:** confirmar pagos y consultar deuda y reservas está probado en la web
-publicada; asignar o reasignar chofer y vehículo en Viajes del día **no se probó en Render**, así que se muestra solo
-lectura salvo que se pruebe antes de las 17:15.
+**El pago es del turno 3** (decidido el 30/10): ningún otro turno lo deja preparado. **Qué ensayar a las 17:15 (Facundo):**
+si la pantalla de pago deja registrar un pago cuando el saldo está «Al día», y qué método e importe usar; si no deja, hay que
+resolver cómo tener un pago pendiente antes de las 17:30. **Límite del turno 3:** confirmar pagos y consultar deuda y reservas
+está probado en la web publicada; asignar o reasignar chofer y vehículo en Viajes del día **no se probó en Render**, así que
+se muestra solo lectura salvo que se pruebe antes de las 17:15.
 
 #### Turno 1 (Martiniano): flujo de presentación
 
 Los minutos son estimados y se ajustan al tiempo real de la reunión.
 
-0. **Antes de compartir (17:40):** ventana de incógnito con `pasajero2` iniciada, Render caliente, todo lo demás cerrado.
+0. **Antes de compartir (17:40):** ventana de incógnito abierta en la pantalla de login, **sin sesión iniciada**; Render caliente
+   (se calentó con un login); todo lo demás cerrado.
 1. **Apertura (~2 min), hablado.** VanFull es una empresa real de charters que hoy trabaja con WhatsApp, Excel y teléfono.
    Arquitectura en una frase: FastAPI es la autoridad de reglas, cupos y pagos; la IA no toca la base, invoca herramientas de la
    API. Qué hizo cada uno: Martiniano el pasajero y la base común (login, contrato de la API, CI, despliegue), Martín el
    chofer y el GPS, Facundo administración y pagos.
-2. **Buscar (~1 min).** 30/10, ida: 3 viajes con sus lugares (20 cada uno). El cupo se calcula en el momento, no se guarda.
-3. **Reservar (~2 min).** Viaje 3 → Confirmar reserva (pide «¿Dónde subís?»). Esperado: reserva consolidada y un lugar menos
+2. **Inicio de sesión, en vivo (~1 min).** Entrar con `pasajero2@vanfull.test`. Mientras carga: cada rol ve una app distinta
+   según su cuenta y la API valida la identidad en cada pedido. Si tarda, es el arranque en frío de Render (esperar, no recargar).
+3. **Buscar (~1 min).** Primera pestaña de la barra inferior (Buscar, Mis reservas, Asistente, Cuenta). 30/10, ida: 3 viajes
+   con sus lugares (20 cada uno). El cupo se calcula en el momento, no se guarda.
+4. **Reservar (~2 min).** Viaje 3 → Confirmar reserva (pide «¿Dónde subís?»). Esperado: reserva consolidada y un lugar menos
    en Buscar (19).
-4. **Mis reservas (~1 min).** Abrir la reserva del viaje 3. La ubicación del viaje solo se ve con una reserva propia
+5. **Mis reservas (~1 min).** Abrir la reserva del viaje 3. La ubicación del viaje solo se ve con una reserva propia
    consolidada: con el viaje sin iniciar, «Ver ubicación» dice «Ubicación no disponible para esta sesión o viaje» (RN-030).
-5. **Informar ausencia, CU-008 (~2 min).** «Informar ausencia» → confirmar. Esperado: «Tu aviso de ausencia está registrado.»
+6. **Informar ausencia, CU-008 (~2 min).** «Informar ausencia» → confirmar. Esperado: «Tu aviso de ausencia está registrado.»
    Avisar que el botón no cambia (la acción solo muestra el mensaje), que no cancela la reserva y que repetirla no duplica.
    **Que el cupo vuelva a subir no está verificado a ojo** (la cancelación del ensayo lo confundió): se muestra solo si se
    comprobó en el ensayo de las 17:15.
-6. **Asistente (~2 min).** Dos mensajes, los que ya funcionaron con el modelo real: «¿hay lugar el viernes 30/10 a la ida?»
+7. **Asistente (~2 min).** Dos mensajes, los que ya funcionaron con el modelo real: «¿hay lugar el viernes 30/10 a la ida?»
    (responde con disponibilidad) y «quiero hablar con una persona» (deriva a una persona). **No pedirle que reserve ni que
    cancele:** no se probó con el modelo real. Cada mensaje gasta de 2 a 4 pedidos del cupo diario (50).
-7. **Registrar el pago (~2 min).** Pantalla de pago: «¿Cómo pagaste?» e importe. Queda **pendiente** hasta que administración
-   lo confirma. **Dejarlo registrado: el turno 3 lo necesita.**
-8. **Traspaso (~10 s).** «El pasajero reservó, avisó y pagó. Ahora Martín muestra el viaje.»
+8. **Traspaso (~10 s).** «El pasajero reservó y avisó su ausencia. Ahora Martín muestra el viaje.»
 
-**No hacer en el turno 1:** cancelar la reserva (después no se puede reservar de nuevo ese viaje, MR-R15) ni mostrar
-Checkout o Mercado Pago (apagado por flag). **Ensayo previo (17:15 a 17:30):** los pasos 2 a 7 con la Web publicada, para fijar
-método e importe del pago y comprobar si el cupo vuelve a subir tras la ausencia; el reinicio de las 17:30 borra todo lo
-ensayado.
+**No hacer en el turno 1:** cancelar la reserva (después no se puede reservar de nuevo ese viaje, MR-R15), registrar el pago
+(es del turno 3) ni mostrar Checkout o Mercado Pago (apagado por flag). **Ensayo previo (17:15 a 17:30):** los pasos 2 a 7 con la
+Web publicada, para comprobar si el cupo vuelve a subir tras la ausencia; el reinicio de las 17:30 borra todo lo ensayado.
 
 ## 4. Qué se declara parcial (no se muestra como completo)
 

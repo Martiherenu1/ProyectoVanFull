@@ -1,5 +1,9 @@
 # CONTEXTO VANFULL — Carga rápida de sesión
 
+> **Chofer, publicación documental autorizada — 2026-10-30:** consolidación de CU-029/CU-030, Issue #259, base actualizada `f55ecf271aba9645582fcf1910b6a7da0084c6f7` (#257/CU-008 conservado). Solo tres documentos; sin cumplimiento completo ni cierre de pendientes funcionales. Commit/push/PR/CI propios aún pendientes al preparar esta nota; estado posterior en el cierre y contexto de Chofer. Sin merge, despliegue ni operaciones reales; notas siguientes históricas.
+
+> **Chofer, preparación documental — 2026-10-30:** cierre CU-029/CU-030 en [PC2/CIERRE-DOCUMENTAL-CU029-CU030.md](PC2/CIERRE-DOCUMENTAL-CU029-CU030.md), rama local `docs/chofer-cierre-documental-cu029-cu030`, base `cbcbf1243370649add1b30fb2f1908bdb54962a5`. Solo documentación para revisión final, sin commit ni publicación; no implica CU completos ni nuevas pruebas/operaciones. Históricos y pendientes conservados; detalle en el cierre y contexto de Chofer.
+
 > **Corte Pasajero y base común — 2026-10-29 (noche).** Entró a `main`: «Ver ubicación» en Mis reservas (#222),
 > `GET /reservas` de CU-027 (#224), fechas del asistente como DD/MM/AAAA (#232), aviso al agotarse el cupo diario
 > de OpenRouter (#234), guion de la demo (#235/#236) y una prueba que dependía de la hora (#239). **Verificado en

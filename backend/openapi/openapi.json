@@ -1231,7 +1231,7 @@
           "pagos"
         ],
         "summary": "Confirmar o rechazar un pago",
-        "description": "Permite a una persona autorizada confirmar o rechazar un pago cuya\nacreditación no haya sido validada automáticamente por un proveedor\nintegrado. No se utiliza para volver a validar pagos ya confirmados\nautomáticamente mediante Mercado Pago. El agente IA nunca confirma pagos.\nUn pago CONFIRMADO genera un comprobante RECIBO. (CU-016, RF-011, RN-015)\n",
+        "description": "Permite a una persona autorizada confirmar o rechazar un pago cuya\nacreditación no haya sido validada automáticamente por un proveedor\nintegrado. No se utiliza para volver a validar pagos ya confirmados\nautomáticamente mediante Mercado Pago. Una decisión CONFIRMADO sobre medio\nMERCADO_PAGO devuelve 409: solo el proveedor puede acreditarlo. El agente IA nunca confirma pagos.\nUn pago CONFIRMADO genera un comprobante RECIBO. (CU-016, RF-011, RN-015)\n",
         "x-cu": "CU-016",
         "parameters": [
           {
@@ -1276,6 +1276,16 @@
           },
           "404": {
             "$ref": "#/components/responses/NoEncontrado"
+          },
+          "409": {
+            "description": "Mercado Pago requiere validación automática del proveedor (`PAGO_MP_REQUIERE_PROVEEDOR`)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
           }
         }
       }
@@ -2051,7 +2061,7 @@
             "type": "string",
             "nullable": true,
             "format": "uri",
-            "description": "Solo sandbox_init_point validado; nulo si no hay enlace seguro o el Pago ya fue decidido"
+            "description": "Solo init_point oficial validado; nulo si no hay enlace seguro o el Pago ya fue decidido"
           }
         }
       },

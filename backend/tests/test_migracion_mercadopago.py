@@ -61,7 +61,7 @@ def test_migracion_optativa_rechaza_destino_antes_de_conectar(env, url):
         timeout=20,
     )
     assert resultado.returncode != 0
-    assert "solo admite entorno local" in resultado.stderr
+    assert "solo admite un perfil de prueba" in resultado.stderr
     assert "ConnectionRefused" not in resultado.stderr and "getaddrinfo" not in resultado.stderr
 
 

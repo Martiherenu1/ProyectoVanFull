@@ -515,10 +515,9 @@ def test_app_real_registra_ruta_solo_con_habilitacion_local(entorno):
     assert resultado.returncode == 0
 
 
-@pytest.mark.parametrize(
-    "decision,codigo,asientos", [("CONFIRMADO", 200, 1), ("RECHAZADO", 409, 0)]
-)
-def test_cu016_gana_carrera_antes_del_webhook(entorno, monkeypatch, decision, codigo, asientos):
+def test_cu016_rechaza_antes_del_webhook_y_conserva_la_decision(entorno, monkeypatch):
+    decision, codigo, asientos = "RECHAZADO", 409, 0
+
     async def carrera(app, fabrica, id_pago):
         retenido, continuar = asyncio.Event(), asyncio.Event()
         original = servicio_pagos.registrar_evento

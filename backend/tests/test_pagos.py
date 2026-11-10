@@ -530,6 +530,34 @@ def test_dueno_puede_rechazar_y_no_genera_movimiento_ni_recibo(entorno):
     ) == [("pago_rechazado",)]
 
 
+def test_mercadopago_no_admite_confirmacion_manual(entorno):
+    base, cliente, pagos = entorno
+    id_pago = asyncio.run(
+        consultar(
+            base,
+            "INSERT INTO pago (id_cliente, importe, medio_pago) "
+            "VALUES ($1, 1250.50, 'MERCADO_PAGO') RETURNING id_pago",
+            pagos["id_cliente"],
+        )
+    )[0][0]
+
+    respuesta = cliente.post(
+        RUTA.format(id_pago),
+        json={"decision": "CONFIRMADO"},
+        headers=_con_rol("administrador"),
+    )
+
+    assert respuesta.status_code == 409
+    assert respuesta.json()["error"]["codigo"] == "PAGO_MP_REQUIERE_PROVEEDOR"
+    assert _estado(base, id_pago) == "PENDIENTE"
+    assert asyncio.run(
+        consultar(base, "SELECT count(*) FROM comprobante WHERE id_pago = $1", id_pago)
+    ) == [(0,)]
+    assert asyncio.run(
+        consultar(base, "SELECT count(*) FROM movimiento_cuenta WHERE id_pago = $1", id_pago)
+    ) == [(0,)]
+
+
 @pytest.mark.parametrize("rol", ["pasajero", "chofer", "representante_corporativo"])
 def test_otros_roles_no_pueden_decidir_y_no_modifican_el_pago(entorno, rol):
     base, cliente, pagos = entorno

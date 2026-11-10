@@ -87,7 +87,12 @@ async def procesar_notificacion_prueba(
             raise NotificacionNoValida("El pago no admite confirmación automática.")
         # RN-015: acreditación válida confirma sin pedir segunda decisión humana.
         # Se reutilizan RECIBO, ACREEDOR y evento atómicos, sin duplicar reglas.
-        await decidir_pago_pendiente(db, pago.id_pago, "CONFIRMADO")
+        await decidir_pago_pendiente(
+            db,
+            pago.id_pago,
+            "CONFIRMADO",
+            validado_por_proveedor=True,
+        )
         logger.info("mercadopago_resultado=confirmado")
         return "confirmado"
     except ErrorMercadoPago:

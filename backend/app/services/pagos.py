@@ -157,7 +157,13 @@ async def preparar_pago_pendiente(
     return pago
 
 
-async def decidir_pago_pendiente(db: AsyncSession, id_pago: int, decision: str) -> Pago:
+async def decidir_pago_pendiente(
+    db: AsyncSession,
+    id_pago: int,
+    decision: str,
+    *,
+    validado_por_proveedor: bool = False,
+) -> Pago:
     """Decide un pago pendiente y registra todo en una única transacción.
 
     El bloqueo de la fila evita que dos administradores decidan el mismo pago a la vez. El filtro
@@ -175,6 +181,16 @@ async def decidir_pago_pendiente(db: AsyncSession, id_pago: int, decision: str) 
             404,
             "PAGO_PENDIENTE_NO_ENCONTRADO",
             "No se encontró un pago pendiente con ese identificador.",
+        )
+    if (
+        pago.medio_pago == "MERCADO_PAGO"
+        and decision == "CONFIRMADO"
+        and not validado_por_proveedor
+    ):
+        raise ApiError(
+            409,
+            "PAGO_MP_REQUIERE_PROVEEDOR",
+            "Un pago Mercado Pago solo puede confirmarse mediante validación del proveedor.",
         )
 
     pago.estado = decision

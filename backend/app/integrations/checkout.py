@@ -1,4 +1,4 @@
-"""Preferences API sandbox estricta. Sin retries POST ni URLs arbitrarias del webhook."""
+"""Preferences API de pruebas. Sin retries POST ni URLs arbitrarias del webhook."""
 
 import re
 from dataclasses import dataclass
@@ -25,6 +25,12 @@ class PreferenciaCheckout:
 
 
 class ClienteCheckoutPruebas(ClienteMercadoPagoPruebas):
+    def __init__(self, cliente: httpx.AsyncClient, access_token: str, application_id: str) -> None:
+        super().__init__(cliente, access_token)
+        if not re.fullmatch(r"[0-9]{1,32}", application_id):
+            raise ValueError("Falta identificador de aplicación de pruebas.")
+        self._application_id = application_id
+
     async def _solicitar(self, metodo: str, ruta: str, **opciones):
         try:
             respuesta = await self._cliente.request(
@@ -46,11 +52,15 @@ class ClienteCheckoutPruebas(ClienteMercadoPagoPruebas):
 
     def _preferencia(self, datos: dict, referencia: str, receptor: int) -> PreferenciaCheckout:
         id_pref = datos.get("id")
-        url = datos.get("sandbox_init_point")
+        url = datos.get("init_point")
+        client_id = datos.get("client_id")
         if (
             not isinstance(id_pref, str)
             or not re.fullmatch(r"[A-Za-z0-9_-]{1,160}", id_pref)
             or not isinstance(url, str)
+            or isinstance(client_id, bool)
+            or not isinstance(client_id, (int, str))
+            or str(client_id) != self._application_id
         ):
             raise NotificacionNoValida("Preferencia no válida.")
         try:
@@ -71,7 +81,13 @@ class ClienteCheckoutPruebas(ClienteMercadoPagoPruebas):
             raise NotificacionNoValida("Detalle de preferencia no válido.") from None
         if (
             uri.scheme != "https"
-            or uri.hostname not in {"sandbox.mercadopago.com", "sandbox.mercadopago.com.ar"}
+            or uri.hostname
+            not in {
+                "mercadopago.com",
+                "www.mercadopago.com",
+                "mercadopago.com.ar",
+                "www.mercadopago.com.ar",
+            }
             or uri.username
             or uri.password
             or puerto not in {None, 443}
@@ -81,7 +97,7 @@ class ClienteCheckoutPruebas(ClienteMercadoPagoPruebas):
             or type(datos.get("collector_id")) is not int
             or datos.get("collector_id") != receptor
         ):
-            raise NotificacionNoValida("Preferencia ajena al escenario sandbox.")
+            raise NotificacionNoValida("Preferencia ajena a la aplicación configurada.")
         return PreferenciaCheckout(id_pref, url, referencia, receptor, importe, moneda)
 
     async def crear_preferencia(
@@ -92,24 +108,26 @@ class ClienteCheckoutPruebas(ClienteMercadoPagoPruebas):
         moneda: str,
         receptor: int,
         retorno: str,
-        webhook: str,
+        webhook: str = "",
     ) -> PreferenciaCheckout:
+        cuerpo = {
+            "items": [
+                {
+                    "title": "VanFull - pago de prueba",
+                    "quantity": 1,
+                    "unit_price": float(importe),
+                    "currency_id": moneda,
+                }
+            ],
+            "external_reference": referencia,
+            "back_urls": {"success": retorno, "pending": retorno, "failure": retorno},
+        }
+        if webhook:
+            cuerpo["notification_url"] = webhook
         datos = await self._solicitar(
             "POST",
             "/checkout/preferences",
-            json={
-                "items": [
-                    {
-                        "title": "VanFull - pago sandbox",
-                        "quantity": 1,
-                        "unit_price": float(importe),
-                        "currency_id": moneda,
-                    }
-                ],
-                "external_reference": referencia,
-                "notification_url": webhook,
-                "back_urls": {"success": retorno, "pending": retorno, "failure": retorno},
-            },
+            json=cuerpo,
         )
         return self._preferencia(datos, referencia, receptor)
 

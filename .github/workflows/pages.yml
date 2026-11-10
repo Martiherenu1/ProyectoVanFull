@@ -21,6 +21,11 @@ on:
         required: true
         default: false
         type: boolean
+      checkout_mp_demo_enabled:
+        description: "Abrir una preferencia fija de demostración sin cambiar la API habitual"
+        required: true
+        default: false
+        type: boolean
 
 permissions:
   contents: read
@@ -33,7 +38,11 @@ concurrency:
 env:
   API_BASE_URL: ${{ inputs.checkout_mp_enabled && vars.CU036_API_BASE_URL || vars.API_BASE_URL }}
   CU036_API_BASE_URL: ${{ vars.CU036_API_BASE_URL }}
-  CHECKOUT_MP_ENABLED: ${{ inputs.checkout_mp_enabled }}
+  CHECKOUT_MP_API_ENABLED: ${{ inputs.checkout_mp_enabled }}
+  CHECKOUT_MP_DEMO_ENABLED: ${{ inputs.checkout_mp_demo_enabled }}
+  CHECKOUT_MP_ENABLED: ${{ inputs.checkout_mp_enabled || inputs.checkout_mp_demo_enabled }}
+  CHECKOUT_MP_DEMO_INIT_POINT: ${{ inputs.checkout_mp_demo_enabled && 'https://www.mercadopago.com.ar/checkout/v1/redirect?pref_id=3800084159-1f311de9-a99d-46ec-8951-5f8bd5ccaa4f' || '' }}
+  CHECKOUT_MP_DEMO_AMOUNT: ${{ inputs.checkout_mp_demo_enabled && '10000' || '' }}
   VANFULL_MAPS_WEB_KEY: ${{ vars.VANFULL_MAPS_WEB_KEY }}
   VANFULL_MAPS_WEB_MAP_ID: ${{ vars.VANFULL_MAPS_WEB_MAP_ID }}
 
@@ -47,13 +56,27 @@ jobs:
             https://*/api) echo "API: $API_BASE_URL" ;;
             *) echo "::error::La variable API_BASE_URL tiene que ser https://<servicio>.onrender.com/api (está: '$API_BASE_URL')."; exit 1 ;;
           esac
-          if [ "$CHECKOUT_MP_ENABLED" = "true" ]; then
+          if [ "$CHECKOUT_MP_API_ENABLED" = "true" ] && [ "$CHECKOUT_MP_DEMO_ENABLED" = "true" ]; then
+            echo "::error::Elegí Checkout por API o demostración fija, no ambos."
+            exit 1
+          fi
+          if [ "$CHECKOUT_MP_API_ENABLED" = "true" ]; then
             case "$CU036_API_BASE_URL" in
               https://*/api) ;;
               *) echo "::error::CU036_API_BASE_URL debe autorizar explícitamente una API de pruebas HTTPS terminada en /api."; exit 1 ;;
             esac
             if [ "$API_BASE_URL" != "$CU036_API_BASE_URL" ]; then
               echo "::error::Checkout Pro solo puede usar la API autorizada en CU036_API_BASE_URL."
+              exit 1
+            fi
+          fi
+          if [ "$CHECKOUT_MP_DEMO_ENABLED" = "true" ]; then
+            if ! [[ "$CHECKOUT_MP_DEMO_INIT_POINT" =~ ^https://(www\.)?mercadopago\.com(\.ar)?/checkout/v1/redirect\?pref_id=[A-Za-z0-9_-]{1,160}$ ]]; then
+              echo "::error::CHECKOUT_MP_DEMO_INIT_POINT no es un init_point oficial válido."
+              exit 1
+            fi
+            if ! [[ "$CHECKOUT_MP_DEMO_AMOUNT" =~ ^[1-9][0-9]*(\.[0-9]{1,2})?$|^0\.(0[1-9]|[1-9][0-9]?)$ ]]; then
+              echo "::error::CHECKOUT_MP_DEMO_AMOUNT debe ser positivo y tener hasta dos decimales."
               exit 1
             fi
           fi
@@ -96,6 +119,8 @@ jobs:
           flutter build web --release --base-href /
           --dart-define=API_BASE_URL="$API_BASE_URL"
           --dart-define=CHECKOUT_MP_ENABLED="$CHECKOUT_MP_ENABLED"
+          --dart-define=CHECKOUT_MP_DEMO_INIT_POINT="$CHECKOUT_MP_DEMO_INIT_POINT"
+          --dart-define=CHECKOUT_MP_DEMO_AMOUNT="$CHECKOUT_MP_DEMO_AMOUNT"
           --dart-define=VANFULL_MAPS_WEB_KEY="$VANFULL_MAPS_WEB_KEY"
           --dart-define=VANFULL_MAPS_WEB_MAP_ID="$VANFULL_MAPS_WEB_MAP_ID"
 
@@ -141,6 +166,8 @@ jobs:
           --base-href "/${{ github.event.repository.name }}/"
           --dart-define=API_BASE_URL="$API_BASE_URL"
           --dart-define=CHECKOUT_MP_ENABLED="$CHECKOUT_MP_ENABLED"
+          --dart-define=CHECKOUT_MP_DEMO_INIT_POINT="$CHECKOUT_MP_DEMO_INIT_POINT"
+          --dart-define=CHECKOUT_MP_DEMO_AMOUNT="$CHECKOUT_MP_DEMO_AMOUNT"
           --dart-define=VANFULL_MAPS_WEB_KEY="$VANFULL_MAPS_WEB_KEY"
           --dart-define=VANFULL_MAPS_WEB_MAP_ID="$VANFULL_MAPS_WEB_MAP_ID"
 

@@ -24,6 +24,8 @@ class PasajeroShell extends StatefulWidget {
     this.pantallaUbicacion,
     this.checkout,
     this.abrirCheckout,
+    this.checkoutDemoInitPoint,
+    this.checkoutDemoImporte,
     this.contextoPagoVigente,
     this.informarAusencia,
     this.contextoAusenciaVigente,
@@ -33,6 +35,8 @@ class PasajeroShell extends StatefulWidget {
   final VoidCallback onSalir;
   final CheckoutApi? checkout;
   final AbrirCheckout? abrirCheckout;
+  final String? checkoutDemoInitPoint;
+  final double? checkoutDemoImporte;
   final bool Function()? contextoPagoVigente;
   final InformarAusencia? informarAusencia;
   final bool Function()? contextoAusenciaVigente;
@@ -115,6 +119,8 @@ class _PasajeroShellState extends State<PasajeroShell> {
           iniciarCheckout: widget.checkout?.iniciar,
           consultarPago: widget.checkout?.consultar,
           abrirCheckout: widget.abrirCheckout,
+          checkoutDemoInitPoint: widget.checkoutDemoInitPoint,
+          checkoutDemoImporte: widget.checkoutDemoImporte,
           contextoVigente: widget.contextoPagoVigente,
           onTerminar: (_) {
             finalizo = true;

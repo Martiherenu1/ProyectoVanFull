@@ -23,8 +23,10 @@ Uri validarUrlCheckout(String valor) {
   final url = Uri.parse(valor);
   if (url.scheme != 'https' ||
       !const {
-        'sandbox.mercadopago.com',
-        'sandbox.mercadopago.com.ar',
+        'mercadopago.com',
+        'www.mercadopago.com',
+        'mercadopago.com.ar',
+        'www.mercadopago.com.ar',
       }.contains(url.host) ||
       url.userInfo.isNotEmpty ||
       url.port != 443 ||
@@ -33,7 +35,7 @@ Uri validarUrlCheckout(String valor) {
       !RegExp(r'^[A-Za-z0-9_-]{1,160}$')
           .hasMatch(url.queryParameters['pref_id'] ?? '')) {
     throw const FormatException(
-      'Enlace Checkout fuera del entorno de pruebas.',
+      'Enlace Checkout fuera del destino autorizado.',
     );
   }
   return url;

@@ -15,7 +15,7 @@ import 'package:http/testing.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 const enlace =
-    'https://sandbox.mercadopago.com.ar/checkout/v1/redirect?pref_id=44-falsa';
+    'https://www.mercadopago.com.ar/checkout/v1/redirect?pref_id=44-falsa';
 const clave = 'b46decdc-5b93-4818-aa91-795b7a7de7c0';
 Pago pago([EstadoPago estado = EstadoPago.pendiente]) =>
     Pago(idPago: 5, importe: 10000, medioPago: 'MERCADO_PAGO', estado: estado);
@@ -157,13 +157,13 @@ void main() {
   }
 
   for (final url in [
-    'http://sandbox.mercadopago.com.ar/?pref_id=a',
-    'https://www.mercadopago.com.ar/?pref_id=a',
-    'https://sandbox.mercadopago.com.ar.evil.test/?pref_id=a',
-    'https://user@sandbox.mercadopago.com.ar/?pref_id=a',
-    'https://sandbox.mercadopago.com.ar/?pref_id=a&pref_id=b',
-    'https://sandbox.mercadopago.com.ar/?pref_id=a#approved',
-    'https://sandbox.mercadopago.com.ar:444/?pref_id=a',
+    'http://www.mercadopago.com.ar/?pref_id=a',
+    'https://sandbox.mercadopago.com.ar/?pref_id=a',
+    'https://www.mercadopago.com.ar.evil.test/?pref_id=a',
+    'https://user@www.mercadopago.com.ar/?pref_id=a',
+    'https://www.mercadopago.com.ar/?pref_id=a&pref_id=b',
+    'https://www.mercadopago.com.ar/?pref_id=a#approved',
+    'https://www.mercadopago.com.ar:444/?pref_id=a',
   ]) {
     test(
       'rechaza URL no autorizada $url',

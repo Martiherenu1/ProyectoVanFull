@@ -92,7 +92,7 @@ class Servidor {
         return json({
           'pago': pago,
           'estado_checkout': 'LISTO',
-          'checkout_url': 'https://sandbox.mercadopago.com.ar/checkout/v1/redirect?pref_id=falsa-5',
+          'checkout_url': 'https://www.mercadopago.com.ar/checkout/v1/redirect?pref_id=falsa-5',
         });
       case '/api/pagos/5':
         consultasPago++;

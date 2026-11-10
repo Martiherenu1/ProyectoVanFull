@@ -24,9 +24,10 @@ aprobación de D1–D6 ni equivalencia BILLETERA/MERCADO_PAGO.
    Identidad vinculada por FK compuesta Pago/cliente; preferencia y Pago únicos;
    UNIQUE(cliente, clave_solicitud). La nueva tabla NO se agrega al esquema base.
 3. Con la transacción cerrada se hace un único POST Preferences. Respuesta segura:
-   receptor/referencia/ítem/importe/moneda y sandbox_init_point HTTPS validado.
-   No existe fallback init_point. El dominio sandbox no prueba por sí solo el
-   entorno; la comprobación decisiva de Payments sigue exigiendo live_mode=false.
+   aplicación/receptor/referencia/ítem/importe/moneda e `init_point` HTTPS oficial
+   validados. La guía oficial vigente eliminó `sandbox_init_point`: las pruebas usan
+   el mismo host de Checkout y se distinguen por credenciales/cuentas ficticias. El
+   dominio no prueba por sí solo el entorno; Payments sigue exigiendo `live_mode=false`.
 4. Reintento de la misma clave recupera la misma intención. Si el POST fue incierto,
    solo GET search por UUID + GET de la preferencia única. Nunca repite POST.
    CREANDO/LISTO/INCIERTO son estados técnicos de intención, no estados contables.

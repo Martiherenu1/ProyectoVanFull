@@ -4,12 +4,14 @@ import asyncio
 import json
 from concurrent.futures import ThreadPoolExecutor
 from contextlib import contextmanager
+from decimal import Decimal
 from uuid import uuid4
 
 import httpx
 import pytest
 from fastapi import FastAPI
 from fastapi.testclient import TestClient
+from pydantic import ValidationError
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
 from sqlalchemy.pool import NullPool
 
@@ -27,6 +29,15 @@ from tests.test_mercadopago_validacion import AHORA, SECRETO, firma, recurso
 from tests.test_pagos import _crear_pasajero
 
 RUTA = "/api/pagos/mercadopago/checkout"
+APPLICATION_ID = "99112233"
+
+
+class AplicacionEspia:
+    def __init__(self):
+        self.prefijos = []
+
+    def include_router(self, router, **_):
+        self.prefijos.append(router.prefix)
 
 
 @pytest.fixture(scope="module")
@@ -49,6 +60,7 @@ def escenario(base):
         mercadopago_checkout_enabled=True,
         mercadopago_access_token="token-falso",
         mercadopago_webhook_secret=SECRETO,
+        mercadopago_application_id=APPLICATION_ID,
         mercadopago_collector_id=44,
         mercadopago_currency="ARS",
         mercadopago_checkout_return_url="https://vanfull.invalid/api/pagos/mercadopago/retorno",
@@ -79,9 +91,10 @@ def api(escenario, *, fallo=None, temprano=False):
     def preferencia():
         return {
             "id": estado["preferencia"],
+            "client_id": APPLICATION_ID,
             "collector_id": 44,
             "external_reference": estado["referencia"],
-            "sandbox_init_point": "https://sandbox.mercadopago.com.ar/checkout/v1/redirect?pref_id=44-falsa",
+            "init_point": "https://www.mercadopago.com.ar/checkout/v1/redirect?pref_id=44-falsa",
             "items": [{"quantity": 1, "unit_price": 10000, "currency_id": "ARS"}],
         }
 
@@ -144,7 +157,7 @@ def api(escenario, *, fallo=None, temprano=False):
 
     async def proveedor():
         async with httpx.AsyncClient(transport=httpx.MockTransport(transporte)) as cliente:
-            yield ClienteCheckoutPruebas(cliente, "token-falso")
+            yield ClienteCheckoutPruebas(cliente, "token-falso", APPLICATION_ID)
 
     async def db():
         async with fabrica() as sesion:
@@ -372,9 +385,68 @@ def test_identidad_propiedad_roles_clave_y_validaciones(escenario):
 
 
 def test_rutas_checkout_ausentes_por_defecto():
-    app = FastAPI()
-    registrar_checkout_si_habilitado(app, Settings(_env_file=None))
-    assert not any("mercadopago/checkout" in r.path for r in app.routes)
+    app = AplicacionEspia()
+    registrar_checkout_si_habilitado(
+        app,
+        Settings(
+            _env_file=None,
+            mercadopago_sandbox_enabled=False,
+            mercadopago_checkout_enabled=False,
+        ),
+    )
+    assert app.prefijos == []
+
+
+def test_checkout_compartido_aislado_no_registra_webhook_ni_lo_envia_a_preferences():
+    ajustes = Settings(
+        _env_file=None,
+        env="test",
+        database_url="postgresql+asyncpg://x:x@db-aislada/vf_sandbox_cu036",
+        mercadopago_sandbox_enabled=False,
+        mercadopago_checkout_enabled=True,
+        mercadopago_access_token="token-falso",
+        mercadopago_application_id=APPLICATION_ID,
+        mercadopago_collector_id=44,
+        mercadopago_currency="ARS",
+        mercadopago_checkout_return_url="https://vanfull-cu036.invalid/retorno",
+    )
+    app = AplicacionEspia()
+    registrar_si_habilitado(app, ajustes)
+    registrar_checkout_si_habilitado(app, ajustes)
+    assert app.prefijos == ["/pagos"]
+
+    async def run():
+        def transporte(request):
+            cuerpo = json.loads(request.content)
+            assert "notification_url" not in cuerpo
+            assert cuerpo["items"][0]["unit_price"] == 10000
+            return httpx.Response(
+                201,
+                json={
+                    "id": "44-falsa",
+                    "client_id": APPLICATION_ID,
+                    "collector_id": 44,
+                    "external_reference": "intento-falso",
+                    "init_point": "https://www.mercadopago.com.ar/?pref_id=44-falsa",
+                    "items": [{"quantity": 1, "unit_price": 10000, "currency_id": "ARS"}],
+                },
+            )
+
+        async with httpx.AsyncClient(transport=httpx.MockTransport(transporte)) as http:
+            proveedor = ClienteCheckoutPruebas(http, "token-falso", APPLICATION_ID)
+            preferencia = await proveedor.crear_preferencia(
+                referencia="intento-falso",
+                importe=Decimal("10000"),
+                moneda="ARS",
+                receptor=44,
+                retorno=ajustes.mercadopago_checkout_return_url,
+            )
+            assert preferencia.url.startswith("https://www.mercadopago.com.ar/")
+
+    asyncio.run(run())
+
+    with pytest.raises(ValidationError):
+        Settings(**(ajustes.model_dump() | {"env": "production"}))
 
 
 @pytest.mark.parametrize("despues", [False, True])
@@ -407,33 +479,37 @@ def test_commit_respuesta_preferencia_ambiguo_recupera_sin_otro_post(
 @pytest.mark.parametrize(
     "cambio",
     [
-        {"sandbox_init_point": None},
-        {"sandbox_init_point": ""},
-        {"sandbox_init_point": "https://www.mercadopago.com.ar/?pref_id=44-falsa"},
-        {"sandbox_init_point": "https://sandbox.mercadopago.com.ar:invalido/?pref_id=44-falsa"},
-        {"sandbox_init_point": "https://usuario@sandbox.mercadopago.com.ar/?pref_id=44-falsa"},
-        {"sandbox_init_point": "https://sandbox.mercadopago.com.ar/?pref_id=otro"},
+        {"init_point": None},
+        {"init_point": ""},
+        {"init_point": "https://sandbox.mercadopago.com.ar/?pref_id=44-falsa"},
+        {"init_point": "https://www.mercadopago.com.ar:invalido/?pref_id=44-falsa"},
+        {"init_point": "https://usuario@www.mercadopago.com.ar/?pref_id=44-falsa"},
+        {"init_point": "https://www.mercadopago.com.ar/?pref_id=otro"},
+        {"init_point": "https://www.mercadopago.com.ar.evil.test/?pref_id=44-falsa"},
         {"external_reference": "otra"},
+        {"client_id": "99112234"},
+        {"client_id": True},
         {"collector_id": 99},
         {"items": []},
         {"items": [{"quantity": True, "unit_price": 1, "currency_id": "ARS"}]},
         {"items": [{"quantity": 1, "unit_price": "NaN", "currency_id": "ARS"}]},
     ],
 )
-def test_preferencia_no_admite_fallback_init_point_ni_datos_inseguros(cambio):
+def test_preferencia_exige_init_point_oficial_y_datos_seguros(cambio):
     from app.integrations.mercadopago import NotificacionNoValida
 
     async def run():
         async with httpx.AsyncClient(
             transport=httpx.MockTransport(lambda _: httpx.Response(200))
         ) as http:
-            proveedor = ClienteCheckoutPruebas(http, "falso")
+            proveedor = ClienteCheckoutPruebas(http, "falso", APPLICATION_ID)
             datos = {
                 "id": "44-falsa",
+                "client_id": APPLICATION_ID,
                 "collector_id": 44,
                 "external_reference": "ref",
-                "sandbox_init_point": "https://sandbox.mercadopago.com.ar/?pref_id=44-falsa",
                 "init_point": "https://www.mercadopago.com.ar/?pref_id=44-falsa",
+                "sandbox_init_point": "https://sandbox.mercadopago.com.ar/?pref_id=44-falsa",
                 "items": [{"quantity": 1, "unit_price": 10000, "currency_id": "ARS"}],
                 **cambio,
             }

@@ -21,12 +21,14 @@ async def proveedor_mp(
     ajustes: Settings = Depends(get_settings),
 ) -> AsyncGenerator[ClienteMercadoPagoPruebas]:
     async with httpx.AsyncClient(follow_redirects=False) as cliente:
-        tipo = (
-            ClienteCheckoutPruebas
-            if ajustes.mercadopago_checkout_enabled
-            else ClienteMercadoPagoPruebas
-        )
-        yield tipo(cliente, ajustes.mercadopago_access_token)
+        if ajustes.mercadopago_checkout_enabled:
+            yield ClienteCheckoutPruebas(
+                cliente,
+                ajustes.mercadopago_access_token,
+                ajustes.mercadopago_application_id,
+            )
+        else:
+            yield ClienteMercadoPagoPruebas(cliente, ajustes.mercadopago_access_token)
 
 
 def reloj_mp() -> float:

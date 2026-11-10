@@ -947,7 +947,8 @@ paths:
         Permite a una persona autorizada confirmar o rechazar un pago cuya
         acreditación no haya sido validada automáticamente por un proveedor
         integrado. No se utiliza para volver a validar pagos ya confirmados
-        automáticamente mediante Mercado Pago. El agente IA nunca confirma pagos.
+        automáticamente mediante Mercado Pago. Una decisión CONFIRMADO sobre medio
+        MERCADO_PAGO devuelve 409: solo el proveedor puede acreditarlo. El agente IA nunca confirma pagos.
         Un pago CONFIRMADO genera un comprobante RECIBO. (CU-016, RF-011, RN-015)
       x-cu: CU-016
       parameters:
@@ -972,6 +973,12 @@ paths:
           $ref: '#/components/responses/SinPermiso'
         '404':
           $ref: '#/components/responses/NoEncontrado'
+        '409':
+          description: Mercado Pago requiere validación automática del proveedor (`PAGO_MP_REQUIERE_PROVEEDOR`)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
 
   # ---------------------------------------------------------------------------
   # VIAJES (administración)
@@ -1509,7 +1516,7 @@ components:
       properties:
         pago: { $ref: '#/components/schemas/Pago' }
         estado_checkout: { type: string, enum: [CREANDO, LISTO, INCIERTO] }
-        checkout_url: { type: string, nullable: true, format: uri, description: Solo sandbox_init_point validado; nulo si no hay enlace seguro o el Pago ya fue decidido }
+        checkout_url: { type: string, nullable: true, format: uri, description: Solo init_point oficial validado; nulo si no hay enlace seguro o el Pago ya fue decidido }
 
     Error:
       type: object

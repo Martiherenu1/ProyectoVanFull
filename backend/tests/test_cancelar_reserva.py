@@ -7,7 +7,7 @@ Todo contra un PostgreSQL real.
 
 import asyncio
 from concurrent.futures import ThreadPoolExecutor
-from datetime import UTC, date, datetime
+from datetime import UTC, date, datetime, timedelta
 from itertools import count
 from types import SimpleNamespace
 
@@ -461,7 +461,8 @@ def test_un_rol_que_no_es_pasajero_es_403(entorno):
 
 
 def test_un_ocasional_en_termino_dice_que_corresponderia_el_credito(entorno):
-    ana, _, id_reserva = _reserva_creada(entorno)
+    fecha_en_termino = (datetime.now(ZONA_ARGENTINA).date() + timedelta(days=2)).isoformat()
+    ana, _, id_reserva = _reserva_creada(entorno, entorno["viaje"](fecha=fecha_en_termino))
     motivo = _cancelar(entorno, ana, id_reserva).json()["motivo"]
     assert "RN-017" in motivo and "en término" in motivo and "todavía no se otorga" in motivo
 

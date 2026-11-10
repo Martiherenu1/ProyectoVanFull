@@ -25,6 +25,8 @@ class PagoScreen extends StatefulWidget {
     this.iniciarCheckout,
     this.consultarPago,
     this.abrirCheckout,
+    this.checkoutDemoInitPoint,
+    this.checkoutDemoImporte,
     this.contextoVigente,
   });
 
@@ -32,6 +34,8 @@ class PagoScreen extends StatefulWidget {
   final IniciarCheckout? iniciarCheckout;
   final ConsultarPagoPropio? consultarPago;
   final AbrirCheckout? abrirCheckout;
+  final String? checkoutDemoInitPoint;
+  final double? checkoutDemoImporte;
   final bool Function()? contextoVigente;
 
   /// El pasajero vio su pago registrado y vuelve.
@@ -78,6 +82,10 @@ class _PagoScreenState extends State<PagoScreen> {
     final medio = _medio;
     if (importe == null || medio == null || _enviando) return;
     if (medio == MedioPago.mercadoPago) {
+      if (_demoCheckoutConfigurada) {
+        await _abrirDemo(importe);
+        return;
+      }
       final iniciar = widget.iniciarCheckout;
       final consultar = widget.consultarPago;
       final abrir = widget.abrirCheckout;
@@ -131,6 +139,52 @@ class _PagoScreenState extends State<PagoScreen> {
         _enviando = false;
         _aviso = _avisoDe(error);
       });
+    }
+  }
+
+  bool get _demoCheckoutConfigurada =>
+      widget.checkoutDemoInitPoint?.isNotEmpty == true &&
+      (widget.checkoutDemoImporte ?? 0) > 0 &&
+      widget.abrirCheckout != null;
+
+  bool _mismoImporte(double primero, double segundo) =>
+      (primero * 100).round() == (segundo * 100).round();
+
+  Future<void> _abrirDemo(double importe) async {
+    final importeDemo = widget.checkoutDemoImporte!;
+    if (!_mismoImporte(importe, importeDemo)) {
+      setState(() {
+        _aviso = _Aviso(
+          'La demostración sólo corresponde a ${importeLegible(importeDemo)}. '
+          'No se registró ningún pago.',
+        );
+      });
+      return;
+    }
+    setState(() {
+      _enviando = true;
+      _aviso = null;
+    });
+    try {
+      final url = validarUrlCheckout(widget.checkoutDemoInitPoint!);
+      final abierta = await widget.abrirCheckout!(url);
+      if (mounted && !abierta) {
+        setState(
+          () => _aviso = const _Aviso(
+            'El navegador no pudo abrir Mercado Pago. No se registró ningún pago.',
+          ),
+        );
+      }
+    } catch (_) {
+      if (mounted) {
+        setState(
+          () => _aviso = const _Aviso(
+            'El enlace de demostración no es una URL oficial válida de Mercado Pago.',
+          ),
+        );
+      }
+    } finally {
+      if (mounted) setState(() => _enviando = false);
     }
   }
 
@@ -219,6 +273,7 @@ class _PagoScreenState extends State<PagoScreen> {
               const SizedBox(height: AppSpacing.sm),
               for (final medio in MedioPago.values)
                 if (medio != MedioPago.mercadoPago ||
+                    _demoCheckoutConfigurada ||
                     (widget.iniciarCheckout != null &&
                         widget.consultarPago != null &&
                         widget.abrirCheckout != null))
@@ -235,7 +290,11 @@ class _PagoScreenState extends State<PagoScreen> {
               const SizedBox(height: AppSpacing.lg),
               Text(
                 _medio == MedioPago.mercadoPago
-                    ? 'Abrirás Mercado Pago para pagar. El saldo cambia cuando el backend verifica la acreditación.'
+                    ? _demoCheckoutConfigurada
+                          ? 'DEMOSTRACIÓN: abre un Checkout Pro de prueba por '
+                                '${importeLegible(widget.checkoutDemoImporte!)}. '
+                                'No registra ni acredita pagos en VanFull.'
+                          : 'Abrirás Mercado Pago para pagar. El saldo cambia cuando el backend verifica la acreditación.'
                     : 'Administración revisa el pago y lo confirma. Hasta entonces tu saldo no cambia.',
                 style: textTheme.bodySmall,
               ),
@@ -263,7 +322,9 @@ class _PagoScreenState extends State<PagoScreen> {
               _enviando
                   ? 'Registrando…'
                   : _medio == MedioPago.mercadoPago
-                  ? 'Iniciar Checkout Pro'
+                  ? _demoCheckoutConfigurada
+                        ? 'Abrir demo de Checkout Pro'
+                        : 'Iniciar Checkout Pro'
                   : 'Registrar pago',
             ),
           ),

@@ -337,6 +337,82 @@ void main() {
     expect(manuales, 0);
   });
 
+  testWidgets('demo abre URL oficial sin registrar ni iniciar un pago', (
+    tester,
+  ) async {
+    var manuales = 0;
+    var inicios = 0;
+    Uri? abierta;
+    await tester.pumpWidget(
+      MaterialApp(
+        home: PagoScreen(
+          saldo: 10000,
+          registrarPago: (a, m) async {
+            manuales++;
+            return pago();
+          },
+          onTerminar: (_) {},
+          iniciarCheckout: (a, c) async {
+            inicios++;
+            return inicio();
+          },
+          consultarPago: (_) async => pago(),
+          abrirCheckout: (url) async {
+            abierta = url;
+            return true;
+          },
+          checkoutDemoInitPoint: enlace,
+          checkoutDemoImporte: 10000,
+        ),
+      ),
+    );
+
+    await tester.tap(find.byKey(const ValueKey('medio-MERCADO_PAGO')));
+    await tester.pump();
+    expect(find.textContaining('DEMOSTRACIÓN'), findsOneWidget);
+    await tester.tap(find.byKey(const ValueKey('registrar-pago')));
+    await tester.pumpAndSettle();
+
+    expect(abierta.toString(), enlace);
+    expect(manuales, 0);
+    expect(inicios, 0);
+    expect(find.textContaining('No registra ni acredita'), findsOneWidget);
+  });
+
+  testWidgets('demo rechaza otro importe y una URL no oficial', (tester) async {
+    var aperturas = 0;
+    await tester.pumpWidget(
+      MaterialApp(
+        home: PagoScreen(
+          saldo: 9000,
+          registrarPago: (a, m) async => pago(),
+          onTerminar: (_) {},
+          abrirCheckout: (_) async {
+            aperturas++;
+            return true;
+          },
+          checkoutDemoInitPoint: 'https://mercadopago.evil.test/?pref_id=a',
+          checkoutDemoImporte: 10000,
+        ),
+      ),
+    );
+    await tester.tap(find.byKey(const ValueKey('medio-MERCADO_PAGO')));
+    await tester.pump();
+    await tester.tap(find.byKey(const ValueKey('registrar-pago')));
+    await tester.pump();
+    expect(
+      find.textContaining(r'sólo corresponde a $ 10.000,00'),
+      findsOneWidget,
+    );
+    expect(aperturas, 0);
+
+    await tester.enterText(find.byKey(const ValueKey('importe-pago')), '10000');
+    await tester.tap(find.byKey(const ValueKey('registrar-pago')));
+    await tester.pumpAndSettle();
+    expect(find.textContaining('no es una URL oficial válida'), findsOneWidget);
+    expect(aperturas, 0);
+  });
+
   testWidgets(
     'cerrar y reabrir conserva solicitud; popup fallido no genera otro inicio',
     (tester) async {

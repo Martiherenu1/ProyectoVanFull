@@ -74,12 +74,20 @@ class VanFullBootstrap extends StatefulWidget {
       'CHECKOUT_MP_ENABLED',
       defaultValue: false,
     ),
+    this.checkoutDemoInitPoint = const String.fromEnvironment(
+      'CHECKOUT_MP_DEMO_INIT_POINT',
+    ),
+    this.checkoutDemoImporte = const String.fromEnvironment(
+      'CHECKOUT_MP_DEMO_AMOUNT',
+    ),
     this.abrirCheckout,
     super.key,
   });
 
   final String apiBaseUrl;
   final bool checkoutEnabled;
+  final String checkoutDemoInitPoint;
+  final String checkoutDemoImporte;
   final AbrirCheckout? abrirCheckout;
   final CrearTransporteHttp? crearTransporte;
   final ComprobarUbicacionInicio? comprobarUbicacionInicio;
@@ -224,6 +232,9 @@ class _VanFullBootstrapState extends State<VanFullBootstrap> {
     );
   }
 
+  bool get _demoCheckout =>
+      widget.checkoutEnabled && widget.checkoutDemoInitPoint.isNotEmpty;
+
   @override
   Widget build(BuildContext context) => SesionApp(
     controller: _sesion,
@@ -235,9 +246,15 @@ class _VanFullBootstrapState extends State<VanFullBootstrap> {
         api: _pasajero,
         informarAusencia: _informarAusencia,
         contextoAusenciaVigente: _ausenciaVigente,
-        checkout: widget.checkoutEnabled ? _checkout : null,
+        checkout: widget.checkoutEnabled && !_demoCheckout ? _checkout : null,
         abrirCheckout: widget.checkoutEnabled
             ? (widget.abrirCheckout ?? abrirCheckoutExterno)
+            : null,
+        checkoutDemoInitPoint: _demoCheckout
+            ? widget.checkoutDemoInitPoint
+            : null,
+        checkoutDemoImporte: _demoCheckout
+            ? double.tryParse(widget.checkoutDemoImporte)
             : null,
         contextoPagoVigente: () =>
             mounted &&

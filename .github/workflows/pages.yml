@@ -4,8 +4,9 @@
 #   - Render (https://vanfull.onrender.com): en la raíz. Se publica en la rama `sitio-web`, que Render
 #     sirve tal cual (render.yaml). Es la URL de la demo.
 #   - GitHub Pages (https://<usuario>.github.io/<repositorio>/): de respaldo.
-# Requiere: Settings → Pages → Source «GitHub Actions», y la variable del repo API_BASE_URL
-# (Settings → Secrets and variables → Actions → Variables). No es secreta: queda en el JS publicado.
+# Requiere: Settings → Pages → Source «GitHub Actions», y la variable del repo API_BASE_URL.
+# CU036_API_BASE_URL autoriza exclusivamente la API aislada usada al habilitar Checkout Pro.
+# (Settings → Secrets and variables → Actions → Variables). No son secretas: quedan en el JS publicado.
 # Opcionales, para el mapa de la última posición (CU-009): VANFULL_MAPS_WEB_KEY y
 # VANFULL_MAPS_WEB_MAP_ID, también como Variables. La clave web queda en el JS publicado: no es un
 # secreto, la protege su restricción por origen en Google Cloud. Sin ellas el sitio compila igual y
@@ -14,6 +15,12 @@ name: Web
 
 on:
   workflow_dispatch:
+    inputs:
+      checkout_mp_enabled:
+        description: "Mostrar Checkout Pro usando la API autorizada en CU036_API_BASE_URL"
+        required: true
+        default: false
+        type: boolean
 
 permissions:
   contents: read
@@ -24,7 +31,9 @@ concurrency:
   cancel-in-progress: false
 
 env:
-  API_BASE_URL: ${{ vars.API_BASE_URL }}
+  API_BASE_URL: ${{ inputs.checkout_mp_enabled && vars.CU036_API_BASE_URL || vars.API_BASE_URL }}
+  CU036_API_BASE_URL: ${{ vars.CU036_API_BASE_URL }}
+  CHECKOUT_MP_ENABLED: ${{ inputs.checkout_mp_enabled }}
   VANFULL_MAPS_WEB_KEY: ${{ vars.VANFULL_MAPS_WEB_KEY }}
   VANFULL_MAPS_WEB_MAP_ID: ${{ vars.VANFULL_MAPS_WEB_MAP_ID }}
 
@@ -38,6 +47,16 @@ jobs:
             https://*/api) echo "API: $API_BASE_URL" ;;
             *) echo "::error::La variable API_BASE_URL tiene que ser https://<servicio>.onrender.com/api (está: '$API_BASE_URL')."; exit 1 ;;
           esac
+          if [ "$CHECKOUT_MP_ENABLED" = "true" ]; then
+            case "$CU036_API_BASE_URL" in
+              https://*/api) ;;
+              *) echo "::error::CU036_API_BASE_URL debe autorizar explícitamente una API de pruebas HTTPS terminada en /api."; exit 1 ;;
+            esac
+            if [ "$API_BASE_URL" != "$CU036_API_BASE_URL" ]; then
+              echo "::error::Checkout Pro solo puede usar la API autorizada en CU036_API_BASE_URL."
+              exit 1
+            fi
+          fi
           # El mapa es opcional: no corta. Con una sola de las dos variables el mapa no se muestra.
           if [ -n "$VANFULL_MAPS_WEB_KEY" ] && [ -n "$VANFULL_MAPS_WEB_MAP_ID" ]; then
             echo "Mapa web: configurado"
@@ -76,6 +95,7 @@ jobs:
         run: >-
           flutter build web --release --base-href /
           --dart-define=API_BASE_URL="$API_BASE_URL"
+          --dart-define=CHECKOUT_MP_ENABLED="$CHECKOUT_MP_ENABLED"
           --dart-define=VANFULL_MAPS_WEB_KEY="$VANFULL_MAPS_WEB_KEY"
           --dart-define=VANFULL_MAPS_WEB_MAP_ID="$VANFULL_MAPS_WEB_MAP_ID"
 
@@ -120,6 +140,7 @@ jobs:
           flutter build web --release
           --base-href "/${{ github.event.repository.name }}/"
           --dart-define=API_BASE_URL="$API_BASE_URL"
+          --dart-define=CHECKOUT_MP_ENABLED="$CHECKOUT_MP_ENABLED"
           --dart-define=VANFULL_MAPS_WEB_KEY="$VANFULL_MAPS_WEB_KEY"
           --dart-define=VANFULL_MAPS_WEB_MAP_ID="$VANFULL_MAPS_WEB_MAP_ID"
 

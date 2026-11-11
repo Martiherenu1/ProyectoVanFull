@@ -1,5 +1,12 @@
 # Contexto vivo · Chofer y viaje en curso (Martín)
 
+## Preparación documental CU-007 para PC3 — 10/11/2026
+
+- Incorporación local íntegra de [ANALISIS-CU007.md](ANALISIS-CU007.md), con sección vigente del 10/11 y ratificación/históricos conservados. Aclaraciones del recuerdo de entrevista comunicado por Martín; no aprobación técnica de Martiniano y Facundo ni CU implementado.
+- Resumen, coherencia, búsqueda de equivalentes y borradores sin publicar en [PREPARACION-PUBLICACION-CU007.md](../PC3/PREPARACION-PUBLICACION-CU007.md). Base main `fa59928ee1dc4ce838f818397181bc6a817c31c1`, rama propia `docs/chofer-analisis-cu007-pc3`.
+- Pendientes: casuales, VUELTA, tratamiento de conflictos offline y habilitación con DNI; QR, sesión/históricos, configuración de paradas, persistencia e idempotencia por acordar. Modelo/contrato solo propuestos; RNF-011/012 conservados. Restricciones de demo 30/10 históricas, sin extenderlas a PC3.
+- Solo cuatro documentos preparados, sin suites por documentación ni operaciones reales. Sin Issue específico equivalente encontrado; título/cuerpo y PR propuestos, no creados. Sin commit, push, publicación, merge ni despliegue; otros trabajos preservados.
+
 ## Consolidación documental publicada — PR #260, 2026-10-30
 
 - Primer HEAD publicado `1720b35dc1aeb14c25c5a4f04dd1c3c5bd91e3ec`, push normal y [PR #260](https://github.com/Martiherenu1/ProyectoVanFull/pull/260) abierta; base `f55ecf271aba9645582fcf1910b6a7da0084c6f7`, solo tres documentos. Único cierre automático #259. CI inicial [41075388445](https://github.com/Martiherenu1/ProyectoVanFull/actions/runs/41075388445) observada en curso, sin aprobación inferida; resultado/SHA del HEAD final se registra en PR/Issue tras observarlo, separado de evidencias históricas. Esta nota actualiza publicación efectiva mediante commit/push documental normal; no hay merge, despliegue ni operaciones reales. CU-029/CU-030 y pendientes siguen abiertos en su alcance; preparación/autorización e históricos siguientes intactos.

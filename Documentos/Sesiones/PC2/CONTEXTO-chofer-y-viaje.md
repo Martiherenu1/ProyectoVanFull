@@ -1,5 +1,12 @@
 # Contexto vivo · Chofer y viaje en curso (Martín)
 
+## Publicación documental CU-007 efectiva — 10/11/2026
+
+- Martín autorizó publicación tras revisar el diff. [Issue #267](https://github.com/Martiherenu1/ProyectoVanFull/issues/267) específico y [PR #268](https://github.com/Martiherenu1/ProyectoVanFull/pull/268) abierta hacia main, sin merge; único cierre automático #267, sin cerrar CU-007 ni sus preguntas funcionales.
+- Base main revalidada sin avance: `fa59928ee1dc4ce838f818397181bc6a817c31c1`. Primer HEAD publicado mediante commit/push normales: `8755c8b972c1ef98c73e072bd41ef3c73224e67a`; este registro documental posterior completa la publicación. HEAD final y CI real de ese HEAD se registran en la PR después de comprobarlos, separados de cualquier evidencia histórica.
+- Revisión solicitada efectivamente mediante GitHub a `Martiherenu1` y `facubarrientos`. Solicitud no equivale a aprobación, revisión del diff ni acuerdo técnico. S10 sigue siendo recuerdo de entrevista comunicado por Martín.
+- Solo los cuatro documentos revisados; análisis SHA-256 `58b44ece93723360dacc5e73ad73f42ff901c481c02959e61291f76afe82d0e4` conservado. Coherencia/enlaces/whitespace comprobados; sin suites locales por alcance documental. Pendientes y preparación anteriores intactos; sin código, contratos, datos, despliegues ni operaciones sobre bases.
+
 ## Preparación documental CU-007 para PC3 — 10/11/2026
 
 - Incorporación local íntegra de [ANALISIS-CU007.md](ANALISIS-CU007.md), con sección vigente del 10/11 y ratificación/históricos conservados. Aclaraciones del recuerdo de entrevista comunicado por Martín; no aprobación técnica de Martiniano y Facundo ni CU implementado.

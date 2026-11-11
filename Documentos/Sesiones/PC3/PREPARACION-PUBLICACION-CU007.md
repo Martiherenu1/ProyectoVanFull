@@ -1,5 +1,21 @@
 # Preparación de publicación documental de CU-007 para PC3
 
+## Publicación efectiva — 10/11/2026
+
+- Creados [Issue #267](https://github.com/Martiherenu1/ProyectoVanFull/issues/267)
+  y [PR #268](https://github.com/Martiherenu1/ProyectoVanFull/pull/268), abierta
+  para revisión, sin merge. Único cierre automático: #267, de documentación.
+- Primer commit/push normal `8755c8b972c1ef98c73e072bd41ef3c73224e67a` sobre
+  `fa59928ee1dc4ce838f818397181bc6a817c31c1`, main sin avance al revalidar.
+  Este registro posterior se publica en la misma rama, sin ampliar los cuatro archivos.
+- Revisión solicitada efectivamente a `Martiherenu1` y `facubarrientos`; ninguna
+  aprobación técnica ni revisión concluida atribuida. Análisis fuente intacto.
+- HEAD final y resultado/enlace de CI se registran en la descripción de #268 tras
+  observarlos; al preparar este registro siguen pendientes de comprobación. No
+  se trasladan resultados de otro HEAD ni se afirma CI aprobada por anticipado.
+- No hubo merge, cambios productivos, despliegues ni operaciones sobre bases.
+  Los borradores y estados «sin publicar» inferiores se conservan como antecedentes.
+
 ## Autorización de publicación — 10/11/2026
 
 Martín revisó el diff y autorizó Issue específico, commit/push normales y PR para

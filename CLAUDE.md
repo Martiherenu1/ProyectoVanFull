@@ -15,6 +15,28 @@ pisarse en `Documentos/Sesiones/PC2/REPARTO-PC2.md`.
 4. **Explicar los comandos** que se corren, no solo pegar el resultado.
 5. Verificar en vez de suponer. Si algo no se pudo verificar, decirlo.
 
+## Al final de cada respuesta: cómo seguir sin gastar tokens de más
+
+Martiniano lo pidió expresamente. **Cerrar cada respuesta con un aviso de dos líneas**, sin repetirlo si no cambió:
+
+> **Siguiente paso:** <cuál>. **Modelo:** Sonnet | Opus | Haiku (<razón corta>).
+> **Contexto:** seguir | `/compact` | `/clear` — <por qué>.
+
+- **`/compact`** si la tarea continúa pero el chat acumuló lecturas grandes o salidas largas. Dejar el mensaje
+  para el compact en un bloque de código (qué se decidió, qué falta, qué archivos leer).
+- **`/clear`** si se cerró un ciclo (PR mergeado, nada sin commitear) y lo que sigue es otro tema, o si se leyó un
+  documento enorme ya resumido. Dejar el **prompt post-clear** en un bloque de código: dónde estamos, qué quedó
+  hecho, qué sigue y qué archivos leer (`CONTEXTO.md`, `CONTEXTO-<área>.md`, el Issue). Corto, pegable sin editar.
+- **Seguir sin tocar nada** es una respuesta válida y la más común: no recomendar `/compact` ni `/clear` por
+  costumbre.
+- **No recomendar ninguno** con cambios sin commitear, una prueba a medio correr o una mutación sin restaurar.
+  Antes de un `/clear`, comprobar que nada vive solo en el chat (commit, `CONTEXTO`, Issues, memoria).
+- **Opus** para reglas ambiguas, diseño de contrato o modelo, seguridad, AG-01 y bugs sin causa obvia. **Sonnet**
+  para un endpoint ya especificado, documentación, PR e Issues, checks y cambios mecánicos. **Haiku** solo para
+  tareas triviales (renombrar, formatear). Si una tarea mezcla ambas, partirla: la decisión en Opus, la ejecución
+  en Sonnet. Avisar el modelo **antes** de la tarea, para cambiarlo con `/model` antes de empezar.
+- El contexto no se puede medir con exactitud: es una **estimación** por volumen, y se dice como tal.
+
 ## La regla de arquitectura que gobierna todo
 
 Cliente-servidor por capas. **La IA no accede a la base de datos**: invoca *tools* de FastAPI.

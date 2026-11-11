@@ -1,6 +1,20 @@
 # Preparación de publicación documental de CU-007 para PC3
 
-## Publicación efectiva — 10/11/2026
+## Integración efectiva verificada — 11/11/2026
+
+PR #268 mergeada en main mediante `c9ac094299a93a52cae6245ea0093aaf964196a2`.
+Se conservan base `fa59928ee1dc4ce838f818397181bc6a817c31c1`, primer HEAD
+`8755c8b972c1ef98c73e072bd41ef3c73224e67a` y HEAD final publicado
+`d5153fa2b2b09803a612eca8c69dea83409de1f0`. La aprobación de Martiniano fue
+únicamente documental: no aprueba implementación ni descenso por reserva.
+Las precisiones transmitidas por Martín el 11/11 dejan S10 pendiente de validación
+con VanFull, los cambios de DER sujetos al acuerdo de los tres y una primera
+entrega solo online como propuesta parcial de Martiniano, pendiente de alcance.
+RF-015 y RNF-011/012 se conservan. No hay fecha de cierre confirmada.
+Los registros siguientes describen publicación y preparación históricas; sus
+afirmaciones de PR abierta/sin merge no son el estado efectivo actual.
+
+## Publicación efectiva — 10/11/2026 (antecedente)
 
 - Creados [Issue #267](https://github.com/Martiherenu1/ProyectoVanFull/issues/267)
   y [PR #268](https://github.com/Martiherenu1/ProyectoVanFull/pull/268), abierta
@@ -16,7 +30,7 @@
 - No hubo merge, cambios productivos, despliegues ni operaciones sobre bases.
   Los borradores y estados «sin publicar» inferiores se conservan como antecedentes.
 
-## Autorización de publicación — 10/11/2026
+## Autorización de publicación — 10/11/2026 (antecedente)
 
 Martín revisó el diff y autorizó Issue específico, commit/push normales y PR para
 revisión, sin merge ni cambios productivos. Main revalidado sin avance en
@@ -27,7 +41,7 @@ no cierra CU-007 ni sus pendientes funcionales. Al registrar esta autorización,
 PR y CI final todavía pendientes. Las notas de preparación siguientes se conservan
 como antecedentes, no como estado de publicación posterior.
 
-**Fecha:** 10/11/2026. **Estado:** preparado localmente para revisión; sin commit,
+**Fecha:** 10/11/2026. **Estado histórico de preparación:** preparado localmente para revisión; sin commit,
 push, Issue, PR, comentarios, merge o despliegue realizados en esta tarea.
 
 ## Base y alcance

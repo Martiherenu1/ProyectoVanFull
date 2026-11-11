@@ -1,5 +1,11 @@
 # Contexto vivo · Chofer y viaje en curso (Martín)
 
+## Integración documental CU-007 verificada — 11/11/2026
+
+- PR #268 mergeada mediante `c9ac094299a93a52cae6245ea0093aaf964196a2`; base `fa59928ee1dc4ce838f818397181bc6a817c31c1`, primer HEAD `8755c8b972c1ef98c73e072bd41ef3c73224e67a` y final `d5153fa2b2b09803a612eca8c69dea83409de1f0` conservados. Aprobación de Martiniano solo documental; no CU implementado ni diseño cerrado. Las notas inferiores de publicación/preparación son históricas.
+- Precisión de revisión informada por Martín: S10 es recuerdo de entrevista pendiente de validación con VanFull; se conserva su atribución original como antecedente. Descenso, paradas, QR y operaciones en el DER requieren acuerdo de los tres; Martiniano todavía no aceptó descenso por reserva.
+- Primera entrega solo online propuesta por Martiniano, parcial y pendiente de alcance/acuerdo; no elimina RF-015/RNF-011/012. Sin fecha de cierre confirmada. Corrección local documental en rama nueva; sin commit/push ni cambios productivos.
+
 ## Publicación documental CU-007 efectiva — 10/11/2026
 
 - Martín autorizó publicación tras revisar el diff. [Issue #267](https://github.com/Martiherenu1/ProyectoVanFull/issues/267) específico y [PR #268](https://github.com/Martiherenu1/ProyectoVanFull/pull/268) abierta hacia main, sin merge; único cierre automático #267, sin cerrar CU-007 ni sus preguntas funcionales.

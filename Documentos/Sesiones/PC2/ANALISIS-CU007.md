@@ -12,6 +12,16 @@ de aquella demo no se extiende automáticamente a esta nueva etapa.
 
 ### Procedencia y autoridad
 
+**Precisión vigente — 11/11/2026:** según la revisión de Martiniano informada por
+Martín, las aclaraciones S10 son **recuerdo de entrevista comunicado por Martín,
+pendiente de validación con VanFull**. La clasificación original «CONFIRMADO POR
+VANFULL — informado por Martín», conservada abajo como antecedente, no acredita
+esa validación pendiente. #268 fue aprobada únicamente como documentación e
+integrada mediante `c9ac094299a93a52cae6245ea0093aaf964196a2`; no aprueba diseño.
+GitHub confirma merge y aprobación de `Martiherenu1` sin texto; las precisiones
+funcionales/técnicas de esta corrección proceden del mensaje de Martín del 11/11,
+no de una cita recuperada del cuerpo de esa revisión.
+
 - **S10 — Información de VanFull comunicada por Martín el 10/11/2026:** Martín
   respondió las preguntas funcionales recordando la entrevista. Se registra como
   **CONFIRMADO POR VANFULL — informado por Martín**, con atribución expresa a ese
@@ -90,6 +100,15 @@ operación e idempotencia; almacenamiento por cuenta; sincronización, reautenti
 retención y protección de datos; aislamiento de callbacks y conservación de unidad
 histórica bajo las FK existentes. Las recomendaciones 1–5 inferiores siguen siendo
 **PROPUESTA DE IA** y aportes para discusión, no decisiones aprobadas.
+
+**Acuerdo requerido, precisión del 11/11 informada por Martín:** los cambios de
+descenso, paradas, QR y operaciones en el DER requieren acuerdo de **Martín,
+Martiniano y Facundo**. Martiniano **todavía no aceptó el descenso por reserva**;
+su aprobación documental no valida esa propuesta ni las estructuras recomendadas.
+Martiniano propone una primera entrega **solo online**, parcial y pendiente de
+alcance/acuerdo del equipo: no elimina RF-015 ni RNF-011/012 ni completa CU-007.
+No hay fecha de cierre confirmada; las fechas de demo y prioridades mencionadas
+en los antecedentes no constituyen un compromiso nuevo de cierre.
 
 Las alternativas de pedir descenso por primera vez al escanear o derivarlo de la
 última parada no deben adoptarse como solución implícita. El destino previsto debe

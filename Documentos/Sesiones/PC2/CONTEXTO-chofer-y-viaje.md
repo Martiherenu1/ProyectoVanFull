@@ -1,5 +1,21 @@
 # Contexto vivo · Chofer y viaje en curso (Martín)
 
+## Publicación contractual RNF-008 / #39 — 2026-11-11
+
+- [PR #272](https://github.com/Martiherenu1/ProyectoVanFull/pull/272) abierta hacia main,
+  sin merge; [registro en #39](https://github.com/Martiherenu1/ProyectoVanFull/issues/39#issuecomment-6809996842).
+- Base revalidada sin avance c9ac094299a93a52cae6245ea0093aaf964196a2; no merge local
+  necesario. Commits iniciales: contrato 6ca26c1 y análisis/contextos b22aa2f.
+  Este registro posterior completa la publicación en la misma rama, cinco archivos.
+- Revisión solicitada efectivamente a Martiherenu1 y facubarrientos; no aprobación
+  formal atribuida. Conformidades informadas y condiciones anteriores conservadas.
+- CI del HEAD final se registra en PR/#39 después de observarla; no se infiere de
+  las 5 pruebas contractuales locales. No se repitieron verificaciones locales porque
+  contrato y base no cambiaron. Dos regresiones originales y sus históricos intactos.
+- Sin implementación productiva, modelo, Flutter ni CI modificados; RNF-008 parcial,
+  ETA fuera de alcance, #39 abierto. Sin despliegue u operaciones reales.
+  Las notas de preparación siguientes son históricas.
+
 ## RNF-008 / #39: rama contractual local — 2026-11-11
 
 - Rama docs/chofer-contrato-rnf008-39, worktree F:/dev/vf-rnf008-contrato,

@@ -1004,7 +1004,7 @@
           "gps"
         ],
         "summary": "Consultar última ubicación del vehículo",
-        "description": "Requiere autenticación bearer (401 NO_AUTENTICADO sin token válido).\nAdministrador y dueño conservan acceso por rol. El pasajero autenticado debe\ntener una reserva propia consolidada del mismo viaje (RN-030); se consulta\nprimero esa reserva, sin bloquearla. Sin reserva propia consolidada se responde\n403 SIN_PERMISO sin coordenadas, incluso si el viaje no existe o no está en_curso.\nUna reserva ajena, provisional o cancelada no habilita. Ausencia y abordaje\nno agregan restricciones. El rol chofer por sí solo no habilita este GET.\n\nDespués de autorizar, si el viaje no existe o no está en_curso se responde\n404 VIAJE_NO_DISPONIBLE. Solo para un viaje en_curso autorizado, si falta una\nposición completa se responde 404 UBICACION_NO_DISPONIBLE. Esa es la precedencia:\nautenticación, permiso, disponibilidad del viaje y disponibilidad de posición.\n\nMarca \"desactualizada\" si supera 30 s (RNF-008).\nConsumidores hacen polling (~10 s, RNF-007). (CU-009, RF-022)\nCOBERTURA PARCIAL: ETA todavía no está implementado; eta_minutos es null.\nNo acredita continuidad GPS ni cumplimiento de RNF-008.\n",
+        "description": "Requiere autenticación bearer (401 NO_AUTENTICADO sin token válido).\nAdministrador y dueño conservan acceso por rol. El pasajero autenticado debe\ntener una reserva propia consolidada del mismo viaje (RN-030); se consulta\nprimero esa reserva, sin bloquearla. Sin reserva propia consolidada se responde\n403 SIN_PERMISO sin coordenadas, incluso si el viaje no existe o no está en_curso.\nUna reserva ajena, provisional o cancelada no habilita. Ausencia y abordaje\nno agregan restricciones. El rol chofer por sí solo no habilita este GET.\n\nDespués de autorizar, si el viaje no existe o no está en_curso se responde\n404 VIAJE_NO_DISPONIBLE. Solo para un viaje en_curso autorizado, si falta una\nposición completa se responde 404 UBICACION_NO_DISPONIBLE. Esa es la precedencia:\nautenticación, permiso, disponibilidad del viaje y disponibilidad de posición.\n\nMarca \"desactualizada\" si supera 30 s (RNF-008).\nfecha_hora_evaluacion es opcional por compatibilidad. Si se entrega, es el\ninstante UTC S tomado una sola vez para esta evaluacion, sobre el mismo\nsnapshot de posicion devuelto: desactualizada = (S - fecha_hora_posicion > 30 s).\nfecha_hora_posicion conserva su significado contractual y politica vigente;\nS no certifica captura fisica, recepcion del cliente ni demora unidireccional.\nCada 200 se genera fresco con Cache-Control: no-store. Una respuesta\nreutilizada desde cache no constituye una nueva referencia temporal.\nSin S valido no se infiere vigencia desde false ni desde el reloj del cliente;\ntrue conserva su significado de desactualizacion acreditada por el servidor.\nConsumidores hacen polling (~10 s, RNF-007). (CU-009, RF-022)\nCOBERTURA PARCIAL: ETA todavía no está implementado; eta_minutos es null.\nNo acredita continuidad GPS ni cumplimiento de RNF-008.\n",
         "x-cu": "CU-009",
         "x-cobertura": "parcial",
         "security": [
@@ -1020,6 +1020,17 @@
         "responses": {
           "200": {
             "description": "Última ubicación del vehículo; eta_minutos es null mientras ETA no esté implementado.",
+            "headers": {
+              "Cache-Control": {
+                "description": "Respuesta fresca; no almacenar ni reutilizar como evaluacion nueva.",
+                "schema": {
+                  "type": "string",
+                  "enum": [
+                    "no-store"
+                  ]
+                }
+              }
+            },
             "content": {
               "application/json": {
                 "schema": {
@@ -2480,6 +2491,11 @@
           "fecha_hora_posicion": {
             "type": "string",
             "format": "date-time"
+          },
+          "fecha_hora_evaluacion": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Instante UTC S de evaluacion de esta respuesta fresca, calculado una sola vez\nsobre el mismo snapshot devuelto: desactualizada es true si y solo si\nS - fecha_hora_posicion supera estrictamente 30 segundos.\nNo cambia fecha_hora_posicion ni la politica de recepcion GPS, no prueba la\nantiguedad fisica de captura ni indica recepcion del cliente.\nPropiedad opcional, no nullable: ausencia o referencia invalida no permiten\ncrear un ancla temporal ni afirmar vigencia a partir de false.\n"
           },
           "desactualizada": {
             "type": "boolean",

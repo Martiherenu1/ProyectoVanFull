@@ -762,6 +762,15 @@ paths:
         autenticación, permiso, disponibilidad del viaje y disponibilidad de posición.
 
         Marca "desactualizada" si supera 30 s (RNF-008).
+        fecha_hora_evaluacion es opcional por compatibilidad. Si se entrega, es el
+        instante UTC S tomado una sola vez para esta evaluacion, sobre el mismo
+        snapshot de posicion devuelto: desactualizada = (S - fecha_hora_posicion > 30 s).
+        fecha_hora_posicion conserva su significado contractual y politica vigente;
+        S no certifica captura fisica, recepcion del cliente ni demora unidireccional.
+        Cada 200 se genera fresco con Cache-Control: no-store. Una respuesta
+        reutilizada desde cache no constituye una nueva referencia temporal.
+        Sin S valido no se infiere vigencia desde false ni desde el reloj del cliente;
+        true conserva su significado de desactualizacion acreditada por el servidor.
         Consumidores hacen polling (~10 s, RNF-007). (CU-009, RF-022)
         COBERTURA PARCIAL: ETA todavía no está implementado; eta_minutos es null.
         No acredita continuidad GPS ni cumplimiento de RNF-008.
@@ -774,6 +783,10 @@ paths:
       responses:
         '200':
           description: Última ubicación del vehículo; eta_minutos es null mientras ETA no esté implementado.
+          headers:
+            Cache-Control:
+              description: Respuesta fresca; no almacenar ni reutilizar como evaluacion nueva.
+              schema: { type: string, enum: [no-store] }
           content:
             application/json:
               schema:
@@ -1688,6 +1701,17 @@ components:
         latitud: { type: number, format: double }
         longitud: { type: number, format: double }
         fecha_hora_posicion: { type: string, format: date-time }
+        fecha_hora_evaluacion:
+          type: string
+          format: date-time
+          description: |
+            Instante UTC S de evaluacion de esta respuesta fresca, calculado una sola vez
+            sobre el mismo snapshot devuelto: desactualizada es true si y solo si
+            S - fecha_hora_posicion supera estrictamente 30 segundos.
+            No cambia fecha_hora_posicion ni la politica de recepcion GPS, no prueba la
+            antiguedad fisica de captura ni indica recepcion del cliente.
+            Propiedad opcional, no nullable: ausencia o referencia invalida no permiten
+            crear un ancla temporal ni afirmar vigencia a partir de false.
         desactualizada: { type: boolean, description: true si supera 30 s de antigüedad (RNF-008). }
         eta_minutos: { type: integer, nullable: true, description: "Estimación de llegada, si disponible." }
 

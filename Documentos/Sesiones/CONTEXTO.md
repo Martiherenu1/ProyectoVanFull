@@ -1,5 +1,12 @@
 # CONTEXTO VANFULL — Carga rápida de sesión
 
+> **RNF-008 / #39, preparación contractual local — 2026-11-11:** rama
+> docs/chofer-contrato-rnf008-39 desde c9ac094299a93a52cae6245ea0093aaf964196a2.
+> Campo opcional fecha_hora_evaluacion y no-store en YAML/JSON; sin implementación,
+> publicación ni cumplimiento completo. Regresiones y APK preservadas fuera de esta
+> rama. Detalle y conformidades condicionadas en el contexto de Chofer y análisis #39;
+> ETA fuera de alcance, #39 abierto. Históricos siguientes conservados.
+
 > **CU-007, publicación documental efectiva — 10/11/2026:** [Issue #267](https://github.com/Martiherenu1/ProyectoVanFull/issues/267) y [PR #268](https://github.com/Martiherenu1/ProyectoVanFull/pull/268) abierta, sin merge; primer HEAD `8755c8b972c1ef98c73e072bd41ef3c73224e67a`, base revalidada `fa59928ee1dc4ce838f818397181bc6a817c31c1`. Push normal de cuatro documentos; revisión solicitada en GitHub a Martiniano (`Martiherenu1`) y Facundo (`facubarrientos`), sin aprobación atribuida. Este registro completa la publicación; HEAD final y CI efectiva se registran en #268 tras observarlos, sin inferir resultados previos. Único cierre documental #267; no CU implementado, sin despliegues ni operaciones sobre bases. Preparación e históricos conservados debajo.
 
 > **CU-007, preparación documental para PC3 — 10/11/2026:** análisis vigente en [PC2/ANALISIS-CU007.md](PC2/ANALISIS-CU007.md), con aclaraciones del recuerdo de entrevista comunicado por Martín y sin aprobación técnica conjunta ni implementación. [Resumen y borradores para revisión](PC3/PREPARACION-PUBLICACION-CU007.md), base `fa59928ee1dc4ce838f818397181bc6a817c31c1`, rama `docs/chofer-analisis-cu007-pc3`. Solo documentación local, sin commit/publicación. Preguntas operativas y decisiones técnicas abiertas; fechas y restricciones de demo del 30/10 conservadas como antecedentes, sin extenderlas automáticamente a PC3.

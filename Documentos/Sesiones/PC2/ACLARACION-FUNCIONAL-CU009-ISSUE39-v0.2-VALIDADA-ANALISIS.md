@@ -165,3 +165,485 @@ Los enlaces trazables de UI y clases de servicio/backend quedan **pendientes**, 
 ---
 
 **Estado final de esta versión:** **v0.2 VALIDADA POR ANÁLISIS FUNCIONAL**, basada en la aprobación expresa de Martín del 18/10/2026. Las siete definiciones funcionales siguen clasificadas como **CONFIRMADO POR VANFULL**; la traducción técnica, el contraste con CU-009 v1.3 y RNF-008 literal, y los eventuales controles de cambio siguen **PENDIENTES DE VALIDACIÓN**. No hay pruebas ejecutadas ni modificaciones de código, SQL, OpenAPI, RF, RN, RNF o CU.
+
+---
+
+## Revisión PC3 de RNF-008 y decisión pendiente #39 — 2026-11-10
+
+**Estado:** recomendación para decidir con Martiniano y Facundo; sin implementación
+productiva ni cambio contractual aplicado. Rama test/chofer-rnf008-pc3-39,
+worktree F:/dev/vf-rnf008-pc3, base exacta origin/main
+fa59928ee1dc4ce838f818397181bc6a817c31c1. #39 revalidado abierto, sin comentarios.
+La aclaración #63/v0.2 sigue siendo antecedente funcional, no aprobación del algoritmo.
+
+### Fuentes y separación respecto del PC2
+
+Literal releído de
+F:/TIN/One Drive/OneDrive/Escritorio/UM/TC/02 Alcance, RF, RNF y Reglas/02_Requisitos_No_Funcionales_VanFull_v1.0_Aprobado_Equipo.docx,
+v1.0 aprobada 31/08/2026, SHA-256
+8f386f3789afdf02f9d886894fb4b02c83ef7695c8b6b5669f29dcf1137f8004:
+
+> Cuando la última posición disponible de un vehículo tenga una antigüedad superior a 30 segundos, el sistema deberá identificarla como información desactualizada y no presentarla como una posición actual en tiempo real.
+
+El worktree F:/dev/vf-eta-rnf008-doc queda intacto en su HEAD histórico fb6e422,
+con seis archivos locales, variante aplicada y resultados **130 aprobadas / 2 fallidas**.
+No están integrados en main ni se trasladó esa variante a esta revisión.
+Inventario y hashes: F:/dev/vf-rnf008-pc3-inventario-original.json.
+APK ensayada: fuente 8217c9c, no recompilada ni intervenida. Merge GitHub no prueba
+despliegue: SHA exacto del backend en Render sigue SIN VERIFICAR.
+
+| Concepto | Qué significa / qué no permite concluir |
+|---|---|
+| Antigüedad contractual | Diferencia entre referencia del servidor y fecha_hora_posicion efectiva almacenada. No se modifica ese timestamp: el POST conserva anterior, sustituye futuro/ausente por hora servidor y actualiza solo si estrictamente posterior. |
+| Edad física de captura | Tiempo desde que se obtuvieron realmente las coordenadas. El contrato actual no aporta evidencia verificable de ello. Recepción reciente o timestamp normalizado no prueban captura reciente. |
+| Demora de respuesta | Tiempo entre evaluar la respuesta y entregarla/aplicarla. Un false correcto al evaluar puede haber envejecido al llegar; no es pérdida de conexión ni prueba de edad de captura. |
+| Conexión perdida confirmada | Exige evidencia identificada y alcance (observador, API, teléfono del chofer). Posición antigua, falta de puntos o error GET no acreditan desconexión del chofer. El contrato GPS no expone ese estado. |
+
+### Resultados nuevos sobre main, sin variante productiva
+
+Solo se trasladaron bloques de tests, conservando aserciones y tags sin excluirlos.
+backend/tests/test_gps.py completo: **7 aprobadas**, 16 advertencias preexistentes,
+11,60 s, incluidas 29 s=false, exactamente 30 s=false y 31 s=true con reloj controlado.
+PostgreSQL 16 efímero, sin red externa/puertos/volúmenes persistentes, ya retirado.
+frontend/test/screens/gps/ubicacion_screen_test.dart completo: **2 aprobadas / 2 fallidas /
+0 omitidas**. Fallan GET 29→31 s y envejecimiento durante GET pendiente por falta de
+identificación explícita como desactualizada. Precondiciones y aserciones intactas.
+Advertencia de tag pendiente-contrato-39 no declarado en dart_test.yaml; no se cambió
+configuración ni se omitió caso alguno. No es suite completa ni cumplimiento RNF-008.
+Ruff y formato del test Python correctos; formato Dart correcto. Análisis estático
+focalizado: sin problemas (40,9 s). diff --check: correcto.
+ETA fuera de alcance; no se modificaron servicios ni datos reales.
+
+### Comparación y recomendación concreta
+
+| Alternativa | Ventaja | Límite |
+|---|---|---|
+| Solo booleano actual | Informa la decisión del servidor al evaluar. | No indica el instante de evaluación ni envejece mientras un GET queda pendiente. |
+| Solo reloj de pared del cliente | Ninguna autoridad temporal nueva. | Restarlo a fecha_hora_posicion presupone sincronización no demostrada; se descarta. |
+| Solo tiempo monotónico desde recepción | Mide intervalos locales sin usar fecha de pared. | No conoce la edad al evaluar ni la demora previa; no llamar edad GPS a segundos desde recepción. |
+| Metadato del servidor sin monotónico | Permite calcular edad contractual al evaluar, sin sincronizar el cliente. | Congela esa edad y no corrige por sí solo demora ni paso posterior del tiempo. |
+| Metadato servidor + RTT y transcurrido monotónicos | Permite acotar edad contractual en la presentación bajo condiciones explícitas. | No determina demora unidireccional exacta, no prueba captura física y conserva una franja incierta alrededor de 30 s. |
+
+**Recomendación:** acordar una extensión aditiva mínima del GET: una propiedad opcional
+fecha_hora_evaluacion (UTC/date-time), calculada en el mismo instante S y sobre el mismo
+snapshot que desactualizada, sin cambiar fecha_hora_posicion T. Servidor nuevo la emitiría
+en cada 200 fresco; cliente nuevo admite que falte y entonces mantiene incertidumbre.
+Solicitar generación fresca y Cache-Control: no-store; no usar un GET cacheado como
+ancla nueva. La propuesta externa YAML/JSON es orientativa, NO aplicada.
+
+Medir en cliente m0 antes de la solicitud y m1 al disponer de la respuesta completa,
+con reloj monotónico, nunca DateTime.now. Definir r=m1−m0 y d=m_actual−m1.
+Si S ocurrió dentro de esa solicitud fresca, la escala servidor es coherente y el
+contador es válido para ese intervalo, A=S−T permite estimar el intervalo contractual:
+
+```
+edad mínima = A + d
+edad máxima = A + r + d
+```
+
+Es una derivación de diseño, no evidencia medida ni fórmula ya implementada.
+No sumar r/2 ni suponer red simétrica; r también incluye procesamiento y entrega.
+Precisar resolución/error/drift y validez de los relojes antes de afirmar límites
+físicos exactos; no se aprueba aquí una tolerancia. Rechazar el ancla si edad es negativa,
+los metadatos son incoherentes, falta S, hay caché no controlada o se pierde continuidad
+del contador. Para la misma posición y contexto, conservar la desactualización
+acreditada por true del servidor o cota mínima válida >30 s: una respuesta repetida
+o la pérdida posterior del ancla no la rejuvenece. Limpiar ese estado al cambiar
+posición/contexto o perder acceso.
+No reinventar llegada, timestamp ni política de recepción.
+
+Ejemplo solicitado: evaluación con A=29 s, RTT=2 s y recepción con d=0 produce
+intervalo [29,31] s. El sistema **no sabe** que la edad exacta sea 31 s; podría ser
+menor si parte del RTT fue anterior a la evaluación. No se marca cumplimiento porque
+se muestre incertidumbre. Tras d>1 s, la cota mínima supera 30 s y ya puede identificarse
+contractualmente como desactualizada; a d=1 exacto la comparación sigue siendo estricta.
+
+Propuesta de clasificación para coordinar:
+- true del servidor o cota mínima >30 s: desactualizada conocida, sin borrar esa marca.
+- cota máxima ≤30 s: dentro de ventana contractual bajo las hipótesis verificadas;
+  nunca equivalente a edad física de captura comprobada.
+- intervalo que cruza 30 s o sin ancla válida: vigencia incierta; no presentar como actual
+  ni mostrar segundos exactos. Sigue siendo una brecha de precisión respecto de una
+  clasificación exacta al cruzar el umbral, no una aprobación de RNF-008.
+- Si el equipo prefiere tratar toda posibilidad de >30 s como expirada por precaución,
+  acordarlo explícitamente, diferenciando esa decisión de una edad conocida; habrá
+  falsos positivos. No cambia el umbral ni se aplica aquí.
+
+Sin caché y una evaluación coherente son condiciones de la propuesta, no hechos
+verificados en Render. Date/Age HTTP genéricos no certifican que la fecha corresponda
+al mismo cálculo; no los adoptar como ancla implícita. [RFC 9111, edad y no-store](https://www.rfc-editor.org/rfc/rfc9111.html).
+Dart ofrece Stopwatch para tiempo transcurrido, pero debe validarse la continuidad
+del contador en cada plataforma y suspensión. Android elapsedRealtime incluye sueño;
+no extrapolarlo sin prueba al Stopwatch Flutter/Web. Al perder el ancla tras reinicio,
+suspensión no cubierta, volver a incertidumbre y consultar fresco solo si no hay
+desactualización ya acreditada para la misma posición y contexto; conservarla si
+la hay. Un cambio de posición/contexto o pérdida de acceso limpia ese estado.
+[Stopwatch](https://api.dart.dev/dart-core/Stopwatch-class.html),
+[SystemClock](https://developer.android.com/reference/android/os/SystemClock).
+
+### Compatibilidad, archivos futuros y aceptación
+
+Clientes Flutter actuales ignoran propiedades adicionales al parsear UbicacionViaje;
+conservarían comportamiento anterior y no obtendrían esta mejora por recibir S.
+Revisar consumidores estrictos. Campo opcional permite cliente nuevo con backend
+anterior: sin metadato no debe inventar un ancla. No cambiar required ni estructuras
+anteriores. Actualizar YAML y JSON equivalentes solo después del acuerdo.
+
+Archivos futuros (NO modificados en esta entrega):
+- backend/openapi/openapi.yaml y openapi.json: propiedad aditiva y respuesta no-store.
+- backend/app/schemas/gps.py: propiedad de respuesta, sin columna nueva.
+- backend/app/services/gps.py: capturar una sola evaluación S para bool y metadato;
+  no tocar enviar ni timestamps almacenados.
+- backend/app/routers/gps.py: header de respuesta GET; revisar caché en despliegue
+  separadamente, sin ejecutarlo ahora.
+- frontend/lib/models/gps/ubicacion_viaje.dart y services/gps/ubicacion_api.dart:
+  parseo compatible y medición monotónica ligada a la solicitud/contexto.
+- frontend/lib/screens/gps/ubicacion_screen.dart: presentar estado con procedencia,
+  reevaluar sin depender de completar otro GET y descartar callbacks antiguos.
+- Los tests GPS existentes de servicio/API/pantalla/mapa/composición.
+
+Aceptación propuesta, sin implementar:
+1. Mismo S calcula flag y metadato; frontera 29/30/31 exacta, sin cambiar T ni POST.
+2. Clientes viejos aceptan campo extra; nuevo con campo ausente/malformado retrocede
+   a incertidumbre, conservando true recibido.
+3. A=29, r=2: intervalo [29,31] incierto al recibir; no afirmar exactamente 31 ni verde.
+   Con d=2, [31,33] desactualizado conocido; exactamente 30 no se fuerza por ≥.
+4. GET posterior pendiente: contador continúa; conserva posición/fecha y cambia
+   presentación cuando la cota fiable supera 30 s; cero GET/envíos solapados.
+5. Latencia asimétrica y procesamiento: no usar mitad del RTT ni recepción como captura.
+6. Reloj cliente muy adelantado/atrasado: no afecta el cálculo. Caché, salto de reloj
+   servidor detectable, ancla incoherente o suspensión no cubierta invalidan referencia.
+7. Cambio viaje/sesión/acceso y callbacks tardíos no restauran anclas/datos anteriores.
+8. Edad contractual vieja por reloj del chofer atrasado sigue vieja con política actual:
+   este metadato NO resuelve VF-39-01 (captura reciente verificable) ni justifica aceptar
+   puntos hoy descartados. Esa parte de #39 requiere otra decisión, fuera de esta etapa.
+
+**Para decidir:** Martiniano valida contrato/snapshot/compatibilidad; Facundo valida
+estados visuales y límites de incertidumbre; Martín mantiene trazabilidad RNF-008/#39.
+Recomendar la pareja metadato+monotónico con cotas, sin prometer exactitud inexistente.
+Acordar la franja incierta y el alcance de verificación física antes de implementar.
+#39 permanece abierto. La mejora de presentación con el contrato actual (true persistente,
+incertidumbre y consulta pendiente) puede revisarse por separado, pero no acredita el umbral.
+
+---
+
+## Textos de pantalla y registro propuesto en #39 — 2026-11-11
+
+### Procedencia y alcance de la conformidad informada
+
+Martín informa conformidad de Martiniano con fecha_hora_evaluacion opcional,
+**condicionada a PR contractual con aviso, registro en #39 y revisión del texto de
+pantalla antes del merge**. No se atribuye aprobación de los tres integrantes ni
+de toda la solución temporal, política de caché o algoritmo por esa conformidad.
+No acredita cumplimiento completo de RNF-008. Esta adición prepara revisión;
+no aplica contrato/código, no publica comentario ni autoriza merge.
+
+### Propuesta breve de pantalla (pendiente de revisión)
+
+| Condición y precedencia | Texto principal | Aclaración |
+|---|---|---|
+| true del servidor, o referencia válida con cota mínima >30 s | **Información desactualizada** | Conservar procedencia en el estado interno. Para la misma posición y contexto, conservar true o una cota mínima válida >30 s ya acreditados, incluso ante respuesta repetida o pérdida posterior del ancla. |
+| Referencia válida con mínima ≤30 s y máxima >30 s | **Vigencia no confirmada** | Puede haber superado el umbral; no presentarla como actual. No afirmar edad exacta. |
+| Sin referencia válida, sin desactualización previamente acreditada | **Antigüedad no verificable** | No se puede establecer su vigencia contractual; no sustituir por reloj del cliente. |
+| Referencia válida, intervalo no negativo íntegramente ≤30 s | **Dentro de la ventana de vigencia contractual** | Solo describe vigencia contractual bajo las condiciones del cálculo, no captura física reciente. |
+
+Aviso complementario común: **«No se pudo verificar cuándo se capturó esta ubicación»**.
+La fecha, si se muestra, sigue identificada como informada de la posición: no se
+convierte en hora de recepción o evaluación. Sin referencia temporal fiable no
+mostrar «hace N segundos» ni otros segundos exactos. Tampoco presentar un intervalo
+como una única edad exacta cuando exista incertidumbre.
+
+Ejemplos internos para revisión, **no mediciones ni textos numéricos obligatorios
+de la pantalla**:
+- Servidor true, incluso sin metadato válido: «Información desactualizada».
+- Intervalo [31,33] s: «Información desactualizada»; la cota mínima supera 30 s.
+- Intervalo [29,31] s: «Vigencia no confirmada»; no afirmar «31 segundos».
+- Referencia ausente/incoherente, sin desactualización previamente acreditada: «Antigüedad no verificable».
+- Misma posición/contexto con true previo o cota mínima válida >30 s ya acreditada:
+  «Información desactualizada», aunque se repita la respuesta o luego se pierda el ancla.
+- Intervalo [28,30] s o [30,30] s: «Dentro de la ventana de vigencia contractual», con el
+  aviso de captura no verificada. Se conserva **>30 s estricto**, no ≥30 s.
+
+**Consulta, conectividad y ausencia de datos se separan del estado de posición:**
+- GET pendiente: «Actualizando ubicación…» con indicador, sin renovar coordenadas,
+  timestamp o vigencia por el solo hecho de consultar.
+- Error de consulta: «No se pudo actualizar la ubicación». Mantener aparte el estado
+  de la última posición; el error no acredita pérdida de conexión del chofer.
+- No se propone «Chofer desconectado» sin una fuente confirmada y acordada que
+  permita saberlo. Una posición antigua o falta de puntos no bastan.
+- Sin posición disponible: «Todavía no hay una posición disponible». No inferir causa.
+- Sin acceso, sesión inválida o viaje cerrado: retirar mapa, coordenadas y avisos
+  de posición; no conservar estados de la posición anterior como datos accesibles.
+
+La franja incierta sigue siendo incierta: estos textos no se presentan como prueba
+de cumplimiento del umbral ni solución completa de RNF-008. Las dos regresiones
+originales permanecen con sus aserciones y sus resultados en rojo; esta propuesta
+no las sustituye ni las convierte en casos aprobados. No se ejecutan pruebas nuevas.
+
+### Comentario propuesto para #39 (BORRADOR NO PUBLICADO)
+
+### RNF-008 / #39 — conformidad condicionada y textos propuestos
+
+Martín informa conformidad de Martiniano con `fecha_hora_evaluacion` opcional,
+condicionada a PR contractual con aviso, registro en #39 y revisión del texto de
+pantalla antes del merge. Es una conformidad informada y acotada: no constituye
+aprobación de los tres, autorización de implementación/merge ni cumplimiento
+completo de RNF-008.
+
+Se propone distinguir:
+- **Información desactualizada**: true del servidor o cota mínima contractual >30 s.
+- **Vigencia no confirmada**: intervalo válido cuya cota mínima es ≤30 s y máxima >30 s.
+- **Antigüedad no verificable**: falta referencia válida, salvo desactualización ya acreditada para la misma posición y contexto.
+- **Dentro de la ventana de vigencia contractual**: intervalo válido íntegramente ≤30 s.
+  Este texto no certifica captura física reciente; se acompaña de
+  «No se pudo verificar cuándo se capturó esta ubicación».
+
+Para la misma posición y contexto, se conserva la desactualización ya acreditada
+por true del servidor o por una cota mínima válida >30 s. Una respuesta repetida
+o la pérdida posterior del ancla no la rejuvenece. Ese estado se limpia al cambiar
+de posición/contexto o perder acceso.
+
+El umbral sigue siendo estrictamente >30 s: exactamente 30 s no fuerza
+desactualización. [29,31] es un ejemplo de intervalo incierto, no una edad exacta
+medida. No se mostrarán segundos exactos sin una referencia que los justifique.
+
+Los errores de consulta se presentan aparte («No se pudo actualizar la ubicación»).
+No se infiere desconexión del chofer por posición antigua, falta de puntos o fallo
+del GET. Sin posición disponible se informa esa ausencia; pérdida de acceso/cierre
+retira mapa, coordenadas y avisos de posición.
+
+Las dos regresiones originales se conservan fallidas, sin cambiar sus aserciones
+ni omitirlas. El histórico 130 aprobadas/2 fallidas de F:\dev\vf-eta-rnf008-doc
+se conserva separado de los resultados nuevos de esta revisión aislada, cuya base
+es fa59928ee1dc4ce838f818397181bc6a817c31c1: 7 pruebas backend aprobadas y
+2 Flutter aprobadas/2 fallidas. Estos resultados nuevos no se atribuyen a main
+sin los tests locales trasladados.
+#39 sigue abierto; quedan por acordar la referencia temporal y los textos, y por
+resolver la antigüedad física no verificable. No hay contrato/código aplicado en
+esta revisión ni despliegue verificado. Un merge en GitHub no acredita Render.
+
+---
+
+## Identidad, regresiones y PR contractual propuesta — revisión 2026-11-11
+
+### Fuentes, bases y conformidades informadas
+
+Main verificado en GitHub y mediante ls-remote:
+**c9ac094299a93a52cae6245ea0093aaf964196a2** (merge documental #268).
+Es el SHA de referencia de esta revisión y del parche contractual candidato.
+Respecto de fa59928ee1dc4ce838f818397181bc6a817c31c1, solo cambian cuatro documentos
+de CU-007; contrato GPS, modelo, servicios, parser e instrucciones aplicables no cambian.
+El worktree conserva HEAD fa59928ee1dc4ce838f818397181bc6a817c31c1 y sus cambios:
+no hubo integración, fetch ni traslado de resultados a main.
+#39 verificado abierto y con cero comentarios; sus criterios siguen sin cerrar.
+
+Martín informa que Facundo está conforme con avanzar con la PR contractual,
+la clasificación y conservar la desactualización acreditada para una misma posición.
+Pide precisar identidad y regresiones, en especial [29,31]. No aprueba implementación,
+merge ni cumplimiento completo. Se mantiene la conformidad informada de Martiniano
+con fecha_hora_evaluacion opcional, condicionada a PR contractual con aviso, registro
+en #39 y revisión de pantalla antes del merge. No se atribuye aprobación conjunta
+de los tres ni se considera publicado este registro.
+
+### Identidad local candidata: posición aceptada y contexto de acceso
+
+Propuesta técnica, sin campo nuevo ni cambio del modelo:
+- Contexto C: viaje solicitado + generación opaca de sesión/acceso + fuente de consulta
+  e instancia/generación de seguimiento. Nunca token, coordenadas o identidad personal
+  como key visible o log. Cambiar cuenta, viaje, fuente, contexto o perder acceso invalida
+  solicitudes, anclas y marca; una nueva sesión no hereda datos del acceso anterior.
+- Posición P dentro de C: (id_viaje, fecha_hora_posicion contractual, latitud, longitud).
+  Timestamp comparado como instante UTC, sin truncarlo; coordenadas finitas comparadas
+  como valores numéricos devueltos por el contrato, sin tolerancia espacial ni redondeo
+  inventados. No usar el texto JSON como identidad (1 y 1.0 representan el mismo valor).
+- El contrato Ubicacion devuelve esos cuatro datos; schema.sql y models/viajes.py
+  conservan una fila por id_viaje, coordenadas NUMERIC(9,6) y TIMESTAMPTZ. No hay ID de
+  muestra ni historial. El servicio solo acepta timestamps efectivos estrictamente
+  posteriores. Por eso timestamp y coordenadas distinguen la representación almacenada,
+  no una captura física única, un envío intentado ni movimiento verificado.
+- No usar solo coordenadas: el vehículo detenido con timestamp posterior es P nueva.
+  Repetir el mismo P es la misma posición aunque cambie S o desactualizada.
+  Timestamps iguales con coordenadas distintas contradicen la actualización normal:
+  tratar como incoherencia a revisar, sin limpiar la marca ni aceptar un reemplazo
+  silencioso. La precisión del parser/serialización y posibles restauraciones de datos
+  limitan esta identidad; no se promete reconocer capturas descartadas o una restauración.
+
+Orden y conservación propuestos:
+1. Descartar primero respuestas/callbacks de otra generación, fuente o acceso, viaje
+   distinto y solicitudes superadas. Una respuesta descartada no altera P, ancla o avisos.
+   Mantener consultas sin solapamiento y guardas existentes; no inferir orden de llegada.
+2. Dentro de C, una respuesta con T anterior al P ya aceptado no lo reemplaza ni limpia
+   su estado. Igual T y mismas coordenadas es respuesta repetida. T posterior válido
+   acepta P nueva y limpia la marca/ancla de la anterior antes de clasificar la nueva.
+3. Para el mismo P y C, conservar «Información desactualizada» acreditada por true
+   del servidor o cota mínima válida >30 s. False repetido, S más reciente o pérdida
+   posterior del ancla no rejuvenecen P. Guardar procedencia en memoria; sin persistencia
+   nueva, historial ni transferencia entre contextos. La pérdida del ancla impide cálculos
+   nuevos, pero no revoca una conclusión ya acreditada bajo condiciones válidas.
+4. Limpiar al aceptar una posición nueva, cambiar contexto o perder acceso; cierre,
+   sesión inválida y retiro de datos limpian mapa, coordenadas, marca y avisos.
+   Un GET fallido no prueba pérdida de acceso ni desconexión del chofer: conserva
+   la última P accesible y separa error de consulta y clasificación temporal.
+5. Las hipótesis de reloj servidor coherente y continuidad monotónica deben validarse.
+   Si se detecta incoherencia que cuestiona una cota previa, no declararla fiable:
+   requiere decisión explícita de integridad/contexto, no rejuvenecimiento silencioso.
+
+### Contrato mínimo propuesto, todavía no aplicado
+
+Solo backend/openapi/openapi.yaml y su JSON equivalente en el parche externo:
+fecha_hora_evaluacion opcional date-time UTC, no nullable y no agregada a required.
+El servidor nuevo la emitiría en cada 200 fresco, con S tomado una sola vez sobre
+el mismo snapshot de P/T usado para desactualizada: true si y solo si S-T >30 s.
+Exactamente 30 s sigue false. No cambia T ni la política POST, permisos o modelo.
+S no es captura ni llegada del GET al cliente; false solo describe la evaluación S.
+
+Se propone Cache-Control: no-store y generación fresca por solicitud. El cliente
+no trataría una respuesta cacheada/reutilizada como ancla nueva. Verificar intermediarios,
+service worker, reloj servidor y transporte es pendiente; el header por sí solo
+no prueba frescura ni sincronía. Medir RTT y transcurrido con monotónico válido:
+[A+d,A+r+d], A=S-T. Sin r/2, reloj de pared cliente como autoridad ni demora exacta.
+Si falta S, es inválido, negativo/incoherente o no hay garantías para el ancla:
+«Antigüedad no verificable», excepto desactualización ya acreditada para P/C.
+No convertir false sin referencia en vigencia acreditada.
+
+Compatibilidad: clientes actuales toleran propiedades JSON extra (parser cotejado);
+los nuevos deben funcionar sin S con incertidumbre, manteniendo true.
+No se exige actualizar el modelo ni alterar required. Revisar consumidores estrictos.
+La PR contractual definiría comportamiento objetivo, sin declarar que el backend
+ya emite S/no-store: implementación, pruebas y despliegue separados y posteriores.
+Los textos permanecen: «Información desactualizada», «Vigencia no confirmada»,
+«Antigüedad no verificable» y «Dentro de la ventana de vigencia contractual».
+El último texto no certifica captura física reciente.
+
+### Regresiones originales: conservar sin reescribir para obtener verde
+
+Histórico F:/dev/vf-eta-rnf008-doc: 130 aprobadas / 2 fallidas con variante local.
+Revisión aislada sobre fa59928ee1dc4ce838f818397181bc6a817c31c1 más tests trasladados:
+7 backend aprobadas; 2 Flutter aprobadas / 2 fallidas / 0 omitidas.
+No son resultados nuevos de c9ac094 ni de esta propuesta. Hoy no se ejecutaron pruebas.
+
+- GET calculado a 29 y recibido a 31: la regresión original conoce una sola línea
+  temporal de prueba y exige «Información desactualizada». Se conserva íntegra y roja.
+  El diseño con metadato+RTT observa [29,31]: no prueba edad conocida estrictamente >30.
+  Su aceptación futura debe exigir «Vigencia no confirmada», en un test separado;
+  eso no satisface ni sustituye la aserción original. La brecha sigue registrada en #39.
+- Envejecimiento mientras otro GET queda pendiente: se conserva íntegra y roja.
+  Futuro caso separado: con A=29 y ancla válida, al transcurrir d=2 la cota mínima
+  es 31 y se exige «Información desactualizada» sin esperar al GET. Al d=1 la mínima
+  es 30 y no basta para acreditar >30; debe considerarse también la cota máxima.
+- Si se pretende cerrar las regresiones originales, hace falta decidir explícitamente
+  la brecha y su trazabilidad, o aportar observabilidad suficiente; no cambiar expectativas,
+  agregar skips, excluir tags o llamar cumplimiento a la incertidumbre.
+
+### Matriz futura de aceptación (propuesta; no ejecutada)
+
+| Caso | Resultado esperado del diseño | Relación con evidencia |
+|---|---|---|
+| Backend S-T =29/30/31 s | false / false / true, mismo S/P/T en bool y metadato | Frontera existente aprobada; metadato nuevo pendiente |
+| S ausente, inválido o ancla no fiable, sin marca previa | Antigüedad no verificable; sin segundos exactos ni autoridad del reloj cliente | Caso nuevo, no arregla originales |
+| A=29,r=2,d=0: [29,31] | Vigencia no confirmada; no afirmar >30 conocido | Aceptación separada; original GET 29→31 sigue roja |
+| A=29,r=2,d=2: [31,33], GET siguiente pendiente | Información desactualizada por cota mínima válida; no congelar presentación | Aceptación futura; original pendiente sigue roja hoy |
+| [28,30] o [30,30] | Dentro de la ventana de vigencia contractual; captura física no verificada | Exactamente 30 no fuerza desactualización |
+| Mismo P/C: true o mínima válida >30 ya acreditados; luego false repetido/ancla perdida | Conservar Información desactualizada y procedencia | Prueba nueva de identidad y monotonía de la clasificación |
+| Vehículo detenido, coordenadas iguales y T posterior | P nueva; limpiar estado anterior y clasificar esta P | No deduplicar solo por coordenadas |
+| T anterior o callback de contexto anterior | Descartar antes de cualquier efecto; no reponer ni limpiar datos actuales | Probar respuesta fuera de orden y cambio de cuenta/viaje/fuente |
+| Igual T y coordenadas diferentes | Incoherencia; no reemplazar silenciosamente ni limpiar marca acreditada | Política candidata para revisión |
+| Pérdida acceso/cierre | Retirar P, mapa, ancla y advertencias; tardías no restauran | No equivale a error GET transitorio |
+| Error GET/posición antigua/sin posición | Estados separados; no afirmar chofer desconectado | El contrato no observa esa conexión |
+| Cliente viejo / backend viejo | Extra ignorado / ausencia tolerada con incertidumbre | Probar compatibilidad sin nueva autoridad temporal |
+
+### Decisiones y siguiente paso de revisión
+
+Acordar identidad P/C, orden/anomalías, garantías de S/no-store/monotónico, textos
+y tratamiento explícito de las regresiones originales; revisar con Martiniano y Facundo
+antes de implementar. La opcionalidad mantiene interoperabilidad, no elimina las brechas.
+No hay aprobación de implementación/merge ni cumplimiento completo de RNF-008.
+#39 permanece abierto; ETA fuera de alcance. SHA Render sin verificar: merge no acredita
+despliegue. Conservados documentos, ensayos, APK 8217c9c y resultados originales.
+
+### Artefactos y validación de esta revisión (sin pruebas funcionales)
+
+- Parche externo: F:/dev/vf-rnf008-pc3-contrato-propuesto.diff. Solo YAML/JSON
+  candidatos, no aplicados; incluye S opcional y no-store, no cambio de POST/modelo.
+- Borrador vigente #39: F:/dev/vf-rnf008-pc3-comentario39-borrador.md; reemplaza
+  únicamente para futura publicación al borrador anterior conservado en este documento.
+- Descripción propuesta de PR, con plantilla del repositorio:
+  F:/dev/vf-rnf008-pc3-pr-contractual-borrador.md. Referencia #39 sin cerrarlo.
+- Parseo YAML con yaml 3.1.4 ya disponible en el entorno Flutter y JSON estándar:
+  correctos; comparación recursiva semántica: equivalentes. Campo date-time opcional
+  y no nullable comprobado. No instalación ni resolución de dependencias.
+- git apply --check del candidato: correcto, sin aplicar. Los dos archivos base son
+  idénticos byte a byte en fa59928 y c9ac094, por lo que la comprobación corresponde
+  también al contenido de main revisado. git diff --check: correcto.
+- No se ejecutó validador integral OpenAPI ni suites nuevas; parseo/equivalencia
+  y aplicabilidad no acreditan implementación, cumplimiento ni comportamiento real.
+- Pruebas, código, contrato versionado y modelo conservan sus bytes anteriores.
+  Copia de artefactos previos y hashes externos preservados; sin publicaciones.
+
+---
+
+## Rama contractual limpia para revisión — 2026-11-11
+
+**Estado vigente de esta rama:** docs/chofer-contrato-rnf008-39,
+F:/dev/vf-rnf008-contrato, creada desde origin/main actualizado
+c9ac094299a93a52cae6245ea0093aaf964196a2. Candidato revisado aplicado localmente
+solo en openapi.yaml y JSON equivalente; sin backend productivo ni Flutter.
+El contrato GPS de esta base coincide con el del candidato: no hubo adaptación
+semántica. Los estados anteriores «no aplicado» describen la preparación externa
+y se conservan como historial, no como estado actual de esta rama.
+
+Se incorpora el análisis previo como documentación, sin sus archivos de pruebas
+ni la variante productiva. Los worktrees de diagnóstico y la APK permanecen
+intactos. Las dos regresiones no pasan a verde por separarlas de esta rama:
+histórico 130/2 en F:/dev/vf-eta-rnf008-doc y revisión fa59928 más tests locales
+(7 backend aprobadas; 2 Flutter aprobadas/2 fallidas/0 omitidas) conservan procedencia.
+No son pruebas de esta rama ni del contrato nuevo.
+
+Propuesta conservada: identidad P=(viaje,T contractual,coordenadas), dentro de
+contexto opaco de acceso/sesión/fuente; posición repetida o pérdida de ancla no
+rejuvenece una marca acreditada por true o mínima válida >30 s. P nueva/contexto
+nuevo o pérdida de acceso limpia estado. No solo coordenadas; detenido con T nuevo
+es nueva P. Descartar respuestas anteriores antes de efectos. Igual T/coordenadas
+distintas y garantías de relojes siguen como propuestas técnicas para revisión.
+
+fecha_hora_evaluacion es opcional y no nullable, del mismo snapshot e instante S
+que calcula desactualizada=(S-T >30 s). Exactamente 30 no fuerza true.
+Respuesta fresca/no-store; sin referencia válida, incertidumbre salvo marca ya
+acreditada. No cambiar recepción GPS, T almacenado, permisos, modelo ni captura.
+Servidor actual aún no emite S/no-store: este contrato no acredita implementación.
+
+Se conservan los textos revisados y la franja [29,31] como Vigencia no confirmada.
+Su futura aceptación es separada de la regresión original que exige desactualizada;
+no se modifican aserciones ni se declara resuelta la brecha. Antigüedad contractual,
+física, error GET y conexión confirmada permanecen separados.
+
+Conformidades informadas por Martín: Martiniano condicionado a PR contractual con
+aviso, registro en #39 y revisión de pantalla antes del merge; Facundo conforme con
+avanzar PR/clasificación/conservación, pidiendo identidad y regresiones precisadas.
+No aprobación de implementación, merge, cumplimiento completo ni conformidad
+conjunta atribuida a los tres. #39 permanece abierto; ETA fuera de alcance.
+Borradores locales de PR y comentario #39 externos; sin publicación ni despliegue.
+Validaciones nuevas se registran debajo, separadas de las regresiones funcionales.
+
+### Validación efectiva de la rama contractual — 2026-11-11
+
+- pytest -q -p no:cacheprovider tests/test_contrato.py tests/test_rutas_contrato.py:
+  **5 aprobadas en 4,82 s** sobre JSON regenerado final. Incluye validación integral
+  OpenAPI YAML/JSON con openapi-spec-validator, equivalencia y rutas frente al contrato.
+  Ejecución previa al regenerado: 5 aprobadas en 16,39 s; no son suites distintas.
+- JSON regenerado desde YAML según README; semántica idéntica al candidato.
+  Solo se normalizó el orden de miembros del objeto de respuesta JSON al orden YAML.
+  Una comprobación inicial de igualdad byte a byte detectó ese orden, no una diferencia
+  contractual. La equivalencia semántica y los controles sobre el resultado aprobaron.
+- ruff check --no-cache .: aprobado; ruff format --check --no-cache .:
+  119 archivos ya formateados. Intento inicial bloqueado por caché en montaje de
+  solo lectura; repetido sin caché, sin cambiar archivos ni controles.
+- git diff --check: limpio. Solo dos archivos OpenAPI y tres documentos.
+- Imagen local existente proyectovanfull-backend:latest; contenedores efímeros
+  con --network none, montaje de solo lectura y sin base. Sin instalaciones ni
+  descarga de imágenes; no se arrancó servidor ni se ejecutaron operaciones reales.
+
+Son resultados contractuales, no suite backend completa, pruebas GPS/Flutter,
+CI remota o cumplimiento de RNF-008. Regresiones originales no reejecutadas,
+no trasladadas y no resueltas. La documentación previa de preparativos y sus
+resultados permanece histórica. SHA Render continúa sin verificar.

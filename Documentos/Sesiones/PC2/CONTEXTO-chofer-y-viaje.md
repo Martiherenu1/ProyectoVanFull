@@ -1,5 +1,23 @@
 # Contexto vivo · Chofer y viaje en curso (Martín)
 
+## RNF-008 / #39: rama contractual local — 2026-11-11
+
+- Rama docs/chofer-contrato-rnf008-39, worktree F:/dev/vf-rnf008-contrato,
+  base c9ac094299a93a52cae6245ea0093aaf964196a2. Candidato opcional
+  fecha_hora_evaluacion y respuesta fresca/no-store aplicados solo a YAML/JSON.
+- [Análisis y matriz de aceptación](ACLARACION-FUNCIONAL-CU009-ISSUE39-v0.2-VALIDADA-ANALISIS.md):
+  identidad P/contexto, clasificación y compatibilidad son propuestas; no implementación.
+- Conformidades informadas de Martiniano/Facundo con condiciones; no merge autorizado,
+  aprobación conjunta ni cumplimiento completo. #39 abierto; ETA fuera de alcance.
+- Regresiones originales, resultados 130/2 y revisión fa59928 (7 backend; 2 Flutter
+  aprobadas/2 fallidas) preservados en sus worktrees, sin traslado de tests/variante.
+  APK 8217c9c intacta; contrato nuevo no implica backend desplegado ni fallo resuelto.
+- Validación nueva: 5 controles existentes de contrato/rutas aprobados (4,82 s),
+  OpenAPI YAML/JSON válidos y equivalentes; JSON regenerado desde YAML.
+  Ruff y formato (119 archivos) correctos, diff --check limpio. Sin red/base.
+  No suite completa, Flutter, CI remota ni resolución de regresiones.
+  Sin commit ni publicación.
+
 ## Publicación documental CU-007 efectiva — 10/11/2026
 
 - Martín autorizó publicación tras revisar el diff. [Issue #267](https://github.com/Martiherenu1/ProyectoVanFull/issues/267) específico y [PR #268](https://github.com/Martiherenu1/ProyectoVanFull/pull/268) abierta hacia main, sin merge; único cierre automático #267, sin cerrar CU-007 ni sus preguntas funcionales.

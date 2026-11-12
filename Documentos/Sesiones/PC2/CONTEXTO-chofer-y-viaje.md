@@ -1,5 +1,17 @@
 # Contexto vivo · Chofer y viaje en curso (Martín)
 
+## Corrección documental CU-007 publicada — 11/11/2026
+
+- [PR #271](https://github.com/Martiherenu1/ProyectoVanFull/pull/271) abierta, sin merge; #268/#267 solo antecedentes, sin cierres automáticos ni cierre de pendientes funcionales. Base main revalidada sin avance `c9ac094299a93a52cae6245ea0093aaf964196a2`; primer commit/push normal `117af4f6d03628b1c1db855ab10cad758d85afdb`.
+- Revisión solicitada efectivamente en GitHub a `Martiherenu1` y `facubarrientos`, sin aprobación anticipada. Solo cuatro documentos; este registro posterior completa publicación. HEAD final y CI efectiva se registran en #271 tras observarlos, sin trasladar resultados de otros HEAD.
+- Precisión de S10 pendiente de validar con VanFull, DER por acordar entre los tres y propuesta online parcial conservadas; sin aceptación de descenso por reserva ni fecha de cierre confirmada. Antecedentes y ratificación intactos; sin código, modelo, contrato, datos, despliegues ni operaciones sobre bases. El estado «sin commit/push» inferior corresponde a la preparación anterior.
+
+## Integración documental CU-007 verificada — 11/11/2026
+
+- PR #268 mergeada mediante `c9ac094299a93a52cae6245ea0093aaf964196a2`; base `fa59928ee1dc4ce838f818397181bc6a817c31c1`, primer HEAD `8755c8b972c1ef98c73e072bd41ef3c73224e67a` y final `d5153fa2b2b09803a612eca8c69dea83409de1f0` conservados. Aprobación de Martiniano solo documental; no CU implementado ni diseño cerrado. Las notas inferiores de publicación/preparación son históricas.
+- Precisión de revisión informada por Martín: S10 es recuerdo de entrevista pendiente de validación con VanFull; se conserva su atribución original como antecedente. Descenso, paradas, QR y operaciones en el DER requieren acuerdo de los tres; Martiniano todavía no aceptó descenso por reserva.
+- Primera entrega solo online propuesta por Martiniano, parcial y pendiente de alcance/acuerdo; no elimina RF-015/RNF-011/012. Sin fecha de cierre confirmada. Corrección local documental en rama nueva; sin commit/push ni cambios productivos.
+
 ## Publicación documental CU-007 efectiva — 10/11/2026
 
 - Martín autorizó publicación tras revisar el diff. [Issue #267](https://github.com/Martiherenu1/ProyectoVanFull/issues/267) específico y [PR #268](https://github.com/Martiherenu1/ProyectoVanFull/pull/268) abierta hacia main, sin merge; único cierre automático #267, sin cerrar CU-007 ni sus preguntas funcionales.

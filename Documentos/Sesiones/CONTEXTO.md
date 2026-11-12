@@ -1,51 +1,22 @@
 # CONTEXTO VANFULL — Carga rápida de sesión
 
-> **CU-007, publicación documental efectiva — 10/11/2026:** [Issue #267](https://github.com/Martiherenu1/ProyectoVanFull/issues/267) y [PR #268](https://github.com/Martiherenu1/ProyectoVanFull/pull/268) abierta, sin merge; primer HEAD `8755c8b972c1ef98c73e072bd41ef3c73224e67a`, base revalidada `fa59928ee1dc4ce838f818397181bc6a817c31c1`. Push normal de cuatro documentos; revisión solicitada en GitHub a Martiniano (`Martiherenu1`) y Facundo (`facubarrientos`), sin aprobación atribuida. Este registro completa la publicación; HEAD final y CI efectiva se registran en #268 tras observarlos, sin inferir resultados previos. Único cierre documental #267; no CU implementado, sin despliegues ni operaciones sobre bases. Preparación e históricos conservados debajo.
+## Estado vigente — 2026-11-12
 
-> **CU-007, preparación documental para PC3 — 10/11/2026:** análisis vigente en [PC2/ANALISIS-CU007.md](PC2/ANALISIS-CU007.md), con aclaraciones del recuerdo de entrevista comunicado por Martín y sin aprobación técnica conjunta ni implementación. [Resumen y borradores para revisión](PC3/PREPARACION-PUBLICACION-CU007.md), base `fa59928ee1dc4ce838f818397181bc6a817c31c1`, rama `docs/chofer-analisis-cu007-pc3`. Solo documentación local, sin commit/publicación. Preguntas operativas y decisiones técnicas abiertas; fechas y restricciones de demo del 30/10 conservadas como antecedentes, sin extenderlas automáticamente a PC3.
-
-> **Chofer, publicación documental efectiva — 2026-10-30:** [PR #260](https://github.com/Martiherenu1/ProyectoVanFull/pull/260) abierta, primer HEAD `1720b35dc1aeb14c25c5a4f04dd1c3c5bd91e3ec`; único cierre documental #259. Base `f55ecf271aba9645582fcf1910b6a7da0084c6f7`, tres documentos, sin CU completos. CI inicial en curso al registrar; resultado del HEAD final en PR/Issue, separado de evidencias históricas. Notas anteriores de preparación se conservan debajo; sin merge, despliegue ni operaciones reales.
-
-> **Chofer, publicación documental autorizada — 2026-10-30:** consolidación de CU-029/CU-030, Issue #259, base actualizada `f55ecf271aba9645582fcf1910b6a7da0084c6f7` (#257/CU-008 conservado). Solo tres documentos; sin cumplimiento completo ni cierre de pendientes funcionales. Commit/push/PR/CI propios aún pendientes al preparar esta nota; estado posterior en el cierre y contexto de Chofer. Sin merge, despliegue ni operaciones reales; notas siguientes históricas.
-
-> **Chofer, preparación documental — 2026-10-30:** cierre CU-029/CU-030 en [PC2/CIERRE-DOCUMENTAL-CU029-CU030.md](PC2/CIERRE-DOCUMENTAL-CU029-CU030.md), rama local `docs/chofer-cierre-documental-cu029-cu030`, base `cbcbf1243370649add1b30fb2f1908bdb54962a5`. Solo documentación para revisión final, sin commit ni publicación; no implica CU completos ni nuevas pruebas/operaciones. Históricos y pendientes conservados; detalle en el cierre y contexto de Chofer.
-
-> **Corte Pasajero y base común — 2026-10-29 (noche).** Entró a `main`: «Ver ubicación» en Mis reservas (#222),
-> `GET /reservas` de CU-027 (#224), fechas del asistente como DD/MM/AAAA (#232), aviso al agotarse el cupo diario
-> de OpenRouter (#234), guion de la demo (#235/#236) y una prueba que dependía de la hora (#239). **Verificado en
-> Render por API (viaje 3, `pasajero2`): crear una reserva (queda consolidada), el cupo baja y vuelve al cancelar,
-> y la ubicación responde 404 con el viaje sin iniciar.** **Asistente:** la cuenta gratuita de OpenRouter permite
-> **50 pedidos por día** (se renueva 21:00 Argentina); reservar/cancelar por el chat con el modelo real **no se
-> verificó**. Reservar no genera deuda (tarifa pendiente, #9): el saldo queda en 0. El cliente Flutter no tiene
-> timeout y el servidor corta a los 60 s. Protección de `main`: 0 approvals y las 2 CI exigidas. Neon sigue sin
-> re-sembrar (espera a Martín). Detalle y decisiones: PC2/CONTEXTO-pasajero-y-base-comun.md y PC2/GUION-DEMO-PC2.md.
-
-> **CU-036, seguimiento #215:** #240 mergeado solo con propuesta; #238 cerrado.
-> Implementación local candidata para PR nuevo, main remoto 440c578 preservado.
-> Rama aislada, vínculo persistente y migración optativa fuera del head normal,
-> webhook condicional HMAC/Payments/CU-016 y pruebas PostgreSQL temporales. Flag false;
-> live_mode=true rechazado. D1–D6 NO aprobadas; sin main/commit/push/despliegue.
-> Matriz y ensayo: PC2/ENSAYO-CU036-AISLADO.md. Cortes históricos siguientes no describen esta rama.
-> Ampliación local Checkout Pro: intención persistente, inicio/consulta propios y Flutter
-> detrás de flags false; reutiliza webhook/CU-016. Modelo/contrato/área pasajero pendientes
-> de aprobación del equipo; efectivo/transferencia conservados. Detalle y riesgos:
-> PC2/CHECKOUT-PRO-CU014-CU036-CANDIDATO.md. Sin llamadas a MP, commit ni despliegue.
-
-> Integración Flutter #229, 2026-10-29: test/admin-flutter-integracion-pc2-229 desde main
-> 8e16205 (#228 integrado). Tres circuitos UI nuevos; 32 focalizadas y analyze aprobados.
-> Solo pruebas/contextos, sin cambios productivos ni Neon/Render. Sin commit/push/PR.
-> Antecedente #227/#228: 3 casos backend + 11 existentes CU-027 aprobados, ya integrados.
-
-> **Corte Administración PC2 — 2026-10-29, main bceb929, #225.** PR #210/#214/#216/#217/#218
-> mergeados. CU-018/027/014/015: PARCIAL; CU-016: circuito documentado IMPLEMENTADO, contraste
-> detallado v1.3 pendiente; CU-036: preparación interna PARCIAL, circuito HTTP PENDIENTE.
-> Viajes incluye cancelación limitada; reservas, deuda y pagos administrativos están conectados.
-> Pendientes: RN-019/CU-017/#75, tipo/evidencia/efectivo-15 %/señas (#84), RN-004/005/006 (#212),
-> criterios CU-027 (#211) y webhook MP inactivo (#215). No equiparar merge con cobertura completa.
-> Fuente de estado y tabla CU→RF→RN→Issue→PR: PC2/CONTEXTO-administracion-y-flutter.md.
-> Despliegue actual y circuitos nuevos en Render SIN VERIFICAR. Notion pendiente de comprobar/
-> actualizar por Facundo; no consultado ni modificado. Rama documental sin commit/push/PR.
-> Los apartados generales posteriores conservan su fecha propia; no se reauditaron otras áreas.
+- **RNF-008:** [PR contractual #272](https://github.com/Martiherenu1/ProyectoVanFull/pull/272)
+  abierta; Martiniano aprobó el contrato con observaciones documentales atendidas.
+  Backend aún sin metadato/header; [implementación #273](https://github.com/Martiherenu1/ProyectoVanFull/issues/273)
+  pendiente. [#39](https://github.com/Martiherenu1/ProyectoVanFull/issues/39) abierto;
+  RNF-008 parcial, dos regresiones pendientes y ETA fuera de alcance.
+- **CU-007:** [análisis](PC2/ANALISIS-CU007.md) y
+  [preparación/antecedentes](PC3/PREPARACION-PUBLICACION-CU007.md); #268 integrado,
+  sin implementación aprobada en esta actualización.
+- Estados por área: [Chofer](PC2/CONTEXTO-chofer-y-viaje.md),
+  [Pasajero/base común](PC2/CONTEXTO-pasajero-y-base-comun.md),
+  [Administración/Flutter](PC2/CONTEXTO-administracion-y-flutter.md).
+  Cortes de PC2, SHA y procedencias se conservan en esos documentos y en el anexo
+  histórico al final; no acreditan el despliegue actual.
+- Validación local contractual previa: 5 aprobadas; CI por HEAD registrada en #272/#39,
+  separada de diagnósticos. No merge ni despliegue. Detalle vigente en contexto de Chofer.
 
 > **Para qué sirve:** documento de arranque. Leyendo esto se recupera todo el contexto crítico del proyecto sin
 > releer la documentación completa. **Mantenerlo actualizado al cerrar cada sesión.**
@@ -54,7 +25,7 @@
 > datos de esta máquina. Los prompts de arranque por tipo de tarea, y el criterio de cuándo conviene
 > abrir un chat nuevo, están en `Documentos/Sesiones/PROMPT-INICIAL.md`.
 >
-> **Última actualización: 2026-10-26** (§13 composición compartida de Flutter integrada y chofer1 verificado contra Render; antes, 24/10: backend en Render y asistente AG-01 con modelo real) · Reemplaza y consolida todas las versiones anteriores.
+> **Corte histórico del cuerpo general: 2026-10-26** (§13 composición compartida de Flutter integrada y chofer1 verificado contra Render; antes, 24/10: backend en Render y asistente AG-01 con modelo real) · Reemplaza y consolida todas las versiones anteriores.
 
 ---
 
@@ -470,3 +441,80 @@ funcionales ni compartidos. 23 pruebas locales aprobadas, analyze/formato correc
 capturas Flutter de 1440/360 px revisadas. Detalle/evidencia en el contexto de Administración.
 Facundo autoriza publicación y merge commit condicionado a CI verde antes del corte 17:15.
 Sin despliegues manuales ni cambios de backend, API, modelo o infraestructura; Mercado Pago congelado.
+
+---
+
+## Anexo — banners históricos anteriores al resumen del 12/11/2026
+
+Los estados siguientes son antecedentes de su fecha, no el estado vigente ni una
+verificación nueva de despliegue. Se conserva íntegra su información y procedencia.
+
+## Publicación contractual RNF-008 / #39 — 2026-11-11
+
+- [PR #272](https://github.com/Martiherenu1/ProyectoVanFull/pull/272) abierta hacia main,
+  sin merge; [registro en #39](https://github.com/Martiherenu1/ProyectoVanFull/issues/39#issuecomment-6809996842).
+- Base revalidada sin avance c9ac094299a93a52cae6245ea0093aaf964196a2; no merge local
+  necesario. Commits iniciales: contrato 6ca26c1 y análisis/contextos b22aa2f.
+  Este registro posterior completa la publicación en la misma rama, cinco archivos.
+- Revisión solicitada efectivamente a Martiherenu1 y facubarrientos; no aprobación
+  formal atribuida. Conformidades informadas y condiciones anteriores conservadas.
+- CI del HEAD final se registra en PR/#39 después de observarla; no se infiere de
+  las 5 pruebas contractuales locales. No se repitieron verificaciones locales porque
+  contrato y base no cambiaron. Dos regresiones originales y sus históricos intactos.
+- Sin implementación productiva, modelo, Flutter ni CI modificados; RNF-008 parcial,
+  ETA fuera de alcance, #39 abierto. Sin despliegue u operaciones reales.
+  Las notas de preparación siguientes son históricas.
+
+> **RNF-008 / #39, preparación contractual local — 2026-11-11:** rama
+> docs/chofer-contrato-rnf008-39 desde c9ac094299a93a52cae6245ea0093aaf964196a2.
+> Campo opcional fecha_hora_evaluacion y no-store en YAML/JSON; sin implementación,
+> publicación ni cumplimiento completo. Regresiones y APK preservadas fuera de esta
+> rama. Detalle y conformidades condicionadas en el contexto de Chofer y análisis #39;
+> ETA fuera de alcance, #39 abierto. Históricos siguientes conservados.
+
+> **CU-007, publicación documental efectiva — 10/11/2026:** [Issue #267](https://github.com/Martiherenu1/ProyectoVanFull/issues/267) y [PR #268](https://github.com/Martiherenu1/ProyectoVanFull/pull/268) abierta, sin merge; primer HEAD `8755c8b972c1ef98c73e072bd41ef3c73224e67a`, base revalidada `fa59928ee1dc4ce838f818397181bc6a817c31c1`. Push normal de cuatro documentos; revisión solicitada en GitHub a Martiniano (`Martiherenu1`) y Facundo (`facubarrientos`), sin aprobación atribuida. Este registro completa la publicación; HEAD final y CI efectiva se registran en #268 tras observarlos, sin inferir resultados previos. Único cierre documental #267; no CU implementado, sin despliegues ni operaciones sobre bases. Preparación e históricos conservados debajo.
+
+> **CU-007, preparación documental para PC3 — 10/11/2026:** análisis vigente en [PC2/ANALISIS-CU007.md](PC2/ANALISIS-CU007.md), con aclaraciones del recuerdo de entrevista comunicado por Martín y sin aprobación técnica conjunta ni implementación. [Resumen y borradores para revisión](PC3/PREPARACION-PUBLICACION-CU007.md), base `fa59928ee1dc4ce838f818397181bc6a817c31c1`, rama `docs/chofer-analisis-cu007-pc3`. Solo documentación local, sin commit/publicación. Preguntas operativas y decisiones técnicas abiertas; fechas y restricciones de demo del 30/10 conservadas como antecedentes, sin extenderlas automáticamente a PC3.
+
+> **Chofer, publicación documental efectiva — 2026-10-30:** [PR #260](https://github.com/Martiherenu1/ProyectoVanFull/pull/260) abierta, primer HEAD `1720b35dc1aeb14c25c5a4f04dd1c3c5bd91e3ec`; único cierre documental #259. Base `f55ecf271aba9645582fcf1910b6a7da0084c6f7`, tres documentos, sin CU completos. CI inicial en curso al registrar; resultado del HEAD final en PR/Issue, separado de evidencias históricas. Notas anteriores de preparación se conservan debajo; sin merge, despliegue ni operaciones reales.
+
+> **Chofer, publicación documental autorizada — 2026-10-30:** consolidación de CU-029/CU-030, Issue #259, base actualizada `f55ecf271aba9645582fcf1910b6a7da0084c6f7` (#257/CU-008 conservado). Solo tres documentos; sin cumplimiento completo ni cierre de pendientes funcionales. Commit/push/PR/CI propios aún pendientes al preparar esta nota; estado posterior en el cierre y contexto de Chofer. Sin merge, despliegue ni operaciones reales; notas siguientes históricas.
+
+> **Chofer, preparación documental — 2026-10-30:** cierre CU-029/CU-030 en [PC2/CIERRE-DOCUMENTAL-CU029-CU030.md](PC2/CIERRE-DOCUMENTAL-CU029-CU030.md), rama local `docs/chofer-cierre-documental-cu029-cu030`, base `cbcbf1243370649add1b30fb2f1908bdb54962a5`. Solo documentación para revisión final, sin commit ni publicación; no implica CU completos ni nuevas pruebas/operaciones. Históricos y pendientes conservados; detalle en el cierre y contexto de Chofer.
+
+> **Corte Pasajero y base común — 2026-10-29 (noche).** Entró a `main`: «Ver ubicación» en Mis reservas (#222),
+> `GET /reservas` de CU-027 (#224), fechas del asistente como DD/MM/AAAA (#232), aviso al agotarse el cupo diario
+> de OpenRouter (#234), guion de la demo (#235/#236) y una prueba que dependía de la hora (#239). **Verificado en
+> Render por API (viaje 3, `pasajero2`): crear una reserva (queda consolidada), el cupo baja y vuelve al cancelar,
+> y la ubicación responde 404 con el viaje sin iniciar.** **Asistente:** la cuenta gratuita de OpenRouter permite
+> **50 pedidos por día** (se renueva 21:00 Argentina); reservar/cancelar por el chat con el modelo real **no se
+> verificó**. Reservar no genera deuda (tarifa pendiente, #9): el saldo queda en 0. El cliente Flutter no tiene
+> timeout y el servidor corta a los 60 s. Protección de `main`: 0 approvals y las 2 CI exigidas. Neon sigue sin
+> re-sembrar (espera a Martín). Detalle y decisiones: PC2/CONTEXTO-pasajero-y-base-comun.md y PC2/GUION-DEMO-PC2.md.
+
+> **CU-036, seguimiento #215:** #240 mergeado solo con propuesta; #238 cerrado.
+> Implementación local candidata para PR nuevo, main remoto 440c578 preservado.
+> Rama aislada, vínculo persistente y migración optativa fuera del head normal,
+> webhook condicional HMAC/Payments/CU-016 y pruebas PostgreSQL temporales. Flag false;
+> live_mode=true rechazado. D1–D6 NO aprobadas; sin main/commit/push/despliegue.
+> Matriz y ensayo: PC2/ENSAYO-CU036-AISLADO.md. Cortes históricos siguientes no describen esta rama.
+> Ampliación local Checkout Pro: intención persistente, inicio/consulta propios y Flutter
+> detrás de flags false; reutiliza webhook/CU-016. Modelo/contrato/área pasajero pendientes
+> de aprobación del equipo; efectivo/transferencia conservados. Detalle y riesgos:
+> PC2/CHECKOUT-PRO-CU014-CU036-CANDIDATO.md. Sin llamadas a MP, commit ni despliegue.
+
+> Integración Flutter #229, 2026-10-29: test/admin-flutter-integracion-pc2-229 desde main
+> 8e16205 (#228 integrado). Tres circuitos UI nuevos; 32 focalizadas y analyze aprobados.
+> Solo pruebas/contextos, sin cambios productivos ni Neon/Render. Sin commit/push/PR.
+> Antecedente #227/#228: 3 casos backend + 11 existentes CU-027 aprobados, ya integrados.
+
+> **Corte Administración PC2 — 2026-10-29, main bceb929, #225.** PR #210/#214/#216/#217/#218
+> mergeados. CU-018/027/014/015: PARCIAL; CU-016: circuito documentado IMPLEMENTADO, contraste
+> detallado v1.3 pendiente; CU-036: preparación interna PARCIAL, circuito HTTP PENDIENTE.
+> Viajes incluye cancelación limitada; reservas, deuda y pagos administrativos están conectados.
+> Pendientes: RN-019/CU-017/#75, tipo/evidencia/efectivo-15 %/señas (#84), RN-004/005/006 (#212),
+> criterios CU-027 (#211) y webhook MP inactivo (#215). No equiparar merge con cobertura completa.
+> Fuente de estado y tabla CU→RF→RN→Issue→PR: PC2/CONTEXTO-administracion-y-flutter.md.
+> Despliegue actual y circuitos nuevos en Render SIN VERIFICAR. Notion pendiente de comprobar/
+> actualizar por Facundo; no consultado ni modificado. Rama documental sin commit/push/PR.
+> Los apartados generales posteriores conservan su fecha propia; no se reauditaron otras áreas.

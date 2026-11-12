@@ -1,5 +1,58 @@
 # Contexto vivo · Chofer y viaje en curso (Martín)
 
+## RNF-008 / #272: revisión formal y ajustes documentales — 2026-11-12
+
+- Martiniano: APPROVED del contrato y [29,31] como Vigencia no confirmada, con tres
+  observaciones no bloqueantes; revisará pantalla cuando exista implementación.
+  [Fuente formal](https://github.com/Martiherenu1/ProyectoVanFull/pull/272#pullrequestreview-5868409821).
+  No aprobación más amplia ni aprobación formal de Facundo atribuida.
+- [#273](https://github.com/Martiherenu1/ProyectoVanFull/issues/273): emisión coherente
+  de fecha_hora_evaluacion/no-store y pruebas backend pendientes; README deja explícito
+  que hoy NO se emiten. #39 abierto, RNF-008 parcial; ETA fuera de alcance.
+- Texto vigente del caso antes dentro de ventana: Sin marca de desactualización en la
+  última consulta; no certifica captura reciente. Reevaluación durante GET pendiente
+  y desactualización acreditada prevalecen. Otros tres estados intactos.
+- Main incorporado por merge: 71739f49b1427aa3523e46011e6085fa9cbe4c91 (solo CLAUDE).
+  Contexto general resumido con banners íntegros en anexo. CU-007 conservado.
+- Solo documentación; contrato/pruebas/producción intactos. No se repiten suites locales
+  por estos cambios; whitespace, coherencia, enlaces y preservación comprobados.
+  CI del HEAD final se registrará en #272/#39, separada de 5 contractuales y dos
+  regresiones pendientes de diagnóstico. Históricos y APK intactos; sin merge remoto.
+
+## Publicación contractual RNF-008 / #39 — 2026-11-11
+
+- [PR #272](https://github.com/Martiherenu1/ProyectoVanFull/pull/272) abierta hacia main,
+  sin merge; [registro en #39](https://github.com/Martiherenu1/ProyectoVanFull/issues/39#issuecomment-6809996842).
+- Base revalidada sin avance c9ac094299a93a52cae6245ea0093aaf964196a2; no merge local
+  necesario. Commits iniciales: contrato 6ca26c1 y análisis/contextos b22aa2f.
+  Este registro posterior completa la publicación en la misma rama, cinco archivos.
+- Revisión solicitada efectivamente a Martiherenu1 y facubarrientos; no aprobación
+  formal atribuida. Conformidades informadas y condiciones anteriores conservadas.
+- CI del HEAD final se registra en PR/#39 después de observarla; no se infiere de
+  las 5 pruebas contractuales locales. No se repitieron verificaciones locales porque
+  contrato y base no cambiaron. Dos regresiones originales y sus históricos intactos.
+- Sin implementación productiva, modelo, Flutter ni CI modificados; RNF-008 parcial,
+  ETA fuera de alcance, #39 abierto. Sin despliegue u operaciones reales.
+  Las notas de preparación siguientes son históricas.
+
+## RNF-008 / #39: rama contractual local — 2026-11-11
+
+- Rama docs/chofer-contrato-rnf008-39, worktree F:/dev/vf-rnf008-contrato,
+  base c9ac094299a93a52cae6245ea0093aaf964196a2. Candidato opcional
+  fecha_hora_evaluacion y respuesta fresca/no-store aplicados solo a YAML/JSON.
+- [Análisis y matriz de aceptación](ACLARACION-FUNCIONAL-CU009-ISSUE39-v0.2-VALIDADA-ANALISIS.md):
+  identidad P/contexto, clasificación y compatibilidad son propuestas; no implementación.
+- Conformidades informadas de Martiniano/Facundo con condiciones; no merge autorizado,
+  aprobación conjunta ni cumplimiento completo. #39 abierto; ETA fuera de alcance.
+- Regresiones originales, resultados 130/2 y revisión fa59928 (7 backend; 2 Flutter
+  aprobadas/2 fallidas) preservados en sus worktrees, sin traslado de tests/variante.
+  APK 8217c9c intacta; contrato nuevo no implica backend desplegado ni fallo resuelto.
+- Validación nueva: 5 controles existentes de contrato/rutas aprobados (4,82 s),
+  OpenAPI YAML/JSON válidos y equivalentes; JSON regenerado desde YAML.
+  Ruff y formato (119 archivos) correctos, diff --check limpio. Sin red/base.
+  No suite completa, Flutter, CI remota ni resolución de regresiones.
+  Sin commit ni publicación.
+
 ## Publicación documental CU-007 efectiva — 10/11/2026
 
 - Martín autorizó publicación tras revisar el diff. [Issue #267](https://github.com/Martiherenu1/ProyectoVanFull/issues/267) específico y [PR #268](https://github.com/Martiherenu1/ProyectoVanFull/pull/268) abierta hacia main, sin merge; único cierre automático #267, sin cerrar CU-007 ni sus preguntas funcionales.

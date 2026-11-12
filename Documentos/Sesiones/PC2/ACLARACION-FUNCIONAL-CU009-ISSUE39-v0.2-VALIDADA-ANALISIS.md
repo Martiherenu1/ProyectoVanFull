@@ -345,7 +345,7 @@ no aplica contrato/código, no publica comentario ni autoriza merge.
 | true del servidor, o referencia válida con cota mínima >30 s | **Información desactualizada** | Conservar procedencia en el estado interno. Para la misma posición y contexto, conservar true o una cota mínima válida >30 s ya acreditados, incluso ante respuesta repetida o pérdida posterior del ancla. |
 | Referencia válida con mínima ≤30 s y máxima >30 s | **Vigencia no confirmada** | Puede haber superado el umbral; no presentarla como actual. No afirmar edad exacta. |
 | Sin referencia válida, sin desactualización previamente acreditada | **Antigüedad no verificable** | No se puede establecer su vigencia contractual; no sustituir por reloj del cliente. |
-| Referencia válida, intervalo no negativo íntegramente ≤30 s | **Dentro de la ventana de vigencia contractual** | Solo describe vigencia contractual bajo las condiciones del cálculo, no captura física reciente. |
+| Referencia válida, intervalo no negativo íntegramente ≤30 s | **Sin marca de desactualización en la última consulta** | Solo describe vigencia contractual bajo las condiciones del cálculo, no captura física reciente. |
 
 Aviso complementario común: **«No se pudo verificar cuándo se capturó esta ubicación»**.
 La fecha, si se muestra, sigue identificada como informada de la posición: no se
@@ -361,7 +361,7 @@ de la pantalla**:
 - Referencia ausente/incoherente, sin desactualización previamente acreditada: «Antigüedad no verificable».
 - Misma posición/contexto con true previo o cota mínima válida >30 s ya acreditada:
   «Información desactualizada», aunque se repita la respuesta o luego se pierda el ancla.
-- Intervalo [28,30] s o [30,30] s: «Dentro de la ventana de vigencia contractual», con el
+- Intervalo [28,30] s o [30,30] s: «Sin marca de desactualización en la última consulta», con el
   aviso de captura no verificada. Se conserva **>30 s estricto**, no ≥30 s.
 
 **Consulta, conectividad y ausencia de datos se separan del estado de posición:**
@@ -394,7 +394,7 @@ Se propone distinguir:
 - **Información desactualizada**: true del servidor o cota mínima contractual >30 s.
 - **Vigencia no confirmada**: intervalo válido cuya cota mínima es ≤30 s y máxima >30 s.
 - **Antigüedad no verificable**: falta referencia válida, salvo desactualización ya acreditada para la misma posición y contexto.
-- **Dentro de la ventana de vigencia contractual**: intervalo válido íntegramente ≤30 s.
+- **Sin marca de desactualización en la última consulta**: intervalo válido íntegramente ≤30 s.
   Este texto no certifica captura física reciente; se acompaña de
   «No se pudo verificar cuándo se capturó esta ubicación».
 
@@ -512,7 +512,7 @@ No se exige actualizar el modelo ni alterar required. Revisar consumidores estri
 La PR contractual definiría comportamiento objetivo, sin declarar que el backend
 ya emite S/no-store: implementación, pruebas y despliegue separados y posteriores.
 Los textos permanecen: «Información desactualizada», «Vigencia no confirmada»,
-«Antigüedad no verificable» y «Dentro de la ventana de vigencia contractual».
+«Antigüedad no verificable» y «Sin marca de desactualización en la última consulta».
 El último texto no certifica captura física reciente.
 
 ### Regresiones originales: conservar sin reescribir para obtener verde
@@ -543,7 +543,7 @@ No son resultados nuevos de c9ac094 ni de esta propuesta. Hoy no se ejecutaron p
 | S ausente, inválido o ancla no fiable, sin marca previa | Antigüedad no verificable; sin segundos exactos ni autoridad del reloj cliente | Caso nuevo, no arregla originales |
 | A=29,r=2,d=0: [29,31] | Vigencia no confirmada; no afirmar >30 conocido | Aceptación separada; original GET 29→31 sigue roja |
 | A=29,r=2,d=2: [31,33], GET siguiente pendiente | Información desactualizada por cota mínima válida; no congelar presentación | Aceptación futura; original pendiente sigue roja hoy |
-| [28,30] o [30,30] | Dentro de la ventana de vigencia contractual; captura física no verificada | Exactamente 30 no fuerza desactualización |
+| [28,30] o [30,30] | Sin marca de desactualización en la última consulta; captura física no verificada | Exactamente 30 no fuerza desactualización |
 | Mismo P/C: true o mínima válida >30 ya acreditados; luego false repetido/ancla perdida | Conservar Información desactualizada y procedencia | Prueba nueva de identidad y monotonía de la clasificación |
 | Vehículo detenido, coordenadas iguales y T posterior | P nueva; limpiar estado anterior y clasificar esta P | No deduplicar solo por coordenadas |
 | T anterior o callback de contexto anterior | Descartar antes de cualquier efecto; no reponer ni limpiar datos actuales | Probar respuesta fuera de orden y cambio de cuenta/viaje/fuente |
@@ -665,3 +665,43 @@ resultados permanece histórica. SHA Render continúa sin verificar.
 - Sin implementación productiva, modelo, Flutter ni CI modificados; RNF-008 parcial,
   ETA fuera de alcance, #39 abierto. Sin despliegue u operaciones reales.
   Las notas de preparación siguientes son históricas.
+
+
+---
+
+## Observaciones de Martiniano atendidas — 2026-11-12
+
+**Fuente formal verificada:** revisión APPROVED de Martiherenu1 en #272,
+[12/11 a las 00:15:57 Argentina](https://github.com/Martiherenu1/ProyectoVanFull/pull/272#pullrequestreview-5868409821).
+Aprueba el contrato, fecha_hora_evaluacion opcional y [29,31] como Vigencia no
+confirmada; tres observaciones no bloqueantes. Revisará la pantalla al existir
+implementación. No se amplía esa aprobación al diseño completo, implementación,
+despliegue o cumplimiento RNF-008, ni se atribuye a Facundo una aprobación formal.
+Sin hilos de revisión pendientes al consultar; revisión de Facundo aún no observada.
+Los apartados anteriores que solo informan conformidad son históricos de su fecha.
+
+La rama incorpora main 71739f49b1427aa3523e46011e6085fa9cbe4c91 por merge normal
+(solo instrucciones CLAUDE; contrato y código GPS sin diferencias). Se conserva
+c9ac094299a93a52cae6245ea0093aaf964196a2 como base de la preparación anterior.
+
+1. README contractual distingue propuesta, implementación y despliegue. Backend
+   todavía NO emite fecha_hora_evaluacion ni Cache-Control: no-store.
+   [Issue #273](https://github.com/Martiherenu1/ProyectoVanFull/issues/273) específico
+   creado tras buscar equivalentes por fecha_hora_evaluacion, no-store y metadato:
+   no había otro de emisión/pruebas. #39 no se duplica ni se cierra.
+2. Texto vigente: **Sin marca de desactualización en la última consulta**, solo
+   para el caso antes clasificado con intervalo válido completo no negativo ≤30.
+   Sustituye en tabla, ejemplos y borradores al texto anterior, conservado en Git.
+   No certifica captura reciente ni significa que un false sin referencia pruebe vigencia.
+3. No sustituye Información desactualizada, Vigencia no confirmada ni Antigüedad
+   no verificable. La clasificación temporal reevaluada prevalece sobre el rótulo
+   de la última consulta mientras un GET sigue pendiente. True del servidor o
+   mínima válida >30 ya acreditados para misma P/contexto no se rejuvenecen por
+   consulta, respuesta repetida o pérdida posterior del ancla. Limpieza por nueva
+   P/contexto o pérdida de acceso, según propuesta previa.
+4. Banners generales resumidos; texto original íntegro trasladado al anexo del
+   mismo CONTEXTO.md, con SHA, fuentes y pendientes conservados. CU-007 no cambia.
+5. Esta actualización es documental: YAML/JSON, modelo, backend, Flutter, CI y
+   pruebas permanecen intactos. Las dos regresiones y las evidencias 130/2 y
+   fa59928 más tests locales siguen separadas de las 5 pruebas contractuales
+   locales y de CI remota. No se declara resuelta la brecha [29,31].

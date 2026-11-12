@@ -1,5 +1,24 @@
 # Contexto vivo · Chofer y viaje en curso (Martín)
 
+## RNF-008 / #272: revisión formal y ajustes documentales — 2026-11-12
+
+- Martiniano: APPROVED del contrato y [29,31] como Vigencia no confirmada, con tres
+  observaciones no bloqueantes; revisará pantalla cuando exista implementación.
+  [Fuente formal](https://github.com/Martiherenu1/ProyectoVanFull/pull/272#pullrequestreview-5868409821).
+  No aprobación más amplia ni aprobación formal de Facundo atribuida.
+- [#273](https://github.com/Martiherenu1/ProyectoVanFull/issues/273): emisión coherente
+  de fecha_hora_evaluacion/no-store y pruebas backend pendientes; README deja explícito
+  que hoy NO se emiten. #39 abierto, RNF-008 parcial; ETA fuera de alcance.
+- Texto vigente del caso antes dentro de ventana: Sin marca de desactualización en la
+  última consulta; no certifica captura reciente. Reevaluación durante GET pendiente
+  y desactualización acreditada prevalecen. Otros tres estados intactos.
+- Main incorporado por merge: 71739f49b1427aa3523e46011e6085fa9cbe4c91 (solo CLAUDE).
+  Contexto general resumido con banners íntegros en anexo. CU-007 conservado.
+- Solo documentación; contrato/pruebas/producción intactos. No se repiten suites locales
+  por estos cambios; whitespace, coherencia, enlaces y preservación comprobados.
+  CI del HEAD final se registrará en #272/#39, separada de 5 contractuales y dos
+  regresiones pendientes de diagnóstico. Históricos y APK intactos; sin merge remoto.
+
 ## Publicación contractual RNF-008 / #39 — 2026-11-11
 
 - [PR #272](https://github.com/Martiherenu1/ProyectoVanFull/pull/272) abierta hacia main,

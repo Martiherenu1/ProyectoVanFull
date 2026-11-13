@@ -8,6 +8,7 @@ import '../../models/pasajero/disponibilidad_viaje.dart';
 import '../../models/pasajero/reserva.dart';
 import 'asistente_screen.dart';
 import 'buscar_servicio_screen.dart';
+import 'cambiar_parada_screen.dart';
 import 'confirmar_reserva_screen.dart';
 import 'mis_reservas_screen.dart';
 import 'pago_screen.dart';
@@ -109,6 +110,22 @@ class _PasajeroShellState extends State<PasajeroShell> {
     _abrirRuta(MaterialPageRoute<void>(builder: (_) => pantalla));
   }
 
+  void _cambiarParada(Reserva reserva) {
+    _abrirRuta(
+      MaterialPageRoute<void>(
+        builder: (contexto) => CambiarParadaScreen(
+          reserva: reserva,
+          cargarParadas: widget.api.cargarParadas,
+          cambiarParada: widget.api.cambiarParada,
+          onTerminar: (_) {
+            Navigator.of(contexto).pop();
+            _ir(_reservas);
+          },
+        ),
+      ),
+    );
+  }
+
   void _registrarPago(Deuda deuda) {
     var finalizo = false;
     _abrirRuta(
@@ -167,6 +184,7 @@ class _PasajeroShellState extends State<PasajeroShell> {
             cancelarReserva: widget.api.cancelarReserva,
             onBuscarServicio: () => _ir(_buscar),
             onRegistrarPago: _registrarPago,
+            onCambiarParada: _cambiarParada,
             onVerUbicacion: widget.pantallaUbicacion == null
                 ? null
                 : _verUbicacion,

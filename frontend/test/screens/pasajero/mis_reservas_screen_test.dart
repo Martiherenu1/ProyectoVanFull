@@ -49,6 +49,7 @@ Future<void> mostrar(
   VoidCallback? buscar,
   ValueChanged<Deuda>? pagar,
   ValueChanged<Reserva>? verUbicacion,
+  ValueChanged<Reserva>? cambiarParada,
 }) => tester.pumpWidget(
   MaterialApp(
     home: MisReservasScreen(
@@ -59,6 +60,7 @@ Future<void> mostrar(
       onBuscarServicio: buscar ?? () {},
       onRegistrarPago: pagar,
       onVerUbicacion: verUbicacion,
+      onCambiarParada: cambiarParada,
     ),
   ),
 );
@@ -401,6 +403,60 @@ void main() {
       await tester.pump();
 
       expect(find.byKey(const ValueKey('ubicacion-1')), findsNothing);
+    });
+  });
+  group('Cambiar parada', () {
+    testWidgets('una reserva abierta y no cancelada ofrece cambiar la parada', (
+      tester,
+    ) async {
+      Reserva? recibida;
+      await mostrar(tester, cambiarParada: (r) => recibida = r);
+      await tester.pump();
+      expect(find.byKey(const ValueKey('cambiar-parada-1')), findsNothing);
+
+      await tester.tap(find.byKey(const ValueKey('reserva-1')));
+      await tester.pump();
+      await tester.tap(find.byKey(const ValueKey('cambiar-parada-1')));
+
+      expect(recibida?.idReserva, 1);
+      expect(recibida?.idRecorrido, 3);
+    });
+
+    testWidgets('la provisional también lo ofrece: el backend decide', (
+      tester,
+    ) async {
+      await mostrar(
+        tester,
+        reservas: () async => [reserva(1, estado: 'provisional')],
+        cambiarParada: (_) {},
+      );
+      await tester.pump();
+      await tester.tap(find.byKey(const ValueKey('reserva-1')));
+      await tester.pump();
+
+      expect(find.byKey(const ValueKey('cambiar-parada-1')), findsOneWidget);
+    });
+
+    testWidgets('la cancelada no lo ofrece', (tester) async {
+      await mostrar(
+        tester,
+        reservas: () async => [reserva(2, estado: 'cancelada')],
+        cambiarParada: (_) {},
+      );
+      await tester.pump();
+      await tester.tap(find.byKey(const ValueKey('reserva-2')));
+      await tester.pump();
+
+      expect(find.byKey(const ValueKey('cambiar-parada-2')), findsNothing);
+    });
+
+    testWidgets('sin callback no hay botón', (tester) async {
+      await mostrar(tester);
+      await tester.pump();
+      await tester.tap(find.byKey(const ValueKey('reserva-1')));
+      await tester.pump();
+
+      expect(find.byKey(const ValueKey('cambiar-parada-1')), findsNothing);
     });
   });
   for (final falla in [false, true]) {

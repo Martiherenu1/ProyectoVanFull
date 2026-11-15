@@ -430,6 +430,8 @@ el 25/10, salvo acuerdo» de REPARTO-PC2 no rige, por decisión de Martiniano):
   - **Estado de la base:** el viaje 5 queda `finalizado` en Neon hasta el próximo `--reiniciar`, que sigue siendo
     obligatorio antes de la demo (reservas de `pasajero1`), y lo coordina Martiniano.
 
+> **CU-030, corrección de revisión PR #281 — 15/11/2026:** salida explícita de resultado incierto permite volver a las acciones del viaje sin cancelar/rechazar el aviso. Viaje/clave conservados solo en el shell de la misma sesión para recuperación manual posterior; sin reenvíos automáticos y sin trasladar datos entre cuentas. Recuperación desplazable con teclado abierto. Procedimiento futuro de migración 0002, preservación/restauración, SHA efectivos backend/Web y ensayo con datos acordados en [entrega manual](PC3/ENTREGA-MANUAL-CU030-280.md). CU-037 separado: proveedor, plataformas, accesos e integración pendientes, sin responsables atribuidos. HEAD y CI de la corrección se registran en #281 tras observarlos; históricos debajo. Sin merge, despliegue, migraciones remotas ni reinicios.
+
 ## 14. Recursos
 
 - **Repo:** https://github.com/Martiherenu1/ProyectoVanFull (**público**) · entrega congelada en el tag `pc1`

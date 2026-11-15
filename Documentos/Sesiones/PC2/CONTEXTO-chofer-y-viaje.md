@@ -1,5 +1,12 @@
 # Contexto vivo · Chofer y viaje en curso (Martín)
 
+## Corrección solicitada en revisión de PR #281 — 15/11/2026
+
+- Sobre `bb1ceb53f89960420c6bda975354b6cbd261c3e0`, sin incorporar cambios independientes de main `7107233b7097870ca5731cf9137209faf326608d`: salir después de resultado incierto/fallos de consulta ya no bloquea las acciones del viaje. Advertencia explícita: salida no equivale a cancelación/rechazo.
+- Shell conserva viaje/clave solo dentro de su sesión; «Resultado propio» permite seleccionar y consultar explícitamente. Sin texto interno almacenado en referencias ni reenvíos/consultas automáticos; al cambiar/cerrar sesión se descartan referencias y respuestas tardías. Recuperación desplazable y prueba de teléfono con teclado abierto.
+- [Entrega manual](../PC3/ENTREGA-MANUAL-CU030-280.md) contiene procedimiento futuro de migración 0002 con respaldo/verificación/restauración, identificación de SHA efectivos backend/Web y dataset a acordar antes del ensayo. Ninguna operación remota ejecutada; no se atribuyen SHA desplegados actuales desde los históricos PC2.
+- CU-037 conserva brecha de comunicación: proveedor/canales, plataformas, accesos, tokens/sesión y evidencia de aceptación/entrega pendientes. La asignación de coordinación anterior era propuesta no confirmada; no se atribuyen responsables. HEAD publicado y CI exacta se registran después de observarlos en #281, sin extender resultados de HEAD anteriores.
+
 ## Publicaci?n manual CU-030 efectiva ? 15/11/2026, PR #281
 
 - [PR #281](https://github.com/Martiherenu1/ProyectoVanFull/pull/281) abierta, push normal; primer HEAD fe14da1f9b868fff23c0f891c84a67f969db9f44 sobre base 71739f4. Revisi?n solicitada efectivamente a Martiherenu1 y facubarrientos; sin aprobaci?n atribuida. ?nico cierre previsto #280, solo alcance manual.

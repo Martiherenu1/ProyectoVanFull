@@ -331,11 +331,20 @@ CREATE TABLE comprobante (
 CREATE TABLE evento_operativo (
     id_evento_operativo BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
     tipo_evento    VARCHAR(50) NOT NULL,
+    CONSTRAINT uq_aviso_solicitud UNIQUE (id_cuenta_autora, id_viaje, clave_solicitud),
+    CONSTRAINT ck_aviso_metadatos CHECK (
+        (id_cuenta_autora IS NULL AND clave_solicitud IS NULL) OR
+        (id_cuenta_autora IS NOT NULL AND clave_solicitud IS NOT NULL
+         AND id_viaje IS NOT NULL AND detalle_evento IS NOT NULL
+         AND tipo_evento IN ('aviso_demora', 'aviso_problema'))
+    ),
     fecha_hora     TIMESTAMPTZ NOT NULL DEFAULT now(),
     detalle_evento TEXT,
     id_reserva     BIGINT,                                -- FK -> reserva (opcional)
     id_pago        BIGINT,                                -- FK -> pago (opcional)
     id_viaje       BIGINT,                                -- FK -> viaje (opcional)
+    id_cuenta_autora BIGINT, -- nullable: no inventar autor de hist?ricos
+    clave_solicitud UUID,
     -- A lo sumo un origen directo entre reserva/pago/viaje (MR-R29)
     CHECK (
         (CASE WHEN id_reserva IS NOT NULL THEN 1 ELSE 0 END
@@ -421,3 +430,5 @@ INSERT INTO rol_acceso (rol) VALUES
     ('administrador'),
     ('dueno'),
     ('representante_corporativo');
+
+ALTER TABLE evento_operativo ADD FOREIGN KEY (id_cuenta_autora) REFERENCES cuenta_acceso (id_cuenta_acceso);

@@ -144,3 +144,10 @@ administración de pasajeros (CU-013), créditos/devoluciones (CU-017), recorrid
 optimización de recorrido (CU-020), choferes (CU-021), vehículos (CU-022), corporativos (CU-023, CU-033, CU-034, CU-035),
 facturación (CU-024), reportes (CU-025), historial (CU-026), abonos (CU-028),
 tarifas y administradores del dueño (CU-031, CU-032), notificaciones (CU-037).
+
+
+### CU-030 manual, seguimiento #280 (15/11/2026)
+
+Se agregan POST/GET `/viajes/{id_viaje}/avisos`, GET `/viajes/{id_viaje}/avisos/resultado` por clave y GET `/pasajeros/me/viajes/{id_viaje}/demora`. POST confirma despu?s de commit (201), repetici?n exacta 200, misma clave/contenido distinto 409; comparaci?n por clase y texto normalizado trim. Autor/correlaci?n tienen columnas/FK/UNIQUE expl?citos, migraci?n 0002. GET resultado solo autor autenticado, incluso fin/reasignaci?n; GET interno admin/due?o. Mensaje contextual solo reserva propia consolidada, sin excluir abordados: reporte fechado, no afirmaci?n de demora activa. No almacena descripci?n interna en vista pasajero.
+
+Cobertura sigue **parcial**: CU-037/push/WhatsApp y automatismo pendientes. `notificacion=no_evaluada` no es env?o pendiente ni fallo. Una respuesta perdida/5xx es incierta; consultar viaje no reconcilia el aviso, y 404 de b?squeda no demuestra rechazo de un POST en vuelo. Sin modificaci?n de las operaciones anteriores. Revisi?n contractual/modelo requerida a Martiniano y Facundo en la PR; solicitud no equivale a revisi?n recibida.

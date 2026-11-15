@@ -1,5 +1,11 @@
 # Contexto vivo · Chofer y viaje en curso (Martín)
 
+## Observaciones de Martiniano comunicadas por Martín — PR #281, 15/11/2026
+
+- Martiniano revisó `bb1ceb5`: conforme con idempotencia, permisos y locks, **sin aprobación formal**; revisará el HEAD final. El acuerdo estructural fue comunicado por Martín; Facundo todavía debe revisar el diff publicado. No atribuir aprobación conjunta ni ampliar la revisión de un corte al siguiente.
+- Merge normal de main `7107233` ya conservado (`046173b`), sin rebase ni force-push. [Entrega manual](../PC3/ENTREGA-MANUAL-CU030-280.md) incluye el diff de MisReservas para revisión, con CU-005/#275 y mensaje de demora coexistentes.
+- Ajustes: SQL ordenado sin alterar modelo/migración/históricos; fecha legible y hora local; carga, ausencia, error y reporte fechado diferenciados; acción específica en lugar de actualización genérica. Salida incierta/recuperación por sesión conservadas, más prueba del formulario con teclado abierto y prueba conjunta CU-005/demora. Resultados y HEAD/CI exactos en #281 tras observarlos. Sin merge de PR, despliegue ni operaciones remotas sobre bases. Históricos siguientes conservados.
+
 ## Corrección solicitada en revisión de PR #281 — 15/11/2026
 
 - **Estado posterior:** corrección publicada como `a9546e4` + documentación `becab45`. Luego el usuario autorizó actualizar la rama con main: merge `046173bce3bd7dc9dc34228f7ca16ee9344ee138` incorpora `7107233b7097870ca5731cf9137209faf326608d`, conservando CU-005 y mensaje contextual, sin conflictos ni reescribir commits publicados. No se fusionó la PR en main. Los puntos siguientes conservan el corte anterior a esta autorización. CI exacta del HEAD posterior se registra en #281.

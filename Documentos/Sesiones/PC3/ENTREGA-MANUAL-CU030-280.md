@@ -60,6 +60,97 @@ Para un ensayo físico posterior: identificar SHA de APK/API y dataset **nuevo**
 
 ## Estado de publicación y pruebas
 
+### Observaciones de revisión comunicadas por Martín — 15/11/2026
+
+Martín informa que **Martiniano revisó el corte `bb1ceb5` y está conforme con el diseño de idempotencia, permisos y locks, pero todavía no aprueba**. Revisará el HEAD final. El acuerdo estructural previo fue comunicado por Martín; no se convierte esa procedencia en aprobación formal del diff. **Facundo aún debe revisar el diff publicado.** Solicitudes de revisión, conformidad de diseño y aprobación formal son hechos diferentes.
+
+- Main revalidado: `7107233b7097870ca5731cf9137209faf326608d`, ya integrado por merge normal `046173bce3bd7dc9dc34228f7ca16ee9344ee138`. Se conserva ese merge, CU-005/#275 y el mensaje contextual. Sin rebase, force-push ni merge de la PR hacia main.
+- `schema.sql`: comentario «históricos» corregido; primero columnas, luego constraints de tabla; FK de autor junto a las FK de `evento_operativo`, antes del seed. Se mantienen orden/tipos de columnas, expresiones y nombres de constraints, ORM y migración 0002, así como históricos sin autor inventado. El cambio es de orden/presentación del DDL, no una migración nueva.
+- Fecha del reporte: `DD/MM/AAAA a las HH:mm (hora local)` mediante `fechaLegible`, con conversión al horario local del dispositivo. Una fecha requerida ausente/inválida es error, no ausencia de aviso. No cambia el contrato ni se estima una demora activa.
+- Mensaje contextual con cuatro resultados distinguibles: consultando; respuesta sin reporte («No hay reportes de demora para mostrar»); error de consulta con reintento manual; reporte fechado con actualización específica. La ausencia de reporte no afirma que no haya demora. Un error retira el contenido previo y no se presenta como ausencia; cargar no habilita consultas duplicadas. Se elimina el control genérico «Actualizar información del viaje»; sin reporte no se muestra un botón aislado sin contexto.
+- La salida segura del fix anterior se conserva: salir no cancela/rechaza el aviso; referencias de viaje/clave solo en la sesión; consulta posterior explícita; sin reenvíos automáticos ni datos de otras cuentas. Nueva prueba del **formulario** a 360 × 640 con teclado de 300 px verifica entrada, timeout, consulta fallida y salida mediante desplazamiento, además de la prueba existente de recuperación con teclado. Son widgets controlados, no una prueba física ni APK nueva.
+- Nueva regresión conjunta en MisReservas: una reserva propia consolidada muestra reporte fechado y mantiene el botón/callback de cambio de parada de CU-005. No se amplían permisos ni estados habilitantes.
+
+#### Diff de compatibilidad para Martiniano
+
+Comparación del archivo `mis_reservas_screen.dart` entre main `7107233` y el resultado de la rama: CU-005 permanece intacto; se añaden importación, parámetro/campo y mensaje contextual. El constructor mantiene **ambos** parámetros nombrados. Es el resultado del merge normal ya publicado, no una propuesta de rebase. Reproducible con `git diff --unified=8 7107233b7097870ca5731cf9137209faf326608d..HEAD -- frontend/lib/screens/pasajero/mis_reservas_screen.dart`.
+
+```diff
+diff --git a/frontend/lib/screens/pasajero/mis_reservas_screen.dart b/frontend/lib/screens/pasajero/mis_reservas_screen.dart
+index 82f5549..043d623 100644
+--- a/frontend/lib/screens/pasajero/mis_reservas_screen.dart
++++ b/frontend/lib/screens/pasajero/mis_reservas_screen.dart
+@@ -1,8 +1,9 @@
++import 'mensaje_demora.dart';
+ import 'accion_informar_ausencia.dart';
+
+ import 'package:flutter/material.dart';
+
+ import '../../core/format/fecha_legible.dart';
+ import '../../core/format/importe.dart';
+ import '../../core/theme/app_colors.dart';
+ import '../../core/theme/app_spacing.dart';
+@@ -24,29 +25,31 @@ typedef CancelarReserva = Future<ResultadoCancelacion> Function(int idReserva);
+
+ /// CU-010 y CU-006, con la cancelación de CU-004. La pantalla no crea clientes
+ /// HTTP ni calcula el saldo ni decide qué se puede cancelar: lo rechaza el
+ /// backend y se muestra su motivo.
+ class MisReservasScreen extends StatefulWidget {
+   const MisReservasScreen({
+     super.key,
+     required this.cargarReservas,
++    this.cargarMensajeDemora,
+     required this.cargarDeuda,
+     required this.cancelarReserva,
+     required this.onBuscarServicio,
+     this.onRegistrarPago,
+     this.onVerUbicacion,
+     this.onCambiarParada,
+     this.informarAusencia,
+     this.alcanceAusencia,
+     this.contextoAusenciaVigente,
+     this.versionReservas = 0,
+   });
+
+   final CargarReservas cargarReservas;
++  final CargarMensajeDemora? cargarMensajeDemora;
+   final CargarDeuda cargarDeuda;
+   final CancelarReserva cancelarReserva;
+
+   final InformarAusencia? informarAusencia;
+   final Object? alcanceAusencia;
+   final bool Function()? contextoAusenciaVigente;
+
+   /// Solicita la recarga existente sin destruir el estado de la pantalla.
+@@ -322,16 +325,24 @@ class _MisReservasScreenState extends State<MisReservasScreen> {
+       separatorBuilder: (_, _) => const Divider(),
+       itemBuilder: (context, index) {
+         final reserva = _reservas[index];
+         final id = reserva.idReserva;
+         final abierta = _reservaAbierta == id;
+         return Column(
+           crossAxisAlignment: CrossAxisAlignment.stretch,
+           children: [
++            if (abierta &&
++                reserva.estado == EstadoReserva.consolidada &&
++                widget.cargarMensajeDemora != null)
++              MensajeDemora(
++                key: ValueKey('demora-${reserva.idReserva}-${reserva.idViaje}'),
++                viaje: reserva.idViaje,
++                cargar: widget.cargarMensajeDemora!,
++              ),
+             _FilaReserva(
+               reserva: reserva,
+               abierta: abierta,
+               onTap: () =>
+                   setState(() => _reservaAbierta = abierta ? null : id),
+             ),
+             if (_motivos[id] != null)
+               Padding(
+```
+
+Resultados locales de esta revisión: **782 pruebas backend aprobadas**, 859 warnings, 682,48 s; Ruff check/formato correctos (124 archivos). Copia de código en contenedor exclusivo, PostgreSQL 16 desechable con datos en memoria, sin volúmenes originales ni configuración remota; contenedores retirados al terminar. Incluye comparación SQL/ORM/migración e históricos; no certifica supervivencia a corte de energía. Flutter: **884 aprobadas**, 8:42, `--no-pub --concurrency=1`; analyze final sin observaciones (19,4 s), formato/espacios correctos. Primer intento completo detenido sin progreso tras 21 pruebas, sin acreditarlo como aprobado; reejecución completa posterior sí aprobada. Tandas focalizadas previas: 33 aprobadas y 26 de MisReservas, sin sumar recuentos ni sustituir la suite final. HEAD/CI final se registra en #281 después de observarla. Los resultados de `0e179bd` y cortes anteriores conservados debajo no se atribuyen a los cambios posteriores. El procedimiento de despliegue sigue preparado y no ejecutado; CU-037 conserva proveedor, plataformas, accesos e integración pendientes, sin simular envíos ni atribuir responsables. No hubo operaciones remotas sobre bases.
+
 ### Revisión posterior: salida incierta y preparación de despliegue (15/11/2026)
 
 **Actualización posterior autorizada:** después de publicar la corrección `a9546e4` y documentación `becab4555684f160758171e8cbbd383be473c7d4` (CI 43772146331 iniciada para ese corte), el usuario autorizó incorporar main en la rama de trabajo conservando ambos cambios de pasajero. Se integró `7107233b7097870ca5731cf9137209faf326608d` mediante merge **solo hacia la rama de PR #281**, commit `046173bce3bd7dc9dc34228f7ca16ee9344ee138`, sin conflictos ni reescritura de los commits publicados. Quedan presentes mensaje de demora y cambio de parada CU-005/#275. Los párrafos siguientes que dicen «sin incorporar main» describen el corte previo a esa autorización. La PR no se fusionó en main; no hubo despliegue. El nuevo HEAD y su CI se registran en #281; la CI del corte becab45 no se atribuye al HEAD posterior.

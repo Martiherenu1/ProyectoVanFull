@@ -37,6 +37,35 @@ class CircuitoAvisos extends base.Escenario {
 }
 
 void main() {
+  testWidgets('recuperación histórica se retira al cerrar y cambiar sesión', (
+    t,
+  ) async {
+    final e = CircuitoAvisos()..estado = 'en_curso';
+    e.guardado = {
+      'id_viaje': 41,
+      'id_evento_operativo': 51,
+      'registro': 'confirmado',
+      'clave_solicitud': '11111111-1111-4111-8111-111111111111',
+    };
+    await e.montar(t);
+    await base.ingresar(t);
+    await t.tap(find.text('Resultado propio'));
+    await base.paso(t);
+    await t.enterText(find.byType(TextField).at(0), '41');
+    await t.enterText(
+      find.byType(TextField).at(1),
+      e.guardado!['clave_solicitud'] as String,
+    );
+    await t.tap(find.text('Consultar resultado'));
+    await base.paso(t);
+    expect(find.text('Aviso registrado (#51).'), findsOneWidget);
+    await base.nuevaCuenta(t);
+    await base.paso(t);
+    expect(find.text('Aviso registrado (#51).'), findsNothing);
+    expect(find.text('Recuperar resultado propio'), findsNothing);
+    await t.pumpWidget(const SizedBox.shrink());
+    await t.pump();
+  });
   testWidgets(
     'bootstrap sesión listado detalle reporte incierto y recuperación',
     (t) async {

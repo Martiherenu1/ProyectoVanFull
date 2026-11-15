@@ -7,7 +7,7 @@ import 'package:http/http.dart' as http;
 import 'package:http/testing.dart';
 
 void main() {
-  const clave = '11111111-1111-4111-8111-111111111111';
+  const clave = 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa';
   test('POST mínimo, autorización externa y recuperación por clave', () async {
     final requests = <http.Request>[];
     final transport = MockClient((r) async {
@@ -30,14 +30,17 @@ void main() {
       ),
     );
     expect(await api.registrar(7, clave, 'problema', 'interno'), 10);
-    expect(await api.recuperar(7, clave), 10);
+    expect(await api.recuperar(7, clave.toUpperCase()), 10);
     expect(requests.first.headers['Authorization'], 'Bearer sintetico');
     expect(jsonDecode(requests.first.body), {
       'clase': 'problema',
       'descripcion_interna': 'interno',
       'clave_solicitud': clave,
     });
-    expect(requests.last.url.queryParameters['clave_solicitud'], clave);
+    expect(
+      requests.last.url.queryParameters['clave_solicitud'],
+      clave.toUpperCase(),
+    );
     transport.close();
   });
   for (final status in [400, 401, 403, 404, 409, 500]) {

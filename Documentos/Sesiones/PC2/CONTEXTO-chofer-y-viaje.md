@@ -1,5 +1,13 @@
 # Contexto vivo · Chofer y viaje en curso (Martín)
 
+## Publicaci?n manual CU-030 efectiva ? 15/11/2026, PR #281
+
+- [PR #281](https://github.com/Martiherenu1/ProyectoVanFull/pull/281) abierta, push normal; primer HEAD fe14da1f9b868fff23c0f891c84a67f969db9f44 sobre base 71739f4. Revisi?n solicitada efectivamente a Martiherenu1 y facubarrientos; sin aprobaci?n atribuida. ?nico cierre previsto #280, solo alcance manual.
+- CI inicial [43767428954](https://github.com/Martiherenu1/ProyectoVanFull/actions/runs/43767428954) success para ese primer HEAD, no para el ajuste posterior de navegaci?n/UUID. HEAD final y CI propia se registran en PR/Issue tras observarlos. Sin merge/despliegue.
+- Ajuste posterior: recuperaci?n propia dentro del navegador de la sesi?n y UUID pegado con may?sculas reconocido. Prueba integrada de cambio de cuenta y regresiones shell: 8 aprobadas; validaci?n final del adaptador registrada en PR. C?digo/modelo/contrato y resultados separados de las evidencias PC2 siguientes.
+- [Entrega y aceptaci?n](../PC3/ENTREGA-MANUAL-CU030-280.md): comunicaci?n CU-037/push/WhatsApp sigue pendiente; mensaje contextual no reemplaza notificaci?n. No CU completo; CU-007 y RNF-008/#39/#273 preservados.
+
+
 ## CU-030 manual para revisi?n ? 15/11/2026, #280
 
 - Worktree aislado, rama feat/chofer-avisos-manual-cu030, base 71739f49b1427aa3523e46011e6085fa9cbe4c91. Autor?a/correlaci?n y recuperaci?n hist?rica propias aprobadas seg?n comunicaci?n de Mart?n; contrato/modelo e implementaci?n en preparaci?n para PR, sin merge/despliegue.

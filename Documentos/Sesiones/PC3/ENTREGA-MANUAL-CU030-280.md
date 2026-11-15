@@ -76,3 +76,12 @@ Nota de entorno de pruebas: PostgreSQL 16 se cre? en contenedor exclusivo `vf-cu
 - UI mantiene clave en memoria durante la sesi?n y la muestra para copiar; recuperaci?n hist?rica por clave disponible sin depender del listado/asignaci?n actual. No hay cola offline ni recuperaci?n autom?tica tras cerrar forzadamente el proceso. Ninguna prueba certifica ese comportamiento.
 
 La CI del HEAD publicado se informar? despu?s de observarla; esta evidencia local no sustituye la CI ni se atribuye anticipadamente a ella.
+
+
+## Publicaci?n observada y ajuste de aislamiento
+
+PR [#281](https://github.com/Martiherenu1/ProyectoVanFull/pull/281) abierta con primer HEAD fe14da1f9b868fff23c0f891c84a67f969db9f44. Revisi?n solicitada efectivamente a Martiherenu1 y facubarrientos y aviso contractual en #280; sin revisi?n recibida atribuida. CI inicial [43767428954](https://github.com/Martiherenu1/ProyectoVanFull/actions/runs/43767428954) completada con success para ese HEAD; evidencia distinta de la CI del ajuste posterior.
+
+Revisi?n propia final corrigi? recuperaci?n hist?rica dentro del navegador de la sesi?n para retirar la pantalla al cambiar de cuenta; la comparaci?n de UUID acepta su forma can?nica al pegar may?sculas. Pruebas integradas y de ChoferShell: 8 aprobadas (18 s), analyze sin observaciones (12,2 s). El adaptador se vuelve a comprobar tras normalizar UUID. La CI del HEAD final y su SHA se registran en PR/Issue despu?s de observarlos, sin atribuir por anticipado el success inicial.
+
+Contenedores de pruebas propios retirados despu?s de terminar las tandas; las bases originales, Neon/Render y APK no se tocaron. Logs locales auxiliares sin seguimiento preservados para diagn?stico. Sin merge, despliegue, credenciales externas o env?o real.

@@ -47,7 +47,7 @@ class AvisosApi {
   int _id(Object? data, int viaje, String clave) {
     if (data is! Map<String, dynamic> ||
         data['id_viaje'] != viaje ||
-        data['clave_solicitud'] != clave ||
+        data['clave_solicitud'] != clave.toLowerCase() ||
         data['registro'] != 'confirmado' ||
         data['id_evento_operativo'] is! int) {
       throw const FormatException('Resultado no confirmado');

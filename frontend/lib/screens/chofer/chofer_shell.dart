@@ -222,7 +222,7 @@ class _ChoferShellState extends State<ChoferShell> {
     floatingActionButton: widget.recuperarAviso == null
         ? null
         : FloatingActionButton.extended(
-            onPressed: () => Navigator.of(context).push<void>(
+            onPressed: () => _navigator.currentState!.push<void>(
               MaterialPageRoute(
                 builder: (_) =>
                     RecuperarAvisoScreen(recuperar: widget.recuperarAviso!),

@@ -2,6 +2,8 @@
 
 ## Corrección solicitada en revisión de PR #281 — 15/11/2026
 
+- **Estado posterior:** corrección publicada como `a9546e4` + documentación `becab45`. Luego el usuario autorizó actualizar la rama con main: merge `046173bce3bd7dc9dc34228f7ca16ee9344ee138` incorpora `7107233b7097870ca5731cf9137209faf326608d`, conservando CU-005 y mensaje contextual, sin conflictos ni reescribir commits publicados. No se fusionó la PR en main. Los puntos siguientes conservan el corte anterior a esta autorización. CI exacta del HEAD posterior se registra en #281.
+
 - Sobre `bb1ceb53f89960420c6bda975354b6cbd261c3e0`, sin incorporar cambios independientes de main `7107233b7097870ca5731cf9137209faf326608d`: salir después de resultado incierto/fallos de consulta ya no bloquea las acciones del viaje. Advertencia explícita: salida no equivale a cancelación/rechazo.
 - Shell conserva viaje/clave solo dentro de su sesión; «Resultado propio» permite seleccionar y consultar explícitamente. Sin texto interno almacenado en referencias ni reenvíos/consultas automáticos; al cambiar/cerrar sesión se descartan referencias y respuestas tardías. Recuperación desplazable y prueba de teléfono con teclado abierto.
 - [Entrega manual](../PC3/ENTREGA-MANUAL-CU030-280.md) contiene procedimiento futuro de migración 0002 con respaldo/verificación/restauración, identificación de SHA efectivos backend/Web y dataset a acordar antes del ensayo. Ninguna operación remota ejecutada; no se atribuyen SHA desplegados actuales desde los históricos PC2.

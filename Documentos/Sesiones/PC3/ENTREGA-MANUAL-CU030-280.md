@@ -62,6 +62,8 @@ Para un ensayo físico posterior: identificar SHA de APK/API y dataset **nuevo**
 
 ### Revisión posterior: salida incierta y preparación de despliegue (15/11/2026)
 
+**Actualización posterior autorizada:** después de publicar la corrección `a9546e4` y documentación `becab4555684f160758171e8cbbd383be473c7d4` (CI 43772146331 iniciada para ese corte), el usuario autorizó incorporar main en la rama de trabajo conservando ambos cambios de pasajero. Se integró `7107233b7097870ca5731cf9137209faf326608d` mediante merge **solo hacia la rama de PR #281**, commit `046173bce3bd7dc9dc34228f7ca16ee9344ee138`, sin conflictos ni reescritura de los commits publicados. Quedan presentes mensaje de demora y cambio de parada CU-005/#275. Los párrafos siguientes que dicen «sin incorporar main» describen el corte previo a esa autorización. La PR no se fusionó en main; no hubo despliegue. El nuevo HEAD y su CI se registran en #281; la CI del corte becab45 no se atribuye al HEAD posterior.
+
 Corrección solicitada por Martín sobre PR #281, a partir de `bb1ceb53f89960420c6bda975354b6cbd261c3e0`. Main observado en modo lectura: `7107233b7097870ca5731cf9137209faf326608d`; sus cambios posteriores a la base son de pasajero/contextos y no se incorporan a esta corrección. Los resultados y HEAD anteriores de este documento son históricos.
 
 - Tras timeout, consultas fallidas o repetición fallida, se permite **Volver al viaje sin confirmar** y volver a sus acciones. La pantalla explica que salir no cancela ni rechaza el aviso y que el resultado sigue incierto. Durante una solicitud en vuelo se mantiene el bloqueo de salida del formulario.

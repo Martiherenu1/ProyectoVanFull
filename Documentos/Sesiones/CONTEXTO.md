@@ -436,6 +436,8 @@ el 25/10, salvo acuerdo» de REPARTO-PC2 no rige, por decisión de Martiniano):
 
 ## 14. Recursos
 
+> **Actualización posterior CU-030/#281 (15/11):** el usuario autorizó incorporar main `7107233` en la rama de trabajo; merge de rama `046173bce3bd7dc9dc34228f7ca16ee9344ee138` conserva CU-005 y mensaje contextual de demora sin conflictos. No es merge de la PR en main ni despliegue. El corte previo de la corrección es `becab45`; HEAD posterior y su propia CI se registran en #281.
+
 - **Repo:** https://github.com/Martiherenu1/ProyectoVanFull (**público**) · entrega congelada en el tag `pc1`
 - **Tablero de los 37 CU (Notion):** https://app.notion.com/p/a05f244f1ab4438982da04067e2fe018
 - **Drive del equipo:** documentación oficial. Los dos documentos que más se consultan para implementar:

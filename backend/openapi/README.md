@@ -25,7 +25,7 @@ python -c "import yaml,json,io; io.open('backend/openapi/openapi.json','w',encod
 - `redocly preview-docs backend/openapi/openapi.yaml`, o
 - al implementar el backend: `http://localhost:8000/docs` (Swagger UI de FastAPI).
 
-Validado con `openapi-spec-validator`: **OpenAPI 3.0.3 · 29 rutas · 33 operaciones HTTP · 29 schemas**.
+Validado con `openapi-spec-validator`: **OpenAPI 3.0.3 · 34 rutas · 40 operaciones HTTP · 34 schemas**.
 
 ## Cobertura de esta versión (v0.1)
 
@@ -48,7 +48,7 @@ de solo lectura (administrador/dueno), reutilizando Deuda. Sin cuenta informa 0.
 inexistente CLIENTE_NO_ENCONTRADO. CU-006 conserva su comportamiento. La gestión de
 consecuencias RN-004/005/006 sigue pendiente; CU-015 conserva cobertura parcial.
 
-> **v0.1 representa 20 de los 37 casos de uso, además de RF-028.** Los otros **17 CU** todavía no tienen
+> **v0.1 representa 21 de los 37 casos de uso, además de RF-028.** Los otros **16 CU** todavía no tienen
 > operaciones y se listan al final. Estos indicadores describen la **cobertura contractual de diseño**;
 > no indican funcionalidades implementadas en el backend ni en el frontend.
 
@@ -63,6 +63,7 @@ Se cuentan las rutas distintas de `paths`, los métodos HTTP de cada ruta, los s
 | **CU-014** Registrar pagos y comprobantes | `POST /pagos` registra PENDIENTE; formulario administrativo transferencia/billetera (#214); `x-cobertura: parcial` | Tipo/evidencia, efectivo/15 %, señas y acuerdos (#84); registro no confirma ni genera recibo/movimiento |
 | **CU-015** Gestionar deuda | `GET /clientes/{id_cliente}/deuda`: consulta administrativa de solo lectura | RN-004/005/006: suspensión, habilitación excepcional y límite mensual |
 | **CU-018** Gestionar viajes | Creación, listado por fecha, actualización programada y cancelación lógica limitada (#189/#208), integrados | RN-019 y CU-017/#75 (reintegros); cambiar servicio/recorrido; reglas de solapamiento |
+| **CU-021** Gestionar choferes | Registrar, listar, consultar y modificar Persona/Chofer (#278) | Documentación habilitante, obligatoriedad, cuenta/rol, baja y alertas pendientes |
 | **CU-027** Consultar reservas por administración | `GET /reservas` para administrador/dueño: todas las reservas, con `id_pasajero`, por `id_reserva` ascendente, solo lectura | Criterios de búsqueda adicionales, nombres y contactos de los pasajeros |
 | **CU-030** Ejecutar viaje | Inicio, finalización y recepción de posiciones GPS | Avisos de demora y problemas, pendientes para otra tarea |
 
@@ -124,6 +125,7 @@ y frontend continúa pendiente; documentar el contrato no implementa los servici
 | CU-015 Gestionar deuda ⚠️ *parcial* | `GET /clientes/{id_cliente}/deuda` | RF-010, MR-R30; RN-004/005/006 pendientes |
 | CU-016 Confirmar/rechazar pago | `POST /pagos/{id}/confirmacion` | RF-011, RN-015 — validación administrativa cuando el medio no acredita automáticamente |
 | CU-018 Gestionar viajes ⚠️ *parcial* | `POST /viajes`, `PATCH /viajes/{id_viaje}` | RF-017/018, RN-001 |
+| CU-021 Gestionar choferes ⚠️ *parcial* | `GET/POST /choferes`, `GET/PATCH /choferes/{id_persona}` | RF-023 |
 | CU-029 Consultar operación asignada | `GET /choferes/me/viajes` | RF-024, RN-029 |
 | CU-029 Consultar operación asignada | `GET /choferes/me/viajes/{id_viaje}` | RF-024, RN-029 |
 | CU-030 Ejecutar viaje ⚠️ *parcial* | `POST /viajes/{id_viaje}/inicio` | RF-025, ADJ-03 |
@@ -139,8 +141,8 @@ ubicación en CU-009/CU-034 y no es una regla directa del POST GPS.
 
 ## CU pendientes de contrato (próxima iteración)
 
-Estos **17 CU** todavía no tienen operaciones en el contrato:
+Estos **16 CU** todavía no tienen operaciones en el contrato:
 administración de pasajeros (CU-013), créditos/devoluciones (CU-017), recorridos (CU-019),
-optimización de recorrido (CU-020), choferes (CU-021), vehículos (CU-022), corporativos (CU-023, CU-033, CU-034, CU-035),
+optimización de recorrido (CU-020), vehículos (CU-022), corporativos (CU-023, CU-033, CU-034, CU-035),
 facturación (CU-024), reportes (CU-025), historial (CU-026), abonos (CU-028),
 tarifas y administradores del dueño (CU-031, CU-032), notificaciones (CU-037).

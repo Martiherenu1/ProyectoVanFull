@@ -3,7 +3,7 @@
 > Lo mantiene el agente de Martiniano, en el mismo PR que cambia algo. Convención en
 > `PROMPT-CONTEXTO-VIVO.md`. Si algo de acá contradice al código, manda el código: corregir este archivo.
 >
-> **Última actualización: 2026-11-12**
+> **Última actualización: 2026-11-15**
 
 ## Estado
 
@@ -13,6 +13,9 @@
 **cancelación (CU-004, sin crédito ni penalidad)**. El asistente puede reservar y cancelar (ver «En curso»).
 El cambio de parada (CU-005) estaba **fuera del PC2** (REPARTO-PC2) y se hizo igual: backend en `main` (#243) y
 pantalla Flutter (#274, 2026-11-12), con la interpretación de «disponibilidad compatible» **sin validar**.
+Para la entrega final se suman, también fuera del PC2, los CU de mi área que no tenían bloqueo: **CU-013
+recortado** (gestión de pasajeros por administración, Issue #285, backend y contrato; falta la pantalla, que
+es de Facundo).
 
 La CI corre en cada PR. En `main` la suite da 300 pruebas; la rama de las tools de AG-01 suma 15 (315), unos dos minutos.
 
@@ -41,6 +44,7 @@ La CI corre en cada PR. En `main` la suite da 300 pruebas; la rama de las tools 
 | Integración del pasajero: login, Buscar, Confirmar, Mis reservas y Asistente conectados a la API (detalle abajo, en «En curso», hasta limpiar esa sección) | #107 | #108 |
 | Deploy de la demo: Neon + Render (API y sitio estático) + Pages de respaldo, CORS por variable, seed sin contraseñas públicas, `DESPLIEGUE.md` | #116, #119, #122, #125 | #117, #120, #124, #126 |
 | Orden de locks pasajero → viaje → reserva en `cancelar_reserva` y helper `reserva_propia_del_viaje` para el aviso de ausencia (CU-008, de Martín); `CONVENCIONES.md` §8 | #131 | #133 |
+| Gestionar pasajeros, recortado (CU-013): `GET`/`POST /api/pasajeros`, `GET`/`PATCH /api/pasajeros/{id_persona}` (con DNI, A1) y `POST …/baja` (A4, lógica); 5 operaciones en el contrato; `tests/test_pasajeros_admin.py` | #285 | el que cierra #285 |
 
 ## En curso
 
@@ -193,6 +197,7 @@ conectada (#87 y el login).
 | 2026-10-29 | **Los 17 CU sin contrato quedan declarados PENDIENTES para el PC2 (decisión de Martiniano, noche del 29/10).** Se evaluó sumar uno para la demo leyendo sus objetivos en CU v1.3: 017, 024, 028, 031 y 035 dependen de reglas sin definir (tarifa #9, crédito de RN-017 #75, pagos); 037 necesita un proveedor de WhatsApp sin definir y 020 la clave de Google Maps; 023, 033, 034 y 025 son grandes (rol corporativo, cuentas, export a Excel/PDF); 032 crea cuentas y roles con contraseñas. Los únicos viables eran consultas de solo lectura (013, 019, 021, 022, 026); el mejor candidato era CU-013 como consulta (tablas `persona` y `pasajero` propias, sin regla pendiente en una lectura), pero se descartó: sin pantalla solo se vería en `/docs`, exige un PR de contrato con aviso y suma riesgo antes de la demo. **No se implementa ninguno ni se declara completo**; quedan en la lista del contrato (`openapi/README.md`, «CU pendientes de contrato») y en el guion de la demo (§4). Los datos que esos CU administran se cargan con el seed | `openapi/README.md`, `GUION-DEMO-PC2.md` |
 
 | 2026-11-12 | **CU-005: pantalla Flutter de cambio de parada (Issue #274).** «Cambiar parada» en Mis reservas (reserva abierta, **no cancelada**: la provisional también lo ofrece, porque el backend decide) abre `screens/pasajero/cambiar_parada_screen.dart`: lista las paradas del recorrido de la reserva (`CargarParadas`), marca «Tu parada actual» y no deja elegirla (el backend respondería `PARADA_SIN_CAMBIOS`), y confirma con `PasajeroApi.cambiarParada(idReserva, ordenParada)` (`POST /reservas/{id}/cambio-parada`). 400 y 409 llegan como `ReservaRechazada`, el 404 como `ApiException`. **No decide nada:** muestra el motivo de cada código del contrato. `RESERVA_NO_MODIFICABLE`, `VIAJE_NO_MODIFICABLE` y el 404 son definitivos (bloquean el botón); `PARADA_NO_VALIDA` y `PARADA_SIN_CAMBIOS` dejan elegir otra. Ante una falla sin respuesta **no afirma que no cambió** (no sabe si se aplicó): manda a revisar Mis reservas, y un reintento ya aplicado lo frena el backend con `PARADA_SIN_CAMBIOS`. Al terminar, Mis reservas se recarga. Sin cambios de contrato, backend ni modelo; el chatbot no lo ofrece. **Verificado:** `flutter analyze` y las pruebas de la pantalla, del adaptador, de Mis reservas y del shell. **SIN VERIFICAR:** contra el backend real (Render) y en un navegador o dispositivo | `cambiar_parada_screen.dart`, `mis_reservas_screen.dart`, `pasajero_shell.dart`, `pasajero_api.dart`, Issue #274 |
+| 2026-11-15 | **CU-013 recortado (Issue #285): gestión administrativa de pasajeros.** Solo `administrador` y `dueno`. Alta (`persona` + `pasajero`, sin cuenta de acceso), consulta por id y lista paginada con búsqueda `q` por DNI, nombre o apellido, `PATCH` de datos personales y categoría **incluido el DNI** (A1: el pasajero no puede, RN-026) y baja lógica (`estado_habilitacion = 'baja'`, A4). El `PATCH` no cambia el estado y rechaza campos desconocidos (400). DNI repetido → 409 `DNI_DUPLICADO`, también si es de un chofer: reutilizar a la persona no está definido y no se infiere. Repetir la baja → 409. **Fuera, por pendiente:** suspensión y habilitación excepcional de 5 días (A2/A3, dependen de RN-004/005/006, Issue #212), motivo de la baja (sin catálogo), catálogo de `categoria` (texto libre ≤30), qué pasa con las reservas futuras de un dado de baja, y que el login hoy no mira `estado_habilitacion`. **Verificado:** 807 pruebas del backend y `ruff`. **SIN VERIFICAR:** contra Render; pantalla de administración (Facundo) | `services/pasajeros.py`, `routers/pasajeros.py`, `schemas/pasajeros.py`, `openapi.yaml`, Issue #285 |
 
 ## Pendientes
 

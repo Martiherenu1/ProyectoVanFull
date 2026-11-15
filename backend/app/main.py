@@ -16,6 +16,7 @@ from app.routers import (
     gps,
     health,
     pagos,
+    pasajeros,
     perfil,
     reservas,
     servicios,
@@ -50,6 +51,7 @@ app.include_router(gps.router, prefix=settings.api_prefix)
 app.include_router(auth.router, prefix=settings.api_prefix)
 app.include_router(ausencias.router, prefix=settings.api_prefix)
 app.include_router(perfil.router, prefix=settings.api_prefix)
+app.include_router(pasajeros.router, prefix=settings.api_prefix)
 app.include_router(deuda.router, prefix=settings.api_prefix)
 app.include_router(servicios.router, prefix=settings.api_prefix)
 app.include_router(reservas.router, prefix=settings.api_prefix)

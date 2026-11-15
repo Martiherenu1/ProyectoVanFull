@@ -71,6 +71,50 @@ Map<String, dynamic> reservaJson({String estado = 'consolidada'}) => {
 };
 
 void main() {
+  test('demora muestra fecha legible y hora local, sin fecha cruda', () async {
+    final data = {
+      'id_viaje': 12,
+      'mensaje': 'El chofer informó una demora. La situación actual no está confirmada.',
+      'fecha_hora_reporte': '2026-11-15T13:05:00',
+    };
+    final cliente = ClienteFalso({
+      'GET /pasajeros/me/viajes/12/demora': () => data,
+    });
+    final mensaje = await PasajeroApi(cliente).mensajeDemora(12);
+    expect(
+      mensaje,
+      contains('Reportado: 15/11/2026 a las 13:05 (hora local).'),
+    );
+    expect(mensaje, isNot(contains('2026-11-15')));
+    expect(mensaje, contains('La situación actual no está confirmada.'));
+  });
+
+  test(
+    'demora sin reporte es ausencia; fecha ausente o inválida es error',
+    () async {
+      const ruta = 'GET /pasajeros/me/viajes/12/demora';
+      Map<String, Object?> data = {
+        'id_viaje': 12,
+        'mensaje': null,
+        'fecha_hora_reporte': null,
+      };
+      final cliente = ClienteFalso({ruta: () => data});
+      final api = PasajeroApi(cliente);
+      expect(await api.mensajeDemora(12), isNull);
+      for (final fecha in [null, 'fecha inválida']) {
+        data = {
+          'id_viaje': 12,
+          'mensaje': 'Reporte',
+          'fecha_hora_reporte': fecha,
+        };
+        await expectLater(
+          api.mensajeDemora(12),
+          throwsA(fecha == null ? isA<TypeError>() : isA<FormatException>()),
+        );
+      }
+    },
+  );
+
   group('AuthApi', () {
     test('login manda el contrato y devuelve la sesión', () async {
       final cliente = ClienteFalso({

@@ -8,6 +8,76 @@ import 'package:frontend/services/chofer/avisos_api.dart';
 
 void main() {
   testWidgets(
+    'formulario en teléfono con teclado permite reportar, consultar y salir incierto',
+    (t) async {
+      t.view.physicalSize = const Size(360, 640);
+      t.view.devicePixelRatio = 1;
+      addTearDown(t.view.resetPhysicalSize);
+      addTearDown(t.view.resetDevicePixelRatio);
+      addTearDown(t.view.resetViewInsets);
+      ReferenciaAviso? referencia;
+      final claves = <String>[];
+      await t.pumpWidget(
+        MaterialApp(
+          home: Builder(
+            builder: (context) => Scaffold(
+              body: TextButton(
+                onPressed: () => Navigator.of(context).push<void>(
+                  MaterialPageRoute(
+                    builder: (_) => Scaffold(
+                      appBar: AppBar(title: const Text('Reportar aviso')),
+                      body: SingleChildScrollView(
+                        padding: const EdgeInsets.all(24),
+                        child: ReporteAviso(
+                          viaje: 41,
+                          registrar: (_, clave, _, _) async {
+                            claves.add(clave);
+                            throw TimeoutException('Controlado');
+                          },
+                          recuperar: (_, clave) async {
+                            claves.add(clave);
+                            throw TimeoutException('Controlado');
+                          },
+                          onIncierto: (aviso) => referencia = aviso,
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+                child: const Text('Acciones del viaje'),
+              ),
+            ),
+          ),
+        ),
+      );
+      await t.tap(find.text('Acciones del viaje'));
+      await t.pumpAndSettle();
+      await t.showKeyboard(find.byType(TextField));
+      t.view.viewInsets = const FakeViewPadding(bottom: 300);
+      await t.pumpAndSettle();
+      await t.enterText(find.byType(TextField), 'Descripción interna');
+      await t.ensureVisible(find.text('Registrar aviso'));
+      await t.tap(find.text('Registrar aviso'));
+      await t.pumpAndSettle();
+      await t.ensureVisible(find.text('Consultar resultado'));
+      await t.tap(find.text('Consultar resultado'));
+      await t.pumpAndSettle();
+      expect(claves, [referencia!.clave, referencia!.clave]);
+      expect(referencia!.viaje, 41);
+      expect(
+        find.textContaining('Salir no cancela ni rechaza'),
+        findsOneWidget,
+      );
+      await t.ensureVisible(find.text('Volver al viaje sin confirmar'));
+      await t.tap(find.text('Volver al viaje sin confirmar'));
+      await t.pumpAndSettle();
+      expect(find.text('Acciones del viaje'), findsOneWidget);
+      expect(claves.length, 2);
+      expect(t.takeException(), isNull);
+    },
+  );
+
+  testWidgets(
     'recuperación en teléfono con teclado permite consultar sin desborde',
     (t) async {
       t.view.physicalSize = const Size(360, 640);

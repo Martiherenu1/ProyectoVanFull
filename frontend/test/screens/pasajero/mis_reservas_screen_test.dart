@@ -50,6 +50,7 @@ Future<void> mostrar(
   ValueChanged<Deuda>? pagar,
   ValueChanged<Reserva>? verUbicacion,
   ValueChanged<Reserva>? cambiarParada,
+  Future<String?> Function(int)? mensajeDemora,
 }) => tester.pumpWidget(
   MaterialApp(
     home: MisReservasScreen(
@@ -61,6 +62,7 @@ Future<void> mostrar(
       onRegistrarPago: pagar,
       onVerUbicacion: verUbicacion,
       onCambiarParada: cambiarParada,
+      cargarMensajeDemora: mensajeDemora,
     ),
   ),
 );
@@ -69,6 +71,37 @@ String textoDe(WidgetTester tester, String clave) =>
     tester.widget<Text>(find.byKey(ValueKey(clave))).data!;
 
 void main() {
+  testWidgets(
+    'CU-005 y reporte fechado de demora coexisten en la reserva propia',
+    (tester) async {
+      Reserva? elegida;
+      final viajes = <int>[];
+      const mensaje =
+          'El chofer informó una demora. Situación actual no confirmada. Reportado: 15/11/2026 a las 13:05.';
+      await mostrar(
+        tester,
+        cambiarParada: (r) => elegida = r,
+        mensajeDemora: (viaje) async {
+          viajes.add(viaje);
+          return mensaje;
+        },
+      );
+      await tester.pumpAndSettle();
+      expect(viajes, isEmpty);
+      await tester.tap(find.byKey(const ValueKey('reserva-1')));
+      await tester.pumpAndSettle();
+      expect(viajes, [101]);
+      expect(find.text(mensaje), findsOneWidget);
+      expect(find.byKey(const ValueKey('cambiar-parada-1')), findsOneWidget);
+      await tester.ensureVisible(
+        find.byKey(const ValueKey('cambiar-parada-1')),
+      );
+      await tester.tap(find.byKey(const ValueKey('cambiar-parada-1')));
+      expect(elegida?.idReserva, 1);
+      expect(elegida?.idViaje, 101);
+    },
+  );
+
   testWidgets(
     'muestra las reservas con su estado en el vocabulario del brief',
     (tester) async {

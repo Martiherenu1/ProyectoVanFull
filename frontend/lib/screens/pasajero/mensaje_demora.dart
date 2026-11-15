@@ -13,6 +13,8 @@ class MensajeDemora extends StatefulWidget {
 
 class _MensajeDemoraState extends State<MensajeDemora> {
   String? _mensaje;
+  bool _cargando = true;
+  bool _error = false;
   int _version = 0;
   @override
   void initState() {
@@ -32,18 +34,23 @@ class _MensajeDemoraState extends State<MensajeDemora> {
     final v = ++_version;
     setState(() {
       _mensaje = null;
+      _cargando = true;
+      _error = false;
     });
     try {
       final m = await widget.cargar(widget.viaje);
       if (mounted && v == _version) {
         setState(() {
           _mensaje = m;
+          _cargando = false;
         });
       }
     } catch (_) {
       if (mounted && v == _version) {
         setState(() {
           _mensaje = null;
+          _cargando = false;
+          _error = true;
         });
       }
     }
@@ -58,11 +65,23 @@ class _MensajeDemoraState extends State<MensajeDemora> {
   @override
   Widget build(BuildContext context) => Column(
     children: [
-      if (_mensaje != null) Text(_mensaje!),
-      TextButton(
-        onPressed: _leer,
-        child: const Text('Actualizar información del viaje'),
-      ),
+      if (_cargando)
+        const Text('Consultando reportes de demora…')
+      else if (_error) ...[
+        const Text(
+          'No pudimos consultar los reportes de demora. '
+          'La situación actual no está confirmada.',
+        ),
+        TextButton(onPressed: _leer, child: const Text('Reintentar consulta')),
+      ] else if (_mensaje == null)
+        const Text('No hay reportes de demora para mostrar.')
+      else ...[
+        Text(_mensaje!),
+        TextButton(
+          onPressed: _leer,
+          child: const Text('Actualizar reporte de demora'),
+        ),
+      ],
     ],
   );
 }

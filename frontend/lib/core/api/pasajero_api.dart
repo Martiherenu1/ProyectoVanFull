@@ -6,6 +6,7 @@ import '../../models/pasajero/parada.dart';
 import '../../models/pasajero/perfil.dart';
 import '../../models/pasajero/reserva.dart';
 import '../../models/pasajero/respuesta_chat.dart';
+import '../format/fecha_legible.dart';
 import 'api_client.dart';
 import 'api_error.dart';
 
@@ -25,7 +26,10 @@ class PasajeroApi {
     if (mensaje == null) return null;
     final fecha = DateTime.parse(data['fecha_hora_reporte'] as String)
         .toLocal();
-    return '$mensaje Reportado: $fecha';
+    final hora =
+        '${fecha.hour.toString().padLeft(2, '0')}:'
+        '${fecha.minute.toString().padLeft(2, '0')}';
+    return '$mensaje Reportado: ${fechaLegible(fecha)} a las $hora (hora local).';
   }
 
   List<Map<String, dynamic>> _lista(Object? cuerpo) =>

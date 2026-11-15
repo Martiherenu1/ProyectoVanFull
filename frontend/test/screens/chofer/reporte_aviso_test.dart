@@ -3,9 +3,45 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:frontend/screens/chofer/reporte_aviso.dart';
+import 'package:frontend/screens/chofer/recuperar_aviso.dart';
 import 'package:frontend/services/chofer/avisos_api.dart';
 
 void main() {
+  testWidgets(
+    'recuperación en teléfono con teclado permite consultar sin desborde',
+    (t) async {
+      t.view.physicalSize = const Size(360, 640);
+      t.view.devicePixelRatio = 1;
+      t.view.viewInsets = const FakeViewPadding(bottom: 300);
+      addTearDown(t.view.resetPhysicalSize);
+      addTearDown(t.view.resetDevicePixelRatio);
+      addTearDown(t.view.resetViewInsets);
+      String? consultada;
+      await t.pumpWidget(
+        MaterialApp(
+          home: RecuperarAvisoScreen(
+            referencias: const [
+              ReferenciaAviso(41, '11111111-1111-4111-8111-111111111111'),
+            ],
+            recuperar: (viaje, clave) async {
+              consultada = clave;
+              return 51;
+            },
+          ),
+        ),
+      );
+      await t.tap(find.text('Recuperar aviso sin confirmar del viaje 41'));
+      await t.pumpAndSettle();
+      await t.showKeyboard(find.byType(TextField).last);
+      await t.ensureVisible(find.text('Consultar resultado'));
+      await t.tap(find.text('Consultar resultado'));
+      await t.pumpAndSettle();
+      expect(consultada, '11111111-1111-4111-8111-111111111111');
+      await t.ensureVisible(find.text('Aviso registrado (#51).'));
+      expect(t.takeException(), isNull);
+    },
+  );
+
   testWidgets('bloquea doble envío y confirma únicamente al responder', (
     t,
   ) async {

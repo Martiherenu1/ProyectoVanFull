@@ -30,12 +30,12 @@ class MisReservasScreen extends StatefulWidget {
   const MisReservasScreen({
     super.key,
     required this.cargarReservas,
+    this.cargarMensajeDemora,
     required this.cargarDeuda,
     required this.cancelarReserva,
     required this.onBuscarServicio,
     this.onRegistrarPago,
     this.onVerUbicacion,
-    this.cargarMensajeDemora,
     this.informarAusencia,
     this.alcanceAusencia,
     this.contextoAusenciaVigente,

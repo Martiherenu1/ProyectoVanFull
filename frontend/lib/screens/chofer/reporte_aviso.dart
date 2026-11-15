@@ -12,16 +12,27 @@ typedef RegistrarAviso = Future<int> Function(
 );
 typedef RecuperarAviso = Future<int> Function(int viaje, String clave);
 
+/// Correlación temporal; pertenece al shell de una única sesión, nunca global.
+class ReferenciaAviso {
+  const ReferenciaAviso(this.viaje, this.clave);
+  final int viaje;
+  final String clave;
+}
+
 class ReporteAviso extends StatefulWidget {
   const ReporteAviso({
     super.key,
     required this.viaje,
     required this.registrar,
     required this.recuperar,
+    this.onIncierto,
+    this.onConfirmado,
   });
   final int viaje;
   final RegistrarAviso registrar;
   final RecuperarAviso recuperar;
+  final ValueChanged<ReferenciaAviso>? onIncierto;
+  final ValueChanged<ReferenciaAviso>? onConfirmado;
   @override
   State<ReporteAviso> createState() => _ReporteAvisoState();
 }
@@ -74,6 +85,7 @@ class _ReporteAvisoState extends State<ReporteAviso> {
               _texto.text.trim(),
             );
       if (!mounted || g != _generacion) return;
+      widget.onConfirmado?.call(ReferenciaAviso(widget.viaje, _clave!));
       setState(() {
         _mensaje = 'Aviso registrado (#$id). Comunicación no evaluada.';
         _incierto = false;
@@ -85,10 +97,13 @@ class _ReporteAvisoState extends State<ReporteAviso> {
       setState(() {
         _incierto = consultar || teniaIncertidumbre || e is! AvisoRechazado;
         _mensaje = _incierto
-            ? 'No pudimos confirmar el resultado. Consultá antes de continuar.'
+            ? 'No pudimos confirmar el resultado. Podés consultar o volver al viaje sin confirmar.'
             : 'El registro fue rechazado. Revisá el viaje o tu sesión.';
         if (!_incierto) _clave = null;
       });
+      if (_incierto) {
+        widget.onIncierto?.call(ReferenciaAviso(widget.viaje, _clave!));
+      }
     } finally {
       if (mounted && g == _generacion) {
         setState(() {
@@ -107,7 +122,7 @@ class _ReporteAvisoState extends State<ReporteAviso> {
 
   @override
   Widget build(BuildContext context) => PopScope(
-    canPop: !_ocupado && !_incierto,
+    canPop: !_ocupado,
     child: Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -142,6 +157,16 @@ class _ReporteAvisoState extends State<ReporteAviso> {
         if (_mensaje.isNotEmpty) Text(_mensaje),
         if (_ocupado) const LinearProgressIndicator(),
         if (_incierto) ...[
+          const Text(
+            'El resultado sigue sin confirmar. Salir no cancela ni rechaza el aviso. '
+            'Viaje y clave se conservan durante esta sesión para consultar después '
+            'en «Resultado propio».',
+          ),
+          TextButton(
+            style: TextButton.styleFrom(minimumSize: const Size(64, 64)),
+            onPressed: _ocupado ? null : () => Navigator.of(context).maybePop(),
+            child: const Text('Volver al viaje sin confirmar'),
+          ),
           TextButton(
             style: TextButton.styleFrom(minimumSize: const Size(64, 64)),
             onPressed: _ocupado ? null : () => _enviar(true),

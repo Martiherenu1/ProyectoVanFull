@@ -48,6 +48,25 @@ class ChoferShell extends StatefulWidget {
 
 class _ChoferShellState extends State<ChoferShell> {
   final _navigator = GlobalKey<NavigatorState>();
+  final _avisosInciertos = ValueNotifier<List<ReferenciaAviso>>([]);
+
+  void _conservarAviso(ReferenciaAviso aviso) {
+    if (!mounted ||
+        _avisosInciertos.value.any(
+          (a) => a.viaje == aviso.viaje && a.clave == aviso.clave,
+        )) {
+      return;
+    }
+    _avisosInciertos.value = [..._avisosInciertos.value, aviso];
+  }
+
+  void _confirmarAviso(ReferenciaAviso aviso) {
+    if (!mounted) return;
+    _avisosInciertos.value = _avisosInciertos.value
+        .where((a) => a.viaje != aviso.viaje || a.clave != aviso.clave)
+        .toList();
+  }
+
   final _fuentes = ValueNotifier(0);
   final _listado = ValueNotifier(0);
   bool _detalleAbierto = false;
@@ -156,6 +175,7 @@ class _ChoferShellState extends State<ChoferShell> {
       entrada.controlador.dispose();
     }
     _coordinadores.clear();
+    _avisosInciertos.dispose();
     _fuentes.dispose();
     _listado.dispose();
     super.dispose();
@@ -180,6 +200,8 @@ class _ChoferShellState extends State<ChoferShell> {
             idViaje: idViaje,
             registrarAviso: widget.registrarAviso,
             recuperarAviso: widget.recuperarAviso,
+            onAvisoIncierto: _conservarAviso,
+            onAvisoConfirmado: _confirmarAviso,
             cargarDetalle: widget.cargarDetalle,
             acciones: _acciones,
             comprobarUbicacionInicio: widget.comprobarUbicacionInicio,
@@ -226,8 +248,14 @@ class _ChoferShellState extends State<ChoferShell> {
             child: FloatingActionButton.extended(
               onPressed: () => _navigator.currentState!.push<void>(
                 MaterialPageRoute(
-                  builder: (_) =>
-                      RecuperarAvisoScreen(recuperar: widget.recuperarAviso!),
+                  builder: (_) => ValueListenableBuilder<List<ReferenciaAviso>>(
+                    valueListenable: _avisosInciertos,
+                    builder: (_, referencias, _) => RecuperarAvisoScreen(
+                      recuperar: widget.recuperarAviso!,
+                      referencias: referencias,
+                      onConfirmado: _confirmarAviso,
+                    ),
+                  ),
                 ),
               ),
               label: const Text('Resultado propio'),

@@ -4,8 +4,15 @@ import 'reporte_aviso.dart';
 
 /// Recuperación por autor: independiente del listado/asignación vigente.
 class RecuperarAvisoScreen extends StatefulWidget {
-  const RecuperarAvisoScreen({super.key, required this.recuperar});
+  const RecuperarAvisoScreen({
+    super.key,
+    required this.recuperar,
+    this.referencias = const [],
+    this.onConfirmado,
+  });
   final RecuperarAviso recuperar;
+  final List<ReferenciaAviso> referencias;
+  final ValueChanged<ReferenciaAviso>? onConfirmado;
   @override
   State<RecuperarAvisoScreen> createState() => _RecuperarAvisoScreenState();
 }
@@ -28,12 +35,14 @@ class _RecuperarAvisoScreenState extends State<RecuperarAvisoScreen> {
       _ocupado = true;
       _mensaje = '';
     });
+    final clave = _clave.text.trim();
     try {
-      final aviso = await widget.recuperar(id, _clave.text.trim());
+      final aviso = await widget.recuperar(id, clave);
       if (mounted) {
         setState(() {
           _mensaje = 'Aviso registrado (#$aviso).';
         });
+        widget.onConfirmado?.call(ReferenciaAviso(id, clave));
       }
     } catch (_) {
       if (mounted) {
@@ -53,10 +62,27 @@ class _RecuperarAvisoScreenState extends State<RecuperarAvisoScreen> {
   @override
   Widget build(BuildContext context) => Scaffold(
     appBar: AppBar(title: const Text('Recuperar resultado propio')),
-    body: Padding(
+    body: SingleChildScrollView(
       padding: const EdgeInsets.all(24),
       child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
+          for (final referencia in widget.referencias)
+            TextButton(
+              style: TextButton.styleFrom(minimumSize: const Size(64, 64)),
+              onPressed: _ocupado
+                  ? null
+                  : () {
+                      setState(() {
+                        _viaje.text = '${referencia.viaje}';
+                        _clave.text = referencia.clave;
+                        _mensaje = 'El resultado sigue sin confirmar. Consultar no reenvía el reporte.';
+                      });
+                    },
+              child: Text(
+                'Recuperar aviso sin confirmar del viaje ${referencia.viaje}',
+              ),
+            ),
           TextField(
             controller: _viaje,
             enabled: !_ocupado,

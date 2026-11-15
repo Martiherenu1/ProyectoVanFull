@@ -22,6 +22,8 @@ class DetalleViajeChoferScreen extends StatefulWidget {
     this.acciones,
     this.registrarAviso,
     this.recuperarAviso,
+    this.onAvisoIncierto,
+    this.onAvisoConfirmado,
     this.comprobarUbicacionInicio,
     this.asistenciaUbicacionInicio,
     this.controlador,
@@ -31,6 +33,8 @@ class DetalleViajeChoferScreen extends StatefulWidget {
   final int idViaje;
   final RegistrarAviso? registrarAviso;
   final RecuperarAviso? recuperarAviso;
+  final ValueChanged<ReferenciaAviso>? onAvisoIncierto;
+  final ValueChanged<ReferenciaAviso>? onAvisoConfirmado;
   final CargarDetalleViajeChofer cargarDetalle;
   final AccionesEjecucionViaje? acciones;
   final ComprobarUbicacionInicio? comprobarUbicacionInicio;
@@ -188,6 +192,8 @@ class _DetalleViajeChoferScreenState extends State<DetalleViajeChoferScreen> {
                       viaje: widget.idViaje,
                       registrar: widget.registrarAviso!,
                       recuperar: widget.recuperarAviso!,
+                      onIncierto: widget.onAvisoIncierto,
+                      onConfirmado: widget.onAvisoConfirmado,
                     ),
                   ),
                 ),

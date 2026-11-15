@@ -9,6 +9,7 @@ from app.core.errors import registrar_manejadores
 from app.routers import (
     ausencias,
     auth,
+    avisos,
     chat,
     chofer,
     deuda,
@@ -58,6 +59,7 @@ app.include_router(viajes.router, prefix=settings.api_prefix)
 app.include_router(chofer.router, prefix=settings.api_prefix)
 app.include_router(chat.router, prefix=settings.api_prefix)
 app.include_router(ejecucion_viajes.router, prefix=settings.api_prefix)
+app.include_router(avisos.router, prefix=settings.api_prefix)
 registrar_si_habilitado(app, settings)
 registrar_checkout_si_habilitado(app, settings)
 

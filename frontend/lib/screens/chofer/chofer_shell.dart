@@ -1,3 +1,6 @@
+import 'recuperar_aviso.dart';
+import 'reporte_aviso.dart';
+
 import 'package:flutter/material.dart';
 
 import '../../controllers/chofer/ejecucion_viaje_controller.dart';
@@ -20,6 +23,8 @@ class ChoferShell extends StatefulWidget {
     required this.onSalir,
     this.fechaInicial,
     this.acciones,
+    this.registrarAviso,
+    this.recuperarAviso,
     this.comprobarUbicacionInicio,
     this.asistenciaUbicacionInicio,
     this.onViajeAceptado,
@@ -29,6 +34,8 @@ class ChoferShell extends StatefulWidget {
   final CargarViajesChofer cargarViajes;
   final CargarDetalleViajeChofer cargarDetalle;
   final VoidCallback onSalir;
+  final RegistrarAviso? registrarAviso;
+  final RecuperarAviso? recuperarAviso;
   final DateTime? fechaInicial;
   final AccionesEjecucionViaje? acciones;
   final ComprobarUbicacionInicio? comprobarUbicacionInicio;
@@ -171,6 +178,8 @@ class _ChoferShellState extends State<ChoferShell> {
           listenable: _fuentes,
           builder: (_, _) => DetalleViajeChoferScreen(
             idViaje: idViaje,
+            registrarAviso: widget.registrarAviso,
+            recuperarAviso: widget.recuperarAviso,
             cargarDetalle: widget.cargarDetalle,
             acciones: _acciones,
             comprobarUbicacionInicio: widget.comprobarUbicacionInicio,
@@ -210,6 +219,18 @@ class _ChoferShellState extends State<ChoferShell> {
 
   @override
   Widget build(BuildContext context) => Scaffold(
+    floatingActionButton: widget.recuperarAviso == null
+        ? null
+        : FloatingActionButton.extended(
+            onPressed: () => Navigator.of(context).push<void>(
+              MaterialPageRoute(
+                builder: (_) =>
+                    RecuperarAvisoScreen(recuperar: widget.recuperarAviso!),
+              ),
+            ),
+            label: const Text('Resultado propio'),
+            icon: const Icon(Icons.receipt_long),
+          ),
     body: NavigatorPopHandler<Object?>(
       onPopWithResult: (_) => _navigator.currentState!.pop(),
       child: Navigator(

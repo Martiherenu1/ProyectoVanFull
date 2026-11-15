@@ -16,6 +16,18 @@ class PasajeroApi {
 
   final ApiClient _cliente;
 
+  Future<String?> mensajeDemora(int viaje) async {
+    final data = await _cliente.get('/pasajeros/me/viajes/$viaje/demora');
+    if (data is! Map<String, dynamic> || data['id_viaje'] != viaje) {
+      throw const FormatException('Viaje incorrecto');
+    }
+    final mensaje = data['mensaje'] as String?;
+    if (mensaje == null) return null;
+    final fecha = DateTime.parse(data['fecha_hora_reporte'] as String)
+        .toLocal();
+    return '$mensaje Reportado: $fecha';
+  }
+
   List<Map<String, dynamic>> _lista(Object? cuerpo) =>
       (cuerpo! as List).cast<Map<String, dynamic>>();
 

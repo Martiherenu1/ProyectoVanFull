@@ -120,6 +120,7 @@ y frontend continúa pendiente; documentar el contrato no implementa los servici
 | CU-010 Reservas propias | `GET /pasajeros/me/reservas`, `GET /reservas/{id}` | RF-043 |
 | CU-011 Chatbot | `POST /chat` | RF-029/032 |
 | CU-012 Sesión | `POST /auth/login`, `POST /auth/logout` | RF-045 |
+| CU-013 Gestionar pasajeros ⚠️ *parcial* | `GET /pasajeros`, `POST /pasajeros`, `GET /pasajeros/{id_persona}`, `PATCH /pasajeros/{id_persona}`, `POST /pasajeros/{id_persona}/baja` | RF-002/042, RN-026; suspensión y habilitación excepcional (RN-004/005) y motivos de baja pendientes |
 | CU-014 Registrar pago | `POST /pagos` | RF-009, RN-016 |
 | CU-015 Gestionar deuda ⚠️ *parcial* | `GET /clientes/{id_cliente}/deuda` | RF-010, MR-R30; RN-004/005/006 pendientes |
 | CU-016 Confirmar/rechazar pago | `POST /pagos/{id}/confirmacion` | RF-011, RN-015 — validación administrativa cuando el medio no acredita automáticamente |
@@ -139,8 +140,8 @@ ubicación en CU-009/CU-034 y no es una regla directa del POST GPS.
 
 ## CU pendientes de contrato (próxima iteración)
 
-Estos **17 CU** todavía no tienen operaciones en el contrato:
-administración de pasajeros (CU-013), créditos/devoluciones (CU-017), recorridos (CU-019),
+Estos **16 CU** todavía no tienen operaciones en el contrato (CU-013 las tiene desde el Issue #285, parciales):
+créditos/devoluciones (CU-017), recorridos (CU-019),
 optimización de recorrido (CU-020), choferes (CU-021), vehículos (CU-022), corporativos (CU-023, CU-033, CU-034, CU-035),
 facturación (CU-024), reportes (CU-025), historial (CU-026), abonos (CU-028),
 tarifas y administradores del dueño (CU-031, CU-032), notificaciones (CU-037).

@@ -85,3 +85,6 @@ PR [#281](https://github.com/Martiherenu1/ProyectoVanFull/pull/281) abierta con 
 Revisi?n propia final corrigi? recuperaci?n hist?rica dentro del navegador de la sesi?n para retirar la pantalla al cambiar de cuenta; la comparaci?n de UUID acepta su forma can?nica al pegar may?sculas. Pruebas integradas y de ChoferShell: 8 aprobadas (18 s), analyze sin observaciones (12,2 s). El adaptador se vuelve a comprobar tras normalizar UUID. La CI del HEAD final y su SHA se registran en PR/Issue despu?s de observarlos, sin atribuir por anticipado el success inicial.
 
 Contenedores de pruebas propios retirados despu?s de terminar las tandas; las bases originales, Neon/Render y APK no se tocaron. Logs locales auxiliares sin seguimiento preservados para diagn?stico. Sin merge, despliegue, credenciales externas o env?o real.
+
+
+Revisi?n de accesibilidad del brief: los controles nuevos del chofer usan m?nimos t?ctiles de 64 px, incluida entrada de reporte, recuperaci?n, selector y acciones de incertidumbre. Pruebas de reporte/integraci?n/shell posteriores: 12 aprobadas (38 s), con aserci?n de tama?o t?ctil; analyze sin observaciones (13,1 s). Se registra como ajuste posterior a cfbe04d, cuya CI no se atribuye al nuevo HEAD.

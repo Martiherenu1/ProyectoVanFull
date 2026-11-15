@@ -113,6 +113,8 @@ class _ReporteAvisoState extends State<ReporteAviso> {
       children: [
         const Text('Informar demora o problema'),
         DropdownButton<String>(
+          itemHeight: 64,
+          isExpanded: true,
           value: _clase,
           items: const [
             DropdownMenuItem(value: 'demora', child: Text('Demora relevante')),
@@ -141,15 +143,18 @@ class _ReporteAvisoState extends State<ReporteAviso> {
         if (_ocupado) const LinearProgressIndicator(),
         if (_incierto) ...[
           TextButton(
+            style: TextButton.styleFrom(minimumSize: const Size(64, 64)),
             onPressed: _ocupado ? null : () => _enviar(true),
             child: const Text('Consultar resultado'),
           ),
           TextButton(
+            style: TextButton.styleFrom(minimumSize: const Size(64, 64)),
             onPressed: _ocupado ? null : () => _enviar(false),
             child: const Text('Repetir el mismo reporte'),
           ),
         ] else
           ElevatedButton(
+            style: ElevatedButton.styleFrom(minimumSize: const Size(64, 64)),
             onPressed: _ocupado ? null : () => _enviar(false),
             child: const Text('Registrar aviso'),
           ),

@@ -177,6 +177,7 @@ class _DetalleViajeChoferScreenState extends State<DetalleViajeChoferScreen> {
             widget.registrarAviso != null &&
             widget.recuperarAviso != null)
           ElevatedButton(
+            style: ElevatedButton.styleFrom(minimumSize: const Size(64, 64)),
             onPressed: () => Navigator.of(context).push<void>(
               MaterialPageRoute(
                 builder: (_) => Scaffold(

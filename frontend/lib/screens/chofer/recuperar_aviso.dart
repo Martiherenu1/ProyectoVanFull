@@ -70,6 +70,7 @@ class _RecuperarAvisoScreenState extends State<RecuperarAvisoScreen> {
           ),
           Text(_mensaje),
           ElevatedButton(
+            style: ElevatedButton.styleFrom(minimumSize: const Size(64, 64)),
             onPressed: _ocupado ? null : _buscar,
             child: const Text('Consultar resultado'),
           ),

@@ -26,6 +26,10 @@ void main() {
       ),
     );
     await t.enterText(find.byType(TextField), 'Interno');
+    expect(
+      t.getSize(find.widgetWithText(ElevatedButton, 'Registrar aviso')).height,
+      greaterThanOrEqualTo(64),
+    );
     await t.tap(find.text('Registrar aviso'));
     await t.pump();
     await t.tap(find.text('Registrar aviso'));

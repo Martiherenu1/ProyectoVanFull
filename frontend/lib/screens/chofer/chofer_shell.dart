@@ -221,15 +221,18 @@ class _ChoferShellState extends State<ChoferShell> {
   Widget build(BuildContext context) => Scaffold(
     floatingActionButton: widget.recuperarAviso == null
         ? null
-        : FloatingActionButton.extended(
-            onPressed: () => _navigator.currentState!.push<void>(
-              MaterialPageRoute(
-                builder: (_) =>
-                    RecuperarAvisoScreen(recuperar: widget.recuperarAviso!),
+        : SizedBox(
+            height: 64,
+            child: FloatingActionButton.extended(
+              onPressed: () => _navigator.currentState!.push<void>(
+                MaterialPageRoute(
+                  builder: (_) =>
+                      RecuperarAvisoScreen(recuperar: widget.recuperarAviso!),
+                ),
               ),
+              label: const Text('Resultado propio'),
+              icon: const Icon(Icons.receipt_long),
             ),
-            label: const Text('Resultado propio'),
-            icon: const Icon(Icons.receipt_long),
           ),
     body: NavigatorPopHandler<Object?>(
       onPopWithResult: (_) => _navigator.currentState!.pop(),

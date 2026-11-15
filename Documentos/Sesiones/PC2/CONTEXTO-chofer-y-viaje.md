@@ -1,5 +1,12 @@
 # Contexto vivo · Chofer y viaje en curso (Martín)
 
+## CU-030 manual para revisi?n ? 15/11/2026, #280
+
+- Worktree aislado, rama feat/chofer-avisos-manual-cu030, base 71739f49b1427aa3523e46011e6085fa9cbe4c91. Autor?a/correlaci?n y recuperaci?n hist?rica propias aprobadas seg?n comunicaci?n de Mart?n; contrato/modelo e implementaci?n en preparaci?n para PR, sin merge/despliegue.
+- [Aceptaci?n ?nica, l?mites y propuesta push](../PC3/ENTREGA-MANUAL-CU030-280.md). Contextual para reserva propia consolidada, sin descripci?n interna ni afirmar demora activa. CU-037 sin mecanismo disponible: comunicaci?n pendiente; CU-030 parcial. Aclaraci?n push/destinatarios de Mart?n pendiente VanFull, no aprobaci?n de proveedor.
+- Migraci?n 0002 additive, hist?ricos sin autores inferidos. Contrato aditivo; sin cambios de sesi?n/Checkout ni RNF-008/#39/#273/CU-007. Pruebas/HEAD/CI propios se registran despu?s de observarlos, separados de los hist?ricos siguientes.
+
+
 ## Publicación documental CU-007 efectiva — 10/11/2026
 
 - Martín autorizó publicación tras revisar el diff. [Issue #267](https://github.com/Martiherenu1/ProyectoVanFull/issues/267) específico y [PR #268](https://github.com/Martiherenu1/ProyectoVanFull/pull/268) abierta hacia main, sin merge; único cierre automático #267, sin cerrar CU-007 ni sus preguntas funcionales.

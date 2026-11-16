@@ -21,5 +21,6 @@ class Ubicacion(BaseModel):
     latitud: float
     longitud: float
     fecha_hora_posicion: datetime
+    fecha_hora_evaluacion: AwareDatetime
     desactualizada: bool
     eta_minutos: int | None = None

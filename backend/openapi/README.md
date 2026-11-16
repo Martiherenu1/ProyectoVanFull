@@ -5,6 +5,33 @@ Cubre el requisito del PC1 **"Comunicación Vista-Controlador: OpenAPI (JSON)"**
 (escrito a mano, previo a la implementación); cuando el backend esté programado, FastAPI expondrá además
 su propio `/openapi.json` generado, que deberá coincidir con este contrato.
 
+## GPS / RNF-008: candidata backend y despliegue pendiente - 2026-11-16
+
+- **Contrato:** la candidata parte de #272, HEAD
+  `54f426373a9a95d7d1c399893980ea9e8cc81f62`. Mantiene
+  `fecha_hora_evaluacion` opcional y no nullable por compatibilidad,
+  una sola evaluacion UTC S sobre el mismo snapshot de posicion y
+  `desactualizada = (S - T > 30 s)`, con `Cache-Control: no-store` en los 200.
+- **Implementacion incluida en esta candidata (#273):** schema, servicio y router
+  emiten S y el header; conserva 29=false, 30=false y 31=true. Verificada localmente
+  con 79 pruebas aprobadas (incluidas cinco contractuales/rutas) sobre esta base
+  mas la candidata. No cambia recepcion GPS, timestamps almacenados, permisos,
+  errores, eta_minutos ni modelo. Publicacion propuesta en rama dependiente de #272;
+  sin integracion hacia main.
+- **Despliegue SIN VERIFICAR:** no se consultaron Neon ni Render; no se verifico
+  el SHA desplegado ni la emision real. Contrato, pruebas locales y CI contractual
+  no acreditan despliegue o funcionamiento en servicios externos.
+
+RNF-008 sigue parcial: #39 y las dos regresiones originales permanecen pendientes.
+No hay implementacion Flutter en este alcance ni acreditacion de continuidad GPS.
+ETA fuera de alcance. YAML/JSON permanecen sin cambios propios.
+
+### Antecedente contractual - 2026-11-12
+
+La nota siguiente describe el corte anterior a esta candidata; su afirmacion sobre
+emision pendiente no describe el codigo local incluido arriba. La revision formal
+citada pertenece al contrato historico, no aprueba esta implementacion.
+
 ## GPS / RNF-008: propuesta, implementación y despliegue — 2026-11-12
 
 - **Contrato propuesto:** [PR #272](https://github.com/Martiherenu1/ProyectoVanFull/pull/272)

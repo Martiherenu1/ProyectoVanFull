@@ -63,6 +63,8 @@ Decisión del modelo físico del 2026-10-13: `cuenta_acceso.hash_contrasena VARC
 diferida la autenticación; sin la columna no hay login (CU-012).
 
 
-## Extensi?n CU-030 #280 ? 15/11/2026
+## Extensión CU-030 #280 — 15/11/2026
 
-Migraci?n 0002 agrega `evento_operativo.id_cuenta_autora` (FK cuenta_acceso) y `clave_solicitud` (UUID), ambos nullable para hist?ricos, con CHECK de metadatos y UNIQUE autor/viaje/clave. El esquema vigente conserva 35 tablas y suma la FK n?mero 55. Las validaciones de 54 FKs citadas arriba son hist?ricas de PC1, no resultados de esta extensi?n. Sin nueva entidad Notificacion (MR-R32). Diagrama de extensi?n: `Documentos/Documentacion/DER-CU030-AVISOS-280.puml`; SQL/ORM/Alembic se verifican juntos. Downgrade con avisos nuevos se bloquea para preservar evidencia; no usarlo sin respaldo y una decisi?n expl?cita.
+Migración 0002 agrega `evento_operativo.id_cuenta_autora` (FK cuenta_acceso) y `clave_solicitud` (UUID), ambos nullable para históricos, con CHECK de metadatos y UNIQUE autor/viaje/clave. El esquema vigente conserva 35 tablas y suma la FK número 55. Las validaciones de 54 FKs citadas arriba son históricas de PC1, no resultados de esta extensión. Sin nueva entidad Notificacion (MR-R32). Diagrama de extensión: `Documentos/Documentacion/DER-CU030-AVISOS-280.puml`; SQL/ORM/Alembic se verifican juntos. Downgrade con avisos nuevos se bloquea para preservar evidencia; no usarlo sin respaldo y una decisión explícita.
+
+**Limitación conocida:** `ck_aviso_metadatos` permite autoría/correlación no nulas únicamente para `aviso_demora` y `aviso_problema`, junto con viaje y detalle no nulos. Los demás eventos siguen admitidos con ambos metadatos nulos; no es soporte de autoría genérica para cualquier evento. Esta aclaración no amplía el constraint, SQL/ORM ni la migración 0002.

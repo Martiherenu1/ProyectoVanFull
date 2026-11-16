@@ -1,5 +1,11 @@
 # Contexto vivo · Chofer y viaje en curso (Martín)
 
+## Conformidad técnica informada de Martiniano — #281, 16/11/2026
+
+- Martín transmite revisión de modelo/SQL/0002/servicios en `6656794`: Martiniano conforme técnicamente, 917 pruebas backend en PostgreSQL local aislado y Ruff/formato correctos. Evidencia informada, sin repetirla aquí; **no aprobación formal**, espera respaldo de Neon. No acredita backup/restauración de Neon ni ventana.
+- Reparación puntual de texto UTF-8 en `backend/db/README.md`; limitación conocida documentada: `ck_aviso_metadatos` restringe metadatos de autoría/correlación a `aviso_demora`/`aviso_problema`. Sin ampliar constraint/modelo/migración ni cambios propios productivos. Diff/whitespace revisados; sin suites funcionales locales por documentación.
+- Main concurrente `5cd091d` incorporado por merge normal `f483b05` para desbloquear CI; conflicto solo en contexto general, ambos bloques conservados y contrato de ambos padres preservado. [Entrega y procedencia](../PC3/ENTREGA-MANUAL-CU030-280.md#revisión-técnica-de-martiniano-informada-por-martín--16112026). SHA/CI del HEAD final en #281 tras observarlos. Guion local sin publicar intacto. Pendientes Facundo final, respaldo Neon actual restaurado y ventana/responsable; sin merge hacia main, despliegue ni operaciones remotas.
+
 ## Revisión UUID de recuperación #281 — 16/11/2026
 
 - Usuario informa que Facundo revisó `8b3466f` y considera resueltos los P1/P2 anteriores; nuevo P2 por retiro literal de clave mayúscula, sin aprobación final Flutter. Reproducción fallida antes de corregir: confirmación visible pero referencia incierta conservada.

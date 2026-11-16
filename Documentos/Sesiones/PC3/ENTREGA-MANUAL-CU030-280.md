@@ -62,6 +62,16 @@ Para un ensayo físico posterior: identificar SHA de APK/API y dataset **nuevo**
 
 ## Estado de publicación y pruebas
 
+### Revisión técnica de Martiniano informada por Martín — 16/11/2026
+
+**Evidencia informada, no reproducida en esta etapa:** según el mensaje de Martiniano transmitido por Martín, revisó modelo, SQL, migración 0002 y servicios sobre `6656794b7cd1e1d4d1be9f8d707cbbbe63ea9827`, está técnicamente conforme y ejecutó **917 pruebas backend** en PostgreSQL local aislado, con Ruff/formato correctos. **No es aprobación formal:** Martiniano espera el respaldo de Neon. Esta tanda informada se distingue de nuestra CI previa del mismo SHA y no acredita respaldo/restauración de Neon, ventana ni despliegue.
+
+Pidió corregir caracteres `?` que sustituyen tildes en `backend/db/README.md`: se reparan únicamente las palabras afectadas de la extensión CU-030 y su separador de título; no se reemplazan globalmente signos de interrogación. Se documenta como **limitación conocida** que `ck_aviso_metadatos` solo admite autoría/correlación no nulas para `aviso_demora`/`aviso_problema`, con viaje/detalle; otros eventos mantienen ambos metadatos nulos. No se amplía el constraint ni SQL/ORM/0002. Corrección propia exclusivamente documental, sin repetir suites funcionales locales; revisión del diff, UTF-8 y whitespace. CI del HEAD publicado en #281 después de observarla.
+
+**Integración necesaria para CI:** HEAD local/remoto verificado `6656794`; main avanzó a `5cd091daa2515ab49b6abb0078677c16892513a2` (CU-035/#296/#298), y GitHub marcó conflicto. Simulación y merge normal hacia la rama de trabajo `f483b059711f18549fa69a82e9cf42b1a67ef3d2` resolvieron únicamente el conflicto de `CONTEXTO.md`, conservando ambos bloques. Cambios de main conservados, unión aditiva revisada; JSON preserva operaciones/schemas de ambos padres y YAML/JSON equivalentes (49 rutas). Sin rebase/force-push ni cambios propios de código. Esta integración queda separada del diff documental del README/revisión; no se atribuye la revisión de Martiniano en `6656794` al código nuevo de CU-035.
+
+**Pendientes vigentes:** revisión final Flutter por Facundo; respaldo actual de Neon con restauración aislada probada y ventana sin uso/responsable confirmado antes del merge. Conformidad técnica informada de Martiniano no equivale a aprobación formal. Guion local intacto y sin publicar; RNF-008, corrección UUID, P1/P2 y demás trabajos conservados. CU-037/notificaciones reales pendientes y CU-030 parcial. Sin merge hacia main, despliegue ni operaciones Neon/Render; un merge futuro puede activar Render y `alembic upgrade head`. Históricos siguientes mantienen su corte y procedencia.
+
 ### Revisión de Facundo sobre 8b3466f — UUID de recuperación, 16/11/2026
 
 **Procedencia:** el usuario comunica que Facundo revisó `8b3466f479a3735b2a4e0063d0bdde4b5f09848d` y confirmó resueltos los P1/P2 anteriores, pero informó otro P2: una recuperación exitosa con UUID mayúscula no retiraba su referencia incierta. No se atribuye aprobación formal/final de Flutter. HEAD local/remoto verificados en ese SHA; main remoto `6f111c10ce8126ee338e978a5070d6fafdc73260`. Sin necesidad de nuevo merge.

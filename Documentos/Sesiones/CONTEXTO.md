@@ -1,5 +1,16 @@
 # CONTEXTO VANFULL — Carga rápida de sesión
 
+## Continuación Flutter RNF-008 / #293 — 16/11/2026
+
+Candidata sobre #292, dependiente de #272: referencia S/no-store, cotas monotónicas y
+presentación temporal independiente de GET pendiente. Ver contexto de Chofer y
+`frontend/technical/rnf008-vigencia.md`. Cliente HTTP compartido aditivo para revisión
+con Facundo/Martiniano. CI propia pendiente; ejecución Flutter local bloqueada por
+revisión automática de acceso a metadatos, sin eludirlo. #39 y diagnósticos originales
+siguen abiertos; sin cumplimiento integral, merge, despliegue ni operaciones de datos.
+Los apartados inferiores conservan sus cortes históricos.
+
+
 ## Estado vigente de esta actualización RNF-008 — 2026-11-16
 
 - Integración de main `4198022f7080d83b30715d5509d9f944e8ba1d7b` en la rama de #272; contrato GPS aditivo conservado junto con CU-005/013/023/033 y contextos de main. No es merge hacia main, implementación #273 ni despliegue. CI de la nueva combinación pendiente al preparar esta nota.

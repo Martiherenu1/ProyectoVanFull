@@ -1,5 +1,22 @@
 # Contexto vivo · Chofer y viaje en curso (Martín)
 
+## Candidata Flutter RNF-008 / #293 — 16/11/2026
+
+- Continuación autorizada por Martín, rama aislada sobre #292 HEAD
+  `8d22318d7e2f531ff81dafbdd6a30904ca9fdf51`, dependiente de #272.
+- Consume S/no-store y cotas monotónicas, sin hora de pared; presentación diferenciada,
+  actualización visual independiente del GET y conservación de marca para misma P/contexto.
+- Extensión HTTP aditiva para metadatos; get/post/patch y 401 existentes conservados.
+  Revisión compartida pendiente de Facundo/Martiniano, sin decisión técnica atribuida.
+- Casos nuevos deterministas y procedimiento en frontend/technical/rnf008-vigencia.md.
+  Formato/whitespace revisados. Flutter local bloqueado por revisión automática ante
+  acceso inesperado al servicio de metadatos del entorno: no se elude; CI por HEAD
+  pendiente al preparar esta nota. No resultado local de analyze/test atribuido.
+- Las dos regresiones originales y sus históricos quedan intactos y pendientes;
+  [29,31] como incertidumbre es aceptación nueva, no resolución de la aserción antigua.
+- #39 abierto, RNF-008 parcial; ETA fuera de alcance. Sin merge, despliegue o datos.
+
+
 ## Publicacion de implementacion backend #273 — 2026-11-16
 
 - Verificacion remota previa: #272 abierta, sin merge, integrable y HEAD

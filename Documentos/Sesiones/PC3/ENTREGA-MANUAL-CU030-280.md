@@ -62,6 +62,24 @@ Para un ensayo físico posterior: identificar SHA de APK/API y dataset **nuevo**
 
 ## Estado de publicación y pruebas
 
+### Corrección de auditoría de Facundo — 16/11/2026
+
+**Procedencia:** Martín informa auditoría de Facundo sobre `4c92b76867e65e56c5d8346b294161d26733d225`: P1 (`main.dart`, 770–789), protección común de 403; P2 (`chofer_shell.dart`, 244–263), acción global sobre rutas internas. Esa auditoría no constituye aprobación formal del código anterior ni del nuevo HEAD; Facundo debe volver a revisar el diff publicado.
+
+**Base comprobada e integración:** HEAD remoto coincidía con `4c92b768`; main efectivo `4198022f7080d83b30715d5509d9f944e8ba1d7b`. Merge normal `c75e36801f1eec92117aadf06ac9b1dc5964b193`, sin rebase/force-push ni merge hacia main. Unión automática sin conflictos textuales; conserva CU-023/#288, CU-033/#290 y mensajes/documentación de #291. Comparación del JSON verifica cada operación/schema de ambos padres sin cambiar sus definiciones; YAML/JSON equivalentes (47 rutas), backend incorporado idéntico a main salvo composición aditiva de routers. No se incorporan ramas independientes RNF-008/ETA ni se altera su trabajo.
+
+**Reproducción antes de corregir:** dos pruebas de integración nuevas fallan al exigir acceso denegado ante 403 de alta y recuperación; el alta absorbía 403 en `AvisoRechazado` y ninguno de los dos callbacks pasaba por `_protegerAcceso`. La prueba de navegación falla porque «Resultado propio» sigue visible sobre el detalle. Al ampliar la comprobación con POST pendiente y transición completa también se reproduce que retorno del sistema retira el formulario: delegación `pop()` ignoraba su `PopScope`. Logs locales saneados: `cu030-auditoria-p1-rojo.log`, `cu030-auditoria-p2-rojo.log`, `cu030-p2-pop-rojo.log`, fuera de Git en Temp. No se alteraron las protecciones para aprobar las pruebas.
+
+**Diff específico de P1:** `main.dart` aplica `_protegerAcceso` a registrar/recuperar, manteniendo `_exigirSesion` antes y después; `AvisosApi` deja pasar el 403 original hasta esa protección. No cambia la política común, no cierra sesión por 403 ni convierte 401 tardío en cierre de otra cuenta. Rechazos 400/401/404/409 del adaptador y resultados inciertos conservan su tratamiento; prueba unitaria exige conservar el status 403.
+
+**Diff específico de P2:** el FAB pasa del Scaffold global a la ruta raíz del listado del navegador interno; no se presenta en detalle, reporte ni recuperación. El retorno delegado usa `maybePop()` para respetar `PopScope` del formulario ocupado. La salida explícita incierta sigue disponible al finalizar la solicitud; conserva viaje/clave en la misma sesión y recuperación manual, sin envíos/consultas automáticos. No se elimina el bloqueo ni se vacían referencias al navegar.
+
+**Verificación:** reproducciones con transporte HTTP controlado, sin red real. Pruebas nuevas: 403 vigente en ambas operaciones, 401 vigente, éxito/401/403 tardíos en alta y recuperación tras cambiar cuenta, ausencia de acción global en rutas internas y retorno bloqueado mientras el POST está en curso. Regresiones incluyen incertidumbre, recuperación de misma clave, teclado de teléfono, shell, permisos/sesión comunes, mapa y ausencias. `flutter analyze --no-pub`: sin observaciones (117,3 s). Conteo final de pruebas, SHA de corrección/documentación y CI exacta se registran en #281 después de observarlos; no se atribuye la CI de `4c92b768` al HEAD nuevo.
+
+**Resultado local final:** 139 pruebas aprobadas (67 s), incluidas las once regresiones nuevas; formato correcto de los cinco Dart modificados y `flutter analyze --no-pub` final sin observaciones (6 s). Logs de regresión y analyze final en Temp fuera de Git. La CI completa backend/Flutter del HEAD publicado se registra en #281 al observarla; no se ejecutó una suite backend local en esta corrección de frontend.
+
+**Pendientes intactos:** revisión de models/migrations por Martiniano, nueva revisión de Facundo, respaldo actual de Neon con restauración aislada probada y ventana acordada sin uso **antes del merge**. CU-037 sigue pendiente entre los tres sin responsables asignados; entrega parcial respecto de comunicación. Sin migraciones remotas, acceso a Neon/Render, despliegue, APK nueva ni merge hacia main; el efecto futuro automático de Render sigue vigente según la sección siguiente.
+
 ### Precisiones de Martiniano comunicadas por Martín — condiciones anteriores al merge
 
 Procedencia: mensaje del usuario que transmite las precisiones de Martiniano; no aprobación formal del HEAD ni autorización para operar Neon/Render. **Antes del merge se requieren** revisión de models/migrations por Martiniano, revisión del diff publicado por Facundo, respaldo actual de Neon con restauración aislada probada y ventana acordada sin uso de la base. Ninguno de esos pendientes se acredita con CI o con el respaldo/ensayo previo de PostgreSQL local. No se verificó ni se produjo un respaldo de Neon durante este trabajo.

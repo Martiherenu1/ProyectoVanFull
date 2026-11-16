@@ -241,41 +241,45 @@ class _ChoferShellState extends State<ChoferShell> {
 
   @override
   Widget build(BuildContext context) => Scaffold(
-    floatingActionButton: widget.recuperarAviso == null
-        ? null
-        : SizedBox(
-            height: 64,
-            child: FloatingActionButton.extended(
-              onPressed: () => _navigator.currentState!.push<void>(
-                MaterialPageRoute(
-                  builder: (_) => ValueListenableBuilder<List<ReferenciaAviso>>(
-                    valueListenable: _avisosInciertos,
-                    builder: (_, referencias, _) => RecuperarAvisoScreen(
-                      recuperar: widget.recuperarAviso!,
-                      referencias: referencias,
-                      onConfirmado: _confirmarAviso,
-                    ),
-                  ),
-                ),
-              ),
-              label: const Text('Resultado propio'),
-              icon: const Icon(Icons.receipt_long),
-            ),
-          ),
     body: NavigatorPopHandler<Object?>(
-      onPopWithResult: (_) => _navigator.currentState!.pop(),
+      onPopWithResult: (_) => _navigator.currentState!.maybePop(),
       child: Navigator(
         key: _navigator,
         onGenerateRoute: (_) => MaterialPageRoute<void>(
-          builder: (_) => ListenableBuilder(
-            listenable: Listenable.merge([_fuentes, _listado]),
-            builder: (_, _) => ViajesChoferScreen(
-              cargarViajes: widget.cargarViajes,
-              fechaInicial: widget.fechaInicial,
-              onViajeSeleccionado: _abrirDetalle,
-              invalidado: _listadoInvalidado,
-              revisionRecarga: _revisionRecarga,
-              onViajesAceptados: _listadoAceptado,
+          builder: (_) => Scaffold(
+            floatingActionButton: widget.recuperarAviso == null
+                ? null
+                : SizedBox(
+                    height: 64,
+                    child: FloatingActionButton.extended(
+                      onPressed: () => _navigator.currentState!.push<void>(
+                        MaterialPageRoute(
+                          builder: (_) =>
+                              ValueListenableBuilder<List<ReferenciaAviso>>(
+                                valueListenable: _avisosInciertos,
+                                builder: (_, referencias, _) =>
+                                    RecuperarAvisoScreen(
+                                      recuperar: widget.recuperarAviso!,
+                                      referencias: referencias,
+                                      onConfirmado: _confirmarAviso,
+                                    ),
+                              ),
+                        ),
+                      ),
+                      label: const Text('Resultado propio'),
+                      icon: const Icon(Icons.receipt_long),
+                    ),
+                  ),
+            body: ListenableBuilder(
+              listenable: Listenable.merge([_fuentes, _listado]),
+              builder: (_, _) => ViajesChoferScreen(
+                cargarViajes: widget.cargarViajes,
+                fechaInicial: widget.fechaInicial,
+                onViajeSeleccionado: _abrirDetalle,
+                invalidado: _listadoInvalidado,
+                revisionRecarga: _revisionRecarga,
+                onViajesAceptados: _listadoAceptado,
+              ),
             ),
           ),
         ),

@@ -769,18 +769,22 @@ class _EntradaChoferState extends State<_EntradaChofer> {
             acciones: _acciones,
             registrarAviso: (id, clave, clase, detalle) async {
               _exigirSesion();
-              final r = await widget.avisos.registrar(
-                id,
-                clave,
-                clase,
-                detalle,
+              final r = await _protegerAcceso(
+                controller: widget.controller,
+                solicitud: () =>
+                    widget.avisos.registrar(id, clave, clase, detalle),
+                onAccesoDenegado: _denegarAcceso,
               );
               _exigirSesion();
               return r;
             },
             recuperarAviso: (id, clave) async {
               _exigirSesion();
-              final r = await widget.avisos.recuperar(id, clave);
+              final r = await _protegerAcceso(
+                controller: widget.controller,
+                solicitud: () => widget.avisos.recuperar(id, clave),
+                onAccesoDenegado: _denegarAcceso,
+              );
               _exigirSesion();
               return r;
             },

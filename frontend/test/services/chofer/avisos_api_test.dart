@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:frontend/core/api/http_api_client.dart';
+import 'package:frontend/core/api/api_error.dart';
 import 'package:frontend/services/chofer/avisos_api.dart';
 import 'package:http/http.dart' as http;
 import 'package:http/testing.dart';
@@ -68,7 +69,11 @@ void main() {
       await expectLater(
         api.registrar(7, clave, 'demora', 'interno'),
         throwsA(
-          status == 500 ? isNot(isA<AvisoRechazado>()) : isA<AvisoRechazado>(),
+          status == 403
+              ? isA<ApiException>().having((e) => e.statusCode, 'status', 403)
+              : status == 500
+              ? isNot(isA<AvisoRechazado>())
+              : isA<AvisoRechazado>(),
         ),
       );
       expect(calls, 1);

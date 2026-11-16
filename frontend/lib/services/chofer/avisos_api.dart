@@ -28,7 +28,8 @@ class AvisosApi {
         clave,
       );
     } on ApiException catch (e) {
-      if ([400, 401, 403, 404, 409].contains(e.statusCode)) {
+      // El contenedor debe recibir 403 para aplicar la protección común.
+      if ([400, 401, 404, 409].contains(e.statusCode)) {
         throw AvisoRechazado();
       }
       rethrow;

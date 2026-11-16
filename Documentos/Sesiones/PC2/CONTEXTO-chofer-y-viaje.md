@@ -1,5 +1,12 @@
 # Contexto vivo · Chofer y viaje en curso (Martín)
 
+## Auditoría de Facundo sobre #281 — 16/11/2026, sin aprobación atribuida
+
+- Remoto `4c92b768` confirmado; main `4198022` incorporado por merge normal `c75e368`, conservando CU-023/CU-033 y #291. Sin rebase/force-push ni merge hacia main; contrato conserva operaciones/schemas de ambos padres y equivalencia YAML/JSON.
+- P1 reproducido en alta/recuperación: 403 no activaba la protección común. Corrección preserva status HTTP hasta `_protegerAcceso` y conserva controles de sesión antes/después. P2 reproducido: recuperación global encima de rutas internas; pasa al listado. Además, retorno del sistema delegado por `maybePop` respeta `PopScope` durante POST, con reproducción previa.
+- [Entrega y diff específico de cada hallazgo](../PC3/ENTREGA-MANUAL-CU030-280.md#corrección-de-auditoría-de-facundo--16112026). Analyze sin observaciones; pruebas locales y CI del HEAD final registradas en #281 tras observarlas. Facundo debe revisar de nuevo: su auditoría de `4c92b768` no es aprobación.
+- Revisión models/migrations, respaldo **actual de Neon con restauración probada** y ventana sin uso siguen pendientes antes del merge. CU-037 entre los tres sin asignaciones. RNF-008/ETA/APK preservados; sin operaciones remotas ni despliegue. Históricos siguientes conservados.
+
 ## Condiciones anteriores al merge #281 — precisiones de Martiniano comunicadas por Martín
 
 - Requieren revisión models/migrations por Martiniano y revisión del diff por Facundo, respaldo actual de Neon con restauración aislada probada y ventana acordada sin uso de la base **antes del merge**. El respaldo/ensayo local previo no acredita Neon. [Procedimiento concreto preparado](../PC3/ENTREGA-MANUAL-CU030-280.md#procedimiento-operativo-concreto--preparado-no-ejecutado-bloquea-el-merge-hasta-acreditarlo), no ejecutado; sin aprobación formal del HEAD.

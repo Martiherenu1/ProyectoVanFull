@@ -139,7 +139,10 @@ y frontend continúa pendiente; documentar el contrato no implementa los servici
 | CU-010 Reservas propias | `GET /pasajeros/me/reservas`, `GET /reservas/{id}` | RF-043 |
 | CU-011 Chatbot | `POST /chat` | RF-029/032 |
 | CU-012 Sesión | `POST /auth/login`, `POST /auth/logout` | RF-045 |
+| CU-013 Gestionar pasajeros ⚠️ *parcial* | `GET /pasajeros`, `POST /pasajeros`, `GET /pasajeros/{id_persona}`, `PATCH /pasajeros/{id_persona}`, `POST /pasajeros/{id_persona}/baja` | RF-002/042, RN-026; suspensión y habilitación excepcional (RN-004/005) y motivos de baja pendientes |
 | CU-014 Registrar pago | `POST /pagos` | RF-009, RN-016 |
+| CU-023 Clientes corporativos ⚠️ *parcial* | `GET`/`POST /clientes-corporativos`, `GET`/`PATCH /clientes-corporativos/{id_cliente}`, `POST …/contactos`, `DELETE …/contactos/{id_persona}`, `POST …/pasajeros`, `DELETE …/pasajeros/{id_pasajero}` | RF-034, RN-014/028; condiciones comerciales y catálogos de estado pendientes |
+| CU-033 Pasajeros de la organización ⚠️ *parcial* | `GET /organizaciones`, `GET`/`POST /organizaciones/{id_cliente}/pasajeros`, `PATCH /organizaciones/{id_cliente}/pasajeros/{id_pasajero}` | RF-035, RN-026/028; baja (A2) y «datos permitidos» pendientes |
 | CU-015 Gestionar deuda ⚠️ *parcial* | `GET /clientes/{id_cliente}/deuda` | RF-010, MR-R30; RN-004/005/006 pendientes |
 | CU-016 Confirmar/rechazar pago | `POST /pagos/{id}/confirmacion` | RF-011, RN-015 — validación administrativa cuando el medio no acredita automáticamente |
 | CU-018 Gestionar viajes ⚠️ *parcial* | `POST /viajes`, `PATCH /viajes/{id_viaje}` | RF-017/018, RN-001 |
@@ -158,8 +161,8 @@ ubicación en CU-009/CU-034 y no es una regla directa del POST GPS.
 
 ## CU pendientes de contrato (próxima iteración)
 
-Estos **17 CU** todavía no tienen operaciones en el contrato:
-administración de pasajeros (CU-013), créditos/devoluciones (CU-017), recorridos (CU-019),
-optimización de recorrido (CU-020), choferes (CU-021), vehículos (CU-022), corporativos (CU-023, CU-033, CU-034, CU-035),
+Estos **14 CU** todavía no tienen operaciones en el contrato (CU-013, CU-023 y CU-033 las tienen desde los Issues #285, #287 y #289, parciales):
+créditos/devoluciones (CU-017), recorridos (CU-019),
+optimización de recorrido (CU-020), choferes (CU-021), vehículos (CU-022), corporativos (CU-034, CU-035),
 facturación (CU-024), reportes (CU-025), historial (CU-026), abonos (CU-028),
 tarifas y administradores del dueño (CU-031, CU-032), notificaciones (CU-037).

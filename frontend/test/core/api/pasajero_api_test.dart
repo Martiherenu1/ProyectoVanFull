@@ -306,6 +306,45 @@ void main() {
       );
     });
 
+    test('cambiar parada manda orden_parada a la ruta de la reserva', () async {
+      final cliente = ClienteFalso({
+        'POST reservas/41/cambio-parada': () => reservaJson(),
+      });
+      final reserva = await PasajeroApi(cliente).cambiarParada(41, 3);
+
+      expect(cliente.ultimaClave, 'POST reservas/41/cambio-parada');
+      expect(cliente.ultimoCuerpo, {'orden_parada': 3});
+      expect(reserva.idReserva, 41);
+    });
+
+    test('cambiar parada traduce 400 y 409; el 404 sube tal cual', () async {
+      for (final (estado, codigo) in [
+        (400, 'PARADA_NO_VALIDA'),
+        (409, 'RESERVA_NO_MODIFICABLE'),
+        (409, 'VIAJE_NO_MODIFICABLE'),
+        (409, 'PARADA_SIN_CAMBIOS'),
+      ]) {
+        final cliente = ClienteFalso({
+          'POST reservas/41/cambio-parada': () => throw error(estado, codigo),
+        });
+        await expectLater(
+          PasajeroApi(cliente).cambiarParada(41, 3),
+          throwsA(
+            isA<ReservaRechazada>().having((r) => r.codigo, 'codigo', codigo),
+          ),
+        );
+      }
+
+      final inexistente = ClienteFalso({
+        'POST reservas/41/cambio-parada': () =>
+            throw error(404, 'NO_ENCONTRADO'),
+      });
+      await expectLater(
+        PasajeroApi(inexistente).cambiarParada(41, 3),
+        throwsA(isA<ApiException>()),
+      );
+    });
+
     test('chat reenvía el conversacion_id solo si existe', () async {
       final cliente = ClienteFalso({
         'POST chat': () => {

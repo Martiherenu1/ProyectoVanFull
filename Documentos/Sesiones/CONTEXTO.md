@@ -1,6 +1,8 @@
 # CONTEXTO VANFULL — Carga rápida de sesión
 
-## Estado vigente — 2026-11-12
+## Estado vigente de esta actualización RNF-008 — 2026-11-16
+
+- Integración de main `4198022f7080d83b30715d5509d9f944e8ba1d7b` en la rama de #272; contrato GPS aditivo conservado junto con CU-005/013/023/033 y contextos de main. No es merge hacia main, implementación #273 ni despliegue. CI de la nueva combinación pendiente al preparar esta nota.
 
 - **RNF-008:** [PR contractual #272](https://github.com/Martiherenu1/ProyectoVanFull/pull/272)
   abierta; Martiniano aprobó el contrato con observaciones documentales atendidas.
@@ -25,7 +27,7 @@
 > datos de esta máquina. Los prompts de arranque por tipo de tarea, y el criterio de cuándo conviene
 > abrir un chat nuevo, están en `Documentos/Sesiones/PROMPT-INICIAL.md`.
 >
-> **Corte histórico del cuerpo general: 2026-10-26** (§13 composición compartida de Flutter integrada y chofer1 verificado contra Render; antes, 24/10: backend en Render y asistente AG-01 con modelo real) · Reemplaza y consolida todas las versiones anteriores.
+> **Última actualización: 2026-11-15** (§11: CU-013, CU-023 y CU-033 recortados; el resto del documento sigue como el 2026-10-26: §13 composición compartida de Flutter integrada y chofer1 verificado contra Render; antes, 24/10: backend en Render y asistente AG-01 con modelo real) · Reemplaza y consolida todas las versiones anteriores.
 
 ---
 
@@ -242,6 +244,8 @@ registra en Deployments). Todavía sin endpoint: los abordajes (Martín).
 
 **`/chat` (AG-01) responde con un modelo real en Render desde el 24/10** (#155, #157): qué se verificó, con qué
 modelos y qué falta, en §13.
+
+**Para la entrega final (2026-11-15), backend y contrato de tres CU de administración y organización, recortados a lo definido** (las pantallas son de Facundo): CU-013 gestionar pasajeros (`/pasajeros`, #285, mergeado en #286), CU-023 clientes corporativos (`/clientes-corporativos`, #287, mergeado en #288) y CU-033 pasajeros de la organización para el representante corporativo (`/organizaciones`, #289). Qué quedó fuera por pendiente y por qué, en `PC2/CONTEXTO-pasajero-y-base-comun.md` (Decisiones del 2026-11-15). Martín aclaró funcionalmente CU-005/RN-020 (la parada nueva tiene que estar habilitada para el viaje) y condicionó el merge de #281 a un backup de Neon con restauración probada.
 
 **Plan:** `services/` (reglas RN) → `routers/` (endpoints del OpenAPI) → tests. Los 37 CU entran en ~10 routers,
 no uno por CU.
@@ -518,3 +522,8 @@ verificación nueva de despliegue. Se conserva íntegra su información y proced
 > Despliegue actual y circuitos nuevos en Render SIN VERIFICAR. Notion pendiente de comprobar/
 > actualizar por Facundo; no consultado ni modificado. Rama documental sin commit/push/PR.
 > Los apartados generales posteriores conservan su fecha propia; no se reauditaron otras áreas.
+
+
+## Antecedente pasajero conservado al integrar main — 16/11/2026
+
+> **Pasajero, CU-005 — 12/11/2026:** pantalla Flutter de cambio de parada ([Issue #274](https://github.com/Martiherenu1/ProyectoVanFull/issues/274)), sobre el backend ya en `main` (#243). Sin cambios de contrato, backend ni modelo. Verificada con `flutter analyze` y pruebas de widget; **sin probar contra Render**. La interpretación de «disponibilidad compatible» (RN-020) **sigue sin validar** (#242 se cerró sin consulta registrada). Siguen pendientes: lista de espera FIFO (CU-003, #34), y CU-013/019/035 sin contrato. Detalle: PC2/CONTEXTO-pasajero-y-base-comun.md.

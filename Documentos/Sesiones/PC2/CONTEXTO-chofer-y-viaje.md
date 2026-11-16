@@ -1,5 +1,12 @@
 # Contexto vivo · Chofer y viaje en curso (Martín)
 
+## Integración contractual RNF-008 / #272 — 16/11/2026
+
+- Main `4198022f7080d83b30715d5509d9f944e8ba1d7b` incorporado en la rama contractual por merge normal; se conservan CU-005/013/023/033 y los contextos de main. Conflicto solo en contexto general, resuelto preservando antecedentes y la actualización parcial del cuerpo general del 15/11.
+- YAML/JSON conservan exclusivamente la adición GPS propuesta. Sin código productivo, modelo, migraciones, Flutter o recepción GPS propios nuevos. Emisión backend/header y pantalla siguen pendientes; #39/#273 abiertos, RNF-008 parcial y ETA fuera de alcance.
+- Verificación local de integración: 5 pruebas de contrato/rutas aprobadas (2,29 s), YAML/JSON válidos y equivalentes, solo tres diferencias semánticas GPS respecto de main, Ruff correcto, 131 archivos con formato correcto y diff --check limpio. Sin bases ni servicios VanFull; no es suite completa ni CI del nuevo HEAD.
+- Aprobación de Martiniano e historial de CI del HEAD anterior conservados; no se atribuyen anticipadamente al HEAD de integración. Validación y CI de esta combinación se informan por separado en #272. Sin merge hacia main, despliegue ni operaciones sobre bases.
+
 ## RNF-008 / #272: revisión formal y ajustes documentales — 2026-11-12
 
 - Martiniano: APPROVED del contrato y [29,31] como Vigencia no confirmada, con tres

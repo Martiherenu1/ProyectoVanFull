@@ -11,11 +11,14 @@ from app.routers import (
     auth,
     chat,
     chofer,
+    corporativos,
     deuda,
     ejecucion_viajes,
     gps,
     health,
+    organizaciones,
     pagos,
+    pasajeros,
     perfil,
     reservas,
     servicios,
@@ -50,7 +53,10 @@ app.include_router(gps.router, prefix=settings.api_prefix)
 app.include_router(auth.router, prefix=settings.api_prefix)
 app.include_router(ausencias.router, prefix=settings.api_prefix)
 app.include_router(perfil.router, prefix=settings.api_prefix)
+app.include_router(pasajeros.router, prefix=settings.api_prefix)
 app.include_router(deuda.router, prefix=settings.api_prefix)
+app.include_router(corporativos.router, prefix=settings.api_prefix)
+app.include_router(organizaciones.router, prefix=settings.api_prefix)
 app.include_router(servicios.router, prefix=settings.api_prefix)
 app.include_router(reservas.router, prefix=settings.api_prefix)
 app.include_router(pagos.router, prefix=settings.api_prefix)

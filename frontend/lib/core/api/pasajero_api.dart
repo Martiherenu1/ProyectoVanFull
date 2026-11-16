@@ -114,6 +114,21 @@ class PasajeroApi {
     }
   }
 
+  /// CU-005. Cambia la parada de ascenso de una reserva propia. 400
+  /// (`PARADA_NO_VALIDA`) y 409 (`RESERVA_NO_MODIFICABLE`, `VIAJE_NO_MODIFICABLE`,
+  /// `PARADA_SIN_CAMBIOS`) son rechazos; el 404 sube como [ApiException].
+  Future<Reserva> cambiarParada(int idReserva, int ordenParada) async {
+    try {
+      final cuerpo = await _cliente.post(
+        'reservas/$idReserva/cambio-parada',
+        body: {'orden_parada': ordenParada},
+      );
+      return Reserva.fromJson(cuerpo! as Map<String, dynamic>);
+    } on ApiException catch (e) {
+      _rechazo(e);
+    }
+  }
+
   Future<RespuestaChat> enviarMensaje(
     String mensaje,
     String? conversacionId,

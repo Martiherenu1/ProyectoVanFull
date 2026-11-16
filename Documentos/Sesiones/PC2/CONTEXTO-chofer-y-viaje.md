@@ -1,5 +1,46 @@
 # Contexto vivo · Chofer y viaje en curso (Martín)
 
+## Publicacion de implementacion backend #273 — 2026-11-16
+
+- Verificacion remota previa: #272 abierta, sin merge, integrable y HEAD
+  `54f426373a9a95d7d1c399893980ea9e8cc81f62`; CI #400 / 43872735324 success.
+  Main sigue en `4198022f7080d83b30715d5509d9f944e8ba1d7b`.
+- Rama de implementacion `feat/chofer-evaluacion-gps-rnf008-273`, basada exactamente
+  en ese HEAD. PR dependiente contra `docs/chofer-contrato-rnf008-39`, no contra
+  main, para revisar solo los siete archivos propios. Integrar primero #272 y
+  luego retargetear y verificar esta entrega contra main; sin merge automatico.
+- Codigo funcional revisado sin bloqueos; resultado local informado por Codex:
+  79 aprobadas, incluidas cinco contractuales/rutas, sin fallos ni omisiones.
+  Ajustes posteriores solo documentales/comentario; no se repite esa suite.
+  Verificacion independiente de revision: cinco contractuales/rutas y Ruff correctos.
+- CI de esta implementacion se registrara por SHA en PR/#273 tras observarla.
+  La CI contractual y aprobaciones previas no se atribuyen a esta implementacion.
+- Sin cambios de Flutter, OpenAPI YAML/JSON, modelo o migraciones. #39 y las dos
+  regresiones originales siguen pendientes; RNF-008 parcial, ETA fuera de alcance.
+  Publicar la rama no acredita despliegue; no se opero sobre Neon/Render.
+
+
+
+## Candidata backend #273 sobre contrato 54f4263 - 2026-11-16
+
+- Base explicita 54f426373a9a95d7d1c399893980ea9e8cc81f62, con main
+  4198022f7080d83b30715d5509d9f944e8ba1d7b como segundo padre verificado.
+- Trasladado solo incremento de implementacion desde candidata local preservada:
+  S UTC unico, mismo T/snapshot, >30 estricto y Cache-Control: no-store en 200.
+- Sin cambios propios de contrato, recepcion GPS, timestamps almacenados, permisos,
+  errores, eta_minutos, modelo, migraciones, Flutter ni CI. Historicos conservados.
+- Verificacion nueva: 79 aprobadas (incluye cinco contrato/rutas), 0 fallidas/omitidas,
+  117.11 s; Ruff/formato/diff correctos. PostgreSQL nuevo en red interna, retirado.
+- Resultados nuevos de esta combinacion y comparacion semantica documentados en
+  revision-rnf008/INFORME.md, artefacto local de revision. 79/5 anteriores separados.
+- CI #400 / 43872735324 del contrato informada por el usuario; no se atribuye a esta
+  candidata. Sin revision anterior atribuida, commit, push, merge ni despliegue.
+- Ajuste posterior a revision: README distingue contrato/candidata/despliegue y
+  conserva antecedentes; alcance propio de siete archivos. Comentario corregido
+  en test_gps_evaluacion.py, sin cambiar AST ni codigo funcional. Sin repetir las
+  79 pruebas por estos ajustes; whitespace y parche completos verificados.
+- #39 y dos regresiones originales pendientes; RNF-008 parcial; ETA fuera de alcance.
+
 ## Integración contractual RNF-008 / #272 — 16/11/2026
 
 - Main `4198022f7080d83b30715d5509d9f944e8ba1d7b` incorporado en la rama contractual por merge normal; se conservan CU-005/013/023/033 y los contextos de main. Conflicto solo en contexto general, resuelto preservando antecedentes y la actualización parcial del cuerpo general del 15/11.

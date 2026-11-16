@@ -58,7 +58,7 @@
 > datos de esta máquina. Los prompts de arranque por tipo de tarea, y el criterio de cuándo conviene
 > abrir un chat nuevo, están en `Documentos/Sesiones/PROMPT-INICIAL.md`.
 >
-> **Última actualización: 2026-10-26** (§13 composición compartida de Flutter integrada y chofer1 verificado contra Render; antes, 24/10: backend en Render y asistente AG-01 con modelo real) · Reemplaza y consolida todas las versiones anteriores.
+> **Última actualización: 2026-11-15** (§11: CU-013, CU-023 y CU-033 recortados; el resto del documento sigue como el 2026-10-26: §13 composición compartida de Flutter integrada y chofer1 verificado contra Render; antes, 24/10: backend en Render y asistente AG-01 con modelo real) · Reemplaza y consolida todas las versiones anteriores.
 
 ---
 
@@ -275,6 +275,8 @@ registra en Deployments). Todavía sin endpoint: los abordajes (Martín).
 
 **`/chat` (AG-01) responde con un modelo real en Render desde el 24/10** (#155, #157): qué se verificó, con qué
 modelos y qué falta, en §13.
+
+**Para la entrega final (2026-11-15), backend y contrato de tres CU de administración y organización, recortados a lo definido** (las pantallas son de Facundo): CU-013 gestionar pasajeros (`/pasajeros`, #285, mergeado en #286), CU-023 clientes corporativos (`/clientes-corporativos`, #287, mergeado en #288) y CU-033 pasajeros de la organización para el representante corporativo (`/organizaciones`, #289). Qué quedó fuera por pendiente y por qué, en `PC2/CONTEXTO-pasajero-y-base-comun.md` (Decisiones del 2026-11-15). Martín aclaró funcionalmente CU-005/RN-020 (la parada nueva tiene que estar habilitada para el viaje) y condicionó el merge de #281 a un backup de Neon con restauración probada.
 
 **Plan:** `services/` (reglas RN) → `routers/` (endpoints del OpenAPI) → tests. Los 37 CU entran en ~10 routers,
 no uno por CU.

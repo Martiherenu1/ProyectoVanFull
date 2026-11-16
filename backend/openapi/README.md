@@ -5,6 +5,25 @@ Cubre el requisito del PC1 **"Comunicación Vista-Controlador: OpenAPI (JSON)"**
 (escrito a mano, previo a la implementación); cuando el backend esté programado, FastAPI expondrá además
 su propio `/openapi.json` generado, que deberá coincidir con este contrato.
 
+## GPS / RNF-008: propuesta, implementación y despliegue — 2026-11-12
+
+- **Contrato propuesto:** [PR #272](https://github.com/Martiherenu1/ProyectoVanFull/pull/272)
+  agrega fecha_hora_evaluacion opcional y no nullable, misma evaluación S/snapshot
+  que desactualizada=(S-T >30 s), y respuesta fresca con Cache-Control: no-store.
+- **Implementación pendiente:** el backend actual **NO emite fecha_hora_evaluacion
+  ni Cache-Control: no-store**. Cotejado en app/schemas/gps.py, services/gps.py y
+  routers/gps.py; no se modifican aquí. [Issue #273](https://github.com/Martiherenu1/ProyectoVanFull/issues/273)
+  registra emisión coherente y pruebas backend. No equivale a implementar Flutter
+  ni resolver completamente [#39](https://github.com/Martiherenu1/ProyectoVanFull/issues/39).
+- **Despliegue no verificado:** no se consultaron servicios de VanFull; SHA exacto
+  desplegado en Render pendiente. Un contrato, merge o CI verde no acreditan emisión real.
+
+La revisión formal de Martiniano aprueba el contrato y [29,31] como Vigencia no
+confirmada; la pantalla se revisará cuando exista implementación. RNF-008 parcial.
+Identidad P/contexto, límites temporales y las dos regresiones pendientes se documentan
+en [el análisis de #39](../../Documentos/Sesiones/PC2/ACLARACION-FUNCIONAL-CU009-ISSUE39-v0.2-VALIDADA-ANALISIS.md).
+ETA fuera de alcance. No se amplía YAML/JSON ni se modifica recepción GPS o modelo.
+
 ## Los dos formatos
 
 | Archivo | Para qué |

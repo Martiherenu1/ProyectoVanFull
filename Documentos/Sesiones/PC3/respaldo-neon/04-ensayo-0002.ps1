@@ -6,7 +6,7 @@ interna de la copia: no puede llegar a Neon ni a ningun servicio externo, y no r
 Hace: alembic current / heads / history / upgrade 0002 / current / check / upgrade 0002 (repetida: no
 debe cambiar nada) / current. Despues compara la copia ANTES y DESPUES de 0002.
 NO ensaya el comportamiento de CU-030 en la API (altas, recuperacion, permisos): eso es otra prueba.
-Uso:  .\04-ensayo-0002.ps1 -Commit 6656794...
+Uso:  .\04-ensayo-0002.ps1 -Commit <SHA del HEAD de #281>   (ver RESPALDO-NEON.md, seccion E)
 #>
 param(
     [Parameter(Mandatory)][string]$Commit,

@@ -165,12 +165,19 @@ OK  La copia es identica a Neon en: version, alembic, extensiones, filas y hash 
 
 ## E. Ensayo de 0002 sobre la copia (paso 4)
 
-El `<SHA>` es el HEAD de #281. Si hoy no cambió, es `6656794b7cd1e1d4d1be9f8d707cbbbe63ea9827`; el script
-compara contra el HEAD actual de #281 en GitHub y avisa si no coincide.
+El commit a ensayar es el **HEAD de #281 en el momento de correrlo**. No se escribe a mano porque se mueve
+(el 16/11 pasó de `6656794` a `e673f98` al integrar `main`): se lee de GitHub y se le pasa al script, que
+además avisa si no coincide con el HEAD actual de #281.
 
 ```powershell
-powershell -NoProfile -ExecutionPolicy Bypass -File .\04-ensayo-0002.ps1 -Commit <SHA>
+$sha = gh pr view 281 --json headRefOid --jq .headRefOid
+$sha
+powershell -NoProfile -ExecutionPolicy Bypass -File .\04-ensayo-0002.ps1 -Commit $sha
 ```
+
+Mirá que el `$sha` impreso sea el que Martín anunció como HEAD final. **El respaldo y la restauración (pasos 2 y
+3) no dependen de ese commit; el ensayo (paso 4) sí.** Si el HEAD de #281 cambia después del ensayo, el paso 4
+se repite sobre el nuevo (los pasos 2 y 3 siguen valiendo mientras Neon no se escriba).
 
 Este paso **no usa Neon** y no te pide la cadena: si en esa ventana de PowerShell tuvieras definida
 `NEON_URL`, el script se niega a correr (con `-File`, cada script es un proceso aparte y no pasa). Corre el código de ese commit en un checkout

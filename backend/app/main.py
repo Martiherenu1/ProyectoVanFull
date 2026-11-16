@@ -11,6 +11,7 @@ from app.routers import (
     auth,
     chat,
     chofer,
+    corporativos,
     deuda,
     ejecucion_viajes,
     gps,
@@ -53,6 +54,7 @@ app.include_router(ausencias.router, prefix=settings.api_prefix)
 app.include_router(perfil.router, prefix=settings.api_prefix)
 app.include_router(pasajeros.router, prefix=settings.api_prefix)
 app.include_router(deuda.router, prefix=settings.api_prefix)
+app.include_router(corporativos.router, prefix=settings.api_prefix)
 app.include_router(servicios.router, prefix=settings.api_prefix)
 app.include_router(reservas.router, prefix=settings.api_prefix)
 app.include_router(pagos.router, prefix=settings.api_prefix)

@@ -1,5 +1,11 @@
 # Contexto vivo · Chofer y viaje en curso (Martín)
 
+## Integración main efectivo en #281 — 15/11/2026
+
+- Main remoto avanzó a `df1ad20729b5a5c1eb1d1ac77ef2450ff004a929` (CU-013/#286); `7107233` ya estaba integrado. Se incorpora por merge normal `7792c645fbbb1db0a32ca8747adc00d8aebd3012`, con primer padre `c9c977d`, sin rebase/force-push ni reescritura. Unión automática revisada, sin conflicto textual pendiente; no se inventa una resolución manual.
+- [Diff completo y evidencia para Martiniano/Facundo](../PC3/ENTREGA-MANUAL-CU030-280.md#integración-del-main-efectivo-para-revisión--15112026): CU-013 conservado, cada operación/schema de ambas referencias intactos y YAML/JSON equivalentes; CU-005, correcciones CU-030, SQL/ORM/migración y APK sin cambios. Local: Ruff/formato, 71 backend y 41 Flutter focalizadas aprobadas; CI completa del HEAD final en #281 tras observarla.
+- Martiniano conforme con diseño en `bb1ceb5` según Martín, sin aprobación formal; revisión del HEAD final y de Facundo pendientes. Sin merge de PR hacia main, despliegues ni bases remotas; CU-037 separado. Históricos siguientes conservados.
+
 ## Observaciones de Martiniano comunicadas por Martín — PR #281, 15/11/2026
 
 - Martiniano revisó `bb1ceb5`: conforme con idempotencia, permisos y locks, **sin aprobación formal**; revisará el HEAD final. El acuerdo estructural fue comunicado por Martín; Facundo todavía debe revisar el diff publicado. No atribuir aprobación conjunta ni ampliar la revisión de un corte al siguiente.

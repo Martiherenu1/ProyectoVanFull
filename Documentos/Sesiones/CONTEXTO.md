@@ -436,6 +436,8 @@ el 25/10, salvo acuerdo» de REPARTO-PC2 no rige, por decisión de Martiniano):
 
 ## 14. Recursos
 
+> **CU-030/#281, integración main efectivo — 15/11:** main remoto `df1ad20` (CU-013/#286) incorporado mediante merge normal `7792c645fbbb1db0a32ca8747adc00d8aebd3012` sobre `c9c977d`. Unión automática revisada; sin rebase/force-push ni merge hacia main. CU-005 y correcciones CU-030 conservadas; [diff y evidencia](PC3/ENTREGA-MANUAL-CU030-280.md). Local: 71 backend y 41 Flutter focalizadas aprobadas; HEAD/CI finales en #281 tras observarlos. Revisión final de Martiniano/Facundo pendiente, sin aprobación atribuida. Sin despliegues ni operaciones remotas sobre bases.
+
 > **Revisión CU-030/#281, 15/11 — procedencia Martín:** Martiniano revisó `bb1ceb5`, conforme con diseño de idempotencia/permisos/locks, sin aprobar; revisará HEAD final. Acuerdo estructural comunicado por Martín; Facundo aún debe revisar el diff. [Entrega manual](PC3/ENTREGA-MANUAL-CU030-280.md) incluye diff de compatibilidad con CU-005/#275, orden SQL, fecha legible/estados diferenciados y teclado. Merge normal de main conservado, sin rebase/force-push. CI y HEAD finales en #281 tras observarlos; sin merge de PR, despliegues ni operaciones remotas sobre bases.
 
 > **Actualización posterior CU-030/#281 (15/11):** el usuario autorizó incorporar main `7107233` en la rama de trabajo; merge de rama `046173bce3bd7dc9dc34228f7ca16ee9344ee138` conserva CU-005 y mensaje contextual de demora sin conflictos. No es merge de la PR en main ni despliegue. El corte previo de la corrección es `becab45`; HEAD posterior y su propia CI se registran en #281.

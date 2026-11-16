@@ -60,6 +60,21 @@ Para un ensayo físico posterior: identificar SHA de APK/API y dataset **nuevo**
 
 ## Estado de publicación y pruebas
 
+### Integración del main efectivo para revisión — 15/11/2026
+
+El usuario informó `mergeable=false` para #281 sobre `c9c977d` y pidió incorporar main por merge normal. Al verificar con `git fetch` y `git ls-remote`, main efectivo era **`df1ad20729b5a5c1eb1d1ac77ef2450ff004a929`**, que integra CU-013/#286; `7107233` ya era ancestro de la rama. El metadato del conector aún mostraba ese SHA anterior, por lo que no se usó como prueba de que main no hubiera avanzado. La simulación local y el merge efectivo no reprodujeron conflicto textual: Git unió automáticamente los archivos coincidentes y se revisó el resultado antes de registrarlo. No se inventa una resolución manual ni se considera que la observación de GitHub demuestre pérdida de código.
+
+**Merge normal registrado:** `7792c645fbbb1db0a32ca8747adc00d8aebd3012`, primer padre `c9c977d0d6489c4ca0ecc0ea4548b2e8b089e0c9`, segundo padre `df1ad20729b5a5c1eb1d1ac77ef2450ff004a929`. Sin rebase, force-push ni modificación de commits publicados. Integra main hacia la rama de #281, no la PR hacia main.
+
+**Diff para Martiniano y Facundo:** [comparación completa de la integración](https://github.com/Martiherenu1/ProyectoVanFull/compare/c9c977d0d6489c4ca0ecc0ea4548b2e8b089e0c9...7792c645fbbb1db0a32ca8747adc00d8aebd3012). Reproducible con `git diff c9c977d0d6489c4ca0ecc0ea4548b2e8b089e0c9 7792c645fbbb1db0a32ca8747adc00d8aebd3012`: nueve archivos, 1456 líneas agregadas y 3 retiradas. Incluye rutas/servicio/schemas/pruebas administrativos de pasajeros, registro del router, contrato YAML/JSON, README del contrato y contexto de pasajero. Los cuatro archivos nuevos de CU-013 son idénticos a main; el contrato conserva cada operación y schema de ambas referencias sin alterar sus definiciones (38 rutas, 38 schemas). YAML/JSON equivalentes y JSON regenerado en temporal idéntico al fusionado.
+
+- `backend/app/main.py` conserva `avisos` y agrega importación/registro de `pasajeros`; las pruebas de rutas/contrato verifican ambos circuitos.
+- El README y los dos formatos del contrato conservan CU-030 y añaden las operaciones/pendientes de CU-013 de main. No se vuelve a una versión anterior del contrato ni se amplía funcionalidad por inferencia.
+- Frontend completo, CU-005/#275, mensaje fechado y sus estados, salida incierta/recuperación/aislamiento, SQL ordenado, ORM y migración 0002 permanecen sin cambios respecto de `c9c977d`. No se modifica la implementación de CU-007, RNF-008 ni APK.
+- Verificación local sobre el árbol fusionado: Ruff correcto y formato de 128 archivos; **71 pruebas backend focalizadas aprobadas**, 106 warnings, 64,97 s (`test_pasajeros_admin`, `test_avisos`, `test_avisos_migracion`, `test_contrato`, `test_rutas_contrato`, `test_modelos`, `test_migracion`). PostgreSQL 16 exclusivo desechable, sin bases/volúmenes previos; contenedores retirados. **41 pruebas Flutter focalizadas aprobadas**, 19 s, con CU-005/mensaje contextual, navegación, teclado y sesión. No se atribuye una nueva suite local completa; la CI completa del HEAD final se registra en #281 tras observarla.
+
+La conformidad de Martiniano sobre diseño en `bb1ceb5` continúa siendo la comunicada por Martín, sin aprobación formal del HEAD posterior. Facundo aún debe revisar el diff publicado. Los resultados/HEAD anteriores siguientes son históricos. CU-037 sigue separado; no se simulan envíos. Sin merge hacia main, despliegues ni operaciones remotas sobre bases.
+
 ### Observaciones de revisión comunicadas por Martín — 15/11/2026
 
 Martín informa que **Martiniano revisó el corte `bb1ceb5` y está conforme con el diseño de idempotencia, permisos y locks, pero todavía no aprueba**. Revisará el HEAD final. El acuerdo estructural previo fue comunicado por Martín; no se convierte esa procedencia en aprobación formal del diff. **Facundo aún debe revisar el diff publicado.** Solicitudes de revisión, conformidad de diseño y aprobación formal son hechos diferentes.

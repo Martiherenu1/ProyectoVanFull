@@ -2,6 +2,8 @@
 
 ## Auditoría de Facundo sobre #281 — 16/11/2026, sin aprobación atribuida
 
+- **Estado posterior:** avance concurrente de main a `6f111c1` (#272/#292/#294) produjo conflicto documental/CI no iniciada tras `482c49d`. Merge normal `9edfebc` conserva ambos bloques de contexto y RNF-008 idéntico a main; fixes CU-030 idénticos a `482c49d`. Modelo/migración intactos, sin cambios propios de ETA. Analyze posterior sin observaciones (11,3 s); pruebas/CI posteriores en #281, sin heredar las 139 previas. Históricos siguientes conservan sus cortes.
+
 - Remoto `4c92b768` confirmado; main `4198022` incorporado por merge normal `c75e368`, conservando CU-023/CU-033 y #291. Sin rebase/force-push ni merge hacia main; contrato conserva operaciones/schemas de ambos padres y equivalencia YAML/JSON.
 - P1 reproducido en alta/recuperación: 403 no activaba la protección común. Corrección preserva status HTTP hasta `_protegerAcceso` y conserva controles de sesión antes/después. P2 reproducido: recuperación global encima de rutas internas; pasa al listado. Además, retorno del sistema delegado por `maybePop` respeta `PopScope` durante POST, con reproducción previa.
 - [Entrega y diff específico de cada hallazgo](../PC3/ENTREGA-MANUAL-CU030-280.md#corrección-de-auditoría-de-facundo--16112026). Analyze sin observaciones; pruebas locales y CI del HEAD final registradas en #281 tras observarlas. Facundo debe revisar de nuevo: su auditoría de `4c92b768` no es aprobación.

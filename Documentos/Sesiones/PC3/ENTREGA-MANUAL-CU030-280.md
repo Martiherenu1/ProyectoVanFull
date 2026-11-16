@@ -3,6 +3,28 @@
 Base: `71739f49b1427aa3523e46011e6085fa9cbe4c91`. Fecha: 15/11/2026.
 Seguimiento único: https://github.com/Martiherenu1/ProyectoVanFull/issues/280.
 
+## Integración del runbook de Neon — 16/11/2026
+
+Main efectivo revalidado en lectura: `8c422e1e53f67020b1a5ce35ff495b868ca12333` (#300/#301), no `5cd091d` ni el corte intermedio `85c030d`. Incorporado mediante merge normal hacia #281 desde `e673f98d5d4e9c30ccdd606d8752b310a0240046`. Único conflicto real: `Documentos/Sesiones/CONTEXTO.md`; se conservan las entradas de ambos trabajos una vez, con fechas/SHA y encabezado de antecedentes para los cortes anteriores. Ficha, guion y notas locales pendientes excluidos del commit. SHA final y CI exacta se registran en #281 después de observarlos, sin heredar CI de `e673f98`.
+
+Martín comunica que Martiniano verificó `e673f98`: 0002 y avisos intactos frente a `6656794`, cadena 0001→0002, CU-035 y contrato comprobantes/avisos conservados. **Conformidad técnica informada, no aprobación formal.** La comparación histórica anterior sigue válida para ese corte y no se repite. Esta integración solo recibe documentación y scripts operativos: código productivo, modelos completos, SQL, migraciones, servicios/eventos/router/schema de avisos, CU-035, OpenAPI YAML/JSON, UUID normalizada, permisos/sesión/navegación y RNF-008 idénticos a `e673f98`. Cadena normal verificada estáticamente: main solo 0001; combinación de #281 0001→0002, head único 0002. No se leyó `alembic_version` real. Sin nuevas suites locales al no cambiar código ni detectar motivo funcional nuevo; CI del nuevo HEAD se verifica por separado.
+
+### Contraste del runbook integrado (preparación, NO ejecución)
+
+Se recibe [RESPALDO-NEON.md](respaldo-neon/RESPALDO-NEON.md) y scripts de #299, sin modificarlos. Concretan los pasos 2–5 del procedimiento inferior: respaldo actual con hash/custodia, restauración completa aislada y ensayo de 0002. El ensayo sintético que informa su autor es antecedente; no acredita respaldo/restauración de Neon. La ficha local resume puertas operativas y remite al procedimiento, no agrega un circuito alternativo. **Antes de ejecutar, coordinar estas diferencias/limitaciones, sin elegirlas silenciosamente:**
+
+| Punto | Diferencia o límite a resolver |
+|---|---|
+| Ventana hasta merge | B exige detener escritores; F.2 propone reanudar/cerrar ventana antes de F.5. El procedimiento de CU-030 exige respaldo vigente y ausencia de escritores hasta merge/verificación. No considerar ese cierre autorización de reapertura: acordar continuidad o nueva ventana/respaldo según actividad real. Reanudar Render también ejecuta el arranque; confirmar SHA efectivo/configuración antes. |
+| Cambio de HEAD | E dice repetir paso 4 con nuevo HEAD y conservar pasos 2/3 mientras Neon no cambie; F.4 pide repetir C/D/E ante cambio de HEAD o tiempo. El requisito vigente es evaluar qué repetir si cambia código/migración, sin presumir validez automática. Registrar decisión y evidencia; no resolver esa discrepancia ejecutando por costumbre. |
+| Identidad y SHA | A.2 compara host: confirmar además proyecto/rama/base, no solo host. El registro del backup captura HEAD local; asociar respaldo y restauración al HEAD final de #281 además del SHA de scripts. E lee HEAD de GitHub, pero el script solo advierte si no coincide: no aceptar ensayo de un SHA distinto del final anunciado. Si luego cambia, evaluar/repetir verificaciones antes del merge. |
+| Ausencia de escritores | B.5/C comparan manifiestos antes/después: igualdad comprueba estado observado, no excluye escrituras intermedias revertidas ni actividad posterior. Conexiones observadas tampoco acreditan por sí solas ausencia continua de escritores. Requiere mecanismo coordinado y evidencia durante toda la ventana. |
+| Restricciones y secuencias | D/manifiesto compara CHECK por nombre/validación, no por significado; lectura y cotejo semántico siguen pendientes, incluido `ck_aviso_metadatos` impreso en E. Secuencias: manifiesto solo registra nombre/último valor; no acredita toda su definición ni `is_called`. Completar evidencia de propiedades necesarias para continuidad histórica; no declarar equivalencia completa por el mensaje automático. Roles/grants/globales expresamente fuera de cobertura: acordar recuperación. |
+
+El respaldo/restauración y ensayo deberán identificar el **HEAD final efectivamente desplegable** y su correspondencia con código/imagen/herramientas utilizados. Antes de merge, revalidar referencias y cadena; si la revisión real no es 0001 o cambia la cadena, detener y coordinar sin `stamp`. El procedimiento anterior y sus históricos se conservan íntegros; este contraste no autoriza scripts, backup ni acceso a Neon.
+
+Siguen pendientes revisión final de Facundo, aprobación condicionada de Martiniano, evidencia de respaldo actual de Neon/restauración y ventana sin uso. Marti hará el backup según mensaje comunicado por Martín; fecha/hora y ejecutor/verificador de despliegue deben confirmarse. Merge futuro puede activar Render y `alembic upgrade head`; **durante esta integración no hay merge hacia main, despliegue ni operaciones Neon/Render**. CU-037 sigue separado, sin envíos simulados ni declaración de CU-030 completo.
+
 ## Procedencia y alcance
 
 El pedido del 15/11 comunica por Martín acuerdos aprobados entre los tres: autoría/correlación explícitas con integridad, recuperación histórica por autor autenticado después de fin/reasignación, mensaje contextual para reserva propia consolidada y prioridad manual. Autoriza implementar, probar aisladamente, publicar PR y pedir revisión; no merge/despliegue. Es la fuente del acuerdo técnico, no una revisión de este diff por los compañeros. Los históricos S7/S8/S9 del análisis conservan sus fechas y estados originales.

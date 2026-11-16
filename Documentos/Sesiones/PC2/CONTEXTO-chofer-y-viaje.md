@@ -1,5 +1,10 @@
 # Contexto vivo · Chofer y viaje en curso (Martín)
 
+## Integración de main y runbook — 16/11/2026
+
+- Main vigente `8c422e1` (#300/#301) recibido mediante merge normal, único conflicto en contexto general; se conservan ambos trabajos. Código/modelo/SQL/migraciones, CU-035, contrato, UUID y RNF-008 idénticos a `e673f98`. Sin repetir suites locales por integración exclusivamente documental; CI del nuevo HEAD debe observarse por separado en #281.
+- Martín comunica verificación técnica de Martiniano sobre `e673f98`, sin aprobación formal. [Contraste del runbook recibido](../PC3/ENTREGA-MANUAL-CU030-280.md#integración-del-runbook-de-neon--16112026): coordinar vigencia del respaldo/ausencia de escritores hasta merge, repetición por cambio de HEAD y limitaciones de las comprobaciones. No se ejecuta. Facundo final, aprobación condicionada Marti, evidencia de Neon/restauración y ventana pendientes; ensayo 0002 ligado al HEAD final. Ficha/guion y sus notas locales excluidos de publicación.
+
 ## Conformidad técnica informada de Martiniano — #281, 16/11/2026
 
 - Martín transmite revisión de modelo/SQL/0002/servicios en `6656794`: Martiniano conforme técnicamente, 917 pruebas backend en PostgreSQL local aislado y Ruff/formato correctos. Evidencia informada, sin repetirla aquí; **no aprobación formal**, espera respaldo de Neon. No acredita backup/restauración de Neon ni ventana.

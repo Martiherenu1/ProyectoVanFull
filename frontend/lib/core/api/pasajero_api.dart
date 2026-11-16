@@ -1,4 +1,5 @@
 import '../../models/chofer/viaje_resumen.dart' show SentidoViaje;
+import '../../models/pasajero/comprobante_propio.dart';
 import '../../models/pasajero/deuda.dart';
 import '../../models/pasajero/disponibilidad_viaje.dart';
 import '../../models/pasajero/pago.dart';
@@ -107,6 +108,23 @@ class PasajeroApi {
       body: {'importe': importe, 'medio_pago': medio.valorApi},
     );
     return Pago.fromJson(cuerpo! as Map<String, dynamic>);
+  }
+
+  /// CU-035. Sin cliente individual o sin comprobantes el backend responde una
+  /// lista vacía (A1), no un error.
+  Future<List<ComprobantePropio>> cargarComprobantes() async {
+    final cuerpo = await _cliente.get('pasajeros/me/comprobantes');
+    return _lista(cuerpo).map(ComprobantePropio.fromJson).toList();
+  }
+
+  /// CU-035. Uno ajeno o inexistente responde el mismo 404
+  /// `COMPROBANTE_NO_ENCONTRADO` (A2): sube como [ApiException] y lo traduce la
+  /// pantalla.
+  Future<ComprobantePropio> cargarComprobante(int idComprobante) async {
+    final cuerpo = await _cliente.get(
+      'pasajeros/me/comprobantes/$idComprobante',
+    );
+    return ComprobantePropio.fromJson(cuerpo! as Map<String, dynamic>);
   }
 
   Future<Perfil> cargarPerfil() async {

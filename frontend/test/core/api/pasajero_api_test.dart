@@ -389,6 +389,83 @@ void main() {
       );
     });
 
+    test(
+      'comprobantes lista los propios y lee los nulos del contrato',
+      () async {
+        final cliente = ClienteFalso({
+          'GET pasajeros/me/comprobantes': () => [
+            {
+              'id_comprobante': 1,
+              'tipo': 'RECIBO',
+              'id_pago': 5,
+              'id_contratacion': null,
+              'id_movimiento_cuenta': null,
+              'fecha_hora': '2026-10-24T18:00:00Z',
+              'importe': 11600,
+              'medio_pago': 'TRANSFERENCIA',
+            },
+            {
+              'id_comprobante': 2,
+              'tipo': 'FACTURA',
+              'id_pago': null,
+              'id_contratacion': 8,
+              'id_movimiento_cuenta': null,
+              'fecha_hora': null,
+              'importe': null,
+              'medio_pago': null,
+            },
+          ],
+        });
+        final lista = await PasajeroApi(cliente).cargarComprobantes();
+
+        expect(cliente.ultimaClave, 'GET pasajeros/me/comprobantes');
+        expect(lista.map((c) => c.tipo.valorApi), ['RECIBO', 'FACTURA']);
+        expect(lista.last.fechaHora, isNull);
+        expect(lista.last.importe, isNull);
+      },
+    );
+
+    test(
+      'sin comprobantes el backend da una lista vacía, no un error',
+      () async {
+        final cliente = ClienteFalso({
+          'GET pasajeros/me/comprobantes': () => <Object?>[],
+        });
+        expect(await PasajeroApi(cliente).cargarComprobantes(), isEmpty);
+      },
+    );
+
+    test('un comprobante se pide por id y el 404 sube sin tocar', () async {
+      final cliente = ClienteFalso({
+        'GET pasajeros/me/comprobantes/9': () => {
+          'id_comprobante': 9,
+          'tipo': 'RECIBO',
+          'id_pago': 5,
+          'id_contratacion': null,
+          'id_movimiento_cuenta': null,
+          'fecha_hora': '2026-10-24T18:00:00Z',
+          'importe': 11600,
+          'medio_pago': 'EFECTIVO',
+        },
+        'GET pasajeros/me/comprobantes/77': () =>
+            throw error(404, 'COMPROBANTE_NO_ENCONTRADO'),
+      });
+      final api = PasajeroApi(cliente);
+
+      final c = await api.cargarComprobante(9);
+      expect(c.idComprobante, 9);
+      expect(c.medioPagoLegible, 'Efectivo');
+
+      await expectLater(
+        api.cargarComprobante(77),
+        throwsA(
+          isA<ApiException>()
+              .having((e) => e.statusCode, 'statusCode', 404)
+              .having((e) => e.codigo, 'codigo', 'COMPROBANTE_NO_ENCONTRADO'),
+        ),
+      );
+    });
+
     test('chat reenvía el conversacion_id solo si existe', () async {
       final cliente = ClienteFalso({
         'POST chat': () => {

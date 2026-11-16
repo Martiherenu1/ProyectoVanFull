@@ -10,6 +10,10 @@
 
 > **Pasajero, CU-005 — 12/11/2026:** pantalla Flutter de cambio de parada ([Issue #274](https://github.com/Martiherenu1/ProyectoVanFull/issues/274)), sobre el backend ya en `main` (#243). Sin cambios de contrato, backend ni modelo. Verificada con `flutter analyze` y pruebas de widget; **sin probar contra Render**. La interpretación de «disponibilidad compatible» (RN-020) **sigue sin validar** (#242 se cerró sin consulta registrada). Siguen pendientes: lista de espera FIFO (CU-003, #34), y CU-013/019/035 sin contrato. Detalle: PC2/CONTEXTO-pasajero-y-base-comun.md.
 
+> **Pasajero — 16/11/2026 (tarde):** pantalla «Mis comprobantes» de CU-035 (lista y detalle, acceso desde Cuenta, [Issue #297](https://github.com/Martiherenu1/ProyectoVanFull/issues/297)). Render ya sirve `main` con `fecha_hora_evaluacion` y los comprobantes (verificado en el `openapi.json` público): se cierra la fila «Render no sirve main». Descarga y representante corporativo siguen pendientes.
+>
+> **Pasajero — 16/11/2026 (mañana):** CU-035 recortado (comprobantes propios del pasajero, solo consulta, [Issue #295](https://github.com/Martiherenu1/ProyectoVanFull/issues/295)), asignado por Facundo; descarga y representante corporativo pendientes. Revisión de modelo/migración de #281 hecha sobre `6656794` (917 pruebas backend, conforme en lo técnico, no aprobada: falta backup de Neon, restauración y ventana). La API de Render no sirve `main` `6f111c1` (sin `fecha_hora_evaluacion`): hay que mirar Events y desplegar; no migra. Detalle: PC2/CONTEXTO-pasajero-y-base-comun.md.
+
 ## Continuación Flutter RNF-008 / #293 — 16/11/2026
 
 Candidata sobre #292, dependiente de #272: referencia S/no-store, cotas monotónicas y

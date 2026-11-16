@@ -170,6 +170,7 @@ y frontend continúa pendiente; documentar el contrato no implementa los servici
 | CU-014 Registrar pago | `POST /pagos` | RF-009, RN-016 |
 | CU-023 Clientes corporativos ⚠️ *parcial* | `GET`/`POST /clientes-corporativos`, `GET`/`PATCH /clientes-corporativos/{id_cliente}`, `POST …/contactos`, `DELETE …/contactos/{id_persona}`, `POST …/pasajeros`, `DELETE …/pasajeros/{id_pasajero}` | RF-034, RN-014/028; condiciones comerciales y catálogos de estado pendientes |
 | CU-033 Pasajeros de la organización ⚠️ *parcial* | `GET /organizaciones`, `GET`/`POST /organizaciones/{id_cliente}/pasajeros`, `PATCH /organizaciones/{id_cliente}/pasajeros/{id_pasajero}` | RF-035, RN-026/028; baja (A2) y «datos permitidos» pendientes |
+| CU-035 Comprobantes propios ⚠️ *parcial* | `GET /pasajeros/me/comprobantes`, `GET /pasajeros/me/comprobantes/{id_comprobante}` | RF-037, RN-028; solo el pasajero y solo consulta: descarga (formato y reglas fiscales) y representante corporativo (ACT-03) pendientes |
 | CU-015 Gestionar deuda ⚠️ *parcial* | `GET /clientes/{id_cliente}/deuda` | RF-010, MR-R30; RN-004/005/006 pendientes |
 | CU-016 Confirmar/rechazar pago | `POST /pagos/{id}/confirmacion` | RF-011, RN-015 — validación administrativa cuando el medio no acredita automáticamente |
 | CU-018 Gestionar viajes ⚠️ *parcial* | `POST /viajes`, `PATCH /viajes/{id_viaje}` | RF-017/018, RN-001 |
@@ -188,8 +189,8 @@ ubicación en CU-009/CU-034 y no es una regla directa del POST GPS.
 
 ## CU pendientes de contrato (próxima iteración)
 
-Estos **14 CU** todavía no tienen operaciones en el contrato (CU-013, CU-023 y CU-033 las tienen desde los Issues #285, #287 y #289, parciales):
+Estos **13 CU** todavía no tienen operaciones en el contrato (CU-013, CU-023, CU-033 y CU-035 las tienen desde los Issues #285, #287, #289 y #295, parciales):
 créditos/devoluciones (CU-017), recorridos (CU-019),
-optimización de recorrido (CU-020), choferes (CU-021), vehículos (CU-022), corporativos (CU-034, CU-035),
+optimización de recorrido (CU-020), choferes (CU-021), vehículos (CU-022), corporativos (CU-034),
 facturación (CU-024), reportes (CU-025), historial (CU-026), abonos (CU-028),
 tarifas y administradores del dueño (CU-031, CU-032), notificaciones (CU-037).

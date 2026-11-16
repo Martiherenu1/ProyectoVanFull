@@ -62,12 +62,15 @@ Tiene que terminar así:
 
 ```
 OK  alembic_version = 0001 (una sola revision, la esperada).
-Version mayor de PostgreSQL en Neon: NN  ->  usar  -Pg NN  en los pasos 2 y 3.
+Version mayor de PostgreSQL en Neon: 16  ->  usar  -Pg 16  en los pasos 2 y 3.
 OK  Ninguna otra conexion a la base en este momento.
 ```
 
-**Anotá el `NN`**: es el `-Pg` de los pasos siguientes. `pg_dump` no puede ser más viejo que el servidor, y la
-copia tiene que ser de la misma versión mayor.
+**Corrido contra el Neon real el 16/11/2026 (solo lectura):** PostgreSQL **16.16**, base `neondb`, 9168 kB,
+`alembic_version` = 0001, única extensión `plpgsql`, 36 tablas en `public`, ninguna otra conexión. Por eso los
+pasos siguientes llevan `-Pg 16`. Si en otro momento el número fuera otro, usá el que diga tu salida:
+`pg_dump` no puede ser más viejo que el servidor y la copia tiene que ser de la misma versión mayor.
+(Los scripts rechazan un `-Pg` que no sean dos dígitos: no pegues un marcador como `NN`.)
 
 | Si ves… | Hacé |
 |---|---|
@@ -101,10 +104,10 @@ verificación) y cualquier seed o migración que alguien corra con la cadena.
 ## C. Respaldo (paso 2)
 
 ```powershell
-powershell -NoProfile -ExecutionPolicy Bypass -File .\02-respaldar.ps1 -Pg NN
+powershell -NoProfile -ExecutionPolicy Bypass -File .\02-respaldar.ps1 -Pg 16
 ```
 
-(Reemplazá `NN` por el número del paso A3.) Pide la cadena. Hace cinco cosas y las muestra numeradas:
+Pide la cadena. Hace cinco cosas y las muestra numeradas:
 manifiesto de Neon antes → `pg_dump` → manifiesto después → compara → hash y lectura del archivo.
 
 Guarda en `%LOCALAPPDATA%\VanFullBackups` (carpeta **fuera de OneDrive y del repo**, solo con tu usuario;
@@ -131,7 +134,7 @@ respaldo: True`.
 ## D. Restauración aislada (paso 3)
 
 ```powershell
-powershell -NoProfile -ExecutionPolicy Bypass -File .\03-restaurar-aislado.ps1 -Pg NN
+powershell -NoProfile -ExecutionPolicy Bypass -File .\03-restaurar-aislado.ps1 -Pg 16
 ```
 
 No usa la cadena de Neon. Toma el último `.dump`, **verifica que su SHA-256 siga siendo el del registro**,
@@ -232,15 +235,19 @@ sembrada con `main`, más 3 eventos históricos en `evento_operativo`), con el c
   `[0]` que tomaba un carácter en vez de un texto, comillas anidadas que el PowerShell 5.1 rompe sin avisar
   (la primera consulta devolvió salida vacía con código 0) y la diferencia de texto de los `CHECK`.
 
+**Verificado contra el Neon real (paso 1, solo lectura, 16/11/2026):** la cadena directa conecta desde el
+contenedor `postgres:16` (no sé si la cadena que pegaste traía `channel_binding=require`: el script no la
+muestra); el servidor es PostgreSQL 16.16, así que la imagen `postgres:16` ya estaba en la máquina; la única
+extensión es `plpgsql`, que trae cualquier PostgreSQL, así que no se espera el error de extensión en la
+restauración (sigue sin comprobarse hasta correr el paso 3); `alembic_version` = 0001; ninguna otra conexión a
+la base en ese instante (no es la prueba de la ventana: esa es el manifiesto antes/después del paso 2).
+
 **NO verificado, depende de Neon real:**
 
-- la versión mayor de PostgreSQL de Neon y que la imagen `postgres:NN` exista y baje bien;
-- que `pg_restore` corra sin error con lo que Neon realmente guarda (extensiones propias de Neon, por ejemplo);
-- que la cadena con `channel_binding=require` conecte desde el contenedor (la imagen oficial trae un libpq
-  que lo soporta, pero no lo probé contra Neon);
-- cuánto tarda el `pg_dump` por internet y que Neon despierte a tiempo;
-- qué conexiones internas de Neon aparecen en `pg_stat_activity` (pueden figurar sin ser tuyas: la salida
-  del paso 1 dice desde dónde y desde cuándo);
+- que `pg_restore` corra sin error con lo que Neon realmente guarda (paso 3);
+- que el `pg_dump` completo funcione y cuánto tarde por internet (paso 2);
+- qué conexiones internas de Neon aparecen en `pg_stat_activity` cuando haya actividad (pueden figurar sin
+  ser tuyas: la salida del paso 1 dice desde dónde y desde cuándo);
 - suspender `vanfull-api` y su efecto sobre los deploys (opcional en B.4);
 - roles, privilegios y objetos globales del clúster: **no están cubiertos** (se restaura sin dueños ni
   grants; la recuperación de privilegios de Neon es un tema aparte).

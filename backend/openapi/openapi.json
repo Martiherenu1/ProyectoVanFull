@@ -49,6 +49,10 @@
       "description": "Gestión operativa de viajes (CU-018) — administración"
     },
     {
+      "name": "corporativo",
+      "description": "Representante de cliente corporativo, dentro de su organización (CU-033)"
+    },
+    {
       "name": "chatbot",
       "description": "Agente conversacional AG-01 (CU-011)"
     },
@@ -1035,6 +1039,278 @@
           },
           "404": {
             "description": "CLIENTE_CORPORATIVO_NO_ENCONTRADO o VINCULO_NO_ENCONTRADO",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/organizaciones": {
+      "get": {
+        "tags": [
+          "corporativo"
+        ],
+        "summary": "Organizaciones que represento",
+        "description": "Solo `representante_corporativo`. Las empresas en las que la persona del token figura como\ncontacto con `es_representante`. Sirve para conocer el `id_cliente` de las demás operaciones:\nel modelo permite representar a más de una empresa, así que no se infiere una sola. (CU-033)\n",
+        "x-cu": "CU-033",
+        "x-cobertura": "parcial",
+        "responses": {
+          "200": {
+            "description": "Organizaciones representadas, ordenadas por razón social",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OrganizacionLista"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/NoAutenticado"
+          },
+          "403": {
+            "$ref": "#/components/responses/SinPermiso"
+          }
+        }
+      }
+    },
+    "/organizaciones/{id_cliente}/pasajeros": {
+      "get": {
+        "tags": [
+          "corporativo"
+        ],
+        "summary": "Pasajeros de mi organización",
+        "description": "Solo `representante_corporativo` de esa empresa. Una empresa que no representa responde\n404 `ORGANIZACION_NO_ENCONTRADA`, igual que una inexistente (CU-033 A3). Ordenado por\napellido, nombre e id.\n",
+        "x-cu": "CU-033",
+        "x-cobertura": "parcial",
+        "parameters": [
+          {
+            "name": "id_cliente",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "minimum": 1
+            }
+          },
+          {
+            "name": "limite",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 100,
+              "default": 20
+            }
+          },
+          {
+            "name": "desplazamiento",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "minimum": 0,
+              "default": 0
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Pasajeros asociados a la empresa",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PasajeroOrganizacionLista"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "VALIDACION — parámetros inválidos",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/NoAutenticado"
+          },
+          "403": {
+            "$ref": "#/components/responses/SinPermiso"
+          },
+          "404": {
+            "description": "ORGANIZACION_NO_ENCONTRADA (inexistente o no representada)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "corporativo"
+        ],
+        "summary": "Registrar un pasajero en mi organización",
+        "description": "Solo `representante_corporativo` de esa empresa. Crea la persona, el pasajero y su vínculo\ncon la empresa en una sola transacción. Si ya existe una persona con ese DNI responde 409\n`DNI_DUPLICADO`: reutilizarla no está definido. La categoría no se carga (queda a cargo de\nadministración). (CU-033, flujo principal)\n",
+        "x-cu": "CU-033",
+        "x-cobertura": "parcial",
+        "parameters": [
+          {
+            "name": "id_cliente",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "minimum": 1
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PasajeroOrganizacionCreate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Pasajero registrado y asociado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PasajeroOrganizacion"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "VALIDACION",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/NoAutenticado"
+          },
+          "403": {
+            "$ref": "#/components/responses/SinPermiso"
+          },
+          "404": {
+            "description": "ORGANIZACION_NO_ENCONTRADA (inexistente o no representada)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "DNI_DUPLICADO",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/organizaciones/{id_cliente}/pasajeros/{id_pasajero}": {
+      "patch": {
+        "tags": [
+          "corporativo"
+        ],
+        "summary": "Modificar un pasajero de mi organización",
+        "description": "Solo `representante_corporativo` de esa empresa. Modifica nombre, apellido, email, teléfono\ny dirección; omitir un campo lo deja sin cambios. Un pasajero que no es de la empresa\nresponde 404 `PASAJERO_NO_ENCONTRADO` sin tocar nada (CU-033 A3). Cualquier otro dato, el\nDNI en particular, responde 403 `DATO_NO_MODIFICABLE` y no modifica ninguno: el cambio lo\nhace un administrador (CU-033 A4, RN-026).\n",
+        "x-cu": "CU-033",
+        "x-cobertura": "parcial",
+        "parameters": [
+          {
+            "name": "id_cliente",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "minimum": 1
+            }
+          },
+          {
+            "name": "id_pasajero",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "minimum": 1
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PasajeroOrganizacionUpdate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Pasajero modificado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PasajeroOrganizacion"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "VALIDACION — sin datos o con datos inválidos",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/NoAutenticado"
+          },
+          "403": {
+            "description": "SIN_PERMISO (otro rol) o DATO_NO_MODIFICABLE (dato no habilitado)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "ORGANIZACION_NO_ENCONTRADA o PASAJERO_NO_ENCONTRADO",
             "content": {
               "application/json": {
                 "schema": {
@@ -3456,6 +3732,175 @@
           "id_pasajero": {
             "type": "integer",
             "minimum": 1
+          }
+        }
+      },
+      "OrganizacionRepresentada": {
+        "type": "object",
+        "required": [
+          "id_cliente",
+          "razon_social"
+        ],
+        "properties": {
+          "id_cliente": {
+            "type": "integer"
+          },
+          "razon_social": {
+            "type": "string"
+          },
+          "cargo": {
+            "type": "string"
+          }
+        }
+      },
+      "OrganizacionLista": {
+        "type": "object",
+        "required": [
+          "items",
+          "total"
+        ],
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/OrganizacionRepresentada"
+            }
+          },
+          "total": {
+            "type": "integer"
+          }
+        }
+      },
+      "PasajeroOrganizacion": {
+        "type": "object",
+        "description": "Pasajero de la organización tal como lo ve su representante (sin categoría ni fotografía).",
+        "required": [
+          "id_persona",
+          "nombre",
+          "apellido",
+          "dni",
+          "estado_habilitacion"
+        ],
+        "properties": {
+          "id_persona": {
+            "type": "integer"
+          },
+          "nombre": {
+            "type": "string"
+          },
+          "apellido": {
+            "type": "string"
+          },
+          "dni": {
+            "type": "string"
+          },
+          "email": {
+            "type": "string"
+          },
+          "telefono": {
+            "type": "string"
+          },
+          "direccion": {
+            "type": "string"
+          },
+          "estado_habilitacion": {
+            "type": "string",
+            "enum": [
+              "habilitado",
+              "suspendido",
+              "baja"
+            ]
+          }
+        }
+      },
+      "PasajeroOrganizacionLista": {
+        "type": "object",
+        "required": [
+          "items",
+          "total"
+        ],
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PasajeroOrganizacion"
+            }
+          },
+          "total": {
+            "type": "integer",
+            "description": "Cantidad de pasajeros de la empresa sin paginar."
+          }
+        }
+      },
+      "PasajeroOrganizacionCreate": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "nombre",
+          "apellido",
+          "dni"
+        ],
+        "properties": {
+          "nombre": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 80
+          },
+          "apellido": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 80
+          },
+          "dni": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 20
+          },
+          "email": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 120
+          },
+          "telefono": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 30
+          },
+          "direccion": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 200
+          }
+        }
+      },
+      "PasajeroOrganizacionUpdate": {
+        "type": "object",
+        "description": "Omitir un campo lo deja sin cambios; null no está admitido. Un campo que no figura acá (el DNI,\npor ejemplo) se acepta en el cuerpo pero se rechaza con 403 DATO_NO_MODIFICABLE.\n",
+        "properties": {
+          "nombre": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 80
+          },
+          "apellido": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 80
+          },
+          "email": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 120
+          },
+          "telefono": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 30
+          },
+          "direccion": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 200
           }
         }
       },

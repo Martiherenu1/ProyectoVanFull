@@ -342,6 +342,342 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
 
+  # ---------------------------------------------------------------------------
+  # CLIENTES CORPORATIVOS (administración, CU-023)
+  # ---------------------------------------------------------------------------
+  /clientes-corporativos:
+    get:
+      tags: [administracion]
+      summary: Localizar clientes corporativos
+      description: |
+        Solo administrador y dueno. Lista paginada de empresas, con búsqueda opcional por razón
+        social o CUIT (`q`, sin distinguir mayúsculas). (CU-023, RF-034)
+      x-cu: CU-023
+      x-cobertura: parcial
+      parameters:
+        - name: q
+          in: query
+          required: false
+          schema: { type: string, maxLength: 100 }
+        - name: limite
+          in: query
+          required: false
+          schema: { type: integer, minimum: 1, maximum: 100, default: 20 }
+        - name: desplazamiento
+          in: query
+          required: false
+          schema: { type: integer, minimum: 0, default: 0 }
+      responses:
+        '200':
+          description: Empresas que coinciden, con el total sin paginar
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ClienteCorporativoLista'
+        '400':
+          description: VALIDACION — parámetros inválidos
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          $ref: '#/components/responses/NoAutenticado'
+        '403':
+          $ref: '#/components/responses/SinPermiso'
+    post:
+      tags: [administracion]
+      summary: Registrar un cliente corporativo
+      description: |
+        Solo administrador y dueno. Crea el cliente (persona jurídica) y su condición de
+        corporativo, en estado `activo`. Las condiciones comerciales no se registran acá: no hay
+        un catálogo cerrado de acuerdos (RN-014). (CU-023, RF-034)
+      x-cu: CU-023
+      x-cobertura: parcial
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ClienteCorporativoCreate'
+      responses:
+        '201':
+          description: Cliente corporativo registrado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ClienteCorporativo'
+        '400':
+          description: VALIDACION — datos inválidos o faltantes
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          $ref: '#/components/responses/NoAutenticado'
+        '403':
+          $ref: '#/components/responses/SinPermiso'
+        '409':
+          description: CUIT_DUPLICADO
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /clientes-corporativos/{id_cliente}:
+    parameters:
+      - name: id_cliente
+        in: path
+        required: true
+        schema: { type: integer, minimum: 1 }
+    get:
+      tags: [administracion]
+      summary: Consultar un cliente corporativo
+      description: Solo administrador y dueno. Datos de la empresa, sus contactos y sus pasajeros asociados. (CU-023 A1)
+      x-cu: CU-023
+      x-cobertura: parcial
+      responses:
+        '200':
+          description: Cliente corporativo con contactos y pasajeros
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ClienteCorporativoDetalle'
+        '400':
+          description: VALIDACION — identificador inválido
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          $ref: '#/components/responses/NoAutenticado'
+        '403':
+          $ref: '#/components/responses/SinPermiso'
+        '404':
+          description: CLIENTE_CORPORATIVO_NO_ENCONTRADO
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+    patch:
+      tags: [administracion]
+      summary: Modificar un cliente corporativo
+      description: |
+        Solo administrador y dueno. Cambia razón social, CUIT o dirección, todo o nada. El estado
+        no se cambia: no tiene catálogo aprobado. (CU-023 A1)
+      x-cu: CU-023
+      x-cobertura: parcial
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ClienteCorporativoUpdate'
+      responses:
+        '200':
+          description: Cliente corporativo actualizado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ClienteCorporativo'
+        '400':
+          description: VALIDACION — cuerpo vacío, campo desconocido o dato inválido
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          $ref: '#/components/responses/NoAutenticado'
+        '403':
+          $ref: '#/components/responses/SinPermiso'
+        '404':
+          description: CLIENTE_CORPORATIVO_NO_ENCONTRADO
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '409':
+          description: CUIT_DUPLICADO
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /clientes-corporativos/{id_cliente}/contactos:
+    post:
+      tags: [administracion]
+      summary: Registrar un contacto de la empresa
+      description: |
+        Solo administrador y dueno. El contacto es una persona que ya existe (`id_persona`) o una
+        nueva (nombre, apellido y DNI obligatorios). Un DNI ya registrado responde DNI_DUPLICADO:
+        esa persona se indica por su id_persona. `es_representante` solo marca el dato, no da
+        cuenta ni rol (CU-033). (CU-023, paso 3)
+      x-cu: CU-023
+      x-cobertura: parcial
+      parameters:
+        - name: id_cliente
+          in: path
+          required: true
+          schema: { type: integer, minimum: 1 }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ContactoCorporativoCreate'
+      responses:
+        '201':
+          description: Contacto registrado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ContactoCorporativo'
+        '400':
+          description: VALIDACION — se mezclan id_persona y datos, o faltan datos de la persona nueva
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          $ref: '#/components/responses/NoAutenticado'
+        '403':
+          $ref: '#/components/responses/SinPermiso'
+        '404':
+          description: CLIENTE_CORPORATIVO_NO_ENCONTRADO o PERSONA_NO_ENCONTRADA
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '409':
+          description: DNI_DUPLICADO o CONTACTO_YA_REGISTRADO
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /clientes-corporativos/{id_cliente}/contactos/{id_persona}:
+    delete:
+      tags: [administracion]
+      summary: Quitar un contacto de la empresa
+      description: Solo administrador y dueno. La persona sigue existiendo. (CU-023 A1)
+      x-cu: CU-023
+      x-cobertura: parcial
+      parameters:
+        - name: id_cliente
+          in: path
+          required: true
+          schema: { type: integer, minimum: 1 }
+        - name: id_persona
+          in: path
+          required: true
+          schema: { type: integer, minimum: 1 }
+      responses:
+        '204':
+          description: Contacto quitado
+        '400':
+          description: VALIDACION — identificador inválido
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          $ref: '#/components/responses/NoAutenticado'
+        '403':
+          $ref: '#/components/responses/SinPermiso'
+        '404':
+          description: CLIENTE_CORPORATIVO_NO_ENCONTRADO o CONTACTO_NO_ENCONTRADO
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /clientes-corporativos/{id_cliente}/pasajeros:
+    post:
+      tags: [administracion]
+      summary: Asociar un pasajero a la empresa
+      description: |
+        Solo administrador y dueno. Asocia un pasajero existente; el vínculo queda `activo`.
+        Un pasajero puede estar asociado a más de una empresa. (CU-023 A2)
+      x-cu: CU-023
+      x-cobertura: parcial
+      parameters:
+        - name: id_cliente
+          in: path
+          required: true
+          schema: { type: integer, minimum: 1 }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PasajeroCorporativoCreate'
+      responses:
+        '201':
+          description: Pasajero asociado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PasajeroCorporativo'
+        '400':
+          description: VALIDACION
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          $ref: '#/components/responses/NoAutenticado'
+        '403':
+          $ref: '#/components/responses/SinPermiso'
+        '404':
+          description: CLIENTE_CORPORATIVO_NO_ENCONTRADO o PASAJERO_NO_ENCONTRADO
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '409':
+          description: PASAJERO_YA_ASOCIADO
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /clientes-corporativos/{id_cliente}/pasajeros/{id_pasajero}:
+    delete:
+      tags: [administracion]
+      summary: Desasociar un pasajero de la empresa
+      description: |
+        Solo administrador y dueno. Borra el vínculo (`estado_vinculo` no tiene catálogo de
+        estados); el pasajero sigue existiendo con sus reservas y pagos. (CU-023 A2)
+      x-cu: CU-023
+      x-cobertura: parcial
+      parameters:
+        - name: id_cliente
+          in: path
+          required: true
+          schema: { type: integer, minimum: 1 }
+        - name: id_pasajero
+          in: path
+          required: true
+          schema: { type: integer, minimum: 1 }
+      responses:
+        '204':
+          description: Pasajero desasociado
+        '400':
+          description: VALIDACION — identificador inválido
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          $ref: '#/components/responses/NoAutenticado'
+        '403':
+          $ref: '#/components/responses/SinPermiso'
+        '404':
+          description: CLIENTE_CORPORATIVO_NO_ENCONTRADO o VINCULO_NO_ENCONTRADO
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
   /clientes/{id_cliente}/deuda:
     get:
       tags: [administracion]
@@ -1823,6 +2159,104 @@ components:
         telefono: { type: string, minLength: 1, maxLength: 30 }
         direccion: { type: string, minLength: 1, maxLength: 200 }
         categoria: { type: string, minLength: 1, maxLength: 30 }
+
+    ClienteCorporativo:
+      type: object
+      required: [id_cliente, razon_social, cuit, estado]
+      properties:
+        id_cliente: { type: integer }
+        razon_social: { type: string }
+        cuit: { type: string }
+        direccion: { type: string }
+        estado: { type: string, description: Solo existe `activo`; sin catálogo aprobado. }
+
+    ClienteCorporativoLista:
+      type: object
+      required: [items, total]
+      properties:
+        items:
+          type: array
+          items: { $ref: '#/components/schemas/ClienteCorporativo' }
+        total: { type: integer, description: Cantidad de coincidencias sin paginar. }
+
+    ClienteCorporativoDetalle:
+      allOf:
+        - $ref: '#/components/schemas/ClienteCorporativo'
+        - type: object
+          required: [contactos, pasajeros]
+          properties:
+            contactos:
+              type: array
+              items: { $ref: '#/components/schemas/ContactoCorporativo' }
+            pasajeros:
+              type: array
+              items: { $ref: '#/components/schemas/PasajeroCorporativo' }
+
+    ClienteCorporativoCreate:
+      type: object
+      additionalProperties: false
+      required: [razon_social, cuit]
+      properties:
+        razon_social: { type: string, minLength: 1, maxLength: 150 }
+        cuit: { type: string, minLength: 1, maxLength: 20, description: Formato no definido. }
+        direccion: { type: string, minLength: 1, maxLength: 200 }
+
+    ClienteCorporativoUpdate:
+      type: object
+      additionalProperties: false
+      minProperties: 1
+      description: Omitir un campo lo deja sin cambios; null no está admitido.
+      properties:
+        razon_social: { type: string, minLength: 1, maxLength: 150 }
+        cuit: { type: string, minLength: 1, maxLength: 20 }
+        direccion: { type: string, minLength: 1, maxLength: 200 }
+
+    ContactoCorporativo:
+      type: object
+      required: [id_persona, nombre, apellido, dni, es_representante]
+      properties:
+        id_persona: { type: integer }
+        nombre: { type: string }
+        apellido: { type: string }
+        dni: { type: string }
+        email: { type: string }
+        telefono: { type: string }
+        cargo: { type: string }
+        es_representante: { type: boolean }
+
+    ContactoCorporativoCreate:
+      type: object
+      additionalProperties: false
+      description: |
+        Una persona existente (`id_persona`, sin datos de persona) o una nueva (nombre, apellido y
+        dni obligatorios, sin `id_persona`).
+      properties:
+        id_persona: { type: integer, minimum: 1 }
+        nombre: { type: string, minLength: 1, maxLength: 80 }
+        apellido: { type: string, minLength: 1, maxLength: 80 }
+        dni: { type: string, minLength: 1, maxLength: 20 }
+        email: { type: string, minLength: 1, maxLength: 120 }
+        telefono: { type: string, minLength: 1, maxLength: 30 }
+        cargo: { type: string, minLength: 1, maxLength: 80 }
+        es_representante: { type: boolean, default: false }
+
+    PasajeroCorporativo:
+      type: object
+      required: [id_persona, nombre, apellido, dni, estado_habilitacion, estado_vinculo]
+      properties:
+        id_persona: { type: integer }
+        nombre: { type: string }
+        apellido: { type: string }
+        dni: { type: string }
+        estado_habilitacion: { type: string, enum: [habilitado, suspendido, baja] }
+        estado_vinculo: { type: string, description: Solo existe `activo`; sin catálogo aprobado. }
+
+    PasajeroCorporativoCreate:
+      type: object
+      additionalProperties: false
+      required: [id_pasajero]
+      properties:
+        id_pasajero: { type: integer, minimum: 1 }
 
     Deuda:
       type: object

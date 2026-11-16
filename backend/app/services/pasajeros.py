@@ -34,7 +34,7 @@ def _armar(persona: Persona, pasajero: Pasajero) -> PasajeroAdmin:
     )
 
 
-def _dni_duplicado(dni: str) -> ApiError:
+def error_dni_duplicado(dni: str) -> ApiError:
     return ApiError(
         409,
         "DNI_DUPLICADO",
@@ -67,14 +67,14 @@ async def _cargar(
     return persona, pasajero
 
 
-async def _dni_en_uso(db: AsyncSession, dni: str, *, salvo: int | None = None) -> bool:
+async def dni_en_uso(db: AsyncSession, dni: str, *, salvo: int | None = None) -> bool:
     consulta = select(Persona.id_persona).where(Persona.dni == dni)
     if salvo is not None:
         consulta = consulta.where(Persona.id_persona != salvo)
     return (await db.execute(consulta)).first() is not None
 
 
-def _patron(texto: str) -> str:
+def patron_busqueda(texto: str) -> str:
     """Texto de búsqueda como patrón ILIKE, sin que `%` ni `_` del usuario funcionen de comodín."""
     escapado = texto.replace("\\", "\\\\").replace("%", "\\%").replace("_", "\\_")
     return f"%{escapado}%"
@@ -86,7 +86,7 @@ async def listar_pasajeros(
     """Localiza pasajeros por DNI, nombre o apellido (flujo principal, paso 2)."""
     filtros = []
     if q and q.strip():
-        patron = _patron(q.strip())
+        patron = patron_busqueda(q.strip())
         filtros.append(
             or_(
                 Persona.dni.ilike(patron, escape="\\"),
@@ -125,8 +125,8 @@ async def crear_pasajero(db: AsyncSession, datos: PasajeroCreate) -> PasajeroAdm
     Si ya hay una persona con ese DNI (por ejemplo, un chofer) responde 409: reutilizar a la persona
     no está definido y no se infiere. El estado inicial es el de la base: `habilitado`.
     """
-    if await _dni_en_uso(db, datos.dni):
-        raise _dni_duplicado(datos.dni)
+    if await dni_en_uso(db, datos.dni):
+        raise error_dni_duplicado(datos.dni)
 
     persona = Persona(**datos.model_dump(include=set(_CAMPOS_PERSONA)))
     db.add(persona)
@@ -135,7 +135,7 @@ async def crear_pasajero(db: AsyncSession, datos: PasajeroCreate) -> PasajeroAdm
     except IntegrityError:
         # Otro alta con el mismo DNI ganó la carrera entre la consulta y el INSERT.
         await db.rollback()
-        raise _dni_duplicado(datos.dni) from None
+        raise error_dni_duplicado(datos.dni) from None
     pasajero = Pasajero(id_persona=persona.id_persona, categoria=datos.categoria)
     db.add(pasajero)
     await db.commit()
@@ -157,9 +157,9 @@ async def modificar_pasajero(
     if (
         nuevo_dni is not None
         and nuevo_dni != persona.dni
-        and await _dni_en_uso(db, nuevo_dni, salvo=id_persona)
+        and await dni_en_uso(db, nuevo_dni, salvo=id_persona)
     ):
-        raise _dni_duplicado(nuevo_dni)
+        raise error_dni_duplicado(nuevo_dni)
 
     for campo, valor in cambios.items():
         setattr(pasajero if campo == "categoria" else persona, campo, valor)
@@ -168,7 +168,7 @@ async def modificar_pasajero(
     except IntegrityError:
         await db.rollback()
         # Solo el DNI es único entre los datos que se pueden cambiar.
-        raise _dni_duplicado(nuevo_dni or "") from None
+        raise error_dni_duplicado(nuevo_dni or "") from None
     return _armar(persona, pasajero)
 
 

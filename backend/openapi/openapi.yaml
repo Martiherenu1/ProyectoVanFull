@@ -138,6 +138,210 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
 
+  /pasajeros:
+    get:
+      tags: [administracion]
+      summary: Localizar pasajeros
+      description: |
+        Solo administrador y dueno. Lista paginada de pasajeros, con búsqueda opcional por DNI,
+        nombre o apellido (`q`, sin distinguir mayúsculas). (CU-013, RF-002/042)
+      x-cu: CU-013
+      x-cobertura: parcial
+      parameters:
+        - name: q
+          in: query
+          required: false
+          schema: { type: string, maxLength: 100 }
+        - name: limite
+          in: query
+          required: false
+          schema: { type: integer, minimum: 1, maximum: 100, default: 20 }
+        - name: desplazamiento
+          in: query
+          required: false
+          schema: { type: integer, minimum: 0, default: 0 }
+      responses:
+        '200':
+          description: Pasajeros que coinciden, con el total sin paginar
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PasajeroLista'
+        '400':
+          description: VALIDACION — parámetros inválidos
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          $ref: '#/components/responses/NoAutenticado'
+        '403':
+          $ref: '#/components/responses/SinPermiso'
+    post:
+      tags: [administracion]
+      summary: Registrar un pasajero
+      description: |
+        Solo administrador y dueno. Crea la persona y el pasajero (estado `habilitado`); no crea
+        cuenta de acceso. Un DNI ya registrado, aunque sea de otra persona (un chofer, por
+        ejemplo), responde DNI_DUPLICADO. (CU-013, RF-002)
+      x-cu: CU-013
+      x-cobertura: parcial
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PasajeroCreate'
+      responses:
+        '201':
+          description: Pasajero registrado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PasajeroAdmin'
+        '400':
+          description: VALIDACION — datos inválidos o faltantes
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          $ref: '#/components/responses/NoAutenticado'
+        '403':
+          $ref: '#/components/responses/SinPermiso'
+        '409':
+          description: DNI_DUPLICADO
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /pasajeros/{id_persona}:
+    parameters:
+      - name: id_persona
+        in: path
+        required: true
+        schema: { type: integer, minimum: 1 }
+    get:
+      tags: [administracion]
+      summary: Consultar un pasajero
+      description: Solo administrador y dueno. (CU-013, RF-042)
+      x-cu: CU-013
+      x-cobertura: parcial
+      responses:
+        '200':
+          description: Datos y estado administrativo del pasajero
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PasajeroAdmin'
+        '400':
+          description: VALIDACION — identificador inválido
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          $ref: '#/components/responses/NoAutenticado'
+        '403':
+          $ref: '#/components/responses/SinPermiso'
+        '404':
+          description: PASAJERO_NO_ENCONTRADO
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+    patch:
+      tags: [administracion]
+      summary: Modificar un pasajero
+      description: |
+        Solo administrador y dueno. Cambia datos personales y categoría, incluido el DNI (A1,
+        RN-026: el pasajero no lo puede cambiar por autoservicio). Todo o nada. No cambia el
+        estado de habilitación: la baja es POST /pasajeros/{id_persona}/baja; la suspensión y la
+        habilitación excepcional (RN-004/005) siguen pendientes. (CU-013, RF-002/042)
+      x-cu: CU-013
+      x-cobertura: parcial
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PasajeroUpdate'
+      responses:
+        '200':
+          description: Pasajero actualizado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PasajeroAdmin'
+        '400':
+          description: VALIDACION — cuerpo vacío, campo desconocido o dato inválido
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          $ref: '#/components/responses/NoAutenticado'
+        '403':
+          $ref: '#/components/responses/SinPermiso'
+        '404':
+          description: PASAJERO_NO_ENCONTRADO
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '409':
+          description: DNI_DUPLICADO
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /pasajeros/{id_persona}/baja:
+    post:
+      tags: [administracion]
+      summary: Dar de baja a un pasajero
+      description: |
+        Solo administrador y dueno. Baja lógica (`estado_habilitacion = baja`): no borra datos.
+        Sin cuerpo: el catálogo de motivos de baja está pendiente. Repetirla responde
+        PASAJERO_YA_DADO_DE_BAJA. (CU-013 A4)
+      x-cu: CU-013
+      x-cobertura: parcial
+      parameters:
+        - name: id_persona
+          in: path
+          required: true
+          schema: { type: integer, minimum: 1 }
+      responses:
+        '200':
+          description: Pasajero dado de baja
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PasajeroAdmin'
+        '400':
+          description: VALIDACION — identificador inválido
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          $ref: '#/components/responses/NoAutenticado'
+        '403':
+          $ref: '#/components/responses/SinPermiso'
+        '404':
+          description: PASAJERO_NO_ENCONTRADO
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '409':
+          description: PASAJERO_YA_DADO_DE_BAJA
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
   /clientes/{id_cliente}/deuda:
     get:
       tags: [administracion]
@@ -1819,6 +2023,57 @@ components:
         email: { type: string }
         telefono: { type: string }
         direccion: { type: string }
+
+    PasajeroAdmin:
+      type: object
+      description: Pasajero tal como lo ve administración (CU-013). Mismos datos que PerfilPasajero.
+      properties:
+        id_persona: { type: integer }
+        nombre: { type: string }
+        apellido: { type: string }
+        dni: { type: string }
+        email: { type: string }
+        telefono: { type: string }
+        direccion: { type: string }
+        categoria: { type: string }
+        estado_habilitacion: { type: string, enum: [habilitado, suspendido, baja] }
+        fotografia: { type: string }
+
+    PasajeroLista:
+      type: object
+      required: [items, total]
+      properties:
+        items:
+          type: array
+          items: { $ref: '#/components/schemas/PasajeroAdmin' }
+        total: { type: integer, description: Cantidad de coincidencias sin paginar. }
+
+    PasajeroCreate:
+      type: object
+      additionalProperties: false
+      required: [nombre, apellido, dni]
+      properties:
+        nombre: { type: string, minLength: 1, maxLength: 80 }
+        apellido: { type: string, minLength: 1, maxLength: 80 }
+        dni: { type: string, minLength: 1, maxLength: 20 }
+        email: { type: string, minLength: 1, maxLength: 120 }
+        telefono: { type: string, minLength: 1, maxLength: 30 }
+        direccion: { type: string, minLength: 1, maxLength: 200 }
+        categoria: { type: string, minLength: 1, maxLength: 30, description: Texto libre; el catálogo está a confirmar. }
+
+    PasajeroUpdate:
+      type: object
+      additionalProperties: false
+      minProperties: 1
+      description: Omitir un campo lo deja sin cambios; null no está admitido.
+      properties:
+        nombre: { type: string, minLength: 1, maxLength: 80 }
+        apellido: { type: string, minLength: 1, maxLength: 80 }
+        dni: { type: string, minLength: 1, maxLength: 20 }
+        email: { type: string, minLength: 1, maxLength: 120 }
+        telefono: { type: string, minLength: 1, maxLength: 30 }
+        direccion: { type: string, minLength: 1, maxLength: 200 }
+        categoria: { type: string, minLength: 1, maxLength: 30 }
 
     Deuda:
       type: object

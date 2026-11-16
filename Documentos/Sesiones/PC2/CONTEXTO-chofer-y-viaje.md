@@ -1,5 +1,12 @@
 # Contexto vivo · Chofer y viaje en curso (Martín)
 
+## Condiciones anteriores al merge #281 — precisiones de Martiniano comunicadas por Martín
+
+- Requieren revisión models/migrations por Martiniano y revisión del diff por Facundo, respaldo actual de Neon con restauración aislada probada y ventana acordada sin uso de la base **antes del merge**. El respaldo/ensayo local previo no acredita Neon. [Procedimiento concreto preparado](../PC3/ENTREGA-MANUAL-CU030-280.md#procedimiento-operativo-concreto--preparado-no-ejecutado-bloquea-el-merge-hasta-acreditarlo), no ejecutado; sin aprobación formal del HEAD.
+- `render.yaml` prevé despliegue de main tras CI; `arrancar.sh` ejecuta `alembic upgrade head`. Merge puede llevar 0002 automáticamente a Neon, sin orden manual posterior. No se ejecutaron migraciones remotas durante este trabajo; no es garantía sobre el efecto futuro del merge. Configuración efectiva del panel/SHA Live no inspeccionados.
+- GitHub informa abierta/no fusionada/mergeable con base `df1ad20`, mientras main remoto es `d15a5d92f593dfc994a2acb236a6878d3b91be29` (#288). Simulación de unión con HEAD `449ba07` sin conflictos; sin merge nuevo ni modificación productiva, sin atribuir CI al árbol simulado.
+- CU-037: coordinación pendiente entre los tres; sin asignación vigente a Martiniano ni otro integrante. Repartos anteriores preservados como propuestas históricas **no aceptadas**; proveedor/plataformas/accesos pendientes. CU-030 continúa parcial respecto de comunicación. Históricos siguientes conservan su corte.
+
 ## Integración main efectivo en #281 — 15/11/2026
 
 - Main remoto avanzó a `df1ad20729b5a5c1eb1d1ac77ef2450ff004a929` (CU-013/#286); `7107233` ya estaba integrado. Se incorpora por merge normal `7792c645fbbb1db0a32ca8747adc00d8aebd3012`, con primer padre `c9c977d`, sin rebase/force-push ni reescritura. Unión automática revisada, sin conflicto textual pendiente; no se inventa una resolución manual.

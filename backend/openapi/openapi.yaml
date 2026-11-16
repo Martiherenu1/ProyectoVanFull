@@ -930,6 +930,66 @@ paths:
                 items:
                   $ref: '#/components/schemas/Reserva'
 
+  /pasajeros/me/comprobantes:
+    get:
+      tags: [pasajero]
+      summary: Consultar comprobantes propios
+      description: |
+        Solo rol pasajero. Comprobantes cuyo origen (pago, contratación o movimiento de cuenta)
+        pertenece al cliente individual del pasajero autenticado, por `id_comprobante` ascendente.
+        Sin cliente individual o sin comprobantes responde una lista vacía (CU-035 A1). Solo
+        consulta: la descarga queda pendiente, porque la spec deja sin definir el formato de los
+        documentos y las reglas fiscales. El representante corporativo (ACT-03) todavía no tiene
+        operación. (CU-035, RF-037, RN-028)
+      x-cu: CU-035
+      x-cobertura: parcial
+      responses:
+        '200':
+          description: Comprobantes propios
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ComprobantePropio'
+        '401':
+          $ref: '#/components/responses/NoAutenticado'
+        '403':
+          $ref: '#/components/responses/SinPermiso'
+
+  /pasajeros/me/comprobantes/{id_comprobante}:
+    get:
+      tags: [pasajero]
+      summary: Consultar un comprobante propio
+      description: |
+        Solo rol pasajero. Un comprobante de otro cliente o inexistente responde el mismo 404
+        `COMPROBANTE_NO_ENCONTRADO`: no se presenta ni se confirma que exista (CU-035 A2, RN-028).
+        (CU-035, RF-037)
+      x-cu: CU-035
+      x-cobertura: parcial
+      parameters:
+        - name: id_comprobante
+          in: path
+          required: true
+          schema: { type: integer, minimum: 1 }
+      responses:
+        '200':
+          description: Comprobante propio
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ComprobantePropio'
+        '401':
+          $ref: '#/components/responses/NoAutenticado'
+        '403':
+          $ref: '#/components/responses/SinPermiso'
+        '404':
+          description: COMPROBANTE_NO_ENCONTRADO — inexistente o de otro cliente
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
   # ---------------------------------------------------------------------------
   # CHOFER (operación asignada)
   # ---------------------------------------------------------------------------
@@ -2706,6 +2766,35 @@ components:
         medio_pago: { type: string }
         estado: { type: string, enum: [PENDIENTE, CONFIRMADO, RECHAZADO] }
         fecha_hora: { type: string, format: date-time }
+
+    ComprobantePropio:
+      type: object
+      description: |
+        Comprobante que emite la empresa (CU-035). La tabla `comprobante` solo guarda el tipo y
+        exactamente un origen (MR-R28): `id_pago` para un RECIBO, `id_contratacion` para una
+        FACTURA, `id_movimiento_cuenta` para una nota. Fecha, importe y medio son los del origen;
+        no hay número, fecha de emisión ni datos fiscales propios del comprobante.
+      required: [id_comprobante, tipo, id_pago, id_contratacion, id_movimiento_cuenta, fecha_hora, importe, medio_pago]
+      properties:
+        id_comprobante: { type: integer }
+        tipo: { type: string, enum: [RECIBO, FACTURA, NOTA_DE_CREDITO, NOTA_DE_DEBITO] }
+        id_pago: { type: integer, nullable: true, description: Origen de un RECIBO. }
+        id_contratacion: { type: integer, nullable: true, description: Origen de una FACTURA. }
+        id_movimiento_cuenta: { type: integer, nullable: true, description: Origen de una nota de crédito o de débito. }
+        fecha_hora:
+          type: string
+          format: date-time
+          nullable: true
+          description: La del pago o la del movimiento. Una FACTURA no tiene, porque la contratación no guarda fecha.
+        importe:
+          type: number
+          format: double
+          nullable: true
+          description: El del pago, el importe acordado de la contratación (puede faltar) o el del movimiento.
+        medio_pago:
+          type: string
+          nullable: true
+          description: Solo en un RECIBO, el medio del pago.
 
     OperacionAsignada:
       type: object

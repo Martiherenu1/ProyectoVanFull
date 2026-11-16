@@ -5,6 +5,52 @@ Cubre el requisito del PC1 **"Comunicación Vista-Controlador: OpenAPI (JSON)"**
 (escrito a mano, previo a la implementación); cuando el backend esté programado, FastAPI expondrá además
 su propio `/openapi.json` generado, que deberá coincidir con este contrato.
 
+## GPS / RNF-008: candidata backend y despliegue pendiente - 2026-11-16
+
+- **Contrato:** la candidata parte de #272, HEAD
+  `54f426373a9a95d7d1c399893980ea9e8cc81f62`. Mantiene
+  `fecha_hora_evaluacion` opcional y no nullable por compatibilidad,
+  una sola evaluacion UTC S sobre el mismo snapshot de posicion y
+  `desactualizada = (S - T > 30 s)`, con `Cache-Control: no-store` en los 200.
+- **Implementacion incluida en esta candidata (#273):** schema, servicio y router
+  emiten S y el header; conserva 29=false, 30=false y 31=true. Verificada localmente
+  con 79 pruebas aprobadas (incluidas cinco contractuales/rutas) sobre esta base
+  mas la candidata. No cambia recepcion GPS, timestamps almacenados, permisos,
+  errores, eta_minutos ni modelo. Publicacion propuesta en rama dependiente de #272;
+  sin integracion hacia main.
+- **Despliegue SIN VERIFICAR:** no se consultaron Neon ni Render; no se verifico
+  el SHA desplegado ni la emision real. Contrato, pruebas locales y CI contractual
+  no acreditan despliegue o funcionamiento en servicios externos.
+
+RNF-008 sigue parcial: #39 y las dos regresiones originales permanecen pendientes.
+No hay implementacion Flutter en este alcance ni acreditacion de continuidad GPS.
+ETA fuera de alcance. YAML/JSON permanecen sin cambios propios.
+
+### Antecedente contractual - 2026-11-12
+
+La nota siguiente describe el corte anterior a esta candidata; su afirmacion sobre
+emision pendiente no describe el codigo local incluido arriba. La revision formal
+citada pertenece al contrato historico, no aprueba esta implementacion.
+
+## GPS / RNF-008: propuesta, implementación y despliegue — 2026-11-12
+
+- **Contrato propuesto:** [PR #272](https://github.com/Martiherenu1/ProyectoVanFull/pull/272)
+  agrega fecha_hora_evaluacion opcional y no nullable, misma evaluación S/snapshot
+  que desactualizada=(S-T >30 s), y respuesta fresca con Cache-Control: no-store.
+- **Implementación pendiente:** el backend actual **NO emite fecha_hora_evaluacion
+  ni Cache-Control: no-store**. Cotejado en app/schemas/gps.py, services/gps.py y
+  routers/gps.py; no se modifican aquí. [Issue #273](https://github.com/Martiherenu1/ProyectoVanFull/issues/273)
+  registra emisión coherente y pruebas backend. No equivale a implementar Flutter
+  ni resolver completamente [#39](https://github.com/Martiherenu1/ProyectoVanFull/issues/39).
+- **Despliegue no verificado:** no se consultaron servicios de VanFull; SHA exacto
+  desplegado en Render pendiente. Un contrato, merge o CI verde no acreditan emisión real.
+
+La revisión formal de Martiniano aprueba el contrato y [29,31] como Vigencia no
+confirmada; la pantalla se revisará cuando exista implementación. RNF-008 parcial.
+Identidad P/contexto, límites temporales y las dos regresiones pendientes se documentan
+en [el análisis de #39](../../Documentos/Sesiones/PC2/ACLARACION-FUNCIONAL-CU009-ISSUE39-v0.2-VALIDADA-ANALISIS.md).
+ETA fuera de alcance. No se amplía YAML/JSON ni se modifica recepción GPS o modelo.
+
 ## Los dos formatos
 
 | Archivo | Para qué |

@@ -49,7 +49,123 @@
 - [Aceptaci?n ?nica, l?mites y propuesta push](../PC3/ENTREGA-MANUAL-CU030-280.md). Contextual para reserva propia consolidada, sin descripci?n interna ni afirmar demora activa. CU-037 sin mecanismo disponible: comunicaci?n pendiente; CU-030 parcial. Aclaraci?n push/destinatarios de Mart?n pendiente VanFull, no aprobaci?n de proveedor.
 - Migraci?n 0002 additive, hist?ricos sin autores inferidos. Contrato aditivo; sin cambios de sesi?n/Checkout ni RNF-008/#39/#273/CU-007. Pruebas/HEAD/CI propios se registran despu?s de observarlos, separados de los hist?ricos siguientes.
 
+## Candidata Flutter RNF-008 / #293 — 16/11/2026
 
+- Continuación autorizada por Martín, rama aislada sobre #292 HEAD
+  `8d22318d7e2f531ff81dafbdd6a30904ca9fdf51`, dependiente de #272.
+- Consume S/no-store y cotas monotónicas, sin hora de pared; presentación diferenciada,
+  actualización visual independiente del GET y conservación de marca para misma P/contexto.
+- Extensión HTTP aditiva para metadatos; get/post/patch y 401 existentes conservados.
+  Revisión compartida pendiente de Facundo/Martiniano, sin decisión técnica atribuida.
+- Casos nuevos deterministas y procedimiento en frontend/technical/rnf008-vigencia.md.
+  Formato/whitespace revisados. Flutter local bloqueado por revisión automática ante
+  acceso inesperado al servicio de metadatos del entorno: no se elude; CI por HEAD
+  pendiente al preparar esta nota. No resultado local de analyze/test atribuido.
+- Las dos regresiones originales y sus históricos quedan intactos y pendientes;
+  [29,31] como incertidumbre es aceptación nueva, no resolución de la aserción antigua.
+- #39 abierto, RNF-008 parcial; ETA fuera de alcance. Sin merge, despliegue o datos.
+
+
+## Publicacion de implementacion backend #273 — 2026-11-16
+
+- Verificacion remota previa: #272 abierta, sin merge, integrable y HEAD
+  `54f426373a9a95d7d1c399893980ea9e8cc81f62`; CI #400 / 43872735324 success.
+  Main sigue en `4198022f7080d83b30715d5509d9f944e8ba1d7b`.
+- Rama de implementacion `feat/chofer-evaluacion-gps-rnf008-273`, basada exactamente
+  en ese HEAD. PR dependiente contra `docs/chofer-contrato-rnf008-39`, no contra
+  main, para revisar solo los siete archivos propios. Integrar primero #272 y
+  luego retargetear y verificar esta entrega contra main; sin merge automatico.
+- Codigo funcional revisado sin bloqueos; resultado local informado por Codex:
+  79 aprobadas, incluidas cinco contractuales/rutas, sin fallos ni omisiones.
+  Ajustes posteriores solo documentales/comentario; no se repite esa suite.
+  Verificacion independiente de revision: cinco contractuales/rutas y Ruff correctos.
+- CI de esta implementacion se registrara por SHA en PR/#273 tras observarla.
+  La CI contractual y aprobaciones previas no se atribuyen a esta implementacion.
+- Sin cambios de Flutter, OpenAPI YAML/JSON, modelo o migraciones. #39 y las dos
+  regresiones originales siguen pendientes; RNF-008 parcial, ETA fuera de alcance.
+  Publicar la rama no acredita despliegue; no se opero sobre Neon/Render.
+
+
+
+## Candidata backend #273 sobre contrato 54f4263 - 2026-11-16
+
+- Base explicita 54f426373a9a95d7d1c399893980ea9e8cc81f62, con main
+  4198022f7080d83b30715d5509d9f944e8ba1d7b como segundo padre verificado.
+- Trasladado solo incremento de implementacion desde candidata local preservada:
+  S UTC unico, mismo T/snapshot, >30 estricto y Cache-Control: no-store en 200.
+- Sin cambios propios de contrato, recepcion GPS, timestamps almacenados, permisos,
+  errores, eta_minutos, modelo, migraciones, Flutter ni CI. Historicos conservados.
+- Verificacion nueva: 79 aprobadas (incluye cinco contrato/rutas), 0 fallidas/omitidas,
+  117.11 s; Ruff/formato/diff correctos. PostgreSQL nuevo en red interna, retirado.
+- Resultados nuevos de esta combinacion y comparacion semantica documentados en
+  revision-rnf008/INFORME.md, artefacto local de revision. 79/5 anteriores separados.
+- CI #400 / 43872735324 del contrato informada por el usuario; no se atribuye a esta
+  candidata. Sin revision anterior atribuida, commit, push, merge ni despliegue.
+- Ajuste posterior a revision: README distingue contrato/candidata/despliegue y
+  conserva antecedentes; alcance propio de siete archivos. Comentario corregido
+  en test_gps_evaluacion.py, sin cambiar AST ni codigo funcional. Sin repetir las
+  79 pruebas por estos ajustes; whitespace y parche completos verificados.
+- #39 y dos regresiones originales pendientes; RNF-008 parcial; ETA fuera de alcance.
+
+## Integración contractual RNF-008 / #272 — 16/11/2026
+
+- Main `4198022f7080d83b30715d5509d9f944e8ba1d7b` incorporado en la rama contractual por merge normal; se conservan CU-005/013/023/033 y los contextos de main. Conflicto solo en contexto general, resuelto preservando antecedentes y la actualización parcial del cuerpo general del 15/11.
+- YAML/JSON conservan exclusivamente la adición GPS propuesta. Sin código productivo, modelo, migraciones, Flutter o recepción GPS propios nuevos. Emisión backend/header y pantalla siguen pendientes; #39/#273 abiertos, RNF-008 parcial y ETA fuera de alcance.
+- Verificación local de integración: 5 pruebas de contrato/rutas aprobadas (2,29 s), YAML/JSON válidos y equivalentes, solo tres diferencias semánticas GPS respecto de main, Ruff correcto, 131 archivos con formato correcto y diff --check limpio. Sin bases ni servicios VanFull; no es suite completa ni CI del nuevo HEAD.
+- Aprobación de Martiniano e historial de CI del HEAD anterior conservados; no se atribuyen anticipadamente al HEAD de integración. Validación y CI de esta combinación se informan por separado en #272. Sin merge hacia main, despliegue ni operaciones sobre bases.
+
+## RNF-008 / #272: revisión formal y ajustes documentales — 2026-11-12
+
+- Martiniano: APPROVED del contrato y [29,31] como Vigencia no confirmada, con tres
+  observaciones no bloqueantes; revisará pantalla cuando exista implementación.
+  [Fuente formal](https://github.com/Martiherenu1/ProyectoVanFull/pull/272#pullrequestreview-5868409821).
+  No aprobación más amplia ni aprobación formal de Facundo atribuida.
+- [#273](https://github.com/Martiherenu1/ProyectoVanFull/issues/273): emisión coherente
+  de fecha_hora_evaluacion/no-store y pruebas backend pendientes; README deja explícito
+  que hoy NO se emiten. #39 abierto, RNF-008 parcial; ETA fuera de alcance.
+- Texto vigente del caso antes dentro de ventana: Sin marca de desactualización en la
+  última consulta; no certifica captura reciente. Reevaluación durante GET pendiente
+  y desactualización acreditada prevalecen. Otros tres estados intactos.
+- Main incorporado por merge: 71739f49b1427aa3523e46011e6085fa9cbe4c91 (solo CLAUDE).
+  Contexto general resumido con banners íntegros en anexo. CU-007 conservado.
+- Solo documentación; contrato/pruebas/producción intactos. No se repiten suites locales
+  por estos cambios; whitespace, coherencia, enlaces y preservación comprobados.
+  CI del HEAD final se registrará en #272/#39, separada de 5 contractuales y dos
+  regresiones pendientes de diagnóstico. Históricos y APK intactos; sin merge remoto.
+
+## Publicación contractual RNF-008 / #39 — 2026-11-11
+
+- [PR #272](https://github.com/Martiherenu1/ProyectoVanFull/pull/272) abierta hacia main,
+  sin merge; [registro en #39](https://github.com/Martiherenu1/ProyectoVanFull/issues/39#issuecomment-6809996842).
+- Base revalidada sin avance c9ac094299a93a52cae6245ea0093aaf964196a2; no merge local
+  necesario. Commits iniciales: contrato 6ca26c1 y análisis/contextos b22aa2f.
+  Este registro posterior completa la publicación en la misma rama, cinco archivos.
+- Revisión solicitada efectivamente a Martiherenu1 y facubarrientos; no aprobación
+  formal atribuida. Conformidades informadas y condiciones anteriores conservadas.
+- CI del HEAD final se registra en PR/#39 después de observarla; no se infiere de
+  las 5 pruebas contractuales locales. No se repitieron verificaciones locales porque
+  contrato y base no cambiaron. Dos regresiones originales y sus históricos intactos.
+- Sin implementación productiva, modelo, Flutter ni CI modificados; RNF-008 parcial,
+  ETA fuera de alcance, #39 abierto. Sin despliegue u operaciones reales.
+  Las notas de preparación siguientes son históricas.
+
+## RNF-008 / #39: rama contractual local — 2026-11-11
+
+- Rama docs/chofer-contrato-rnf008-39, worktree F:/dev/vf-rnf008-contrato,
+  base c9ac094299a93a52cae6245ea0093aaf964196a2. Candidato opcional
+  fecha_hora_evaluacion y respuesta fresca/no-store aplicados solo a YAML/JSON.
+- [Análisis y matriz de aceptación](ACLARACION-FUNCIONAL-CU009-ISSUE39-v0.2-VALIDADA-ANALISIS.md):
+  identidad P/contexto, clasificación y compatibilidad son propuestas; no implementación.
+- Conformidades informadas de Martiniano/Facundo con condiciones; no merge autorizado,
+  aprobación conjunta ni cumplimiento completo. #39 abierto; ETA fuera de alcance.
+- Regresiones originales, resultados 130/2 y revisión fa59928 (7 backend; 2 Flutter
+  aprobadas/2 fallidas) preservados en sus worktrees, sin traslado de tests/variante.
+  APK 8217c9c intacta; contrato nuevo no implica backend desplegado ni fallo resuelto.
+- Validación nueva: 5 controles existentes de contrato/rutas aprobados (4,82 s),
+  OpenAPI YAML/JSON válidos y equivalentes; JSON regenerado desde YAML.
+  Ruff y formato (119 archivos) correctos, diff --check limpio. Sin red/base.
+  No suite completa, Flutter, CI remota ni resolución de regresiones.
+  Sin commit ni publicación.
 ## Publicación documental CU-007 efectiva — 10/11/2026
 
 - Martín autorizó publicación tras revisar el diff. [Issue #267](https://github.com/Martiherenu1/ProyectoVanFull/issues/267) específico y [PR #268](https://github.com/Martiherenu1/ProyectoVanFull/pull/268) abierta hacia main, sin merge; único cierre automático #267, sin cerrar CU-007 ni sus preguntas funcionales.

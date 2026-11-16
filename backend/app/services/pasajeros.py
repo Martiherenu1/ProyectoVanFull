@@ -19,7 +19,7 @@ from app.schemas.pasajeros import PasajeroAdmin, PasajeroCreate, PasajeroLista, 
 _CAMPOS_PERSONA = ("nombre", "apellido", "dni", "email", "telefono", "direccion")
 
 
-def _armar(persona: Persona, pasajero: Pasajero) -> PasajeroAdmin:
+def armar_pasajero(persona: Persona, pasajero: Pasajero) -> PasajeroAdmin:
     return PasajeroAdmin(
         id_persona=persona.id_persona,
         nombre=persona.nombre,
@@ -43,7 +43,7 @@ def error_dni_duplicado(dni: str) -> ApiError:
     )
 
 
-async def _cargar(
+async def cargar_pasajero(
     db: AsyncSession, id_persona: int, *, bloquear: bool = False
 ) -> tuple[Persona, Pasajero]:
     """El pasajero y su persona. Con `bloquear`, toma el lock del pasajero primero (CONVENCIONES §8)."""
@@ -110,17 +110,17 @@ async def listar_pasajeros(
         )
     ).all()
     return PasajeroLista(
-        items=[_armar(persona, pasajero) for persona, pasajero in filas], total=total or 0
+        items=[armar_pasajero(persona, pasajero) for persona, pasajero in filas], total=total or 0
     )
 
 
 async def obtener_pasajero(db: AsyncSession, id_persona: int) -> PasajeroAdmin:
-    persona, pasajero = await _cargar(db, id_persona)
-    return _armar(persona, pasajero)
+    persona, pasajero = await cargar_pasajero(db, id_persona)
+    return armar_pasajero(persona, pasajero)
 
 
-async def crear_pasajero(db: AsyncSession, datos: PasajeroCreate) -> PasajeroAdmin:
-    """Registra la persona y el pasajero en una sola transacción.
+async def insertar_pasajero(db: AsyncSession, datos: PasajeroCreate) -> tuple[Persona, Pasajero]:
+    """Agrega la persona y el pasajero a la transacción, sin confirmarla (la confirma quien llama).
 
     Si ya hay una persona con ese DNI (por ejemplo, un chofer) responde 409: reutilizar a la persona
     no está definido y no se infiere. El estado inicial es el de la base: `habilitado`.
@@ -138,9 +138,15 @@ async def crear_pasajero(db: AsyncSession, datos: PasajeroCreate) -> PasajeroAdm
         raise error_dni_duplicado(datos.dni) from None
     pasajero = Pasajero(id_persona=persona.id_persona, categoria=datos.categoria)
     db.add(pasajero)
+    return persona, pasajero
+
+
+async def crear_pasajero(db: AsyncSession, datos: PasajeroCreate) -> PasajeroAdmin:
+    """Registra la persona y el pasajero en una sola transacción (CU-013, flujo principal)."""
+    persona, pasajero = await insertar_pasajero(db, datos)
     await db.commit()
     await db.refresh(pasajero)
-    return _armar(persona, pasajero)
+    return armar_pasajero(persona, pasajero)
 
 
 async def modificar_pasajero(
@@ -151,7 +157,7 @@ async def modificar_pasajero(
     if not cambios:
         raise ApiError(400, "VALIDACION", "No se indicó ningún dato para modificar.")
 
-    persona, pasajero = await _cargar(db, id_persona, bloquear=True)
+    persona, pasajero = await cargar_pasajero(db, id_persona, bloquear=True)
 
     nuevo_dni = cambios.get("dni")
     if (
@@ -169,7 +175,7 @@ async def modificar_pasajero(
         await db.rollback()
         # Solo el DNI es único entre los datos que se pueden cambiar.
         raise error_dni_duplicado(nuevo_dni or "") from None
-    return _armar(persona, pasajero)
+    return armar_pasajero(persona, pasajero)
 
 
 async def dar_de_baja(db: AsyncSession, id_persona: int) -> PasajeroAdmin:
@@ -178,11 +184,11 @@ async def dar_de_baja(db: AsyncSession, id_persona: int) -> PasajeroAdmin:
     PENDIENTE: no hay catálogo de motivos de baja, así que no se guarda ninguno; y tampoco está
     definido qué pasa con las reservas futuras de quien se da de baja.
     """
-    persona, pasajero = await _cargar(db, id_persona, bloquear=True)
+    persona, pasajero = await cargar_pasajero(db, id_persona, bloquear=True)
     if pasajero.estado_habilitacion == "baja":
         raise ApiError(
             409, "PASAJERO_YA_DADO_DE_BAJA", "El pasajero ya fue dado de baja anteriormente."
         )
     pasajero.estado_habilitacion = "baja"
     await db.commit()
-    return _armar(persona, pasajero)
+    return armar_pasajero(persona, pasajero)

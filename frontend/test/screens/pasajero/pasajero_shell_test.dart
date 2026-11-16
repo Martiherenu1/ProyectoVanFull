@@ -11,6 +11,16 @@ class ServidorFalso implements ApiClient {
   final pagos = <Object?>[];
   final cambiosDeParada = <Object?>[];
   int pedidosDeReservas = 0;
+  final comprobante = <String, dynamic>{
+    'id_comprobante': 9,
+    'tipo': 'RECIBO',
+    'id_pago': 5,
+    'id_contratacion': null,
+    'id_movimiento_cuenta': null,
+    'fecha_hora': '2026-10-24T18:05:00',
+    'importe': 11600,
+    'medio_pago': 'TRANSFERENCIA',
+  };
   final perfil = <String, dynamic>{
     'id_persona': 7,
     'nombre': 'Ana',
@@ -61,6 +71,10 @@ class ServidorFalso implements ApiClient {
         return {'saldo': 11600, 'estado': 'con_deuda'};
       case 'pasajeros/me':
         return perfil;
+      case 'pasajeros/me/comprobantes':
+        return [comprobante];
+      case 'pasajeros/me/comprobantes/9':
+        return comprobante;
     }
     throw StateError('GET inesperado: $path');
   }
@@ -306,5 +320,49 @@ void main() {
 
     expect(pedidos, [12]);
     expect(find.text('pantalla de ubicación'), findsOneWidget);
+  });
+
+  testWidgets('desde Cuenta se abre Mis comprobantes y el detalle de uno', (
+    tester,
+  ) async {
+    final servidor = ServidorFalso();
+    await tester.pumpWidget(
+      MaterialApp(
+        home: PasajeroShell(api: PasajeroApi(servidor), onSalir: () {}),
+      ),
+    );
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Cuenta'));
+    await tester.pumpAndSettle();
+
+    await tester.ensureVisible(find.byKey(const ValueKey('ver-comprobantes')));
+    await tester.pump();
+    await tester.tap(find.byKey(const ValueKey('ver-comprobantes')));
+    await tester.pumpAndSettle();
+    expect(find.text('Mis comprobantes'), findsWidgets);
+    expect(find.text('24/10/2026 18:05 · Transferencia'), findsOneWidget);
+
+    await tester.tap(find.byKey(const ValueKey('comprobante-9')));
+    await tester.pumpAndSettle();
+    expect(
+      tester
+          .widget<Text>(find.byKey(const ValueKey('importe-comprobante')))
+          .data,
+      r'$ 11.600,00',
+    );
+    expect(
+      tester
+          .widget<Text>(find.byKey(const ValueKey('origen-comprobante')))
+          .data,
+      'Pago N.º 5',
+    );
+
+    // Atrás lleva a la lista y atrás de nuevo a Cuenta.
+    await tester.pageBack();
+    await tester.pumpAndSettle();
+    expect(find.byKey(const ValueKey('comprobante-9')), findsOneWidget);
+    await tester.pageBack();
+    await tester.pumpAndSettle();
+    expect(find.byKey(const ValueKey('ver-comprobantes')), findsOneWidget);
   });
 }

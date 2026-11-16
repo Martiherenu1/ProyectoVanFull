@@ -22,11 +22,15 @@ class PerfilScreen extends StatefulWidget {
     required this.cargarPerfil,
     required this.modificarPerfil,
     required this.onSalir,
+    this.onVerComprobantes,
   });
 
   final CargarPerfil cargarPerfil;
   final ModificarPerfil modificarPerfil;
   final VoidCallback onSalir;
+
+  /// Abre Mis comprobantes (CU-035). Sin él no hay botón.
+  final VoidCallback? onVerComprobantes;
 
   @override
   State<PerfilScreen> createState() => _PerfilScreenState();
@@ -234,6 +238,18 @@ class _PerfilScreenState extends State<PerfilScreen> {
           ),
           child: Text(_guardando ? 'Guardando…' : 'Guardar cambios'),
         ),
+        if (widget.onVerComprobantes != null) ...[
+          const SizedBox(height: AppSpacing.xl),
+          SizedBox(
+            height: AppSpacing.touchTarget,
+            width: double.infinity,
+            child: OutlinedButton(
+              key: const ValueKey('ver-comprobantes'),
+              onPressed: widget.onVerComprobantes,
+              child: const Text('Mis comprobantes'),
+            ),
+          ),
+        ],
         const SizedBox(height: AppSpacing.xl),
         _botonSalir(),
       ],

@@ -1,6 +1,8 @@
 # CONTEXTO VANFULL — Carga rápida de sesión
 
-> **Pasajero — 16/11/2026:** CU-035 recortado (comprobantes propios del pasajero, solo consulta, [Issue #295](https://github.com/Martiherenu1/ProyectoVanFull/issues/295)), asignado por Facundo; descarga y representante corporativo pendientes. Revisión de modelo/migración de #281 hecha sobre `6656794` (917 pruebas backend, conforme en lo técnico, no aprobada: falta backup de Neon, restauración y ventana). La API de Render no sirve `main` `6f111c1` (sin `fecha_hora_evaluacion`): hay que mirar Events y desplegar; no migra. Detalle: PC2/CONTEXTO-pasajero-y-base-comun.md.
+> **Pasajero — 16/11/2026 (tarde):** pantalla «Mis comprobantes» de CU-035 (lista y detalle, acceso desde Cuenta, [Issue #297](https://github.com/Martiherenu1/ProyectoVanFull/issues/297)). Render ya sirve `main` con `fecha_hora_evaluacion` y los comprobantes (verificado en el `openapi.json` público): se cierra la fila «Render no sirve main». Descarga y representante corporativo siguen pendientes.
+>
+> **Pasajero — 16/11/2026 (mañana):** CU-035 recortado (comprobantes propios del pasajero, solo consulta, [Issue #295](https://github.com/Martiherenu1/ProyectoVanFull/issues/295)), asignado por Facundo; descarga y representante corporativo pendientes. Revisión de modelo/migración de #281 hecha sobre `6656794` (917 pruebas backend, conforme en lo técnico, no aprobada: falta backup de Neon, restauración y ventana). La API de Render no sirve `main` `6f111c1` (sin `fecha_hora_evaluacion`): hay que mirar Events y desplegar; no migra. Detalle: PC2/CONTEXTO-pasajero-y-base-comun.md.
 
 ## Continuación Flutter RNF-008 / #293 — 16/11/2026
 

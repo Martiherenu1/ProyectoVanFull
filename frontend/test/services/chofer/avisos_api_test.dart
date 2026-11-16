@@ -31,17 +31,14 @@ void main() {
       ),
     );
     expect(await api.registrar(7, clave, 'problema', 'interno'), 10);
-    expect(await api.recuperar(7, clave.toUpperCase()), 10);
+    expect(await api.recuperar(7, '  ${clave.toUpperCase()}  '), 10);
     expect(requests.first.headers['Authorization'], 'Bearer sintetico');
     expect(jsonDecode(requests.first.body), {
       'clase': 'problema',
       'descripcion_interna': 'interno',
       'clave_solicitud': clave,
     });
-    expect(
-      requests.last.url.queryParameters['clave_solicitud'],
-      clave.toUpperCase(),
-    );
+    expect(requests.last.url.queryParameters['clave_solicitud'], clave);
     transport.close();
   });
   for (final status in [400, 401, 403, 404, 409, 500]) {

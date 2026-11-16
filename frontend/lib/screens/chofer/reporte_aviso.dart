@@ -14,9 +14,11 @@ typedef RecuperarAviso = Future<int> Function(int viaje, String clave);
 
 /// Correlación temporal; pertenece al shell de una única sesión, nunca global.
 class ReferenciaAviso {
-  const ReferenciaAviso(this.viaje, this.clave);
+  const ReferenciaAviso(this.viaje, String clave) : _clave = clave;
   final int viaje;
-  final String clave;
+  final String _clave;
+  // Una representación para conservar, comparar y retirar la referencia.
+  String get clave => _clave.trim().toLowerCase();
 }
 
 class ReporteAviso extends StatefulWidget {

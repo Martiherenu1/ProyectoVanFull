@@ -1,5 +1,11 @@
 # Contexto vivo · Chofer y viaje en curso (Martín)
 
+## Revisión UUID de recuperación #281 — 16/11/2026
+
+- Usuario informa que Facundo revisó `8b3466f` y considera resueltos los P1/P2 anteriores; nuevo P2 por retiro literal de clave mayúscula, sin aprobación final Flutter. Reproducción fallida antes de corregir: confirmación visible pero referencia incierta conservada.
+- Corrección normaliza `trim().toLowerCase()` antes de consultar y en la representación de referencias para conservar/comparar/retirar por viaje/clave. Pruebas de retiro selectivo, deduplicación, errores/UUID inválida y respuestas tardías entre sesiones; permisos, navegación y RNF-008 conservados. [Procedencia y aceptación](../PC3/ENTREGA-MANUAL-CU030-280.md#revisión-de-facundo-sobre-8b3466f--uuid-de-recuperación-16112026); SHA, resultados y CI exacta en #281 tras observarlos.
+- Guion local sin publicar preservado con T06 controlado; no se incluye en commit. Pendientes aprobación final Facundo, revisión models/migrations, backup Neon actual restaurado, ventana/responsable. CU-037 separado. Sin cambios backend/contrato/modelo/migración, merge hacia main ni operaciones remotas.
+
 ## Auditoría de Facundo sobre #281 — 16/11/2026, sin aprobación atribuida
 
 - **Estado posterior:** avance concurrente de main a `6f111c1` (#272/#292/#294) produjo conflicto documental/CI no iniciada tras `482c49d`. Merge normal `9edfebc` conserva ambos bloques de contexto y RNF-008 idéntico a main; fixes CU-030 idénticos a `482c49d`. Modelo/migración intactos, sin cambios propios de ETA. Analyze posterior sin observaciones (11,3 s); pruebas/CI posteriores en #281, sin heredar las 139 previas. Históricos siguientes conservan sus cortes.

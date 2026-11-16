@@ -36,14 +36,17 @@ class AvisosApi {
     }
   }
 
-  Future<int> recuperar(int viaje, String clave) async => _id(
-    await client.get(
-      '/viajes/$viaje/avisos/resultado',
-      queryParameters: {'clave_solicitud': clave},
-    ),
-    viaje,
-    clave,
-  );
+  Future<int> recuperar(int viaje, String clave) async {
+    final normalizada = clave.trim().toLowerCase();
+    return _id(
+      await client.get(
+        '/viajes/$viaje/avisos/resultado',
+        queryParameters: {'clave_solicitud': normalizada},
+      ),
+      viaje,
+      normalizada,
+    );
+  }
 
   int _id(Object? data, int viaje, String clave) {
     if (data is! Map<String, dynamic> ||

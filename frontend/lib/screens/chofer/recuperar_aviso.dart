@@ -30,12 +30,12 @@ class _RecuperarAvisoScreenState extends State<RecuperarAvisoScreen> {
 
   Future<void> _buscar() async {
     final id = int.tryParse(_viaje.text);
-    if (_ocupado || id == null || id <= 0 || _clave.text.isEmpty) return;
+    final clave = _clave.text.trim().toLowerCase();
+    if (_ocupado || id == null || id <= 0 || clave.isEmpty) return;
     setState(() {
       _ocupado = true;
       _mensaje = '';
     });
-    final clave = _clave.text.trim();
     try {
       final aviso = await widget.recuperar(id, clave);
       if (mounted) {

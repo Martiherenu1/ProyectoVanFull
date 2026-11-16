@@ -29,6 +29,23 @@ class UbicacionApi {
     }
   }
 
-  Future<UbicacionViaje> consultar(int id) async =>
-      UbicacionViaje.fromJson(await _cliente.get('viajes/$id/ubicacion'), id);
+  Future<UbicacionViaje> consultar(int id) async {
+    final cliente = _cliente;
+    if (cliente is ApiClientConMetadatos) {
+      final respuesta = await cliente.getConMetadatos('viajes/$id/ubicacion');
+      final directivas = (respuesta.headers['cache-control'] ?? '')
+          .toLowerCase()
+          .split(',')
+          .map((d) => d.trim());
+      final age = respuesta.headers['age'];
+      final sinCache =
+          directivas.contains('no-store') &&
+          (age == null || int.tryParse(age.trim()) == 0);
+      return UbicacionViaje.fromJson(respuesta.cuerpo, id, sinCache: sinCache);
+    }
+    return UbicacionViaje.fromJson(
+      await cliente.get('viajes/$id/ubicacion'),
+      id,
+    );
+  }
 }

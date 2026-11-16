@@ -6,7 +6,7 @@ import 'api_client.dart';
 import 'api_error.dart';
 
 /// Implementación HTTP del cliente común, sin almacenar sesión ni conocer DTO de negocio.
-final class HttpApiClient implements ApiClient {
+final class HttpApiClient implements ApiClientConMetadatos {
   HttpApiClient({
     required Uri baseUri,
     required this.transport,
@@ -30,6 +30,23 @@ final class HttpApiClient implements ApiClient {
         (headers) =>
             transport.get(_resolve(path, queryParameters), headers: headers),
       );
+
+  @override
+  Future<RespuestaApi> getConMetadatos(String path) async {
+    Map<String, String> recibidos = const {};
+    final cuerpo = await _enviar((headers) async {
+      final response = await transport.get(
+        _resolve(path),
+        headers: {...headers, 'Cache-Control': 'no-cache'},
+      );
+      recibidos = Map.unmodifiable({
+        for (final entry in response.headers.entries)
+          entry.key.toLowerCase(): entry.value,
+      });
+      return response;
+    });
+    return RespuestaApi(cuerpo, recibidos);
+  }
 
   @override
   Future<Object?> post(String path, {Object? body, String? accessToken}) =>

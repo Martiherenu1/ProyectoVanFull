@@ -13,3 +13,14 @@ abstract interface class ApiClient {
 
   Future<Object?> patch(String path, {Object? body});
 }
+
+/// Capacidad opcional: clientes existentes pueden seguir entregando solo el cuerpo.
+class RespuestaApi {
+  const RespuestaApi(this.cuerpo, this.headers);
+  final Object? cuerpo;
+  final Map<String, String> headers;
+}
+
+abstract interface class ApiClientConMetadatos implements ApiClient {
+  Future<RespuestaApi> getConMetadatos(String path);
+}

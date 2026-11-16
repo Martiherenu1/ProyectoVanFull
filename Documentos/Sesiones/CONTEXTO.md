@@ -1,5 +1,7 @@
 # CONTEXTO VANFULL — Carga rápida de sesión
 
+> **Pasajero — 16/11/2026:** CU-035 recortado (comprobantes propios del pasajero, solo consulta, [Issue #295](https://github.com/Martiherenu1/ProyectoVanFull/issues/295)), asignado por Facundo; descarga y representante corporativo pendientes. Revisión de modelo/migración de #281 hecha sobre `6656794` (917 pruebas backend, conforme en lo técnico, no aprobada: falta backup de Neon, restauración y ventana). La API de Render no sirve `main` `6f111c1` (sin `fecha_hora_evaluacion`): hay que mirar Events y desplegar; no migra. Detalle: PC2/CONTEXTO-pasajero-y-base-comun.md.
+
 ## Continuación Flutter RNF-008 / #293 — 16/11/2026
 
 Candidata sobre #292, dependiente de #272: referencia S/no-store, cotas monotónicas y

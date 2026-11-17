@@ -1772,62 +1772,44 @@
         "tags": [
           "servicios"
         ],
-        "summary": "Consultar tarifa aplicable",
-        "description": "Determina la tarifa según tipo de cliente, modalidad, días y medio de pago\n(incluye descuento 15% efectivo, RN-011). (RF-028; se usa como paso previo de CU-003)\n",
+        "summary": "Consultar la tarifa ocasional de un viaje",
+        "description": "Precio por viaje de un pasajero **ocasional**: alguien que usa eventualmente un charter\nuniversitario o laboral existente (AC9-02/03 de Issue #9). Es el paso previo de CU-003.\n(RF-028, RN-010, RN-011)\n\n**Selección.** La tarifa se determina por el **servicio** del viaje (`UNIVERSITARIO` o\n`LABORAL`) y su **sentido** (`IDA` o `VUELTA`) (AC9-04). En la tabla `tarifa` se\nidentifica por `tipo = OCASIONAL:<tipo_servicio>:<sentido>`, por ejemplo\n`OCASIONAL:UNIVERSITARIO:IDA`. Rige la de mayor `fecha_vigencia` que no sea posterior a\nla fecha de la consulta (hora de Argentina); una tarifa sin `fecha_vigencia` no rige.\nModalidad y sentido **solo eligen el precio**: no determinan la parada de descenso ni\nlas habilitaciones del viaje. Consultar no reserva ni habilita a abordar.\n\n**Importe base e importe acordado.** `importe_base` es el importe comercial aplicable,\nsin el 15 % por efectivo. Es el valor que la contratación guarda como `importe_acordado`\nal crearse. Una tarifa posterior no recalcula una contratación ya hecha (AC9-19).\n\n**Efectivo.** Elegir efectivo no otorga el descuento: VanFull lo reconoce solo cuando\nrecibe y confirma el pago (AC9-13). Por eso esta consulta no recibe medio de pago y\n`efectivo_informativo` es una referencia, no un descuento otorgado ni un importe a\nguardar. El descuento real se calcula al confirmar cada pago en efectivo, sobre la\ndeuda que ese pago cancela (AC9-14/15).\n\n**Fuera de esta operación:** abonos mensuales universitarios y laborales (días por\nsemana, prorrateo; AC9-01/08/09), la tarifa conjunta `IDA_VUELTA` del mismo día\n(AC9-05/06), servicios especiales y corporativos (cotización particular, AC9-07) y la\nactualización por FADEEAC (AC9-17/19).\n",
         "x-rf": "RF-028",
+        "x-cobertura": "parcial",
         "parameters": [
           {
-            "name": "tipo_cliente",
+            "name": "id_viaje",
             "in": "query",
             "required": true,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "modalidad",
-            "in": "query",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "enum": [
-                "IDA",
-                "VUELTA",
-                "IDA_VUELTA"
-              ]
-            }
-          },
-          {
-            "name": "dias",
-            "in": "query",
-            "required": false,
             "schema": {
               "type": "integer"
-            }
-          },
-          {
-            "name": "medio_pago",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "enum": [
-                "EFECTIVO",
-                "TRANSFERENCIA",
-                "BILLETERA",
-                "CUENTA_CORRIENTE",
-                "MERCADO_PAGO"
-              ]
-            }
+            },
+            "description": "Un viaje de `GET /servicios/disponibilidad`."
           }
         ],
         "responses": {
           "200": {
-            "description": "Tarifa aplicable",
+            "description": "Tarifa ocasional vigente para el servicio y el sentido del viaje",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Tarifa"
+                  "$ref": "#/components/schemas/TarifaAplicable"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/NoAutenticado"
+          },
+          "404": {
+            "$ref": "#/components/responses/NoEncontrado"
+          },
+          "409": {
+            "description": "`TARIFA_NO_APLICABLE` si el servicio del viaje es especial o corporativo (se cotizan particularmente, AC9-07), o `TARIFA_NO_VIGENTE` si no hay una tarifa ocasional vigente para ese servicio y sentido.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
                 }
               }
             }
@@ -4442,8 +4424,20 @@
           }
         }
       },
-      "Tarifa": {
+      "TarifaAplicable": {
         "type": "object",
+        "description": "Tarifa ocasional vigente para un viaje (RF-028). Los importes son decimales con dos posiciones (`NUMERIC(12,2)` en la base).",
+        "required": [
+          "id_tarifa",
+          "nombre",
+          "tipo",
+          "id_viaje",
+          "tipo_servicio",
+          "sentido",
+          "fecha_vigencia",
+          "importe_base",
+          "efectivo_informativo"
+        ],
         "properties": {
           "id_tarifa": {
             "type": "integer"
@@ -4451,12 +4445,57 @@
           "nombre": {
             "type": "string"
           },
-          "importe": {
-            "type": "number",
-            "format": "double"
-          },
           "tipo": {
-            "type": "string"
+            "type": "string",
+            "example": "OCASIONAL:UNIVERSITARIO:IDA"
+          },
+          "id_viaje": {
+            "type": "integer"
+          },
+          "tipo_servicio": {
+            "type": "string",
+            "enum": [
+              "UNIVERSITARIO",
+              "LABORAL"
+            ]
+          },
+          "sentido": {
+            "type": "string",
+            "enum": [
+              "IDA",
+              "VUELTA"
+            ]
+          },
+          "fecha_vigencia": {
+            "type": "string",
+            "format": "date"
+          },
+          "importe_base": {
+            "type": "number",
+            "minimum": 0,
+            "multipleOf": 0.01,
+            "description": "Importe comercial aplicable, sin descuento por efectivo. Es el que la contratación guarda como `importe_acordado`."
+          },
+          "efectivo_informativo": {
+            "type": "object",
+            "description": "Solo informativo: cuánto se pagaría si se cancela todo en efectivo y VanFull lo confirma (AC9-13/15). No es un descuento otorgado, no se guarda y no se descuenta de `importe_base`.",
+            "required": [
+              "porcentaje",
+              "importe_si_se_confirma"
+            ],
+            "properties": {
+              "porcentaje": {
+                "type": "number",
+                "example": 15,
+                "description": "RN-011."
+              },
+              "importe_si_se_confirma": {
+                "type": "number",
+                "minimum": 0,
+                "multipleOf": 0.01,
+                "description": "`importe_base × 0,85` a dos decimales. El criterio de desempate al medio centavo está pendiente (PV9-06 de Issue #9)."
+              }
+            }
           }
         }
       },

@@ -13,6 +13,7 @@ class RoleRouter extends StatelessWidget {
     this.entradaPasajero,
     this.entradaChofer,
     this.entradaAdministrador,
+    this.entradaDueno,
     this.fechaAdmin,
     this.cargarViajesAdmin,
     this.onViajeAdminSeleccionado,
@@ -23,12 +24,22 @@ class RoleRouter extends StatelessWidget {
   final WidgetBuilder? entradaPasajero;
   final WidgetBuilder? entradaChofer;
   final WidgetBuilder? entradaAdministrador;
+  final WidgetBuilder? entradaDueno;
   final DateTime? fechaAdmin;
   final CargarViajesDelDia? cargarViajesAdmin;
   final ValueChanged<int>? onViajeAdminSeleccionado;
 
   @override
   Widget build(BuildContext context) {
+    // Solo una entrada explícita: no hereda el menú administrativo completo.
+    if (roles.length == 1 && roles.single == 'dueno' && entradaDueno != null) {
+      return MaterialApp(
+        title: 'VanFull',
+        debugShowCheckedModeBanner: false,
+        theme: AppTheme.admin,
+        home: Builder(builder: entradaDueno!),
+      );
+    }
     final resolution = _resolve(roles);
 
     return MaterialApp(

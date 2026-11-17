@@ -288,6 +288,8 @@ class _VanFullBootstrapState extends State<VanFullBootstrap> {
       gpsApi: _gpsApi,
       onSalir: controller.salir,
     ),
+    entradaDueno: (controller) =>
+        _EntradaVehiculosDueno(controller: controller, api: _vehiculosAdmin),
     entradaChofer: (controller) => _EntradaChofer(
       controller: controller,
       listar: _viajesChofer,
@@ -679,6 +681,72 @@ class _EntradaAdministracionState extends State<_EntradaAdministracion> {
     Navigator.of(context).popUntil((route) => route.isFirst);
     setState(() => _accesoDenegado = true);
   }
+}
+
+/// CU-022: acceso del dueño limitado a las operaciones de vehículos existentes.
+class _EntradaVehiculosDueno extends StatefulWidget {
+  const _EntradaVehiculosDueno({required this.controller, required this.api});
+
+  final SesionController controller;
+  final VehiculosAdminApi api;
+
+  @override
+  State<_EntradaVehiculosDueno> createState() => _EntradaVehiculosDuenoState();
+}
+
+class _EntradaVehiculosDuenoState extends State<_EntradaVehiculosDueno> {
+  late final int _generacion = widget.controller.generacion;
+  late final String? _token = widget.controller.token;
+  bool _accesoDenegado = false;
+
+  bool get _vigente =>
+      mounted &&
+      !_accesoDenegado &&
+      _token != null &&
+      widget.controller.generacion == _generacion &&
+      widget.controller.token == _token;
+
+  Future<T> _proteger<T>(Future<T> Function() operacion) async {
+    if (!_vigente) throw StateError('La sesión ya no está vigente.');
+    final resultado = await _protegerAcceso(
+      controller: widget.controller,
+      solicitud: operacion,
+      onAccesoDenegado: () {
+        if (!_vigente) return;
+        Navigator.of(context).popUntil((route) => route.isFirst);
+        setState(() => _accesoDenegado = true);
+      },
+    );
+    if (!_vigente) throw StateError('La sesión ya no está vigente.');
+    return resultado;
+  }
+
+  @override
+  Widget build(BuildContext context) => _accesoDenegado
+      ? _AccesoDenegado(
+          key: const Key('dueno-acceso-denegado'),
+          onSalir: widget.controller.salir,
+        )
+      : Column(
+          children: [
+            Expanded(
+              child: VehiculosAdminScreen(
+                cargar: () => _proteger(widget.api.listar),
+                crear: (datos) => _proteger(() => widget.api.crear(datos)),
+                actualizar: (id, datos) =>
+                    _proteger(() => widget.api.actualizar(id, datos)),
+              ),
+            ),
+            SafeArea(
+              minimum: const EdgeInsets.all(AppSpacing.md),
+              child: OutlinedButton(
+                key: const Key('dueno-salir'),
+                onPressed: widget.controller.salir,
+                child: const Text('Cerrar sesión'),
+              ),
+            ),
+          ],
+        );
 }
 
 class _EntradaChofer extends StatefulWidget {

@@ -51,7 +51,7 @@ def test_las_claves_foraneas_son_las_del_schema(sql, sql_mp):
         for c in tabla.constraints
         if isinstance(c, ForeignKeyConstraint)
     )
-    assert en_modelos == en_sql == 54
+    assert en_modelos == en_sql == 55
     fks_mp = sum(
         isinstance(c, ForeignKeyConstraint)
         for nombre in ("pago_mercadopago", "checkout_mercadopago")

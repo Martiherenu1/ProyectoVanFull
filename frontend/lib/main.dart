@@ -1,3 +1,4 @@
+import 'services/chofer/avisos_api.dart';
 import 'services/pasajero/ausencias_api.dart';
 import 'screens/pasajero/accion_informar_ausencia.dart';
 import 'models/gps/ubicacion_viaje.dart';
@@ -124,6 +125,7 @@ class _VanFullBootstrapState extends State<VanFullBootstrap> {
   late final ViajesChoferApi _viajesChofer;
   late final DetalleViajeChoferApi _detalleChofer;
   late final EjecucionViajeApi _ejecucionChofer;
+  late final AvisosApi _avisosChofer;
   late final UbicacionApi _gpsApi;
   late final ComprobarUbicacionInicio _comprobarUbicacion;
   late final AsistenciaUbicacionInicio? _asistenciaUbicacion;
@@ -158,6 +160,7 @@ class _VanFullBootstrapState extends State<VanFullBootstrap> {
     _viajesChofer = ViajesChoferApi(httpClient);
     _detalleChofer = DetalleViajeChoferApi(httpClient);
     _ejecucionChofer = EjecucionViajeApi(httpClient);
+    _avisosChofer = AvisosApi(httpClient);
     _gpsApi = UbicacionApi(httpClient);
     final comprobador = ComprobadorUbicacionAndroid();
     _comprobarUbicacion =
@@ -290,6 +293,7 @@ class _VanFullBootstrapState extends State<VanFullBootstrap> {
       listar: _viajesChofer,
       detalle: _detalleChofer,
       ejecucion: _ejecucionChofer,
+      avisos: _avisosChofer,
       gpsApi: _gpsApi,
       comprobarUbicacion: _comprobarUbicacion,
       asistenciaUbicacion: _asistenciaUbicacion,
@@ -683,6 +687,7 @@ class _EntradaChofer extends StatefulWidget {
     required this.listar,
     required this.detalle,
     required this.ejecucion,
+    required this.avisos,
     required this.gpsApi,
     required this.comprobarUbicacion,
     required this.asistenciaUbicacion,
@@ -693,6 +698,7 @@ class _EntradaChofer extends StatefulWidget {
   final ViajesChoferApi listar;
   final DetalleViajeChoferApi detalle;
   final EjecucionViajeApi ejecucion;
+  final AvisosApi avisos;
   final UbicacionApi gpsApi;
   final ComprobarUbicacionInicio comprobarUbicacion;
   final AsistenciaUbicacionInicio? asistenciaUbicacion;
@@ -806,6 +812,27 @@ class _EntradaChoferState extends State<_EntradaChofer> {
             cargarViajes: _cargarViajes,
             cargarDetalle: _cargarDetalle,
             acciones: _acciones,
+            registrarAviso: (id, clave, clase, detalle) async {
+              _exigirSesion();
+              final r = await _protegerAcceso(
+                controller: widget.controller,
+                solicitud: () =>
+                    widget.avisos.registrar(id, clave, clase, detalle),
+                onAccesoDenegado: _denegarAcceso,
+              );
+              _exigirSesion();
+              return r;
+            },
+            recuperarAviso: (id, clave) async {
+              _exigirSesion();
+              final r = await _protegerAcceso(
+                controller: widget.controller,
+                solicitud: () => widget.avisos.recuperar(id, clave),
+                onAccesoDenegado: _denegarAcceso,
+              );
+              _exigirSesion();
+              return r;
+            },
             comprobarUbicacionInicio: _comprobarUbicacion,
             asistenciaUbicacionInicio: _asistencia,
             onViajeAceptado: _viajeAceptado,

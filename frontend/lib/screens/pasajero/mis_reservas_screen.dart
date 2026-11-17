@@ -1,3 +1,4 @@
+import 'mensaje_demora.dart';
 import 'accion_informar_ausencia.dart';
 
 import 'package:flutter/material.dart';
@@ -29,11 +30,13 @@ class MisReservasScreen extends StatefulWidget {
   const MisReservasScreen({
     super.key,
     required this.cargarReservas,
+    this.cargarMensajeDemora,
     required this.cargarDeuda,
     required this.cancelarReserva,
     required this.onBuscarServicio,
     this.onRegistrarPago,
     this.onVerUbicacion,
+    this.onCambiarParada,
     this.informarAusencia,
     this.alcanceAusencia,
     this.contextoAusenciaVigente,
@@ -41,6 +44,7 @@ class MisReservasScreen extends StatefulWidget {
   });
 
   final CargarReservas cargarReservas;
+  final CargarMensajeDemora? cargarMensajeDemora;
   final CargarDeuda cargarDeuda;
   final CancelarReserva cancelarReserva;
 
@@ -60,6 +64,10 @@ class MisReservasScreen extends StatefulWidget {
   /// Abre la ubicación del viaje de una reserva consolidada (RN-030). Sin él no
   /// hay botón. El backend decide si ya hay posición: acá solo se ofrece.
   final ValueChanged<Reserva>? onVerUbicacion;
+
+  /// Abre el cambio de parada de una reserva no cancelada (CU-005). Sin él no
+  /// hay botón. El backend decide si procede: acá solo se ofrece.
+  final ValueChanged<Reserva>? onCambiarParada;
 
   @override
   State<MisReservasScreen> createState() => _MisReservasScreenState();
@@ -322,6 +330,14 @@ class _MisReservasScreenState extends State<MisReservasScreen> {
         return Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
+            if (abierta &&
+                reserva.estado == EstadoReserva.consolidada &&
+                widget.cargarMensajeDemora != null)
+              MensajeDemora(
+                key: ValueKey('demora-${reserva.idReserva}-${reserva.idViaje}'),
+                viaje: reserva.idViaje,
+                cargar: widget.cargarMensajeDemora!,
+              ),
             _FilaReserva(
               reserva: reserva,
               abierta: abierta,
@@ -364,6 +380,20 @@ class _MisReservasScreenState extends State<MisReservasScreen> {
                   alcance: widget.alcanceAusencia!,
                   contextoVigente: widget.contextoAusenciaVigente!,
                   informar: widget.informarAusencia!,
+                ),
+              ),
+            if (abierta &&
+                reserva.estado != EstadoReserva.cancelada &&
+                widget.onCambiarParada != null)
+              Padding(
+                padding: const EdgeInsets.only(bottom: AppSpacing.sm),
+                child: OutlinedButton(
+                  key: ValueKey('cambiar-parada-$id'),
+                  onPressed: () => widget.onCambiarParada!(reserva),
+                  style: OutlinedButton.styleFrom(
+                    minimumSize: const Size(0, AppSpacing.touchTarget),
+                  ),
+                  child: const Text('Cambiar parada'),
                 ),
               ),
             if (abierta && reserva.estado != EstadoReserva.cancelada)

@@ -49,6 +49,8 @@ Future<void> mostrar(
   VoidCallback? buscar,
   ValueChanged<Deuda>? pagar,
   ValueChanged<Reserva>? verUbicacion,
+  ValueChanged<Reserva>? cambiarParada,
+  Future<String?> Function(int)? mensajeDemora,
 }) => tester.pumpWidget(
   MaterialApp(
     home: MisReservasScreen(
@@ -59,6 +61,8 @@ Future<void> mostrar(
       onBuscarServicio: buscar ?? () {},
       onRegistrarPago: pagar,
       onVerUbicacion: verUbicacion,
+      onCambiarParada: cambiarParada,
+      cargarMensajeDemora: mensajeDemora,
     ),
   ),
 );
@@ -67,6 +71,37 @@ String textoDe(WidgetTester tester, String clave) =>
     tester.widget<Text>(find.byKey(ValueKey(clave))).data!;
 
 void main() {
+  testWidgets(
+    'CU-005 y reporte fechado de demora coexisten en la reserva propia',
+    (tester) async {
+      Reserva? elegida;
+      final viajes = <int>[];
+      const mensaje =
+          'El chofer informó una demora. Situación actual no confirmada. Reportado: 15/11/2026 a las 13:05.';
+      await mostrar(
+        tester,
+        cambiarParada: (r) => elegida = r,
+        mensajeDemora: (viaje) async {
+          viajes.add(viaje);
+          return mensaje;
+        },
+      );
+      await tester.pumpAndSettle();
+      expect(viajes, isEmpty);
+      await tester.tap(find.byKey(const ValueKey('reserva-1')));
+      await tester.pumpAndSettle();
+      expect(viajes, [101]);
+      expect(find.text(mensaje), findsOneWidget);
+      expect(find.byKey(const ValueKey('cambiar-parada-1')), findsOneWidget);
+      await tester.ensureVisible(
+        find.byKey(const ValueKey('cambiar-parada-1')),
+      );
+      await tester.tap(find.byKey(const ValueKey('cambiar-parada-1')));
+      expect(elegida?.idReserva, 1);
+      expect(elegida?.idViaje, 101);
+    },
+  );
+
   testWidgets(
     'muestra las reservas con su estado en el vocabulario del brief',
     (tester) async {
@@ -401,6 +436,60 @@ void main() {
       await tester.pump();
 
       expect(find.byKey(const ValueKey('ubicacion-1')), findsNothing);
+    });
+  });
+  group('Cambiar parada', () {
+    testWidgets('una reserva abierta y no cancelada ofrece cambiar la parada', (
+      tester,
+    ) async {
+      Reserva? recibida;
+      await mostrar(tester, cambiarParada: (r) => recibida = r);
+      await tester.pump();
+      expect(find.byKey(const ValueKey('cambiar-parada-1')), findsNothing);
+
+      await tester.tap(find.byKey(const ValueKey('reserva-1')));
+      await tester.pump();
+      await tester.tap(find.byKey(const ValueKey('cambiar-parada-1')));
+
+      expect(recibida?.idReserva, 1);
+      expect(recibida?.idRecorrido, 3);
+    });
+
+    testWidgets('la provisional también lo ofrece: el backend decide', (
+      tester,
+    ) async {
+      await mostrar(
+        tester,
+        reservas: () async => [reserva(1, estado: 'provisional')],
+        cambiarParada: (_) {},
+      );
+      await tester.pump();
+      await tester.tap(find.byKey(const ValueKey('reserva-1')));
+      await tester.pump();
+
+      expect(find.byKey(const ValueKey('cambiar-parada-1')), findsOneWidget);
+    });
+
+    testWidgets('la cancelada no lo ofrece', (tester) async {
+      await mostrar(
+        tester,
+        reservas: () async => [reserva(2, estado: 'cancelada')],
+        cambiarParada: (_) {},
+      );
+      await tester.pump();
+      await tester.tap(find.byKey(const ValueKey('reserva-2')));
+      await tester.pump();
+
+      expect(find.byKey(const ValueKey('cambiar-parada-2')), findsNothing);
+    });
+
+    testWidgets('sin callback no hay botón', (tester) async {
+      await mostrar(tester);
+      await tester.pump();
+      await tester.tap(find.byKey(const ValueKey('reserva-1')));
+      await tester.pump();
+
+      expect(find.byKey(const ValueKey('cambiar-parada-1')), findsNothing);
     });
   });
   for (final falla in [false, true]) {

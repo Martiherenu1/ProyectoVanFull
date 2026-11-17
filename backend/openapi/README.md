@@ -5,6 +5,52 @@ Cubre el requisito del PC1 **"Comunicación Vista-Controlador: OpenAPI (JSON)"**
 (escrito a mano, previo a la implementación); cuando el backend esté programado, FastAPI expondrá además
 su propio `/openapi.json` generado, que deberá coincidir con este contrato.
 
+## GPS / RNF-008: candidata backend y despliegue pendiente - 2026-11-16
+
+- **Contrato:** la candidata parte de #272, HEAD
+  `54f426373a9a95d7d1c399893980ea9e8cc81f62`. Mantiene
+  `fecha_hora_evaluacion` opcional y no nullable por compatibilidad,
+  una sola evaluacion UTC S sobre el mismo snapshot de posicion y
+  `desactualizada = (S - T > 30 s)`, con `Cache-Control: no-store` en los 200.
+- **Implementacion incluida en esta candidata (#273):** schema, servicio y router
+  emiten S y el header; conserva 29=false, 30=false y 31=true. Verificada localmente
+  con 79 pruebas aprobadas (incluidas cinco contractuales/rutas) sobre esta base
+  mas la candidata. No cambia recepcion GPS, timestamps almacenados, permisos,
+  errores, eta_minutos ni modelo. Publicacion propuesta en rama dependiente de #272;
+  sin integracion hacia main.
+- **Despliegue SIN VERIFICAR:** no se consultaron Neon ni Render; no se verifico
+  el SHA desplegado ni la emision real. Contrato, pruebas locales y CI contractual
+  no acreditan despliegue o funcionamiento en servicios externos.
+
+RNF-008 sigue parcial: #39 y las dos regresiones originales permanecen pendientes.
+No hay implementacion Flutter en este alcance ni acreditacion de continuidad GPS.
+ETA fuera de alcance. YAML/JSON permanecen sin cambios propios.
+
+### Antecedente contractual - 2026-11-12
+
+La nota siguiente describe el corte anterior a esta candidata; su afirmacion sobre
+emision pendiente no describe el codigo local incluido arriba. La revision formal
+citada pertenece al contrato historico, no aprueba esta implementacion.
+
+## GPS / RNF-008: propuesta, implementación y despliegue — 2026-11-12
+
+- **Contrato propuesto:** [PR #272](https://github.com/Martiherenu1/ProyectoVanFull/pull/272)
+  agrega fecha_hora_evaluacion opcional y no nullable, misma evaluación S/snapshot
+  que desactualizada=(S-T >30 s), y respuesta fresca con Cache-Control: no-store.
+- **Implementación pendiente:** el backend actual **NO emite fecha_hora_evaluacion
+  ni Cache-Control: no-store**. Cotejado en app/schemas/gps.py, services/gps.py y
+  routers/gps.py; no se modifican aquí. [Issue #273](https://github.com/Martiherenu1/ProyectoVanFull/issues/273)
+  registra emisión coherente y pruebas backend. No equivale a implementar Flutter
+  ni resolver completamente [#39](https://github.com/Martiherenu1/ProyectoVanFull/issues/39).
+- **Despliegue no verificado:** no se consultaron servicios de VanFull; SHA exacto
+  desplegado en Render pendiente. Un contrato, merge o CI verde no acreditan emisión real.
+
+La revisión formal de Martiniano aprueba el contrato y [29,31] como Vigencia no
+confirmada; la pantalla se revisará cuando exista implementación. RNF-008 parcial.
+Identidad P/contexto, límites temporales y las dos regresiones pendientes se documentan
+en [el análisis de #39](../../Documentos/Sesiones/PC2/ACLARACION-FUNCIONAL-CU009-ISSUE39-v0.2-VALIDADA-ANALISIS.md).
+ETA fuera de alcance. No se amplía YAML/JSON ni se modifica recepción GPS o modelo.
+
 ## Los dos formatos
 
 | Archivo | Para qué |
@@ -25,7 +71,7 @@ python -c "import yaml,json,io; io.open('backend/openapi/openapi.json','w',encod
 - `redocly preview-docs backend/openapi/openapi.yaml`, o
 - al implementar el backend: `http://localhost:8000/docs` (Swagger UI de FastAPI).
 
-Validado con `openapi-spec-validator`: **OpenAPI 3.0.3 · 34 rutas · 40 operaciones HTTP · 34 schemas**.
+Validado con `openapi-spec-validator`: **OpenAPI 3.0.3 · 51 rutas · 63 operaciones HTTP · 57 schemas**.
 
 ## Cobertura de esta versión (v0.1)
 
@@ -48,7 +94,7 @@ de solo lectura (administrador/dueno), reutilizando Deuda. Sin cuenta informa 0.
 inexistente CLIENTE_NO_ENCONTRADO. CU-006 conserva su comportamiento. La gestión de
 consecuencias RN-004/005/006 sigue pendiente; CU-015 conserva cobertura parcial.
 
-> **v0.1 representa 21 de los 37 casos de uso, además de RF-028.** Los otros **16 CU** todavía no tienen
+> **v0.1 representa 25 de los 37 casos de uso, además de RF-028.** Los otros **12 CU** todavía no tienen
 > operaciones y se listan al final. Estos indicadores describen la **cobertura contractual de diseño**;
 > no indican funcionalidades implementadas en el backend ni en el frontend.
 
@@ -121,7 +167,11 @@ y frontend continúa pendiente; documentar el contrato no implementa los servici
 | CU-010 Reservas propias | `GET /pasajeros/me/reservas`, `GET /reservas/{id}` | RF-043 |
 | CU-011 Chatbot | `POST /chat` | RF-029/032 |
 | CU-012 Sesión | `POST /auth/login`, `POST /auth/logout` | RF-045 |
+| CU-013 Gestionar pasajeros ⚠️ *parcial* | `GET /pasajeros`, `POST /pasajeros`, `GET /pasajeros/{id_persona}`, `PATCH /pasajeros/{id_persona}`, `POST /pasajeros/{id_persona}/baja` | RF-002/042, RN-026; suspensión y habilitación excepcional (RN-004/005) y motivos de baja pendientes |
 | CU-014 Registrar pago | `POST /pagos` | RF-009, RN-016 |
+| CU-023 Clientes corporativos ⚠️ *parcial* | `GET`/`POST /clientes-corporativos`, `GET`/`PATCH /clientes-corporativos/{id_cliente}`, `POST …/contactos`, `DELETE …/contactos/{id_persona}`, `POST …/pasajeros`, `DELETE …/pasajeros/{id_pasajero}` | RF-034, RN-014/028; condiciones comerciales y catálogos de estado pendientes |
+| CU-033 Pasajeros de la organización ⚠️ *parcial* | `GET /organizaciones`, `GET`/`POST /organizaciones/{id_cliente}/pasajeros`, `PATCH /organizaciones/{id_cliente}/pasajeros/{id_pasajero}` | RF-035, RN-026/028; baja (A2) y «datos permitidos» pendientes |
+| CU-035 Comprobantes propios ⚠️ *parcial* | `GET /pasajeros/me/comprobantes`, `GET /pasajeros/me/comprobantes/{id_comprobante}` | RF-037, RN-028; solo el pasajero y solo consulta: descarga (formato y reglas fiscales) y representante corporativo (ACT-03) pendientes |
 | CU-015 Gestionar deuda ⚠️ *parcial* | `GET /clientes/{id_cliente}/deuda` | RF-010, MR-R30; RN-004/005/006 pendientes |
 | CU-016 Confirmar/rechazar pago | `POST /pagos/{id}/confirmacion` | RF-011, RN-015 — validación administrativa cuando el medio no acredita automáticamente |
 | CU-018 Gestionar viajes ⚠️ *parcial* | `POST /viajes`, `PATCH /viajes/{id_viaje}` | RF-017/018, RN-001 |
@@ -141,8 +191,15 @@ ubicación en CU-009/CU-034 y no es una regla directa del POST GPS.
 
 ## CU pendientes de contrato (próxima iteración)
 
-Estos **16 CU** todavía no tienen operaciones en el contrato:
-administración de pasajeros (CU-013), créditos/devoluciones (CU-017), recorridos (CU-019),
-optimización de recorrido (CU-020), vehículos (CU-022), corporativos (CU-023, CU-033, CU-034, CU-035),
+Estos **12 CU** todavía no tienen operaciones en el contrato (CU-013, CU-023, CU-033 y CU-035 las tienen desde los Issues #285, #287, #289 y #295, parciales):
+créditos/devoluciones (CU-017), recorridos (CU-019),
+optimización de recorrido (CU-020), vehículos (CU-022), corporativos (CU-034),
 facturación (CU-024), reportes (CU-025), historial (CU-026), abonos (CU-028),
 tarifas y administradores del dueño (CU-031, CU-032), notificaciones (CU-037).
+
+
+### CU-030 manual, seguimiento #280 (15/11/2026)
+
+Se agregan POST/GET `/viajes/{id_viaje}/avisos`, GET `/viajes/{id_viaje}/avisos/resultado` por clave y GET `/pasajeros/me/viajes/{id_viaje}/demora`. POST confirma despu?s de commit (201), repetici?n exacta 200, misma clave/contenido distinto 409; comparaci?n por clase y texto normalizado trim. Autor/correlaci?n tienen columnas/FK/UNIQUE expl?citos, migraci?n 0002. GET resultado solo autor autenticado, incluso fin/reasignaci?n; GET interno admin/due?o. Mensaje contextual solo reserva propia consolidada, sin excluir abordados: reporte fechado, no afirmaci?n de demora activa. No almacena descripci?n interna en vista pasajero.
+
+Cobertura sigue **parcial**: CU-037/push/WhatsApp y automatismo pendientes. `notificacion=no_evaluada` no es env?o pendiente ni fallo. Una respuesta perdida/5xx es incierta; consultar viaje no reconcilia el aviso, y 404 de b?squeda no demuestra rechazo de un POST en vuelo. Sin modificaci?n de las operaciones anteriores. Revisi?n contractual/modelo requerida a Martiniano y Facundo en la PR; solicitud no equivale a revisi?n recibida.

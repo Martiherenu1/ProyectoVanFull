@@ -47,6 +47,8 @@ tags:
     description: Registro y confirmación de pagos (CU-014, CU-016)
   - name: viajes
     description: Gestión operativa de viajes (CU-018) — administración
+  - name: corporativo
+    description: Representante de cliente corporativo, dentro de su organización (CU-033)
   - name: chatbot
     description: Agente conversacional AG-01 (CU-011)
   - name: integraciones
@@ -140,6 +142,718 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
 
+  /pasajeros:
+    get:
+      tags: [administracion]
+      summary: Localizar pasajeros
+      description: |
+        Solo administrador y dueno. Lista paginada de pasajeros, con búsqueda opcional por DNI,
+        nombre o apellido (`q`, sin distinguir mayúsculas). (CU-013, RF-002/042)
+      x-cu: CU-013
+      x-cobertura: parcial
+      parameters:
+        - name: q
+          in: query
+          required: false
+          schema: { type: string, maxLength: 100 }
+        - name: limite
+          in: query
+          required: false
+          schema: { type: integer, minimum: 1, maximum: 100, default: 20 }
+        - name: desplazamiento
+          in: query
+          required: false
+          schema: { type: integer, minimum: 0, default: 0 }
+      responses:
+        '200':
+          description: Pasajeros que coinciden, con el total sin paginar
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PasajeroLista'
+        '400':
+          description: VALIDACION — parámetros inválidos
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          $ref: '#/components/responses/NoAutenticado'
+        '403':
+          $ref: '#/components/responses/SinPermiso'
+    post:
+      tags: [administracion]
+      summary: Registrar un pasajero
+      description: |
+        Solo administrador y dueno. Crea la persona y el pasajero (estado `habilitado`); no crea
+        cuenta de acceso. Un DNI ya registrado, aunque sea de otra persona (un chofer, por
+        ejemplo), responde DNI_DUPLICADO. (CU-013, RF-002)
+      x-cu: CU-013
+      x-cobertura: parcial
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PasajeroCreate'
+      responses:
+        '201':
+          description: Pasajero registrado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PasajeroAdmin'
+        '400':
+          description: VALIDACION — datos inválidos o faltantes
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          $ref: '#/components/responses/NoAutenticado'
+        '403':
+          $ref: '#/components/responses/SinPermiso'
+        '409':
+          description: DNI_DUPLICADO
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /pasajeros/{id_persona}:
+    parameters:
+      - name: id_persona
+        in: path
+        required: true
+        schema: { type: integer, minimum: 1 }
+    get:
+      tags: [administracion]
+      summary: Consultar un pasajero
+      description: Solo administrador y dueno. (CU-013, RF-042)
+      x-cu: CU-013
+      x-cobertura: parcial
+      responses:
+        '200':
+          description: Datos y estado administrativo del pasajero
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PasajeroAdmin'
+        '400':
+          description: VALIDACION — identificador inválido
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          $ref: '#/components/responses/NoAutenticado'
+        '403':
+          $ref: '#/components/responses/SinPermiso'
+        '404':
+          description: PASAJERO_NO_ENCONTRADO
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+    patch:
+      tags: [administracion]
+      summary: Modificar un pasajero
+      description: |
+        Solo administrador y dueno. Cambia datos personales y categoría, incluido el DNI (A1,
+        RN-026: el pasajero no lo puede cambiar por autoservicio). Todo o nada. No cambia el
+        estado de habilitación: la baja es POST /pasajeros/{id_persona}/baja; la suspensión y la
+        habilitación excepcional (RN-004/005) siguen pendientes. (CU-013, RF-002/042)
+      x-cu: CU-013
+      x-cobertura: parcial
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PasajeroUpdate'
+      responses:
+        '200':
+          description: Pasajero actualizado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PasajeroAdmin'
+        '400':
+          description: VALIDACION — cuerpo vacío, campo desconocido o dato inválido
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          $ref: '#/components/responses/NoAutenticado'
+        '403':
+          $ref: '#/components/responses/SinPermiso'
+        '404':
+          description: PASAJERO_NO_ENCONTRADO
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '409':
+          description: DNI_DUPLICADO
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /pasajeros/{id_persona}/baja:
+    post:
+      tags: [administracion]
+      summary: Dar de baja a un pasajero
+      description: |
+        Solo administrador y dueno. Baja lógica (`estado_habilitacion = baja`): no borra datos.
+        Sin cuerpo: el catálogo de motivos de baja está pendiente. Repetirla responde
+        PASAJERO_YA_DADO_DE_BAJA. (CU-013 A4)
+      x-cu: CU-013
+      x-cobertura: parcial
+      parameters:
+        - name: id_persona
+          in: path
+          required: true
+          schema: { type: integer, minimum: 1 }
+      responses:
+        '200':
+          description: Pasajero dado de baja
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PasajeroAdmin'
+        '400':
+          description: VALIDACION — identificador inválido
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          $ref: '#/components/responses/NoAutenticado'
+        '403':
+          $ref: '#/components/responses/SinPermiso'
+        '404':
+          description: PASAJERO_NO_ENCONTRADO
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '409':
+          description: PASAJERO_YA_DADO_DE_BAJA
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  # ---------------------------------------------------------------------------
+  # CLIENTES CORPORATIVOS (administración, CU-023)
+  # ---------------------------------------------------------------------------
+  /clientes-corporativos:
+    get:
+      tags: [administracion]
+      summary: Localizar clientes corporativos
+      description: |
+        Solo administrador y dueno. Lista paginada de empresas, con búsqueda opcional por razón
+        social o CUIT (`q`, sin distinguir mayúsculas). (CU-023, RF-034)
+      x-cu: CU-023
+      x-cobertura: parcial
+      parameters:
+        - name: q
+          in: query
+          required: false
+          schema: { type: string, maxLength: 100 }
+        - name: limite
+          in: query
+          required: false
+          schema: { type: integer, minimum: 1, maximum: 100, default: 20 }
+        - name: desplazamiento
+          in: query
+          required: false
+          schema: { type: integer, minimum: 0, default: 0 }
+      responses:
+        '200':
+          description: Empresas que coinciden, con el total sin paginar
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ClienteCorporativoLista'
+        '400':
+          description: VALIDACION — parámetros inválidos
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          $ref: '#/components/responses/NoAutenticado'
+        '403':
+          $ref: '#/components/responses/SinPermiso'
+    post:
+      tags: [administracion]
+      summary: Registrar un cliente corporativo
+      description: |
+        Solo administrador y dueno. Crea el cliente (persona jurídica) y su condición de
+        corporativo, en estado `activo`. Las condiciones comerciales no se registran acá: no hay
+        un catálogo cerrado de acuerdos (RN-014). (CU-023, RF-034)
+      x-cu: CU-023
+      x-cobertura: parcial
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ClienteCorporativoCreate'
+      responses:
+        '201':
+          description: Cliente corporativo registrado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ClienteCorporativo'
+        '400':
+          description: VALIDACION — datos inválidos o faltantes
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          $ref: '#/components/responses/NoAutenticado'
+        '403':
+          $ref: '#/components/responses/SinPermiso'
+        '409':
+          description: CUIT_DUPLICADO
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /clientes-corporativos/{id_cliente}:
+    parameters:
+      - name: id_cliente
+        in: path
+        required: true
+        schema: { type: integer, minimum: 1 }
+    get:
+      tags: [administracion]
+      summary: Consultar un cliente corporativo
+      description: Solo administrador y dueno. Datos de la empresa, sus contactos y sus pasajeros asociados. (CU-023 A1)
+      x-cu: CU-023
+      x-cobertura: parcial
+      responses:
+        '200':
+          description: Cliente corporativo con contactos y pasajeros
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ClienteCorporativoDetalle'
+        '400':
+          description: VALIDACION — identificador inválido
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          $ref: '#/components/responses/NoAutenticado'
+        '403':
+          $ref: '#/components/responses/SinPermiso'
+        '404':
+          description: CLIENTE_CORPORATIVO_NO_ENCONTRADO
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+    patch:
+      tags: [administracion]
+      summary: Modificar un cliente corporativo
+      description: |
+        Solo administrador y dueno. Cambia razón social, CUIT o dirección, todo o nada. El estado
+        no se cambia: no tiene catálogo aprobado. (CU-023 A1)
+      x-cu: CU-023
+      x-cobertura: parcial
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ClienteCorporativoUpdate'
+      responses:
+        '200':
+          description: Cliente corporativo actualizado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ClienteCorporativo'
+        '400':
+          description: VALIDACION — cuerpo vacío, campo desconocido o dato inválido
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          $ref: '#/components/responses/NoAutenticado'
+        '403':
+          $ref: '#/components/responses/SinPermiso'
+        '404':
+          description: CLIENTE_CORPORATIVO_NO_ENCONTRADO
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '409':
+          description: CUIT_DUPLICADO
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /clientes-corporativos/{id_cliente}/contactos:
+    post:
+      tags: [administracion]
+      summary: Registrar un contacto de la empresa
+      description: |
+        Solo administrador y dueno. El contacto es una persona que ya existe (`id_persona`) o una
+        nueva (nombre, apellido y DNI obligatorios). Un DNI ya registrado responde DNI_DUPLICADO:
+        esa persona se indica por su id_persona. `es_representante` solo marca el dato, no da
+        cuenta ni rol (CU-033). (CU-023, paso 3)
+      x-cu: CU-023
+      x-cobertura: parcial
+      parameters:
+        - name: id_cliente
+          in: path
+          required: true
+          schema: { type: integer, minimum: 1 }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ContactoCorporativoCreate'
+      responses:
+        '201':
+          description: Contacto registrado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ContactoCorporativo'
+        '400':
+          description: VALIDACION — se mezclan id_persona y datos, o faltan datos de la persona nueva
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          $ref: '#/components/responses/NoAutenticado'
+        '403':
+          $ref: '#/components/responses/SinPermiso'
+        '404':
+          description: CLIENTE_CORPORATIVO_NO_ENCONTRADO o PERSONA_NO_ENCONTRADA
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '409':
+          description: DNI_DUPLICADO o CONTACTO_YA_REGISTRADO
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /clientes-corporativos/{id_cliente}/contactos/{id_persona}:
+    delete:
+      tags: [administracion]
+      summary: Quitar un contacto de la empresa
+      description: Solo administrador y dueno. La persona sigue existiendo. (CU-023 A1)
+      x-cu: CU-023
+      x-cobertura: parcial
+      parameters:
+        - name: id_cliente
+          in: path
+          required: true
+          schema: { type: integer, minimum: 1 }
+        - name: id_persona
+          in: path
+          required: true
+          schema: { type: integer, minimum: 1 }
+      responses:
+        '204':
+          description: Contacto quitado
+        '400':
+          description: VALIDACION — identificador inválido
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          $ref: '#/components/responses/NoAutenticado'
+        '403':
+          $ref: '#/components/responses/SinPermiso'
+        '404':
+          description: CLIENTE_CORPORATIVO_NO_ENCONTRADO o CONTACTO_NO_ENCONTRADO
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /clientes-corporativos/{id_cliente}/pasajeros:
+    post:
+      tags: [administracion]
+      summary: Asociar un pasajero a la empresa
+      description: |
+        Solo administrador y dueno. Asocia un pasajero existente; el vínculo queda `activo`.
+        Un pasajero puede estar asociado a más de una empresa. (CU-023 A2)
+      x-cu: CU-023
+      x-cobertura: parcial
+      parameters:
+        - name: id_cliente
+          in: path
+          required: true
+          schema: { type: integer, minimum: 1 }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PasajeroCorporativoCreate'
+      responses:
+        '201':
+          description: Pasajero asociado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PasajeroCorporativo'
+        '400':
+          description: VALIDACION
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          $ref: '#/components/responses/NoAutenticado'
+        '403':
+          $ref: '#/components/responses/SinPermiso'
+        '404':
+          description: CLIENTE_CORPORATIVO_NO_ENCONTRADO o PASAJERO_NO_ENCONTRADO
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '409':
+          description: PASAJERO_YA_ASOCIADO
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /clientes-corporativos/{id_cliente}/pasajeros/{id_pasajero}:
+    delete:
+      tags: [administracion]
+      summary: Desasociar un pasajero de la empresa
+      description: |
+        Solo administrador y dueno. Borra el vínculo (`estado_vinculo` no tiene catálogo de
+        estados); el pasajero sigue existiendo con sus reservas y pagos. (CU-023 A2)
+      x-cu: CU-023
+      x-cobertura: parcial
+      parameters:
+        - name: id_cliente
+          in: path
+          required: true
+          schema: { type: integer, minimum: 1 }
+        - name: id_pasajero
+          in: path
+          required: true
+          schema: { type: integer, minimum: 1 }
+      responses:
+        '204':
+          description: Pasajero desasociado
+        '400':
+          description: VALIDACION — identificador inválido
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          $ref: '#/components/responses/NoAutenticado'
+        '403':
+          $ref: '#/components/responses/SinPermiso'
+        '404':
+          description: CLIENTE_CORPORATIVO_NO_ENCONTRADO o VINCULO_NO_ENCONTRADO
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /organizaciones:
+    get:
+      tags: [corporativo]
+      summary: Organizaciones que represento
+      description: |
+        Solo `representante_corporativo`. Las empresas en las que la persona del token figura como
+        contacto con `es_representante`. Sirve para conocer el `id_cliente` de las demás operaciones:
+        el modelo permite representar a más de una empresa, así que no se infiere una sola. (CU-033)
+      x-cu: CU-033
+      x-cobertura: parcial
+      responses:
+        '200':
+          description: Organizaciones representadas, ordenadas por razón social
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OrganizacionLista'
+        '401':
+          $ref: '#/components/responses/NoAutenticado'
+        '403':
+          $ref: '#/components/responses/SinPermiso'
+
+  /organizaciones/{id_cliente}/pasajeros:
+    get:
+      tags: [corporativo]
+      summary: Pasajeros de mi organización
+      description: |
+        Solo `representante_corporativo` de esa empresa. Una empresa que no representa responde
+        404 `ORGANIZACION_NO_ENCONTRADA`, igual que una inexistente (CU-033 A3). Ordenado por
+        apellido, nombre e id.
+      x-cu: CU-033
+      x-cobertura: parcial
+      parameters:
+        - name: id_cliente
+          in: path
+          required: true
+          schema: { type: integer, minimum: 1 }
+        - name: limite
+          in: query
+          schema: { type: integer, minimum: 1, maximum: 100, default: 20 }
+        - name: desplazamiento
+          in: query
+          schema: { type: integer, minimum: 0, default: 0 }
+      responses:
+        '200':
+          description: Pasajeros asociados a la empresa
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PasajeroOrganizacionLista'
+        '400':
+          description: VALIDACION — parámetros inválidos
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          $ref: '#/components/responses/NoAutenticado'
+        '403':
+          $ref: '#/components/responses/SinPermiso'
+        '404':
+          description: ORGANIZACION_NO_ENCONTRADA (inexistente o no representada)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+    post:
+      tags: [corporativo]
+      summary: Registrar un pasajero en mi organización
+      description: |
+        Solo `representante_corporativo` de esa empresa. Crea la persona, el pasajero y su vínculo
+        con la empresa en una sola transacción. Si ya existe una persona con ese DNI responde 409
+        `DNI_DUPLICADO`: reutilizarla no está definido. La categoría no se carga (queda a cargo de
+        administración). (CU-033, flujo principal)
+      x-cu: CU-033
+      x-cobertura: parcial
+      parameters:
+        - name: id_cliente
+          in: path
+          required: true
+          schema: { type: integer, minimum: 1 }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PasajeroOrganizacionCreate'
+      responses:
+        '201':
+          description: Pasajero registrado y asociado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PasajeroOrganizacion'
+        '400':
+          description: VALIDACION
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          $ref: '#/components/responses/NoAutenticado'
+        '403':
+          $ref: '#/components/responses/SinPermiso'
+        '404':
+          description: ORGANIZACION_NO_ENCONTRADA (inexistente o no representada)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '409':
+          description: DNI_DUPLICADO
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /organizaciones/{id_cliente}/pasajeros/{id_pasajero}:
+    patch:
+      tags: [corporativo]
+      summary: Modificar un pasajero de mi organización
+      description: |
+        Solo `representante_corporativo` de esa empresa. Modifica nombre, apellido, email, teléfono
+        y dirección; omitir un campo lo deja sin cambios. Un pasajero que no es de la empresa
+        responde 404 `PASAJERO_NO_ENCONTRADO` sin tocar nada (CU-033 A3). Cualquier otro dato, el
+        DNI en particular, responde 403 `DATO_NO_MODIFICABLE` y no modifica ninguno: el cambio lo
+        hace un administrador (CU-033 A4, RN-026).
+      x-cu: CU-033
+      x-cobertura: parcial
+      parameters:
+        - name: id_cliente
+          in: path
+          required: true
+          schema: { type: integer, minimum: 1 }
+        - name: id_pasajero
+          in: path
+          required: true
+          schema: { type: integer, minimum: 1 }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PasajeroOrganizacionUpdate'
+      responses:
+        '200':
+          description: Pasajero modificado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PasajeroOrganizacion'
+        '400':
+          description: VALIDACION — sin datos o con datos inválidos
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          $ref: '#/components/responses/NoAutenticado'
+        '403':
+          description: SIN_PERMISO (otro rol) o DATO_NO_MODIFICABLE (dato no habilitado)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: ORGANIZACION_NO_ENCONTRADA o PASAJERO_NO_ENCONTRADO
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
   /clientes/{id_cliente}/deuda:
     get:
       tags: [administracion]
@@ -217,6 +931,66 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/Reserva'
+
+  /pasajeros/me/comprobantes:
+    get:
+      tags: [pasajero]
+      summary: Consultar comprobantes propios
+      description: |
+        Solo rol pasajero. Comprobantes cuyo origen (pago, contratación o movimiento de cuenta)
+        pertenece al cliente individual del pasajero autenticado, por `id_comprobante` ascendente.
+        Sin cliente individual o sin comprobantes responde una lista vacía (CU-035 A1). Solo
+        consulta: la descarga queda pendiente, porque la spec deja sin definir el formato de los
+        documentos y las reglas fiscales. El representante corporativo (ACT-03) todavía no tiene
+        operación. (CU-035, RF-037, RN-028)
+      x-cu: CU-035
+      x-cobertura: parcial
+      responses:
+        '200':
+          description: Comprobantes propios
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ComprobantePropio'
+        '401':
+          $ref: '#/components/responses/NoAutenticado'
+        '403':
+          $ref: '#/components/responses/SinPermiso'
+
+  /pasajeros/me/comprobantes/{id_comprobante}:
+    get:
+      tags: [pasajero]
+      summary: Consultar un comprobante propio
+      description: |
+        Solo rol pasajero. Un comprobante de otro cliente o inexistente responde el mismo 404
+        `COMPROBANTE_NO_ENCONTRADO`: no se presenta ni se confirma que exista (CU-035 A2, RN-028).
+        (CU-035, RF-037)
+      x-cu: CU-035
+      x-cobertura: parcial
+      parameters:
+        - name: id_comprobante
+          in: path
+          required: true
+          schema: { type: integer, minimum: 1 }
+      responses:
+        '200':
+          description: Comprobante propio
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ComprobantePropio'
+        '401':
+          $ref: '#/components/responses/NoAutenticado'
+        '403':
+          $ref: '#/components/responses/SinPermiso'
+        '404':
+          description: COMPROBANTE_NO_ENCONTRADO — inexistente o de otro cliente
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
 
   # ---------------------------------------------------------------------------
   # CHOFER (operación asignada)
@@ -764,6 +1538,15 @@ paths:
         autenticación, permiso, disponibilidad del viaje y disponibilidad de posición.
 
         Marca "desactualizada" si supera 30 s (RNF-008).
+        fecha_hora_evaluacion es opcional por compatibilidad. Si se entrega, es el
+        instante UTC S tomado una sola vez para esta evaluacion, sobre el mismo
+        snapshot de posicion devuelto: desactualizada = (S - fecha_hora_posicion > 30 s).
+        fecha_hora_posicion conserva su significado contractual y politica vigente;
+        S no certifica captura fisica, recepcion del cliente ni demora unidireccional.
+        Cada 200 se genera fresco con Cache-Control: no-store. Una respuesta
+        reutilizada desde cache no constituye una nueva referencia temporal.
+        Sin S valido no se infiere vigencia desde false ni desde el reloj del cliente;
+        true conserva su significado de desactualizacion acreditada por el servidor.
         Consumidores hacen polling (~10 s, RNF-007). (CU-009, RF-022)
         COBERTURA PARCIAL: ETA todavía no está implementado; eta_minutos es null.
         No acredita continuidad GPS ni cumplimiento de RNF-008.
@@ -776,6 +1559,10 @@ paths:
       responses:
         '200':
           description: Última ubicación del vehículo; eta_minutos es null mientras ETA no esté implementado.
+          headers:
+            Cache-Control:
+              description: Respuesta fresca; no almacenar ni reutilizar como evaluacion nueva.
+              schema: { type: string, enum: [no-store] }
           content:
             application/json:
               schema:
@@ -1579,6 +2366,257 @@ paths:
               schema: { $ref: '#/components/schemas/Error' }
 
 # =============================================================================
+  /viajes/{id_viaje}/avisos:
+    post:
+      tags:
+      - chofer
+      summary: Registrar aviso del chofer propio en curso; reintento histórico propio
+      x-cu: CU-030
+      x-cobertura: parcial
+      security:
+      - bearerAuth: []
+      description: 'CU-030/RF-025; MR-R29/MR-R32; #280. Registro manual. CU-037 no integrado:
+        no_evaluada no promete envío. Sin automatismo, ETA o QR. Respuesta perdida/5xx
+        es resultado incierto; 404 de búsqueda no prueba rechazo de POST en vuelo. Solo
+        rol chofer. Clave única por cuenta autora/viaje. Contenido normalizado por trim;
+        misma clave/clase/texto repite ID, diferente contenido 409. Reintento existente
+        autorizado por autor aun tras fin/reasignación; alta nueva exige asignación
+        vigente y en_curso.'
+      parameters:
+      - name: id_viaje
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int64
+      responses:
+        '200':
+          description: Resultado autorizado; Cache-Control no-store
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Aviso'
+        '400':
+          description: Rechazo según convenciones; no resuelve envíos anteriores inciertos
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: Rechazo según convenciones; no resuelve envíos anteriores inciertos
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '403':
+          description: Rechazo según convenciones; no resuelve envíos anteriores inciertos
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Rechazo según convenciones; no resuelve envíos anteriores inciertos
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '409':
+          description: Rechazo según convenciones; no resuelve envíos anteriores inciertos
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '201':
+          description: Confirmado después de commit; 200 en repetición exacta
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Aviso'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AvisoCrear'
+    get:
+      tags:
+      - chofer
+      summary: Consulta interna admin/dueño de avisos manuales del viaje
+      x-cu: CU-030
+      x-cobertura: parcial
+      security:
+      - bearerAuth: []
+      description: 'CU-030/RF-025; MR-R29/MR-R32; #280. Registro manual. CU-037 no integrado:
+        no_evaluada no promete envío. Sin automatismo, ETA o QR. Respuesta perdida/5xx
+        es resultado incierto; 404 de búsqueda no prueba rechazo de POST en vuelo.'
+      parameters:
+      - name: id_viaje
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int64
+      responses:
+        '200':
+          description: Resultado autorizado; Cache-Control no-store
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Aviso'
+        '400':
+          description: Rechazo según convenciones; no resuelve envíos anteriores inciertos
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: Rechazo según convenciones; no resuelve envíos anteriores inciertos
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '403':
+          description: Rechazo según convenciones; no resuelve envíos anteriores inciertos
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Rechazo según convenciones; no resuelve envíos anteriores inciertos
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '409':
+          description: Rechazo según convenciones; no resuelve envíos anteriores inciertos
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+  /viajes/{id_viaje}/avisos/resultado:
+    get:
+      tags:
+      - chofer
+      summary: Recuperar resultado histórico propio por autor autenticado
+      x-cu: CU-030
+      x-cobertura: parcial
+      security:
+      - bearerAuth: []
+      description: 'CU-030/RF-025; MR-R29/MR-R32; #280. Registro manual. CU-037 no integrado:
+        no_evaluada no promete envío. Sin automatismo, ETA o QR. Respuesta perdida/5xx
+        es resultado incierto; 404 de búsqueda no prueba rechazo de POST en vuelo.'
+      parameters:
+      - name: id_viaje
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int64
+      - name: clave_solicitud
+        in: query
+        required: true
+        schema:
+          type: string
+          format: uuid
+      responses:
+        '200':
+          description: Resultado autorizado; Cache-Control no-store
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Aviso'
+        '400':
+          description: Rechazo según convenciones; no resuelve envíos anteriores inciertos
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: Rechazo según convenciones; no resuelve envíos anteriores inciertos
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '403':
+          description: Rechazo según convenciones; no resuelve envíos anteriores inciertos
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Rechazo según convenciones; no resuelve envíos anteriores inciertos
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '409':
+          description: Rechazo según convenciones; no resuelve envíos anteriores inciertos
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+  /pasajeros/me/viajes/{id_viaje}/demora:
+    get:
+      tags:
+      - chofer
+      summary: Mensaje contextual para reserva propia consolidada
+      x-cu: CU-030
+      x-cobertura: parcial
+      security:
+      - bearerAuth: []
+      description: 'CU-030/RF-025; MR-R29/MR-R32; #280. Registro manual. CU-037 no integrado:
+        no_evaluada no promete envío. Sin automatismo, ETA o QR. Respuesta perdida/5xx
+        es resultado incierto; 404 de búsqueda no prueba rechazo de POST en vuelo. Solo
+        pasajero con reserva propia consolidada revalidada. Viaje fuera de en_curso
+        devuelve mensaje null. Mensaje fechado de reporte, nunca afirmación de demora
+        activa. Sin detalle interno ni historial.'
+      parameters:
+      - name: id_viaje
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int64
+      responses:
+        '200':
+          description: Resultado autorizado; Cache-Control no-store
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MensajeDemora'
+        '400':
+          description: Rechazo según convenciones; no resuelve envíos anteriores inciertos
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: Rechazo según convenciones; no resuelve envíos anteriores inciertos
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '403':
+          description: Rechazo según convenciones; no resuelve envíos anteriores inciertos
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Rechazo según convenciones; no resuelve envíos anteriores inciertos
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '409':
+          description: Rechazo según convenciones; no resuelve envíos anteriores inciertos
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
 components:
 
   securitySchemes:
@@ -1699,6 +2737,219 @@ components:
         telefono: { type: string }
         direccion: { type: string }
 
+    PasajeroAdmin:
+      type: object
+      description: Pasajero tal como lo ve administración (CU-013). Mismos datos que PerfilPasajero.
+      properties:
+        id_persona: { type: integer }
+        nombre: { type: string }
+        apellido: { type: string }
+        dni: { type: string }
+        email: { type: string }
+        telefono: { type: string }
+        direccion: { type: string }
+        categoria: { type: string }
+        estado_habilitacion: { type: string, enum: [habilitado, suspendido, baja] }
+        fotografia: { type: string }
+
+    PasajeroLista:
+      type: object
+      required: [items, total]
+      properties:
+        items:
+          type: array
+          items: { $ref: '#/components/schemas/PasajeroAdmin' }
+        total: { type: integer, description: Cantidad de coincidencias sin paginar. }
+
+    PasajeroCreate:
+      type: object
+      additionalProperties: false
+      required: [nombre, apellido, dni]
+      properties:
+        nombre: { type: string, minLength: 1, maxLength: 80 }
+        apellido: { type: string, minLength: 1, maxLength: 80 }
+        dni: { type: string, minLength: 1, maxLength: 20 }
+        email: { type: string, minLength: 1, maxLength: 120 }
+        telefono: { type: string, minLength: 1, maxLength: 30 }
+        direccion: { type: string, minLength: 1, maxLength: 200 }
+        categoria: { type: string, minLength: 1, maxLength: 30, description: Texto libre; el catálogo está a confirmar. }
+
+    PasajeroUpdate:
+      type: object
+      additionalProperties: false
+      minProperties: 1
+      description: Omitir un campo lo deja sin cambios; null no está admitido.
+      properties:
+        nombre: { type: string, minLength: 1, maxLength: 80 }
+        apellido: { type: string, minLength: 1, maxLength: 80 }
+        dni: { type: string, minLength: 1, maxLength: 20 }
+        email: { type: string, minLength: 1, maxLength: 120 }
+        telefono: { type: string, minLength: 1, maxLength: 30 }
+        direccion: { type: string, minLength: 1, maxLength: 200 }
+        categoria: { type: string, minLength: 1, maxLength: 30 }
+
+    ClienteCorporativo:
+      type: object
+      required: [id_cliente, razon_social, cuit, estado]
+      properties:
+        id_cliente: { type: integer }
+        razon_social: { type: string }
+        cuit: { type: string }
+        direccion: { type: string }
+        estado: { type: string, description: Solo existe `activo`; sin catálogo aprobado. }
+
+    ClienteCorporativoLista:
+      type: object
+      required: [items, total]
+      properties:
+        items:
+          type: array
+          items: { $ref: '#/components/schemas/ClienteCorporativo' }
+        total: { type: integer, description: Cantidad de coincidencias sin paginar. }
+
+    ClienteCorporativoDetalle:
+      allOf:
+        - $ref: '#/components/schemas/ClienteCorporativo'
+        - type: object
+          required: [contactos, pasajeros]
+          properties:
+            contactos:
+              type: array
+              items: { $ref: '#/components/schemas/ContactoCorporativo' }
+            pasajeros:
+              type: array
+              items: { $ref: '#/components/schemas/PasajeroCorporativo' }
+
+    ClienteCorporativoCreate:
+      type: object
+      additionalProperties: false
+      required: [razon_social, cuit]
+      properties:
+        razon_social: { type: string, minLength: 1, maxLength: 150 }
+        cuit: { type: string, minLength: 1, maxLength: 20, description: Formato no definido. }
+        direccion: { type: string, minLength: 1, maxLength: 200 }
+
+    ClienteCorporativoUpdate:
+      type: object
+      additionalProperties: false
+      minProperties: 1
+      description: Omitir un campo lo deja sin cambios; null no está admitido.
+      properties:
+        razon_social: { type: string, minLength: 1, maxLength: 150 }
+        cuit: { type: string, minLength: 1, maxLength: 20 }
+        direccion: { type: string, minLength: 1, maxLength: 200 }
+
+    ContactoCorporativo:
+      type: object
+      required: [id_persona, nombre, apellido, dni, es_representante]
+      properties:
+        id_persona: { type: integer }
+        nombre: { type: string }
+        apellido: { type: string }
+        dni: { type: string }
+        email: { type: string }
+        telefono: { type: string }
+        cargo: { type: string }
+        es_representante: { type: boolean }
+
+    ContactoCorporativoCreate:
+      type: object
+      additionalProperties: false
+      description: |
+        Una persona existente (`id_persona`, sin datos de persona) o una nueva (nombre, apellido y
+        dni obligatorios, sin `id_persona`).
+      properties:
+        id_persona: { type: integer, minimum: 1 }
+        nombre: { type: string, minLength: 1, maxLength: 80 }
+        apellido: { type: string, minLength: 1, maxLength: 80 }
+        dni: { type: string, minLength: 1, maxLength: 20 }
+        email: { type: string, minLength: 1, maxLength: 120 }
+        telefono: { type: string, minLength: 1, maxLength: 30 }
+        cargo: { type: string, minLength: 1, maxLength: 80 }
+        es_representante: { type: boolean, default: false }
+
+    PasajeroCorporativo:
+      type: object
+      required: [id_persona, nombre, apellido, dni, estado_habilitacion, estado_vinculo]
+      properties:
+        id_persona: { type: integer }
+        nombre: { type: string }
+        apellido: { type: string }
+        dni: { type: string }
+        estado_habilitacion: { type: string, enum: [habilitado, suspendido, baja] }
+        estado_vinculo: { type: string, description: Solo existe `activo`; sin catálogo aprobado. }
+
+    PasajeroCorporativoCreate:
+      type: object
+      additionalProperties: false
+      required: [id_pasajero]
+      properties:
+        id_pasajero: { type: integer, minimum: 1 }
+
+    OrganizacionRepresentada:
+      type: object
+      required: [id_cliente, razon_social]
+      properties:
+        id_cliente: { type: integer }
+        razon_social: { type: string }
+        cargo: { type: string }
+
+    OrganizacionLista:
+      type: object
+      required: [items, total]
+      properties:
+        items:
+          type: array
+          items: { $ref: '#/components/schemas/OrganizacionRepresentada' }
+        total: { type: integer }
+
+    PasajeroOrganizacion:
+      type: object
+      description: Pasajero de la organización tal como lo ve su representante (sin categoría ni fotografía).
+      required: [id_persona, nombre, apellido, dni, estado_habilitacion]
+      properties:
+        id_persona: { type: integer }
+        nombre: { type: string }
+        apellido: { type: string }
+        dni: { type: string }
+        email: { type: string }
+        telefono: { type: string }
+        direccion: { type: string }
+        estado_habilitacion: { type: string, enum: [habilitado, suspendido, baja] }
+
+    PasajeroOrganizacionLista:
+      type: object
+      required: [items, total]
+      properties:
+        items:
+          type: array
+          items: { $ref: '#/components/schemas/PasajeroOrganizacion' }
+        total: { type: integer, description: Cantidad de pasajeros de la empresa sin paginar. }
+
+    PasajeroOrganizacionCreate:
+      type: object
+      additionalProperties: false
+      required: [nombre, apellido, dni]
+      properties:
+        nombre: { type: string, minLength: 1, maxLength: 80 }
+        apellido: { type: string, minLength: 1, maxLength: 80 }
+        dni: { type: string, minLength: 1, maxLength: 20 }
+        email: { type: string, minLength: 1, maxLength: 120 }
+        telefono: { type: string, minLength: 1, maxLength: 30 }
+        direccion: { type: string, minLength: 1, maxLength: 200 }
+
+    PasajeroOrganizacionUpdate:
+      type: object
+      description: |
+        Omitir un campo lo deja sin cambios; null no está admitido. Un campo que no figura acá (el DNI,
+        por ejemplo) se acepta en el cuerpo pero se rechaza con 403 DATO_NO_MODIFICABLE.
+      properties:
+        nombre: { type: string, minLength: 1, maxLength: 80 }
+        apellido: { type: string, minLength: 1, maxLength: 80 }
+        email: { type: string, minLength: 1, maxLength: 120 }
+        telefono: { type: string, minLength: 1, maxLength: 30 }
+        direccion: { type: string, minLength: 1, maxLength: 200 }
+
     Deuda:
       type: object
       properties:
@@ -1818,6 +3069,17 @@ components:
         latitud: { type: number, format: double }
         longitud: { type: number, format: double }
         fecha_hora_posicion: { type: string, format: date-time }
+        fecha_hora_evaluacion:
+          type: string
+          format: date-time
+          description: |
+            Instante UTC S de evaluacion de esta respuesta fresca, calculado una sola vez
+            sobre el mismo snapshot devuelto: desactualizada es true si y solo si
+            S - fecha_hora_posicion supera estrictamente 30 segundos.
+            No cambia fecha_hora_posicion ni la politica de recepcion GPS, no prueba la
+            antiguedad fisica de captura ni indica recepcion del cliente.
+            Propiedad opcional, no nullable: ausencia o referencia invalida no permiten
+            crear un ancla temporal ni afirmar vigencia a partir de false.
         desactualizada: { type: boolean, description: true si supera 30 s de antigüedad (RNF-008). }
         eta_minutos: { type: integer, nullable: true, description: "Estimación de llegada, si disponible." }
 
@@ -1885,6 +3147,35 @@ components:
         medio_pago: { type: string }
         estado: { type: string, enum: [PENDIENTE, CONFIRMADO, RECHAZADO] }
         fecha_hora: { type: string, format: date-time }
+
+    ComprobantePropio:
+      type: object
+      description: |
+        Comprobante que emite la empresa (CU-035). La tabla `comprobante` solo guarda el tipo y
+        exactamente un origen (MR-R28): `id_pago` para un RECIBO, `id_contratacion` para una
+        FACTURA, `id_movimiento_cuenta` para una nota. Fecha, importe y medio son los del origen;
+        no hay número, fecha de emisión ni datos fiscales propios del comprobante.
+      required: [id_comprobante, tipo, id_pago, id_contratacion, id_movimiento_cuenta, fecha_hora, importe, medio_pago]
+      properties:
+        id_comprobante: { type: integer }
+        tipo: { type: string, enum: [RECIBO, FACTURA, NOTA_DE_CREDITO, NOTA_DE_DEBITO] }
+        id_pago: { type: integer, nullable: true, description: Origen de un RECIBO. }
+        id_contratacion: { type: integer, nullable: true, description: Origen de una FACTURA. }
+        id_movimiento_cuenta: { type: integer, nullable: true, description: Origen de una nota de crédito o de débito. }
+        fecha_hora:
+          type: string
+          format: date-time
+          nullable: true
+          description: La del pago o la del movimiento. Una FACTURA no tiene, porque la contratación no guarda fecha.
+        importe:
+          type: number
+          format: double
+          nullable: true
+          description: El del pago, el importe acordado de la contratación (puede faltar) o el del movimiento.
+        medio_pago:
+          type: string
+          nullable: true
+          description: Solo en un RECIBO, el medio del pago.
 
     OperacionAsignada:
       type: object
@@ -2085,3 +3376,82 @@ components:
         conversacion_id: { type: string }
         derivar_humano: { type: boolean, description: true si el agente escaló a una persona (RF-032). }
         tool_usada: { type: string, nullable: true, description: "Tool invocada por el agente, si hubo." }
+
+    AvisoCrear:
+      type: object
+      additionalProperties: false
+      required:
+      - clase
+      - descripcion_interna
+      - clave_solicitud
+      properties:
+        clase:
+          type: string
+          enum:
+          - demora
+          - problema
+        descripcion_interna:
+          type: string
+          minLength: 1
+          maxLength: 2000
+        clave_solicitud:
+          type: string
+          format: uuid
+    Aviso:
+      type: object
+      required:
+      - id_evento_operativo
+      - id_viaje
+      - clase
+      - descripcion_interna
+      - id_cuenta_autora
+      - clave_solicitud
+      - fecha_hora_registro
+      - registro
+      - notificacion
+      properties:
+        id_evento_operativo:
+          type: integer
+          format: int64
+        id_viaje:
+          type: integer
+          format: int64
+        id_cuenta_autora:
+          type: integer
+          format: int64
+        clase:
+          type: string
+          enum:
+          - demora
+          - problema
+        descripcion_interna:
+          type: string
+        clave_solicitud:
+          type: string
+          format: uuid
+        fecha_hora_registro:
+          type: string
+          format: date-time
+        registro:
+          type: string
+          enum:
+          - confirmado
+        notificacion:
+          type: string
+          enum:
+          - no_evaluada
+    MensajeDemora:
+      type: object
+      required:
+      - id_viaje
+      properties:
+        id_viaje:
+          type: integer
+          format: int64
+        mensaje:
+          type: string
+          nullable: true
+        fecha_hora_reporte:
+          type: string
+          format: date-time
+          nullable: true

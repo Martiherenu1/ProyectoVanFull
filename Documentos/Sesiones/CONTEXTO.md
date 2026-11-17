@@ -1,51 +1,66 @@
 # CONTEXTO VANFULL — Carga rápida de sesión
 
-> **CU-007, publicación documental efectiva — 10/11/2026:** [Issue #267](https://github.com/Martiherenu1/ProyectoVanFull/issues/267) y [PR #268](https://github.com/Martiherenu1/ProyectoVanFull/pull/268) abierta, sin merge; primer HEAD `8755c8b972c1ef98c73e072bd41ef3c73224e67a`, base revalidada `fa59928ee1dc4ce838f818397181bc6a817c31c1`. Push normal de cuatro documentos; revisión solicitada en GitHub a Martiniano (`Martiherenu1`) y Facundo (`facubarrientos`), sin aprobación atribuida. Este registro completa la publicación; HEAD final y CI efectiva se registran en #268 tras observarlos, sin inferir resultados previos. Único cierre documental #267; no CU implementado, sin despliegues ni operaciones sobre bases. Preparación e históricos conservados debajo.
+> **Corte del 17/11/2026 (madrugada):**
+> - **#304 (0002 sin respaldo previo):** hay respaldo posterior y restauración aislada idéntica (#305, #306). Facundo revisó Flutter de #281 sobre `40fd608`: favorable, como revisión posterior al merge. En #304 quedaron registrados el procedimiento incumplido y el riesgo residual: sin manifiesto previo, no se puede probar que los datos anteriores al merge no cambiaron. **Falta:** el SHA y el estado del deploy en Render Events, y si la consola de Neon tiene un punto anterior a las 01:54 UTC. No se hacen pruebas nuevas sobre Neon hasta coordinarlo.
+> - **Tarifas (#9):** el contrato de `GET /tarifas` está en el [PR #307](https://github.com/Martiherenu1/ProyectoVanFull/pull/307), en borrador y solo contrato. Pide `id_viaje`, toma `tarifa.tipo = OCASIONAL:<servicio>:<sentido>`, `importe_base` (= `importe_acordado`) y `efectivo_informativo` aparte. Espera el OK de Martín y Facundo a los 5 puntos «Para decidir» del PR. Martín revisó que no choca con CU-007/ETA, sin aprobar todavía convención, contrato ni contabilidad.
+> - **CU-034:** pendiente documentado para el 20/11, en el [Issue #308](https://github.com/Martiherenu1/ProyectoVanFull/issues/308). Se acordó con Martín y Facundo coincidió. No se implementa ni se elige modelo.
+> - **CU-037:** simulación local de Martín (fuera del repo) corrida aislada, 12/12 pruebas OK. Observaciones: un rechazo bloquea el reintento y un timeout no se puede repetir. La elegibilidad por estado de reserva es de pasajero. Propuesta: pendiente documentado para el 20/11.
 
-> **CU-007, preparación documental para PC3 — 10/11/2026:** análisis vigente en [PC2/ANALISIS-CU007.md](PC2/ANALISIS-CU007.md), con aclaraciones del recuerdo de entrevista comunicado por Martín y sin aprobación técnica conjunta ni implementación. [Resumen y borradores para revisión](PC3/PREPARACION-PUBLICACION-CU007.md), base `fa59928ee1dc4ce838f818397181bc6a817c31c1`, rama `docs/chofer-analisis-cu007-pc3`. Solo documentación local, sin commit/publicación. Preguntas operativas y decisiones técnicas abiertas; fechas y restricciones de demo del 30/10 conservadas como antecedentes, sin extenderlas automáticamente a PC3.
+> **⚠️ #281 mergeado y Neon en 0002 sin respaldo previo — 16/11/2026 (23:00):** #281 entró a `main` en `686e2cc` (22:54 ART, HEAD `40fd608`) antes del respaldo y el ensayo acordados; Render desplegó y migró Neon a 0002. Verificado con `06-post-0002.ps1` (solo lectura): 0002 aplicada como se esperaba, 25 eventos y 0 con metadatos nuevos, respaldo posterior con SHA-256 `9365E8B5…B566B`. **No revertir el merge** (el código viejo no arranca con Neon en 0002). Falta ver si Neon permite una rama de antes de 01:54 UTC para tener el estado previo. [Issue #304](https://github.com/Martiherenu1/ProyectoVanFull/issues/304); runbook, sección G.
 
-> **Chofer, publicación documental efectiva — 2026-10-30:** [PR #260](https://github.com/Martiherenu1/ProyectoVanFull/pull/260) abierta, primer HEAD `1720b35dc1aeb14c25c5a4f04dd1c3c5bd91e3ec`; único cierre documental #259. Base `f55ecf271aba9645582fcf1910b6a7da0084c6f7`, tres documentos, sin CU completos. CI inicial en curso al registrar; resultado del HEAD final en PR/Issue, separado de evidencias históricas. Notas anteriores de preparación se conservan debajo; sin merge, despliegue ni operaciones reales.
+> **CU-030/#281, candidato tras integrar #303 — 16/11/2026:** main vigente `fe4015fe9c751098f90d8a9b16836090b29a6171` incorporado por merge normal desde `bb44997`. Único conflicto real en este contexto; contexto de pasajero integrado automáticamente, conservando su verificación informada de CU-035 y script sin ejecutarlo. Martiniano revisó `bb44997` según mensaje comunicado por Martín: cadena 0001→0002, migración y avisos/modelo/SQL conservados; conformidad técnica, **no aprobación formal**. El nuevo HEAD es candidato para revisión y ensayo, no aprobado; Facundo final y ventana/respaldo/restauración/ensayo siguen pendientes. **Según Martín, Martiniano creó en Neon pago y recibo de prueba N.º 2 para pasajero2: incluirlos en el respaldo, sin omitirlos ni borrarlos como preparación.** No se accedió a Neon para verificarlo. Ensayo 0002 sobre el HEAD finalmente acordado; evaluar impacto ante cambios posteriores. Ficha, guion y notas locales conservados sin publicar. Sin merge hacia main, despliegue ni operaciones Neon. Los cortes anteriores se conservan como antecedentes abajo; la CI nueva se registra en #281 tras observarla.
 
-> **Chofer, publicación documental autorizada — 2026-10-30:** consolidación de CU-029/CU-030, Issue #259, base actualizada `f55ecf271aba9645582fcf1910b6a7da0084c6f7` (#257/CU-008 conservado). Solo tres documentos; sin cumplimiento completo ni cierre de pendientes funcionales. Commit/push/PR/CI propios aún pendientes al preparar esta nota; estado posterior en el cierre y contexto de Chofer. Sin merge, despliegue ni operaciones reales; notas siguientes históricas.
+> **Pasajero — 16/11/2026 (noche):** respaldo de Neon y ensayo de 0002 para #281: procedimiento y scripts en `Documentos/Sesiones/PC3/respaldo-neon/` (`RESPALDO-NEON.md`), **ensayado con una base sintética y el código real de #281, sin ejecutar contra Neon**. Falta correrlo en una ventana acordada (lo hace Martiniano; versión de PostgreSQL, extensiones y tiempos de Neon sin verificar). La revisión de Martiniano sobre #281 ya está publicada (COMMENTED, 16/11). No autoriza el merge. Además, «Mis comprobantes» verificado contra Render en solo lectura (lista vacía de `pasajero2`, 404 y 401 correctos): falta una lista con datos y la pantalla en el celular (`PC3/verificacion-comprobantes/`).
+>
 
-> **Chofer, preparación documental — 2026-10-30:** cierre CU-029/CU-030 en [PC2/CIERRE-DOCUMENTAL-CU029-CU030.md](PC2/CIERRE-DOCUMENTAL-CU029-CU030.md), rama local `docs/chofer-cierre-documental-cu029-cu030`, base `cbcbf1243370649add1b30fb2f1908bdb54962a5`. Solo documentación para revisión final, sin commit ni publicación; no implica CU completos ni nuevas pruebas/operaciones. Históricos y pendientes conservados; detalle en el cierre y contexto de Chofer.
+## Antecedentes de los cortes anteriores (fechas y SHA originales)
 
-> **Corte Pasajero y base común — 2026-10-29 (noche).** Entró a `main`: «Ver ubicación» en Mis reservas (#222),
-> `GET /reservas` de CU-027 (#224), fechas del asistente como DD/MM/AAAA (#232), aviso al agotarse el cupo diario
-> de OpenRouter (#234), guion de la demo (#235/#236) y una prueba que dependía de la hora (#239). **Verificado en
-> Render por API (viaje 3, `pasajero2`): crear una reserva (queda consolidada), el cupo baja y vuelve al cancelar,
-> y la ubicación responde 404 con el viaje sin iniciar.** **Asistente:** la cuenta gratuita de OpenRouter permite
-> **50 pedidos por día** (se renueva 21:00 Argentina); reservar/cancelar por el chat con el modelo real **no se
-> verificó**. Reservar no genera deuda (tarifa pendiente, #9): el saldo queda en 0. El cliente Flutter no tiene
-> timeout y el servidor corta a los 60 s. Protección de `main`: 0 approvals y las 2 CI exigidas. Neon sigue sin
-> re-sembrar (espera a Martín). Detalle y decisiones: PC2/CONTEXTO-pasajero-y-base-comun.md y PC2/GUION-DEMO-PC2.md.
+> **CU-030/#281, integración de main — 16/11/2026:** main efectivo `8c422e1` (#300/#301) incorporado por merge normal hacia la rama de #281; único conflicto en este contexto, entradas de ambos trabajos conservadas una vez y antecedentes separados abajo. Código/modelo/SQL/0002 y protecciones idénticos a `e673f98`; runbook de respaldo recibido, no ejecutado. [Contraste y pendientes operativos](PC3/ENTREGA-MANUAL-CU030-280.md#integración-del-runbook-de-neon--16112026). Martiniano verificó `e673f98` según mensaje comunicado por Martín, conformidad técnica sin aprobación formal. Facundo final, aprobación condicionada de Marti y evidencia Neon/restauración/ventana siguen pendientes. El ensayo debe identificar el HEAD final efectivamente desplegable; sin merge hacia main ni operaciones Neon/Render.
 
-> **CU-036, seguimiento #215:** #240 mergeado solo con propuesta; #238 cerrado.
-> Implementación local candidata para PR nuevo, main remoto 440c578 preservado.
-> Rama aislada, vínculo persistente y migración optativa fuera del head normal,
-> webhook condicional HMAC/Payments/CU-016 y pruebas PostgreSQL temporales. Flag false;
-> live_mode=true rechazado. D1–D6 NO aprobadas; sin main/commit/push/despliegue.
-> Matriz y ensayo: PC2/ENSAYO-CU036-AISLADO.md. Cortes históricos siguientes no describen esta rama.
-> Ampliación local Checkout Pro: intención persistente, inicio/consulta propios y Flutter
-> detrás de flags false; reutiliza webhook/CU-016. Modelo/contrato/área pasajero pendientes
-> de aprobación del equipo; efectivo/transferencia conservados. Detalle y riesgos:
-> PC2/CHECKOUT-PRO-CU014-CU036-CANDIDATO.md. Sin llamadas a MP, commit ni despliegue.
+> **CU-030/#281, revisión técnica informada — 16/11:** Martín transmite que Martiniano revisó modelo/SQL/0002/servicios en `6656794`, conforme técnicamente y 917 pruebas backend locales aisladas con Ruff/formato correctos; **no aprobación formal**, espera respaldo Neon. README DB corregido puntualmente y limitación de autoría de `ck_aviso_metadatos` a avisos documentada, sin ampliar constraint/migración. Main `5cd091d` integrado por merge normal `f483b05` para CI, conservando ambos contextos y CU-035. [Detalle y procedencia](PC3/ENTREGA-MANUAL-CU030-280.md#revisión-técnica-de-martiniano-informada-por-martín--16112026); SHA/CI nuevos en #281 tras observarlos. Guion local intacto/sin publicar; pendientes Facundo final, respaldo Neon actual restaurado, ventana/responsable. Sin merge hacia main, despliegue ni operaciones Neon/Render.
 
-> Integración Flutter #229, 2026-10-29: test/admin-flutter-integracion-pc2-229 desde main
-> 8e16205 (#228 integrado). Tres circuitos UI nuevos; 32 focalizadas y analyze aprobados.
-> Solo pruebas/contextos, sin cambios productivos ni Neon/Render. Sin commit/push/PR.
-> Antecedente #227/#228: 3 casos backend + 11 existentes CU-027 aprobados, ya integrados.
+> **CU-030/#281, recuperación UUID — 16/11:** según el usuario, Facundo confirma P1/P2 anteriores resueltos en `8b3466f`, sin aprobación final; nuevo P2 reproducido y corregido normalizando UUID antes de consultar y al representar referencias inciertas, con retiro selectivo por viaje/clave. [Entrega y aceptación](PC3/ENTREGA-MANUAL-CU030-280.md#revisión-de-facundo-sobre-8b3466f--uuid-de-recuperación-16112026); resultados/SHA/CI nuevos en #281 tras observarlos. Guion local sigue sin publicar (T06 controlado), sin ensayos reales. Permisos/sesión/RNF-008 y navegación conservados; pendientes revisión final Flutter, modelo/migración, respaldo Neon restaurado y ventana/responsable. CU-037 parcial; sin merge hacia main ni operaciones Neon/Render.
 
-> **Corte Administración PC2 — 2026-10-29, main bceb929, #225.** PR #210/#214/#216/#217/#218
-> mergeados. CU-018/027/014/015: PARCIAL; CU-016: circuito documentado IMPLEMENTADO, contraste
-> detallado v1.3 pendiente; CU-036: preparación interna PARCIAL, circuito HTTP PENDIENTE.
-> Viajes incluye cancelación limitada; reservas, deuda y pagos administrativos están conectados.
-> Pendientes: RN-019/CU-017/#75, tipo/evidencia/efectivo-15 %/señas (#84), RN-004/005/006 (#212),
-> criterios CU-027 (#211) y webhook MP inactivo (#215). No equiparar merge con cobertura completa.
-> Fuente de estado y tabla CU→RF→RN→Issue→PR: PC2/CONTEXTO-administracion-y-flutter.md.
-> Despliegue actual y circuitos nuevos en Render SIN VERIFICAR. Notion pendiente de comprobar/
-> actualizar por Facundo; no consultado ni modificado. Rama documental sin commit/push/PR.
-> Los apartados generales posteriores conservan su fecha propia; no se reauditaron otras áreas.
+> **CU-030/#281, avance concurrente posterior — 16/11:** main `6f111c1` (#272/#292/#294) incorporado por merge normal `9edfebc` tras conflicto exclusivamente documental; ambos bloques preservados. RNF-008 idéntico a main, fixes de auditoría idénticos a `482c49d`, SQL/ORM/migración intactos. Resultados anteriores de 139 pruebas separados de la verificación y CI del HEAD posterior en #281. Facundo debe volver a revisar, sin aprobación atribuida; respaldo Neon actual restaurado, revisión models/migrations y ventana sin uso siguen pendientes. Sin merge hacia main ni despliegue.
+
+> **CU-030/#281 — auditoría de Facundo, 16/11/2026:** P1/P2 informados por Martín sobre `4c92b768`, reproducidos antes de corregir; no aprobación atribuida. Main `4198022` incorporado por merge normal `c75e368`, conservando cambios ajenos. Alta/recuperación usan protección común de 403; acción de recuperación limitada al listado y retorno respeta formulario ocupado. [Entrega y verificaciones](PC3/ENTREGA-MANUAL-CU030-280.md#corrección-de-auditoría-de-facundo--16112026); SHA/CI exactos en #281 tras observarlos, sin heredar CI anterior. Pendientes revisión models/migrations, nueva revisión de Facundo, respaldo Neon actual restaurado y ventana sin uso antes del merge. CU-037 separado, RNF-008/ETA preservados. Sin merge hacia main, operaciones Neon ni despliegue.
+
+> **CU-030/#281 — precisiones de Martiniano comunicadas por Martín:** antes del merge: revisión models/migrations por Martiniano, revisión de Facundo, respaldo actual de **Neon** con restauración aislada probada y ventana acordada sin uso de la base. Respaldo local anterior no lo acredita. Merge puede activar Render y `alembic upgrade head`, llevando 0002 automáticamente a Neon; «sin migraciones remotas durante este trabajo» no descarta ese efecto futuro. [Procedimiento preparado, NO ejecutado](PC3/ENTREGA-MANUAL-CU030-280.md#procedimiento-operativo-concreto--preparado-no-ejecutado-bloquea-el-merge-hasta-acreditarlo). CU-037 pendiente de coordinación entre los tres, sin asignaciones; propuestas previas históricas/no aceptadas. GitHub informa base `df1ad20` y mergeable, pero main remoto ya es `d15a5d9`; simulación sin conflictos, sin merge innecesario. Sin aprobación formal, acceso Neon, merge hacia main ni despliegue.
+
+> **Pasajero — 16/11/2026 (tarde):** pantalla «Mis comprobantes» de CU-035 (lista y detalle, acceso desde Cuenta, [Issue #297](https://github.com/Martiherenu1/ProyectoVanFull/issues/297)). Render ya sirve `main` con `fecha_hora_evaluacion` y los comprobantes (verificado en el `openapi.json` público): se cierra la fila «Render no sirve main». Descarga y representante corporativo siguen pendientes.
+>
+> **Pasajero — 16/11/2026 (mañana):** CU-035 recortado (comprobantes propios del pasajero, solo consulta, [Issue #295](https://github.com/Martiherenu1/ProyectoVanFull/issues/295)), asignado por Facundo; descarga y representante corporativo pendientes. Revisión de modelo/migración de #281 hecha sobre `6656794` (917 pruebas backend, conforme en lo técnico, no aprobada: falta backup de Neon, restauración y ventana). La API de Render no sirve `main` `6f111c1` (sin `fecha_hora_evaluacion`): hay que mirar Events y desplegar; no migra. Detalle: PC2/CONTEXTO-pasajero-y-base-comun.md.
+
+## Continuación Flutter RNF-008 / #293 — 16/11/2026
+
+Candidata sobre #292, dependiente de #272: referencia S/no-store, cotas monotónicas y
+presentación temporal independiente de GET pendiente. Ver contexto de Chofer y
+`frontend/technical/rnf008-vigencia.md`. Cliente HTTP compartido aditivo para revisión
+con Facundo/Martiniano. CI propia pendiente; ejecución Flutter local bloqueada por
+revisión automática de acceso a metadatos, sin eludirlo. #39 y diagnósticos originales
+siguen abiertos; sin cumplimiento integral, merge, despliegue ni operaciones de datos.
+Los apartados inferiores conservan sus cortes históricos.
+
+
+## Estado vigente de esta actualización RNF-008 — 2026-11-16
+
+- Integración de main `4198022f7080d83b30715d5509d9f944e8ba1d7b` en la rama de #272; contrato GPS aditivo conservado junto con CU-005/013/023/033 y contextos de main. No es merge hacia main, implementación #273 ni despliegue. CI de la nueva combinación pendiente al preparar esta nota.
+
+- **RNF-008:** [PR contractual #272](https://github.com/Martiherenu1/ProyectoVanFull/pull/272)
+  abierta; Martiniano aprobó el contrato con observaciones documentales atendidas.
+  Backend aún sin metadato/header; [implementación #273](https://github.com/Martiherenu1/ProyectoVanFull/issues/273)
+  pendiente. [#39](https://github.com/Martiherenu1/ProyectoVanFull/issues/39) abierto;
+  RNF-008 parcial, dos regresiones pendientes y ETA fuera de alcance.
+- **CU-007:** [análisis](PC2/ANALISIS-CU007.md) y
+  [preparación/antecedentes](PC3/PREPARACION-PUBLICACION-CU007.md); #268 integrado,
+  sin implementación aprobada en esta actualización.
+- Estados por área: [Chofer](PC2/CONTEXTO-chofer-y-viaje.md),
+  [Pasajero/base común](PC2/CONTEXTO-pasajero-y-base-comun.md),
+  [Administración/Flutter](PC2/CONTEXTO-administracion-y-flutter.md).
+  Cortes de PC2, SHA y procedencias se conservan en esos documentos y en el anexo
+  histórico al final; no acreditan el despliegue actual.
+- Validación local contractual previa: 5 aprobadas; CI por HEAD registrada en #272/#39,
+  separada de diagnósticos. No merge ni despliegue. Detalle vigente en contexto de Chofer.
 
 > **Para qué sirve:** documento de arranque. Leyendo esto se recupera todo el contexto crítico del proyecto sin
 > releer la documentación completa. **Mantenerlo actualizado al cerrar cada sesión.**
@@ -54,7 +69,7 @@
 > datos de esta máquina. Los prompts de arranque por tipo de tarea, y el criterio de cuándo conviene
 > abrir un chat nuevo, están en `Documentos/Sesiones/PROMPT-INICIAL.md`.
 >
-> **Última actualización: 2026-10-26** (§13 composición compartida de Flutter integrada y chofer1 verificado contra Render; antes, 24/10: backend en Render y asistente AG-01 con modelo real) · Reemplaza y consolida todas las versiones anteriores.
+> **Última actualización: 2026-11-15** (§11: CU-013, CU-023 y CU-033 recortados; el resto del documento sigue como el 2026-10-26: §13 composición compartida de Flutter integrada y chofer1 verificado contra Render; antes, 24/10: backend en Render y asistente AG-01 con modelo real) · Reemplaza y consolida todas las versiones anteriores.
 
 ---
 
@@ -272,6 +287,8 @@ registra en Deployments). Todavía sin endpoint: los abordajes (Martín).
 **`/chat` (AG-01) responde con un modelo real en Render desde el 24/10** (#155, #157): qué se verificó, con qué
 modelos y qué falta, en §13.
 
+**Para la entrega final (2026-11-15), backend y contrato de tres CU de administración y organización, recortados a lo definido** (las pantallas son de Facundo): CU-013 gestionar pasajeros (`/pasajeros`, #285, mergeado en #286), CU-023 clientes corporativos (`/clientes-corporativos`, #287, mergeado en #288) y CU-033 pasajeros de la organización para el representante corporativo (`/organizaciones`, #289). Qué quedó fuera por pendiente y por qué, en `PC2/CONTEXTO-pasajero-y-base-comun.md` (Decisiones del 2026-11-15). Martín aclaró funcionalmente CU-005/RN-020 (la parada nueva tiene que estar habilitada para el viaje) y condicionó el merge de #281 a un backup de Neon con restauración probada.
+
 **Plan:** `services/` (reglas RN) → `routers/` (endpoints del OpenAPI) → tests. Los 37 CU entran en ~10 routers,
 no uno por CU.
 
@@ -430,7 +447,15 @@ el 25/10, salvo acuerdo» de REPARTO-PC2 no rige, por decisión de Martiniano):
   - **Estado de la base:** el viaje 5 queda `finalizado` en Neon hasta el próximo `--reiniciar`, que sigue siendo
     obligatorio antes de la demo (reservas de `pasajero1`), y lo coordina Martiniano.
 
+> **CU-030, corrección de revisión PR #281 — 15/11/2026:** salida explícita de resultado incierto permite volver a las acciones del viaje sin cancelar/rechazar el aviso. Viaje/clave conservados solo en el shell de la misma sesión para recuperación manual posterior; sin reenvíos automáticos y sin trasladar datos entre cuentas. Recuperación desplazable con teclado abierto. Procedimiento futuro de migración 0002, preservación/restauración, SHA efectivos backend/Web y ensayo con datos acordados en [entrega manual](PC3/ENTREGA-MANUAL-CU030-280.md). CU-037 separado: proveedor, plataformas, accesos e integración pendientes, sin responsables atribuidos. HEAD y CI de la corrección se registran en #281 tras observarlos; históricos debajo. Sin merge, despliegue, migraciones remotas ni reinicios.
+
 ## 14. Recursos
+
+> **CU-030/#281, integración main efectivo — 15/11:** main remoto `df1ad20` (CU-013/#286) incorporado mediante merge normal `7792c645fbbb1db0a32ca8747adc00d8aebd3012` sobre `c9c977d`. Unión automática revisada; sin rebase/force-push ni merge hacia main. CU-005 y correcciones CU-030 conservadas; [diff y evidencia](PC3/ENTREGA-MANUAL-CU030-280.md). Local: 71 backend y 41 Flutter focalizadas aprobadas; HEAD/CI finales en #281 tras observarlos. Revisión final de Martiniano/Facundo pendiente, sin aprobación atribuida. Sin despliegues ni operaciones remotas sobre bases.
+
+> **Revisión CU-030/#281, 15/11 — procedencia Martín:** Martiniano revisó `bb1ceb5`, conforme con diseño de idempotencia/permisos/locks, sin aprobar; revisará HEAD final. Acuerdo estructural comunicado por Martín; Facundo aún debe revisar el diff. [Entrega manual](PC3/ENTREGA-MANUAL-CU030-280.md) incluye diff de compatibilidad con CU-005/#275, orden SQL, fecha legible/estados diferenciados y teclado. Merge normal de main conservado, sin rebase/force-push. CI y HEAD finales en #281 tras observarlos; sin merge de PR, despliegues ni operaciones remotas sobre bases.
+
+> **Actualización posterior CU-030/#281 (15/11):** el usuario autorizó incorporar main `7107233` en la rama de trabajo; merge de rama `046173bce3bd7dc9dc34228f7ca16ee9344ee138` conserva CU-005 y mensaje contextual de demora sin conflictos. No es merge de la PR en main ni despliegue. El corte previo de la corrección es `becab45`; HEAD posterior y su propia CI se registran en #281.
 
 - **Repo:** https://github.com/Martiherenu1/ProyectoVanFull (**público**) · entrega congelada en el tag `pc1`
 - **Tablero de los 37 CU (Notion):** https://app.notion.com/p/a05f244f1ab4438982da04067e2fe018
@@ -470,3 +495,85 @@ funcionales ni compartidos. 23 pruebas locales aprobadas, analyze/formato correc
 capturas Flutter de 1440/360 px revisadas. Detalle/evidencia en el contexto de Administración.
 Facundo autoriza publicación y merge commit condicionado a CI verde antes del corte 17:15.
 Sin despliegues manuales ni cambios de backend, API, modelo o infraestructura; Mercado Pago congelado.
+
+---
+
+## Anexo — banners históricos anteriores al resumen del 12/11/2026
+
+Los estados siguientes son antecedentes de su fecha, no el estado vigente ni una
+verificación nueva de despliegue. Se conserva íntegra su información y procedencia.
+
+## Publicación contractual RNF-008 / #39 — 2026-11-11
+
+- [PR #272](https://github.com/Martiherenu1/ProyectoVanFull/pull/272) abierta hacia main,
+  sin merge; [registro en #39](https://github.com/Martiherenu1/ProyectoVanFull/issues/39#issuecomment-6809996842).
+- Base revalidada sin avance c9ac094299a93a52cae6245ea0093aaf964196a2; no merge local
+  necesario. Commits iniciales: contrato 6ca26c1 y análisis/contextos b22aa2f.
+  Este registro posterior completa la publicación en la misma rama, cinco archivos.
+- Revisión solicitada efectivamente a Martiherenu1 y facubarrientos; no aprobación
+  formal atribuida. Conformidades informadas y condiciones anteriores conservadas.
+- CI del HEAD final se registra en PR/#39 después de observarla; no se infiere de
+  las 5 pruebas contractuales locales. No se repitieron verificaciones locales porque
+  contrato y base no cambiaron. Dos regresiones originales y sus históricos intactos.
+- Sin implementación productiva, modelo, Flutter ni CI modificados; RNF-008 parcial,
+  ETA fuera de alcance, #39 abierto. Sin despliegue u operaciones reales.
+  Las notas de preparación siguientes son históricas.
+
+> **RNF-008 / #39, preparación contractual local — 2026-11-11:** rama
+> docs/chofer-contrato-rnf008-39 desde c9ac094299a93a52cae6245ea0093aaf964196a2.
+> Campo opcional fecha_hora_evaluacion y no-store en YAML/JSON; sin implementación,
+> publicación ni cumplimiento completo. Regresiones y APK preservadas fuera de esta
+> rama. Detalle y conformidades condicionadas en el contexto de Chofer y análisis #39;
+> ETA fuera de alcance, #39 abierto. Históricos siguientes conservados.
+
+> **CU-007, publicación documental efectiva — 10/11/2026:** [Issue #267](https://github.com/Martiherenu1/ProyectoVanFull/issues/267) y [PR #268](https://github.com/Martiherenu1/ProyectoVanFull/pull/268) abierta, sin merge; primer HEAD `8755c8b972c1ef98c73e072bd41ef3c73224e67a`, base revalidada `fa59928ee1dc4ce838f818397181bc6a817c31c1`. Push normal de cuatro documentos; revisión solicitada en GitHub a Martiniano (`Martiherenu1`) y Facundo (`facubarrientos`), sin aprobación atribuida. Este registro completa la publicación; HEAD final y CI efectiva se registran en #268 tras observarlos, sin inferir resultados previos. Único cierre documental #267; no CU implementado, sin despliegues ni operaciones sobre bases. Preparación e históricos conservados debajo.
+
+> **CU-007, preparación documental para PC3 — 10/11/2026:** análisis vigente en [PC2/ANALISIS-CU007.md](PC2/ANALISIS-CU007.md), con aclaraciones del recuerdo de entrevista comunicado por Martín y sin aprobación técnica conjunta ni implementación. [Resumen y borradores para revisión](PC3/PREPARACION-PUBLICACION-CU007.md), base `fa59928ee1dc4ce838f818397181bc6a817c31c1`, rama `docs/chofer-analisis-cu007-pc3`. Solo documentación local, sin commit/publicación. Preguntas operativas y decisiones técnicas abiertas; fechas y restricciones de demo del 30/10 conservadas como antecedentes, sin extenderlas automáticamente a PC3.
+
+> **Chofer, publicación documental efectiva — 2026-10-30:** [PR #260](https://github.com/Martiherenu1/ProyectoVanFull/pull/260) abierta, primer HEAD `1720b35dc1aeb14c25c5a4f04dd1c3c5bd91e3ec`; único cierre documental #259. Base `f55ecf271aba9645582fcf1910b6a7da0084c6f7`, tres documentos, sin CU completos. CI inicial en curso al registrar; resultado del HEAD final en PR/Issue, separado de evidencias históricas. Notas anteriores de preparación se conservan debajo; sin merge, despliegue ni operaciones reales.
+
+> **Chofer, publicación documental autorizada — 2026-10-30:** consolidación de CU-029/CU-030, Issue #259, base actualizada `f55ecf271aba9645582fcf1910b6a7da0084c6f7` (#257/CU-008 conservado). Solo tres documentos; sin cumplimiento completo ni cierre de pendientes funcionales. Commit/push/PR/CI propios aún pendientes al preparar esta nota; estado posterior en el cierre y contexto de Chofer. Sin merge, despliegue ni operaciones reales; notas siguientes históricas.
+
+> **Chofer, preparación documental — 2026-10-30:** cierre CU-029/CU-030 en [PC2/CIERRE-DOCUMENTAL-CU029-CU030.md](PC2/CIERRE-DOCUMENTAL-CU029-CU030.md), rama local `docs/chofer-cierre-documental-cu029-cu030`, base `cbcbf1243370649add1b30fb2f1908bdb54962a5`. Solo documentación para revisión final, sin commit ni publicación; no implica CU completos ni nuevas pruebas/operaciones. Históricos y pendientes conservados; detalle en el cierre y contexto de Chofer.
+
+> **Corte Pasajero y base común — 2026-10-29 (noche).** Entró a `main`: «Ver ubicación» en Mis reservas (#222),
+> `GET /reservas` de CU-027 (#224), fechas del asistente como DD/MM/AAAA (#232), aviso al agotarse el cupo diario
+> de OpenRouter (#234), guion de la demo (#235/#236) y una prueba que dependía de la hora (#239). **Verificado en
+> Render por API (viaje 3, `pasajero2`): crear una reserva (queda consolidada), el cupo baja y vuelve al cancelar,
+> y la ubicación responde 404 con el viaje sin iniciar.** **Asistente:** la cuenta gratuita de OpenRouter permite
+> **50 pedidos por día** (se renueva 21:00 Argentina); reservar/cancelar por el chat con el modelo real **no se
+> verificó**. Reservar no genera deuda (tarifa pendiente, #9): el saldo queda en 0. El cliente Flutter no tiene
+> timeout y el servidor corta a los 60 s. Protección de `main`: 0 approvals y las 2 CI exigidas. Neon sigue sin
+> re-sembrar (espera a Martín). Detalle y decisiones: PC2/CONTEXTO-pasajero-y-base-comun.md y PC2/GUION-DEMO-PC2.md.
+
+> **CU-036, seguimiento #215:** #240 mergeado solo con propuesta; #238 cerrado.
+> Implementación local candidata para PR nuevo, main remoto 440c578 preservado.
+> Rama aislada, vínculo persistente y migración optativa fuera del head normal,
+> webhook condicional HMAC/Payments/CU-016 y pruebas PostgreSQL temporales. Flag false;
+> live_mode=true rechazado. D1–D6 NO aprobadas; sin main/commit/push/despliegue.
+> Matriz y ensayo: PC2/ENSAYO-CU036-AISLADO.md. Cortes históricos siguientes no describen esta rama.
+> Ampliación local Checkout Pro: intención persistente, inicio/consulta propios y Flutter
+> detrás de flags false; reutiliza webhook/CU-016. Modelo/contrato/área pasajero pendientes
+> de aprobación del equipo; efectivo/transferencia conservados. Detalle y riesgos:
+> PC2/CHECKOUT-PRO-CU014-CU036-CANDIDATO.md. Sin llamadas a MP, commit ni despliegue.
+
+> Integración Flutter #229, 2026-10-29: test/admin-flutter-integracion-pc2-229 desde main
+> 8e16205 (#228 integrado). Tres circuitos UI nuevos; 32 focalizadas y analyze aprobados.
+> Solo pruebas/contextos, sin cambios productivos ni Neon/Render. Sin commit/push/PR.
+> Antecedente #227/#228: 3 casos backend + 11 existentes CU-027 aprobados, ya integrados.
+
+> **Corte Administración PC2 — 2026-10-29, main bceb929, #225.** PR #210/#214/#216/#217/#218
+> mergeados. CU-018/027/014/015: PARCIAL; CU-016: circuito documentado IMPLEMENTADO, contraste
+> detallado v1.3 pendiente; CU-036: preparación interna PARCIAL, circuito HTTP PENDIENTE.
+> Viajes incluye cancelación limitada; reservas, deuda y pagos administrativos están conectados.
+> Pendientes: RN-019/CU-017/#75, tipo/evidencia/efectivo-15 %/señas (#84), RN-004/005/006 (#212),
+> criterios CU-027 (#211) y webhook MP inactivo (#215). No equiparar merge con cobertura completa.
+> Fuente de estado y tabla CU→RF→RN→Issue→PR: PC2/CONTEXTO-administracion-y-flutter.md.
+> Despliegue actual y circuitos nuevos en Render SIN VERIFICAR. Notion pendiente de comprobar/
+> actualizar por Facundo; no consultado ni modificado. Rama documental sin commit/push/PR.
+> Los apartados generales posteriores conservan su fecha propia; no se reauditaron otras áreas.
+
+
+## Antecedente pasajero conservado al integrar main — 16/11/2026
+
+> **Pasajero, CU-005 — 12/11/2026:** pantalla Flutter de cambio de parada ([Issue #274](https://github.com/Martiherenu1/ProyectoVanFull/issues/274)), sobre el backend ya en `main` (#243). Sin cambios de contrato, backend ni modelo. Verificada con `flutter analyze` y pruebas de widget; **sin probar contra Render**. La interpretación de «disponibilidad compatible» (RN-020) **sigue sin validar** (#242 se cerró sin consulta registrada). Siguen pendientes: lista de espera FIFO (CU-003, #34), y CU-013/019/035 sin contrato. Detalle: PC2/CONTEXTO-pasajero-y-base-comun.md.

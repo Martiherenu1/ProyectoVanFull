@@ -71,6 +71,50 @@ Map<String, dynamic> reservaJson({String estado = 'consolidada'}) => {
 };
 
 void main() {
+  test('demora muestra fecha legible y hora local, sin fecha cruda', () async {
+    final data = {
+      'id_viaje': 12,
+      'mensaje': 'El chofer informó una demora. La situación actual no está confirmada.',
+      'fecha_hora_reporte': '2026-11-15T13:05:00',
+    };
+    final cliente = ClienteFalso({
+      'GET /pasajeros/me/viajes/12/demora': () => data,
+    });
+    final mensaje = await PasajeroApi(cliente).mensajeDemora(12);
+    expect(
+      mensaje,
+      contains('Reportado: 15/11/2026 a las 13:05 (hora local).'),
+    );
+    expect(mensaje, isNot(contains('2026-11-15')));
+    expect(mensaje, contains('La situación actual no está confirmada.'));
+  });
+
+  test(
+    'demora sin reporte es ausencia; fecha ausente o inválida es error',
+    () async {
+      const ruta = 'GET /pasajeros/me/viajes/12/demora';
+      Map<String, Object?> data = {
+        'id_viaje': 12,
+        'mensaje': null,
+        'fecha_hora_reporte': null,
+      };
+      final cliente = ClienteFalso({ruta: () => data});
+      final api = PasajeroApi(cliente);
+      expect(await api.mensajeDemora(12), isNull);
+      for (final fecha in [null, 'fecha inválida']) {
+        data = {
+          'id_viaje': 12,
+          'mensaje': 'Reporte',
+          'fecha_hora_reporte': fecha,
+        };
+        await expectLater(
+          api.mensajeDemora(12),
+          throwsA(fecha == null ? isA<TypeError>() : isA<FormatException>()),
+        );
+      }
+    },
+  );
+
   group('AuthApi', () {
     test('login manda el contrato y devuelve la sesión', () async {
       final cliente = ClienteFalso({
@@ -303,6 +347,122 @@ void main() {
       await expectLater(
         PasajeroApi(rechazada).cancelarReserva(41),
         throwsA(isA<ReservaRechazada>()),
+      );
+    });
+
+    test('cambiar parada manda orden_parada a la ruta de la reserva', () async {
+      final cliente = ClienteFalso({
+        'POST reservas/41/cambio-parada': () => reservaJson(),
+      });
+      final reserva = await PasajeroApi(cliente).cambiarParada(41, 3);
+
+      expect(cliente.ultimaClave, 'POST reservas/41/cambio-parada');
+      expect(cliente.ultimoCuerpo, {'orden_parada': 3});
+      expect(reserva.idReserva, 41);
+    });
+
+    test('cambiar parada traduce 400 y 409; el 404 sube tal cual', () async {
+      for (final (estado, codigo) in [
+        (400, 'PARADA_NO_VALIDA'),
+        (409, 'RESERVA_NO_MODIFICABLE'),
+        (409, 'VIAJE_NO_MODIFICABLE'),
+        (409, 'PARADA_SIN_CAMBIOS'),
+      ]) {
+        final cliente = ClienteFalso({
+          'POST reservas/41/cambio-parada': () => throw error(estado, codigo),
+        });
+        await expectLater(
+          PasajeroApi(cliente).cambiarParada(41, 3),
+          throwsA(
+            isA<ReservaRechazada>().having((r) => r.codigo, 'codigo', codigo),
+          ),
+        );
+      }
+
+      final inexistente = ClienteFalso({
+        'POST reservas/41/cambio-parada': () =>
+            throw error(404, 'NO_ENCONTRADO'),
+      });
+      await expectLater(
+        PasajeroApi(inexistente).cambiarParada(41, 3),
+        throwsA(isA<ApiException>()),
+      );
+    });
+
+    test(
+      'comprobantes lista los propios y lee los nulos del contrato',
+      () async {
+        final cliente = ClienteFalso({
+          'GET pasajeros/me/comprobantes': () => [
+            {
+              'id_comprobante': 1,
+              'tipo': 'RECIBO',
+              'id_pago': 5,
+              'id_contratacion': null,
+              'id_movimiento_cuenta': null,
+              'fecha_hora': '2026-10-24T18:00:00Z',
+              'importe': 11600,
+              'medio_pago': 'TRANSFERENCIA',
+            },
+            {
+              'id_comprobante': 2,
+              'tipo': 'FACTURA',
+              'id_pago': null,
+              'id_contratacion': 8,
+              'id_movimiento_cuenta': null,
+              'fecha_hora': null,
+              'importe': null,
+              'medio_pago': null,
+            },
+          ],
+        });
+        final lista = await PasajeroApi(cliente).cargarComprobantes();
+
+        expect(cliente.ultimaClave, 'GET pasajeros/me/comprobantes');
+        expect(lista.map((c) => c.tipo.valorApi), ['RECIBO', 'FACTURA']);
+        expect(lista.last.fechaHora, isNull);
+        expect(lista.last.importe, isNull);
+      },
+    );
+
+    test(
+      'sin comprobantes el backend da una lista vacía, no un error',
+      () async {
+        final cliente = ClienteFalso({
+          'GET pasajeros/me/comprobantes': () => <Object?>[],
+        });
+        expect(await PasajeroApi(cliente).cargarComprobantes(), isEmpty);
+      },
+    );
+
+    test('un comprobante se pide por id y el 404 sube sin tocar', () async {
+      final cliente = ClienteFalso({
+        'GET pasajeros/me/comprobantes/9': () => {
+          'id_comprobante': 9,
+          'tipo': 'RECIBO',
+          'id_pago': 5,
+          'id_contratacion': null,
+          'id_movimiento_cuenta': null,
+          'fecha_hora': '2026-10-24T18:00:00Z',
+          'importe': 11600,
+          'medio_pago': 'EFECTIVO',
+        },
+        'GET pasajeros/me/comprobantes/77': () =>
+            throw error(404, 'COMPROBANTE_NO_ENCONTRADO'),
+      });
+      final api = PasajeroApi(cliente);
+
+      final c = await api.cargarComprobante(9);
+      expect(c.idComprobante, 9);
+      expect(c.medioPagoLegible, 'Efectivo');
+
+      await expectLater(
+        api.cargarComprobante(77),
+        throwsA(
+          isA<ApiException>()
+              .having((e) => e.statusCode, 'statusCode', 404)
+              .having((e) => e.codigo, 'codigo', 'COMPROBANTE_NO_ENCONTRADO'),
+        ),
       );
     });
 

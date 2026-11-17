@@ -77,12 +77,16 @@ async def consultar(db: AsyncSession, usuario: UsuarioActual, id_viaje: int) -> 
         or posicion.fecha_hora_posicion is None
     ):
         raise ApiError(404, "UBICACION_NO_DISPONIBLE", "Ubicación no disponible.")
+    # RNF-008: una sola evaluacion S sobre la posicion leida para esta respuesta.
+    evaluacion = datetime.now(UTC)
+    fecha_posicion = posicion.fecha_hora_posicion
     resultado = Ubicacion(
         id_viaje=id_viaje,
         latitud=posicion.latitud,
         longitud=posicion.longitud,
-        fecha_hora_posicion=posicion.fecha_hora_posicion,
-        desactualizada=datetime.now(UTC) - posicion.fecha_hora_posicion > timedelta(seconds=30),
+        fecha_hora_posicion=fecha_posicion,
+        fecha_hora_evaluacion=evaluacion,
+        desactualizada=evaluacion - fecha_posicion > timedelta(seconds=30),
         eta_minutos=None,
     )
     await db.commit()

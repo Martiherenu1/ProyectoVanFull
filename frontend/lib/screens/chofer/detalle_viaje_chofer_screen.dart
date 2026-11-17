@@ -1,3 +1,6 @@
+import '../../models/chofer/viaje_resumen.dart';
+import 'reporte_aviso.dart';
+
 import 'package:flutter/material.dart';
 
 import '../../controllers/chofer/ejecucion_viaje_controller.dart';
@@ -17,6 +20,10 @@ class DetalleViajeChoferScreen extends StatefulWidget {
     required this.idViaje,
     required this.cargarDetalle,
     this.acciones,
+    this.registrarAviso,
+    this.recuperarAviso,
+    this.onAvisoIncierto,
+    this.onAvisoConfirmado,
     this.comprobarUbicacionInicio,
     this.asistenciaUbicacionInicio,
     this.controlador,
@@ -24,6 +31,10 @@ class DetalleViajeChoferScreen extends StatefulWidget {
   });
 
   final int idViaje;
+  final RegistrarAviso? registrarAviso;
+  final RecuperarAviso? recuperarAviso;
+  final ValueChanged<ReferenciaAviso>? onAvisoIncierto;
+  final ValueChanged<ReferenciaAviso>? onAvisoConfirmado;
   final CargarDetalleViajeChofer cargarDetalle;
   final AccionesEjecucionViaje? acciones;
   final ComprobarUbicacionInicio? comprobarUbicacionInicio;
@@ -166,6 +177,30 @@ class _DetalleViajeChoferScreenState extends State<DetalleViajeChoferScreen> {
       key: ValueKey('detalle-${viaje.idViaje}'),
       padding: const EdgeInsets.all(AppSpacing.lg),
       children: [
+        if (viaje.estado == EstadoViaje.enCurso &&
+            widget.registrarAviso != null &&
+            widget.recuperarAviso != null)
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(minimumSize: const Size(64, 64)),
+            onPressed: () => Navigator.of(context).push<void>(
+              MaterialPageRoute(
+                builder: (_) => Scaffold(
+                  appBar: AppBar(title: const Text('Reportar aviso')),
+                  body: SingleChildScrollView(
+                    padding: const EdgeInsets.all(AppSpacing.lg),
+                    child: ReporteAviso(
+                      viaje: widget.idViaje,
+                      registrar: widget.registrarAviso!,
+                      recuperar: widget.recuperarAviso!,
+                      onIncierto: widget.onAvisoIncierto,
+                      onConfirmado: widget.onAvisoConfirmado,
+                    ),
+                  ),
+                ),
+              ),
+            ),
+            child: const Text('Informar demora o problema'),
+          ),
         if (widget.acciones != null)
           AccionesViajeChofer(
             controlador: _controlador,

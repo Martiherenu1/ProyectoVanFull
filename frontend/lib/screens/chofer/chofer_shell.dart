@@ -1,3 +1,6 @@
+import 'recuperar_aviso.dart';
+import 'reporte_aviso.dart';
+
 import 'package:flutter/material.dart';
 
 import '../../controllers/chofer/ejecucion_viaje_controller.dart';
@@ -20,6 +23,8 @@ class ChoferShell extends StatefulWidget {
     required this.onSalir,
     this.fechaInicial,
     this.acciones,
+    this.registrarAviso,
+    this.recuperarAviso,
     this.comprobarUbicacionInicio,
     this.asistenciaUbicacionInicio,
     this.onViajeAceptado,
@@ -29,6 +34,8 @@ class ChoferShell extends StatefulWidget {
   final CargarViajesChofer cargarViajes;
   final CargarDetalleViajeChofer cargarDetalle;
   final VoidCallback onSalir;
+  final RegistrarAviso? registrarAviso;
+  final RecuperarAviso? recuperarAviso;
   final DateTime? fechaInicial;
   final AccionesEjecucionViaje? acciones;
   final ComprobarUbicacionInicio? comprobarUbicacionInicio;
@@ -41,6 +48,25 @@ class ChoferShell extends StatefulWidget {
 
 class _ChoferShellState extends State<ChoferShell> {
   final _navigator = GlobalKey<NavigatorState>();
+  final _avisosInciertos = ValueNotifier<List<ReferenciaAviso>>([]);
+
+  void _conservarAviso(ReferenciaAviso aviso) {
+    if (!mounted ||
+        _avisosInciertos.value.any(
+          (a) => a.viaje == aviso.viaje && a.clave == aviso.clave,
+        )) {
+      return;
+    }
+    _avisosInciertos.value = [..._avisosInciertos.value, aviso];
+  }
+
+  void _confirmarAviso(ReferenciaAviso aviso) {
+    if (!mounted) return;
+    _avisosInciertos.value = _avisosInciertos.value
+        .where((a) => a.viaje != aviso.viaje || a.clave != aviso.clave)
+        .toList();
+  }
+
   final _fuentes = ValueNotifier(0);
   final _listado = ValueNotifier(0);
   bool _detalleAbierto = false;
@@ -149,6 +175,7 @@ class _ChoferShellState extends State<ChoferShell> {
       entrada.controlador.dispose();
     }
     _coordinadores.clear();
+    _avisosInciertos.dispose();
     _fuentes.dispose();
     _listado.dispose();
     super.dispose();
@@ -171,6 +198,10 @@ class _ChoferShellState extends State<ChoferShell> {
           listenable: _fuentes,
           builder: (_, _) => DetalleViajeChoferScreen(
             idViaje: idViaje,
+            registrarAviso: widget.registrarAviso,
+            recuperarAviso: widget.recuperarAviso,
+            onAvisoIncierto: _conservarAviso,
+            onAvisoConfirmado: _confirmarAviso,
             cargarDetalle: widget.cargarDetalle,
             acciones: _acciones,
             comprobarUbicacionInicio: widget.comprobarUbicacionInicio,
@@ -211,19 +242,44 @@ class _ChoferShellState extends State<ChoferShell> {
   @override
   Widget build(BuildContext context) => Scaffold(
     body: NavigatorPopHandler<Object?>(
-      onPopWithResult: (_) => _navigator.currentState!.pop(),
+      onPopWithResult: (_) => _navigator.currentState!.maybePop(),
       child: Navigator(
         key: _navigator,
         onGenerateRoute: (_) => MaterialPageRoute<void>(
-          builder: (_) => ListenableBuilder(
-            listenable: Listenable.merge([_fuentes, _listado]),
-            builder: (_, _) => ViajesChoferScreen(
-              cargarViajes: widget.cargarViajes,
-              fechaInicial: widget.fechaInicial,
-              onViajeSeleccionado: _abrirDetalle,
-              invalidado: _listadoInvalidado,
-              revisionRecarga: _revisionRecarga,
-              onViajesAceptados: _listadoAceptado,
+          builder: (_) => Scaffold(
+            floatingActionButton: widget.recuperarAviso == null
+                ? null
+                : SizedBox(
+                    height: 64,
+                    child: FloatingActionButton.extended(
+                      onPressed: () => _navigator.currentState!.push<void>(
+                        MaterialPageRoute(
+                          builder: (_) =>
+                              ValueListenableBuilder<List<ReferenciaAviso>>(
+                                valueListenable: _avisosInciertos,
+                                builder: (_, referencias, _) =>
+                                    RecuperarAvisoScreen(
+                                      recuperar: widget.recuperarAviso!,
+                                      referencias: referencias,
+                                      onConfirmado: _confirmarAviso,
+                                    ),
+                              ),
+                        ),
+                      ),
+                      label: const Text('Resultado propio'),
+                      icon: const Icon(Icons.receipt_long),
+                    ),
+                  ),
+            body: ListenableBuilder(
+              listenable: Listenable.merge([_fuentes, _listado]),
+              builder: (_, _) => ViajesChoferScreen(
+                cargarViajes: widget.cargarViajes,
+                fechaInicial: widget.fechaInicial,
+                onViajeSeleccionado: _abrirDetalle,
+                invalidado: _listadoInvalidado,
+                revisionRecarga: _revisionRecarga,
+                onViajesAceptados: _listadoAceptado,
+              ),
             ),
           ),
         ),

@@ -3,12 +3,16 @@ import 'accion_informar_ausencia.dart';
 import 'package:flutter/material.dart';
 
 import '../../core/api/pasajero_api.dart';
+import '../../models/pasajero/comprobante_propio.dart';
 import '../../models/pasajero/deuda.dart';
 import '../../models/pasajero/disponibilidad_viaje.dart';
 import '../../models/pasajero/reserva.dart';
 import 'asistente_screen.dart';
 import 'buscar_servicio_screen.dart';
+import 'cambiar_parada_screen.dart';
+import 'comprobante_detalle_screen.dart';
 import 'confirmar_reserva_screen.dart';
+import 'mis_comprobantes_screen.dart';
 import 'mis_reservas_screen.dart';
 import 'pago_screen.dart';
 import 'perfil_screen.dart';
@@ -109,6 +113,44 @@ class _PasajeroShellState extends State<PasajeroShell> {
     _abrirRuta(MaterialPageRoute<void>(builder: (_) => pantalla));
   }
 
+  void _cambiarParada(Reserva reserva) {
+    _abrirRuta(
+      MaterialPageRoute<void>(
+        builder: (contexto) => CambiarParadaScreen(
+          reserva: reserva,
+          cargarParadas: widget.api.cargarParadas,
+          cambiarParada: widget.api.cambiarParada,
+          onTerminar: (_) {
+            Navigator.of(contexto).pop();
+            _ir(_reservas);
+          },
+        ),
+      ),
+    );
+  }
+
+  void _verComprobantes() {
+    _abrirRuta(
+      MaterialPageRoute<void>(
+        builder: (_) => MisComprobantesScreen(
+          cargarComprobantes: widget.api.cargarComprobantes,
+          onAbrir: _abrirComprobante,
+        ),
+      ),
+    );
+  }
+
+  void _abrirComprobante(ComprobantePropio comprobante) {
+    _abrirRuta(
+      MaterialPageRoute<void>(
+        builder: (_) => ComprobanteDetalleScreen(
+          idComprobante: comprobante.idComprobante,
+          cargarComprobante: widget.api.cargarComprobante,
+        ),
+      ),
+    );
+  }
+
   void _registrarPago(Deuda deuda) {
     var finalizo = false;
     _abrirRuta(
@@ -163,10 +205,12 @@ class _PasajeroShellState extends State<PasajeroShell> {
             alcanceAusencia: alcance,
             contextoAusenciaVigente: ausenciaVigente,
             cargarReservas: widget.api.cargarReservas,
+            cargarMensajeDemora: widget.api.mensajeDemora,
             cargarDeuda: widget.api.cargarDeuda,
             cancelarReserva: widget.api.cancelarReserva,
             onBuscarServicio: () => _ir(_buscar),
             onRegistrarPago: _registrarPago,
+            onCambiarParada: _cambiarParada,
             onVerUbicacion: widget.pantallaUbicacion == null
                 ? null
                 : _verUbicacion,
@@ -176,6 +220,7 @@ class _PasajeroShellState extends State<PasajeroShell> {
             cargarPerfil: widget.api.cargarPerfil,
             modificarPerfil: widget.api.modificarPerfil,
             onSalir: widget.onSalir,
+            onVerComprobantes: _verComprobantes,
           ),
         ],
       ),

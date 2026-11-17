@@ -9,7 +9,18 @@ import 'package:frontend/screens/pasajero/perfil_screen.dart';
 class ServidorFalso implements ApiClient {
   final reservas = <Map<String, dynamic>>[];
   final pagos = <Object?>[];
+  final cambiosDeParada = <Object?>[];
   int pedidosDeReservas = 0;
+  final comprobante = <String, dynamic>{
+    'id_comprobante': 9,
+    'tipo': 'RECIBO',
+    'id_pago': 5,
+    'id_contratacion': null,
+    'id_movimiento_cuenta': null,
+    'fecha_hora': '2026-10-24T18:05:00',
+    'importe': 11600,
+    'medio_pago': 'TRANSFERENCIA',
+  };
   final perfil = <String, dynamic>{
     'id_persona': 7,
     'nombre': 'Ana',
@@ -46,6 +57,12 @@ class ServidorFalso implements ApiClient {
             'nombre_descripcion': 'Plaza Belgrano',
             'comprometida': true,
           },
+          {
+            'id_parada': 20,
+            'orden': 2,
+            'nombre_descripcion': 'Terminal de Ómnibus',
+            'comprometida': true,
+          },
         ];
       case 'pasajeros/me/reservas':
         pedidosDeReservas++;
@@ -54,6 +71,10 @@ class ServidorFalso implements ApiClient {
         return {'saldo': 11600, 'estado': 'con_deuda'};
       case 'pasajeros/me':
         return perfil;
+      case 'pasajeros/me/comprobantes':
+        return [comprobante];
+      case 'pasajeros/me/comprobantes/9':
+        return comprobante;
     }
     throw StateError('GET inesperado: $path');
   }
@@ -73,6 +94,12 @@ class ServidorFalso implements ApiClient {
         'estado': 'consolidada',
       };
       reservas.add(reserva);
+      return reserva;
+    }
+    if (path == 'reservas/41/cambio-parada') {
+      cambiosDeParada.add(body);
+      final reserva = reservas.single;
+      reserva['orden_parada'] = (body! as Map<String, dynamic>)['orden_parada'];
       return reserva;
     }
     if (path == 'pagos') {
@@ -206,6 +233,54 @@ void main() {
     expect(servidor.pedidosDeReservas, greaterThan(antes));
   });
 
+  testWidgets('desde Mis reservas se cambia la parada y se vuelve', (
+    tester,
+  ) async {
+    final servidor = ServidorFalso()
+      ..reservas.add({
+        'id_reserva': 41,
+        'id_pasajero': 7,
+        'id_viaje': 12,
+        'id_recorrido': 3,
+        'orden_parada': 1,
+        'fecha': '2026-10-30',
+        'horario': '06:15',
+        'sentido': 'IDA',
+        'estado': 'consolidada',
+      });
+    await tester.pumpWidget(
+      MaterialApp(
+        home: PasajeroShell(api: PasajeroApi(servidor), onSalir: () {}),
+      ),
+    );
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Mis reservas'));
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.byKey(const ValueKey('reserva-41')));
+    await tester.pump();
+    await tester.tap(find.byKey(const ValueKey('cambiar-parada-41')));
+    await tester.pumpAndSettle();
+
+    // La parada actual (1) figura como tal; se elige la 2 y se confirma.
+    expect(find.byKey(const ValueKey('parada-actual')), findsOneWidget);
+    await tester.tap(find.byKey(const ValueKey('parada-2')));
+    await tester.pump();
+    await tester.tap(find.byKey(const ValueKey('confirmar-cambio-parada')));
+    await tester.pumpAndSettle();
+    expect(servidor.cambiosDeParada, [
+      {'orden_parada': 2},
+    ]);
+    expect(find.text('Ahora subís en Terminal de Ómnibus.'), findsOneWidget);
+
+    // Al terminar vuelve a Mis reservas y la recarga.
+    final antes = servidor.pedidosDeReservas;
+    await tester.tap(find.byKey(const ValueKey('terminar-cambio-parada')));
+    await tester.pumpAndSettle();
+    expect(find.byKey(const ValueKey('reserva-41')), findsOneWidget);
+    expect(servidor.pedidosDeReservas, greaterThan(antes));
+  });
+
   testWidgets('desde Mis reservas se abre la ubicación del viaje reservado', (
     tester,
   ) async {
@@ -245,5 +320,49 @@ void main() {
 
     expect(pedidos, [12]);
     expect(find.text('pantalla de ubicación'), findsOneWidget);
+  });
+
+  testWidgets('desde Cuenta se abre Mis comprobantes y el detalle de uno', (
+    tester,
+  ) async {
+    final servidor = ServidorFalso();
+    await tester.pumpWidget(
+      MaterialApp(
+        home: PasajeroShell(api: PasajeroApi(servidor), onSalir: () {}),
+      ),
+    );
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Cuenta'));
+    await tester.pumpAndSettle();
+
+    await tester.ensureVisible(find.byKey(const ValueKey('ver-comprobantes')));
+    await tester.pump();
+    await tester.tap(find.byKey(const ValueKey('ver-comprobantes')));
+    await tester.pumpAndSettle();
+    expect(find.text('Mis comprobantes'), findsWidgets);
+    expect(find.text('24/10/2026 18:05 · Transferencia'), findsOneWidget);
+
+    await tester.tap(find.byKey(const ValueKey('comprobante-9')));
+    await tester.pumpAndSettle();
+    expect(
+      tester
+          .widget<Text>(find.byKey(const ValueKey('importe-comprobante')))
+          .data,
+      r'$ 11.600,00',
+    );
+    expect(
+      tester
+          .widget<Text>(find.byKey(const ValueKey('origen-comprobante')))
+          .data,
+      'Pago N.º 5',
+    );
+
+    // Atrás lleva a la lista y atrás de nuevo a Cuenta.
+    await tester.pageBack();
+    await tester.pumpAndSettle();
+    expect(find.byKey(const ValueKey('comprobante-9')), findsOneWidget);
+    await tester.pageBack();
+    await tester.pumpAndSettle();
+    expect(find.byKey(const ValueKey('ver-comprobantes')), findsOneWidget);
   });
 }

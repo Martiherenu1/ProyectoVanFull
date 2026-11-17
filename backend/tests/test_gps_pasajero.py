@@ -81,9 +81,12 @@ def test_consolidada_en_curso_con_posicion_sin_restricciones_adicionales(entorno
         "latitud",
         "longitud",
         "fecha_hora_posicion",
+        "fecha_hora_evaluacion",
         "desactualizada",
         "eta_minutos",
     }
+    assert r.headers["Cache-Control"] == "no-store"
+    assert r.json()["fecha_hora_evaluacion"]
     assert r.json()["id_viaje"] == viaje
     assert (r.json()["latitud"], r.json()["longitud"]) == (1, 2)
     assert r.json()["eta_minutos"] is None

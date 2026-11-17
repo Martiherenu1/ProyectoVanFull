@@ -5,6 +5,7 @@
 """
 
 from datetime import datetime
+from uuid import UUID
 
 from sqlalchemy import (
     BigInteger,
@@ -14,6 +15,8 @@ from sqlalchemy import (
     Identity,
     String,
     Text,
+    UniqueConstraint,
+    Uuid,
     func,
 )
 from sqlalchemy.orm import Mapped, mapped_column
@@ -24,6 +27,16 @@ from app.core.database import Base
 class EventoOperativo(Base):
     __tablename__ = "evento_operativo"
     __table_args__ = (
+        UniqueConstraint(
+            "id_cuenta_autora", "id_viaje", "clave_solicitud", name="uq_aviso_solicitud"
+        ),
+        CheckConstraint(
+            "(id_cuenta_autora IS NULL AND clave_solicitud IS NULL) OR "
+            "(id_cuenta_autora IS NOT NULL AND clave_solicitud IS NOT NULL "
+            "AND id_viaje IS NOT NULL AND detalle_evento IS NOT NULL "
+            "AND tipo_evento IN ('aviso_demora', 'aviso_problema'))",
+            name="ck_aviso_metadatos",
+        ),
         # A lo sumo un origen directo entre reserva, pago y viaje (MR-R29).
         CheckConstraint(
             "(CASE WHEN id_reserva IS NOT NULL THEN 1 ELSE 0 END"
@@ -41,3 +54,7 @@ class EventoOperativo(Base):
     id_reserva: Mapped[int | None] = mapped_column(BigInteger, ForeignKey("reserva.id_reserva"))
     id_pago: Mapped[int | None] = mapped_column(BigInteger, ForeignKey("pago.id_pago"))
     id_viaje: Mapped[int | None] = mapped_column(BigInteger, ForeignKey("viaje.id_viaje"))
+    id_cuenta_autora: Mapped[int | None] = mapped_column(
+        BigInteger, ForeignKey("cuenta_acceso.id_cuenta_acceso")
+    )
+    clave_solicitud: Mapped[UUID | None] = mapped_column(Uuid)

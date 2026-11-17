@@ -1,5 +1,7 @@
 # Despliegue de la demo
 
+> **PR #281 / CU-030 — condición anterior al merge:** esta guía conserva el procedimiento histórico de demo, incluido su seed; no usarlo para reinicializar la base existente. El merge puede activar Render y su arranque `alembic upgrade head`, aplicando 0002 sobre Neon automáticamente. Antes se requieren revisión models/migrations por Martiniano, revisión de Facundo, respaldo **actual de Neon con restauración aislada probada** y ventana acordada sin uso de la base. El respaldo local anterior no lo acredita. Seguir el [procedimiento concreto](Documentos/Sesiones/PC3/ENTREGA-MANUAL-CU030-280.md#procedimiento-operativo-concreto--preparado-no-ejecutado-bloquea-el-merge-hasta-acreditarlo). No se ejecutaron operaciones remotas durante esta revisión; eso no excluye efectos futuros del merge. Sin autorización de merge o despliegue.
+
 Demo del 30/10/2026 (freeze el 25/10). Issue #116.
 
 ```

@@ -1,4 +1,5 @@
 import '../../models/chofer/viaje_resumen.dart' show SentidoViaje;
+import '../../models/pasajero/comprobante_propio.dart';
 import '../../models/pasajero/deuda.dart';
 import '../../models/pasajero/disponibilidad_viaje.dart';
 import '../../models/pasajero/pago.dart';
@@ -6,6 +7,7 @@ import '../../models/pasajero/parada.dart';
 import '../../models/pasajero/perfil.dart';
 import '../../models/pasajero/reserva.dart';
 import '../../models/pasajero/respuesta_chat.dart';
+import '../format/fecha_legible.dart';
 import 'api_client.dart';
 import 'api_error.dart';
 
@@ -15,6 +17,21 @@ class PasajeroApi {
   const PasajeroApi(this._cliente);
 
   final ApiClient _cliente;
+
+  Future<String?> mensajeDemora(int viaje) async {
+    final data = await _cliente.get('/pasajeros/me/viajes/$viaje/demora');
+    if (data is! Map<String, dynamic> || data['id_viaje'] != viaje) {
+      throw const FormatException('Viaje incorrecto');
+    }
+    final mensaje = data['mensaje'] as String?;
+    if (mensaje == null) return null;
+    final fecha = DateTime.parse(data['fecha_hora_reporte'] as String)
+        .toLocal();
+    final hora =
+        '${fecha.hour.toString().padLeft(2, '0')}:'
+        '${fecha.minute.toString().padLeft(2, '0')}';
+    return '$mensaje Reportado: ${fechaLegible(fecha)} a las $hora (hora local).';
+  }
 
   List<Map<String, dynamic>> _lista(Object? cuerpo) =>
       (cuerpo! as List).cast<Map<String, dynamic>>();
@@ -93,6 +110,23 @@ class PasajeroApi {
     return Pago.fromJson(cuerpo! as Map<String, dynamic>);
   }
 
+  /// CU-035. Sin cliente individual o sin comprobantes el backend responde una
+  /// lista vacía (A1), no un error.
+  Future<List<ComprobantePropio>> cargarComprobantes() async {
+    final cuerpo = await _cliente.get('pasajeros/me/comprobantes');
+    return _lista(cuerpo).map(ComprobantePropio.fromJson).toList();
+  }
+
+  /// CU-035. Uno ajeno o inexistente responde el mismo 404
+  /// `COMPROBANTE_NO_ENCONTRADO` (A2): sube como [ApiException] y lo traduce la
+  /// pantalla.
+  Future<ComprobantePropio> cargarComprobante(int idComprobante) async {
+    final cuerpo = await _cliente.get(
+      'pasajeros/me/comprobantes/$idComprobante',
+    );
+    return ComprobantePropio.fromJson(cuerpo! as Map<String, dynamic>);
+  }
+
   Future<Perfil> cargarPerfil() async {
     final cuerpo = await _cliente.get('pasajeros/me');
     return Perfil.fromJson(cuerpo! as Map<String, dynamic>);
@@ -109,6 +143,21 @@ class PasajeroApi {
     try {
       final cuerpo = await _cliente.post('reservas/$idReserva/cancelacion');
       return ResultadoCancelacion.fromJson(cuerpo! as Map<String, dynamic>);
+    } on ApiException catch (e) {
+      _rechazo(e);
+    }
+  }
+
+  /// CU-005. Cambia la parada de ascenso de una reserva propia. 400
+  /// (`PARADA_NO_VALIDA`) y 409 (`RESERVA_NO_MODIFICABLE`, `VIAJE_NO_MODIFICABLE`,
+  /// `PARADA_SIN_CAMBIOS`) son rechazos; el 404 sube como [ApiException].
+  Future<Reserva> cambiarParada(int idReserva, int ordenParada) async {
+    try {
+      final cuerpo = await _cliente.post(
+        'reservas/$idReserva/cambio-parada',
+        body: {'orden_parada': ordenParada},
+      );
+      return Reserva.fromJson(cuerpo! as Map<String, dynamic>);
     } on ApiException catch (e) {
       _rechazo(e);
     }

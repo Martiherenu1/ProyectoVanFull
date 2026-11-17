@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import '../../core/api/api_error.dart';
 import '../../core/maps/configuracion_mapa.dart';
 import '../../models/gps/ubicacion_viaje.dart';
+import '../../models/gps/vigencia_ubicacion.dart';
 import '../../widgets/gps/mapa_ultima_posicion.dart';
 
 class UbicacionScreen extends StatefulWidget {
@@ -17,8 +18,12 @@ class UbicacionScreen extends StatefulWidget {
     this.configuracionMapa,
     this.prepararMapa,
     this.crearVisorMapa,
+    this.relojMonotono,
     super.key,
   });
+
+  /// Tiempo transcurrido monotónico; nunca fecha de pared. Inyectable en pruebas.
+  final Duration Function()? relojMonotono;
   final int idViaje;
   final Future<UbicacionViaje> Function(int) consultar;
 
@@ -34,8 +39,13 @@ class UbicacionScreen extends StatefulWidget {
   State<UbicacionScreen> createState() => _UbicacionScreenState();
 }
 
-class _UbicacionScreenState extends State<UbicacionScreen> {
-  Timer? _timer;
+class _UbicacionScreenState extends State<UbicacionScreen>
+    with WidgetsBindingObserver {
+  Timer? _timer, _timerVigencia;
+  final _reloj = Stopwatch()..start();
+  final _vigencia = VigenciaUbicacion();
+  int _continuidad = 0;
+  bool _activa = true;
   UbicacionViaje? _posicion;
   bool _cargando = false, _bloqueada = false, _enVuelo = false;
   bool _consultarAlTerminar = false;
@@ -46,6 +56,7 @@ class _UbicacionScreenState extends State<UbicacionScreen> {
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
     widget.invalidaciones?.addListener(_invalidada);
     _reiniciar();
   }
@@ -61,8 +72,29 @@ class _UbicacionScreenState extends State<UbicacionScreen> {
         oldWidget.consultar != widget.consultar ||
         oldWidget.alcance != widget.alcance ||
         oldWidget.invalidaciones != widget.invalidaciones ||
-        oldWidget.contextoVigente != widget.contextoVigente) {
+        oldWidget.contextoVigente != widget.contextoVigente ||
+        oldWidget.relojMonotono != widget.relojMonotono) {
       _reiniciar();
+    }
+  }
+
+  Duration? _ahora() {
+    try {
+      return widget.relojMonotono?.call() ?? _reloj.elapsed;
+    } catch (_) {
+      return null;
+    }
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (!mounted) return;
+    _continuidad++;
+    _activa = state == AppLifecycleState.resumed;
+    setState(_vigencia.invalidarAncla);
+    if (_activa) {
+      _consultarAlTerminar = _enVuelo;
+      if (!_enVuelo) unawaited(_consultar());
     }
   }
 
@@ -82,14 +114,25 @@ class _UbicacionScreenState extends State<UbicacionScreen> {
     _generacion++;
     _alcanceMapa = Object();
     _posicion = null;
+    _vigencia.limpiar();
+    _continuidad++;
     _error = null;
     _bloqueada = false;
     _timer?.cancel();
+    _timerVigencia?.cancel();
     if (!_contextoVigente) {
       _retirar();
       return;
     }
     _timer = Timer.periodic(const Duration(seconds: 10), (_) => _consultar());
+    _timerVigencia = Timer.periodic(const Duration(seconds: 1), (_) {
+      if (!mounted || _bloqueada || !_activa) return;
+      if (!_contextoVigente) {
+        _retirar();
+      } else if (_posicion != null) {
+        setState(() => _vigencia.texto(_ahora()));
+      }
+    });
     // Un GET anterior no se cancela; esperar sin solapar otra consulta.
     _consultarAlTerminar = _enVuelo;
     if (!_enVuelo) unawaited(_consultar());
@@ -99,6 +142,9 @@ class _UbicacionScreenState extends State<UbicacionScreen> {
     _generacion++;
     _consultarAlTerminar = false;
     _timer?.cancel();
+    _timerVigencia?.cancel();
+    _vigencia.limpiar();
+    _continuidad++;
     _alcanceMapa = Object();
     setState(() {
       _posicion = null;
@@ -118,7 +164,7 @@ class _UbicacionScreenState extends State<UbicacionScreen> {
   }
 
   Future<void> _consultar() async {
-    if (_enVuelo || _bloqueada || !mounted) return;
+    if (_enVuelo || _bloqueada || !mounted || !_activa) return;
     if (!_contextoVigente) {
       _retirar();
       return;
@@ -126,18 +172,31 @@ class _UbicacionScreenState extends State<UbicacionScreen> {
     final g = _generacion;
     final id = widget.idViaje;
     final fuente = widget.consultar;
+    final inicio = _ahora();
+    final continuidad = _continuidad;
     _enVuelo = true;
     setState(() => _cargando = true);
     try {
       final p = await fuente(id);
+      final recepcion = _ahora();
       if (!_puedeAplicar(g)) return;
       if (!posicionDelViaje(p, id) ||
-          (_posicion != null && p.fecha.isBefore(_posicion!.fecha))) {
+          (_posicion != null &&
+              (p.fecha.isBefore(_posicion!.fecha) ||
+                  (p.fecha == _posicion!.fecha &&
+                      (p.latitud != _posicion!.latitud ||
+                          p.longitud != _posicion!.longitud))))) {
         throw const FormatException(
           'Posición no válida para actualizar la vista',
         );
       }
       setState(() {
+        _vigencia.aceptar(
+          p,
+          inicio: inicio,
+          recepcion: recepcion,
+          continuidad: continuidad == _continuidad && _activa,
+        );
         _posicion = p;
         _error = null;
       });
@@ -146,19 +205,20 @@ class _UbicacionScreenState extends State<UbicacionScreen> {
       if (e.statusCode == 404 && e.codigo == 'UBICACION_NO_DISPONIBLE') {
         setState(() {
           _posicion = null;
+          _vigencia.limpiar();
           _error = 'Todavía no hay una posición disponible.';
         });
       } else if ([401, 403, 404].contains(e.statusCode)) {
         _retirar();
       } else {
         setState(() {
-          _error = 'Consulta interrumpida. Última posición recibida; no es ubicación actual.';
+          _error = 'Consulta interrumpida. No se pudo actualizar la ubicación.';
         });
       }
     } catch (_) {
       if (_puedeAplicar(g)) {
         setState(() {
-          _error = 'Sin actualización de ubicación. Revisá la conexión.';
+          _error = 'Sin actualización de ubicación. No se pudo actualizar la ubicación.';
         });
       }
     } finally {
@@ -177,7 +237,11 @@ class _UbicacionScreenState extends State<UbicacionScreen> {
   void dispose() {
     _generacion++;
     widget.invalidaciones?.removeListener(_invalidada);
+    WidgetsBinding.instance.removeObserver(this);
     _timer?.cancel();
+    _timerVigencia?.cancel();
+    _reloj.stop();
+    _vigencia.limpiar();
     super.dispose();
   }
 
@@ -194,11 +258,7 @@ class _UbicacionScreenState extends State<UbicacionScreen> {
           if (_posicion case final p?) ...[
             Text('Última posición: ${p.latitud}, ${p.longitud}'),
             Text('Fecha informada: ${p.fecha.toLocal()}'),
-            Text(
-              p.desactualizada || _error != null
-                  ? 'Información desactualizada / sin actualización confirmada.'
-                  : 'No marcada desactualizada en la última consulta.',
-            ),
+            Text(_vigencia.texto(_ahora())),
             const Text('La antigüedad real de captura no está verificada.'),
             Text(
               p.etaMinutos == null

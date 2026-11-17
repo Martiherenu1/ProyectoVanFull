@@ -9,13 +9,18 @@ from app.core.errors import registrar_manejadores
 from app.routers import (
     ausencias,
     auth,
+    avisos,
     chat,
     chofer,
+    comprobantes,
+    corporativos,
     deuda,
     ejecucion_viajes,
     gps,
     health,
+    organizaciones,
     pagos,
+    pasajeros,
     perfil,
     reservas,
     servicios,
@@ -51,7 +56,11 @@ app.include_router(gps.router, prefix=settings.api_prefix)
 app.include_router(auth.router, prefix=settings.api_prefix)
 app.include_router(ausencias.router, prefix=settings.api_prefix)
 app.include_router(perfil.router, prefix=settings.api_prefix)
+app.include_router(pasajeros.router, prefix=settings.api_prefix)
 app.include_router(deuda.router, prefix=settings.api_prefix)
+app.include_router(comprobantes.router, prefix=settings.api_prefix)
+app.include_router(corporativos.router, prefix=settings.api_prefix)
+app.include_router(organizaciones.router, prefix=settings.api_prefix)
 app.include_router(servicios.router, prefix=settings.api_prefix)
 app.include_router(reservas.router, prefix=settings.api_prefix)
 app.include_router(pagos.router, prefix=settings.api_prefix)
@@ -60,6 +69,7 @@ app.include_router(viajes.router, prefix=settings.api_prefix)
 app.include_router(chofer.router, prefix=settings.api_prefix)
 app.include_router(chat.router, prefix=settings.api_prefix)
 app.include_router(ejecucion_viajes.router, prefix=settings.api_prefix)
+app.include_router(avisos.router, prefix=settings.api_prefix)
 registrar_si_habilitado(app, settings)
 registrar_checkout_si_habilitado(app, settings)
 

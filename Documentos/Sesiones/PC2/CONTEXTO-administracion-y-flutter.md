@@ -1,5 +1,14 @@
 # Contexto vivo · Administración y Flutter (Facundo)
 
+## CU-022 / #276 / #277 — integración de main para revisión PC3 (17/11/2026)
+
+- Merge normal de main d00c1ee sobre HEAD 491e914, con resolución aditiva de YAML/JSON/README OpenAPI y composición backend/Flutter conservada. 51 rutas, 63 operaciones y 57 schemas; sin cambios propios de migraciones/modelos/SQL.
+- Este commit contiene la integración y siete pruebas de sesión de vehículos administrativos; la corrección del acceso de dueno se registra por separado en el siguiente commit.
+- Evidencia previa a esa corrección: suite Flutter existente 977 aprobadas y siete regresiones administrativas aprobadas aparte; nueve backend sin BD aprobadas, Ruff/formato correctos. No se repiten suites locales para esta separación de trazabilidad.
+- PostgreSQL 16 local sin ejecutar por motor Docker inaccesible. Intento contra servidor local anterior: cuatro passed, cinco failed y 31 errors por cierre de conexión antes de crear las bases temporales; no acredita CRUD/migración.
+- Publicación de la revisión autorizada por Facundo; CI del nuevo HEAD se verifica en #277. CU-022 sigue parcial por documentación operativa sin definir. Sin merge a main, Neon/Render ni despliegue.
+
+
 ## Estado
 
 **Trabajo local posterior #238/#240, seguimiento #215:** #240 ya mergeado solo con

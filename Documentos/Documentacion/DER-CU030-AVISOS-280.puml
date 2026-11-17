@@ -1,0 +1,30 @@
+@startuml
+title Extensión física CU-030 #280 (15/11/2026) — no nueva entidad Notificacion
+entity cuenta_acceso {
+  * id_cuenta_acceso : BIGINT <<PK>>
+}
+entity viaje {
+  * id_viaje : BIGINT <<PK>>
+}
+entity evento_operativo {
+  * id_evento_operativo : BIGINT <<PK>>
+  tipo_evento : VARCHAR(50)
+  fecha_hora : TIMESTAMPTZ
+  detalle_evento : TEXT
+  id_reserva : BIGINT nullable
+  id_pago : BIGINT nullable
+  id_viaje : BIGINT nullable <<FK>>
+  id_cuenta_autora : BIGINT nullable <<FK>>
+  clave_solicitud : UUID nullable
+}
+cuenta_acceso |o--o{ evento_operativo : autora
+viaje |o--o{ evento_operativo : origen
+note bottom of evento_operativo
+MR-R29: a lo sumo un origen reserva/pago/viaje.
+MR-R32: sin entidad Notificacion.
+UNIQUE (id_cuenta_autora, id_viaje, clave_solicitud).
+CHECK: autor/clave juntos; aviso nuevo exige viaje/detalle/clase.
+Históricos: ambos NULL, no se infiere autor.
+Diagrama de extensión; no reemplaza DER oficial completo.
+end note
+@enduml

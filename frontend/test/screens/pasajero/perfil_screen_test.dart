@@ -26,6 +26,7 @@ Future<void> mostrar(
   CargarPerfil? cargar,
   ModificarPerfil? modificar,
   VoidCallback? salir,
+  VoidCallback? verComprobantes,
 }) async {
   await tester.pumpWidget(
     MaterialApp(
@@ -33,6 +34,7 @@ Future<void> mostrar(
         cargarPerfil: cargar ?? () async => perfil(),
         modificarPerfil: modificar ?? (cambios) async => perfil(),
         onSalir: salir ?? () {},
+        onVerComprobantes: verComprobantes,
       ),
     ),
   );
@@ -51,6 +53,20 @@ Future<void> escribir(WidgetTester tester, String clave, String texto) async {
 }
 
 void main() {
+  testWidgets('Mis comprobantes solo se ofrece si hay a dónde ir', (
+    tester,
+  ) async {
+    await mostrar(tester);
+    expect(find.byKey(const ValueKey('ver-comprobantes')), findsNothing);
+
+    var abierto = 0;
+    await mostrar(tester, verComprobantes: () => abierto++);
+    await tester.ensureVisible(find.byKey(const ValueKey('ver-comprobantes')));
+    await tester.pump();
+    await tester.tap(find.byKey(const ValueKey('ver-comprobantes')));
+    expect(abierto, 1);
+  });
+
   testWidgets('muestra nombre y DNI sin edición y los datos editables', (
     tester,
   ) async {

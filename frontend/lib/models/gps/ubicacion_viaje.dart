@@ -5,15 +5,25 @@ class UbicacionViaje {
     this.longitud,
     this.fecha,
     this.desactualizada,
-    this.etaMinutos,
-  );
+    this.etaMinutos, {
+    this.fechaEvaluacion,
+    this.sinCache = false,
+  });
   final int idViaje;
   final double latitud, longitud;
   final DateTime fecha;
   final bool desactualizada;
   final int? etaMinutos;
+  final DateTime? fechaEvaluacion;
 
-  factory UbicacionViaje.fromJson(Object? value, int id) {
+  /// Solo el adaptador HTTP verifica no-store; el JSON por sí solo no lo acredita.
+  final bool sinCache;
+
+  factory UbicacionViaje.fromJson(
+    Object? value,
+    int id, {
+    bool sinCache = false,
+  }) {
     if (value is! Map<String, dynamic>) {
       throw const FormatException('Ubicación inválida');
     }
@@ -22,6 +32,14 @@ class UbicacionViaje {
       value['fecha_hora_posicion'] as String? ?? '',
     );
     final eta = value['eta_minutos'];
+    final rawEvaluacion = value['fecha_hora_evaluacion'];
+    final evaluacion = rawEvaluacion is String
+        ? DateTime.tryParse(rawEvaluacion)
+        : null;
+    // Un metadato opcional inválido no elimina una posición válida: pierde el ancla.
+    final evaluacionValida = evaluacion != null && evaluacion.isUtc
+        ? evaluacion
+        : null;
     if (value['id_viaje'] != id ||
         lat is! num ||
         lon is! num ||
@@ -44,6 +62,8 @@ class UbicacionViaje {
       fecha,
       value['desactualizada'] as bool,
       eta as int?,
+      fechaEvaluacion: evaluacionValida,
+      sinCache: sinCache,
     );
   }
 }

@@ -225,6 +225,35 @@ Si algo dice `NO`, **#281 no se mergea**: guardá la salida completa.
 
 ---
 
+## G. Contingencia: 0002 ya se aplicó sin respaldo previo
+
+Pasó el 16/11/2026: #281 se mergeó (`686e2cc`, 22:54 ART) antes de C, D y E, Render desplegó y
+`arrancar.sh` migró Neon a 0002 ([#304](https://github.com/Martiherenu1/ProyectoVanFull/issues/304)).
+**No revertir el merge:** con Neon en 0002, un código que solo conoce 0001 no arranca (Alembic no
+encuentra la revisión). Lo que se hace:
+
+1. **Comprobar y respaldar el estado actual** (solo lee de Neon):
+
+   ```powershell
+   powershell -NoProfile -ExecutionPolicy Bypass -File .\06-post-0002.ps1 -Pg 16
+   ```
+
+   Verifica `alembic_version` = 0002, las dos columnas nullable, las tres restricciones validadas y
+   cuántos eventos tienen metadatos nuevos; saca `neon-post-0002-<fecha>.dump` con SHA-256 y
+   `pg_restore --list`, y deja `registro-post-<fecha>.txt`.
+2. **Buscar el estado previo en Neon:** desde la consola, crear una rama de la base en un instante
+   anterior al despliegue (crearla no toca la rama principal). Cuántas horas de historia guarda depende
+   del plan: hacerlo cuanto antes. De esa rama se puede sacar un respaldo con `02-respaldar.ps1` usando
+   su cadena.
+
+**Resultado del 16/11/2026, 23:01 ART:** 0002 aplicada como se esperaba; `evento_operativo` 25 filas, 0
+con metadatos nuevos (ningún histórico recibió autor); Neon sin cambios durante el respaldo; 36 tablas con
+datos en el archivo; SHA-256 `9365E8B5FCF32A295680AFE20379B93CEFDD51BF3AC2787310CEF43DBACB566B`
+(91 255 bytes), custodiado fuera de OneDrive. **Sin verificar:** que los datos previos estén intactos
+contra un estado anterior, porque no hay manifiesto de antes de 0002 (la rama del punto 2 lo resolvería).
+
+---
+
 ## Qué verifiqué y qué no
 
 **Ensayado el 16/11/2026 en esta máquina con una base sintética** (PostgreSQL 16 descartable, migrada y

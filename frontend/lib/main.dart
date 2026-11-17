@@ -288,6 +288,8 @@ class _VanFullBootstrapState extends State<VanFullBootstrap> {
       gpsApi: _gpsApi,
       onSalir: controller.salir,
     ),
+    entradaDueno: (controller) =>
+        _EntradaChoferesDueno(controller: controller, api: _choferesAdmin),
     entradaChofer: (controller) => _EntradaChofer(
       controller: controller,
       listar: _viajesChofer,
@@ -679,6 +681,71 @@ class _EntradaAdministracionState extends State<_EntradaAdministracion> {
     Navigator.of(context).popUntil((route) => route.isFirst);
     setState(() => _accesoDenegado = true);
   }
+}
+
+class _EntradaChoferesDueno extends StatefulWidget {
+  const _EntradaChoferesDueno({required this.controller, required this.api});
+
+  final SesionController controller;
+  final ChoferesAdminApi api;
+
+  @override
+  State<_EntradaChoferesDueno> createState() => _EntradaChoferesDuenoState();
+}
+
+class _EntradaChoferesDuenoState extends State<_EntradaChoferesDueno> {
+  late final int _generacion = widget.controller.generacion;
+  late final String? _token = widget.controller.token;
+  bool _accesoDenegado = false;
+
+  bool get _vigente =>
+      mounted &&
+      !_accesoDenegado &&
+      _token != null &&
+      widget.controller.generacion == _generacion &&
+      widget.controller.token == _token;
+
+  Future<T> _proteger<T>(Future<T> Function() operacion) async {
+    if (!_vigente) throw StateError('La sesión ya no está vigente.');
+    final resultado = await _protegerAcceso(
+      controller: widget.controller,
+      solicitud: operacion,
+      onAccesoDenegado: () {
+        if (!_vigente) return;
+        Navigator.of(context).popUntil((route) => route.isFirst);
+        setState(() => _accesoDenegado = true);
+      },
+    );
+    if (!_vigente) throw StateError('La sesión ya no está vigente.');
+    return resultado;
+  }
+
+  @override
+  Widget build(BuildContext context) => _accesoDenegado
+      ? _AccesoDenegado(
+          key: const Key('dueno-acceso-denegado'),
+          onSalir: widget.controller.salir,
+        )
+      : Column(
+          children: [
+            Expanded(
+              child: ChoferesAdminScreen(
+                cargar: () => _proteger(widget.api.listar),
+                crear: (datos) => _proteger(() => widget.api.crear(datos)),
+                actualizar: (id, datos) =>
+                    _proteger(() => widget.api.actualizar(id, datos)),
+              ),
+            ),
+            SafeArea(
+              minimum: const EdgeInsets.all(AppSpacing.md),
+              child: OutlinedButton(
+                key: const Key('dueno-salir'),
+                onPressed: widget.controller.salir,
+                child: const Text('Cerrar sesión'),
+              ),
+            ),
+          ],
+        );
 }
 
 class _EntradaChofer extends StatefulWidget {

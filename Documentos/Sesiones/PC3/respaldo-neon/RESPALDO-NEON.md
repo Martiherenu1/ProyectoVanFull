@@ -252,6 +252,30 @@ datos en el archivo; SHA-256 `9365E8B5FCF32A295680AFE20379B93CEFDD51BF3AC2787310
 (91 255 bytes), custodiado fuera de OneDrive. **Sin verificar:** que los datos previos estén intactos
 contra un estado anterior, porque no hay manifiesto de antes de 0002 (la rama del punto 2 lo resolvería).
 
+3. **Restaurar aislado el respaldo posterior** (no toca Neon ni pide la cadena):
+
+   ```powershell
+   powershell -NoProfile -ExecutionPolicy Bypass -File .\03-restaurar-aislado.ps1 -Pg 16 -Archivo neon-post-0002-<fecha>.dump -Manifiesto post-antes-<fecha>.txt
+   powershell -NoProfile -ExecutionPolicy Bypass -File .\05-limpiar.ps1
+   ```
+
+**Restauración del 16/11/2026, 23:20 ART:** SHA-256 igual al del registro; contenedor aislado (red
+interna, sin puertos, base vacía); restauración completa en una transacción; **copia idéntica al
+manifiesto de Neon** (416 líneas: filas y hash de cada tabla, secuencias, columnas, índices, PK/FK/UNIQUE).
+En la copia están el pago N.º 1 (10 000,00) y el N.º 2 (1234,50, TRANSFERENCIA), ambos CONFIRMADO, con
+sus RECIBO N.º 1 y N.º 2 y un movimiento ACREEDOR cada uno.
+
+**Dos trampas que encontró esta restauración (ya resueltas en `03-restaurar-aislado.ps1`):**
+
+- **Neon marca las columnas agregadas con `ALTER TABLE`** con un parámetro interno
+  (`ALTER COLUMN … SET (pg_attver=…)`) que un PostgreSQL común rechaza (`unrecognized parameter
+  "pg_attver"`). Es metadato de Neon, no datos. El script pasa el respaldo a SQL, quita **solo** esas
+  líneas (dice cuántas: 2 con 0002) y restaura con `psql` en una transacción que corta ante el primer error.
+- **La intercalación tiene que ser la de Neon (`C.UTF-8`)**. Con la de la imagen (`en_US.utf8`) los
+  datos se restauran iguales, pero el manifiesto ordena distinto las filas y los hashes de `viaje`,
+  `posicion_gps` y `evento_operativo` no coinciden. El script lee la intercalación del propio respaldo y
+  crea la copia con ella.
+
 ---
 
 ## Qué verifiqué y qué no

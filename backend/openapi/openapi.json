@@ -3167,6 +3167,392 @@
           }
         }
       }
+    },
+    "/viajes/{id_viaje}/avisos": {
+      "post": {
+        "tags": [
+          "chofer"
+        ],
+        "summary": "Registrar aviso del chofer propio en curso; reintento histórico propio",
+        "x-cu": "CU-030",
+        "x-cobertura": "parcial",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "description": "CU-030/RF-025; MR-R29/MR-R32; #280. Registro manual. CU-037 no integrado: no_evaluada no promete envío. Sin automatismo, ETA o QR. Respuesta perdida/5xx es resultado incierto; 404 de búsqueda no prueba rechazo de POST en vuelo. Solo rol chofer. Clave única por cuenta autora/viaje. Contenido normalizado por trim; misma clave/clase/texto repite ID, diferente contenido 409. Reintento existente autorizado por autor aun tras fin/reasignación; alta nueva exige asignación vigente y en_curso.",
+        "parameters": [
+          {
+            "name": "id_viaje",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Resultado autorizado; Cache-Control no-store",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Aviso"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Rechazo según convenciones; no resuelve envíos anteriores inciertos",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Rechazo según convenciones; no resuelve envíos anteriores inciertos",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Rechazo según convenciones; no resuelve envíos anteriores inciertos",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Rechazo según convenciones; no resuelve envíos anteriores inciertos",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Rechazo según convenciones; no resuelve envíos anteriores inciertos",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "201": {
+            "description": "Confirmado después de commit; 200 en repetición exacta",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Aviso"
+                }
+              }
+            }
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AvisoCrear"
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "tags": [
+          "chofer"
+        ],
+        "summary": "Consulta interna admin/dueño de avisos manuales del viaje",
+        "x-cu": "CU-030",
+        "x-cobertura": "parcial",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "description": "CU-030/RF-025; MR-R29/MR-R32; #280. Registro manual. CU-037 no integrado: no_evaluada no promete envío. Sin automatismo, ETA o QR. Respuesta perdida/5xx es resultado incierto; 404 de búsqueda no prueba rechazo de POST en vuelo.",
+        "parameters": [
+          {
+            "name": "id_viaje",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Resultado autorizado; Cache-Control no-store",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Aviso"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Rechazo según convenciones; no resuelve envíos anteriores inciertos",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Rechazo según convenciones; no resuelve envíos anteriores inciertos",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Rechazo según convenciones; no resuelve envíos anteriores inciertos",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Rechazo según convenciones; no resuelve envíos anteriores inciertos",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Rechazo según convenciones; no resuelve envíos anteriores inciertos",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/viajes/{id_viaje}/avisos/resultado": {
+      "get": {
+        "tags": [
+          "chofer"
+        ],
+        "summary": "Recuperar resultado histórico propio por autor autenticado",
+        "x-cu": "CU-030",
+        "x-cobertura": "parcial",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "description": "CU-030/RF-025; MR-R29/MR-R32; #280. Registro manual. CU-037 no integrado: no_evaluada no promete envío. Sin automatismo, ETA o QR. Respuesta perdida/5xx es resultado incierto; 404 de búsqueda no prueba rechazo de POST en vuelo.",
+        "parameters": [
+          {
+            "name": "id_viaje",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          },
+          {
+            "name": "clave_solicitud",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Resultado autorizado; Cache-Control no-store",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Aviso"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Rechazo según convenciones; no resuelve envíos anteriores inciertos",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Rechazo según convenciones; no resuelve envíos anteriores inciertos",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Rechazo según convenciones; no resuelve envíos anteriores inciertos",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Rechazo según convenciones; no resuelve envíos anteriores inciertos",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Rechazo según convenciones; no resuelve envíos anteriores inciertos",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/pasajeros/me/viajes/{id_viaje}/demora": {
+      "get": {
+        "tags": [
+          "chofer"
+        ],
+        "summary": "Mensaje contextual para reserva propia consolidada",
+        "x-cu": "CU-030",
+        "x-cobertura": "parcial",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "description": "CU-030/RF-025; MR-R29/MR-R32; #280. Registro manual. CU-037 no integrado: no_evaluada no promete envío. Sin automatismo, ETA o QR. Respuesta perdida/5xx es resultado incierto; 404 de búsqueda no prueba rechazo de POST en vuelo. Solo pasajero con reserva propia consolidada revalidada. Viaje fuera de en_curso devuelve mensaje null. Mensaje fechado de reporte, nunca afirmación de demora activa. Sin detalle interno ni historial.",
+        "parameters": [
+          {
+            "name": "id_viaje",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Resultado autorizado; Cache-Control no-store",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MensajeDemora"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Rechazo según convenciones; no resuelve envíos anteriores inciertos",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Rechazo según convenciones; no resuelve envíos anteriores inciertos",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Rechazo según convenciones; no resuelve envíos anteriores inciertos",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Rechazo según convenciones; no resuelve envíos anteriores inciertos",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Rechazo según convenciones; no resuelve envíos anteriores inciertos",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
@@ -4808,6 +5194,112 @@
             "type": "string",
             "nullable": true,
             "description": "Tool invocada por el agente, si hubo."
+          }
+        }
+      },
+      "AvisoCrear": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "clase",
+          "descripcion_interna",
+          "clave_solicitud"
+        ],
+        "properties": {
+          "clase": {
+            "type": "string",
+            "enum": [
+              "demora",
+              "problema"
+            ]
+          },
+          "descripcion_interna": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 2000
+          },
+          "clave_solicitud": {
+            "type": "string",
+            "format": "uuid"
+          }
+        }
+      },
+      "Aviso": {
+        "type": "object",
+        "required": [
+          "id_evento_operativo",
+          "id_viaje",
+          "clase",
+          "descripcion_interna",
+          "id_cuenta_autora",
+          "clave_solicitud",
+          "fecha_hora_registro",
+          "registro",
+          "notificacion"
+        ],
+        "properties": {
+          "id_evento_operativo": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "id_viaje": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "id_cuenta_autora": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "clase": {
+            "type": "string",
+            "enum": [
+              "demora",
+              "problema"
+            ]
+          },
+          "descripcion_interna": {
+            "type": "string"
+          },
+          "clave_solicitud": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "fecha_hora_registro": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "registro": {
+            "type": "string",
+            "enum": [
+              "confirmado"
+            ]
+          },
+          "notificacion": {
+            "type": "string",
+            "enum": [
+              "no_evaluada"
+            ]
+          }
+        }
+      },
+      "MensajeDemora": {
+        "type": "object",
+        "required": [
+          "id_viaje"
+        ],
+        "properties": {
+          "id_viaje": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "mensaje": {
+            "type": "string",
+            "nullable": true
+          },
+          "fecha_hora_reporte": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
           }
         }
       }

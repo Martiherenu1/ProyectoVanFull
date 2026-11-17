@@ -1,3 +1,4 @@
+import 'mensaje_demora.dart';
 import 'accion_informar_ausencia.dart';
 
 import 'package:flutter/material.dart';
@@ -29,6 +30,7 @@ class MisReservasScreen extends StatefulWidget {
   const MisReservasScreen({
     super.key,
     required this.cargarReservas,
+    this.cargarMensajeDemora,
     required this.cargarDeuda,
     required this.cancelarReserva,
     required this.onBuscarServicio,
@@ -42,6 +44,7 @@ class MisReservasScreen extends StatefulWidget {
   });
 
   final CargarReservas cargarReservas;
+  final CargarMensajeDemora? cargarMensajeDemora;
   final CargarDeuda cargarDeuda;
   final CancelarReserva cancelarReserva;
 
@@ -327,6 +330,14 @@ class _MisReservasScreenState extends State<MisReservasScreen> {
         return Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
+            if (abierta &&
+                reserva.estado == EstadoReserva.consolidada &&
+                widget.cargarMensajeDemora != null)
+              MensajeDemora(
+                key: ValueKey('demora-${reserva.idReserva}-${reserva.idViaje}'),
+                viaje: reserva.idViaje,
+                cargar: widget.cargarMensajeDemora!,
+              ),
             _FilaReserva(
               reserva: reserva,
               abierta: abierta,

@@ -205,6 +205,7 @@ class _PasajeroShellState extends State<PasajeroShell> {
             alcanceAusencia: alcance,
             contextoAusenciaVigente: ausenciaVigente,
             cargarReservas: widget.api.cargarReservas,
+            cargarMensajeDemora: widget.api.mensajeDemora,
             cargarDeuda: widget.api.cargarDeuda,
             cancelarReserva: widget.api.cancelarReserva,
             onBuscarServicio: () => _ir(_buscar),

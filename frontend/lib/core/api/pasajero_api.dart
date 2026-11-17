@@ -7,6 +7,7 @@ import '../../models/pasajero/parada.dart';
 import '../../models/pasajero/perfil.dart';
 import '../../models/pasajero/reserva.dart';
 import '../../models/pasajero/respuesta_chat.dart';
+import '../format/fecha_legible.dart';
 import 'api_client.dart';
 import 'api_error.dart';
 
@@ -16,6 +17,21 @@ class PasajeroApi {
   const PasajeroApi(this._cliente);
 
   final ApiClient _cliente;
+
+  Future<String?> mensajeDemora(int viaje) async {
+    final data = await _cliente.get('/pasajeros/me/viajes/$viaje/demora');
+    if (data is! Map<String, dynamic> || data['id_viaje'] != viaje) {
+      throw const FormatException('Viaje incorrecto');
+    }
+    final mensaje = data['mensaje'] as String?;
+    if (mensaje == null) return null;
+    final fecha = DateTime.parse(data['fecha_hora_reporte'] as String)
+        .toLocal();
+    final hora =
+        '${fecha.hour.toString().padLeft(2, '0')}:'
+        '${fecha.minute.toString().padLeft(2, '0')}';
+    return '$mensaje Reportado: ${fechaLegible(fecha)} a las $hora (hora local).';
+  }
 
   List<Map<String, dynamic>> _lista(Object? cuerpo) =>
       (cuerpo! as List).cast<Map<String, dynamic>>();

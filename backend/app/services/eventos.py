@@ -14,6 +14,8 @@ cambio que lo origina, así que o se guardan los dos o ninguno. El `commit` lo h
 llama, al final de la operación.
 """
 
+from uuid import UUID
+
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.models.trazabilidad import EventoOperativo
@@ -30,6 +32,8 @@ async def registrar_evento(
     id_reserva: int | None = None,
     id_pago: int | None = None,
     id_viaje: int | None = None,
+    id_cuenta_autora: int | None = None,
+    clave_solicitud: UUID | None = None,
 ) -> EventoOperativo:
     """Agrega un evento a la sesión y lo envía a la base (sin confirmar la transacción).
 
@@ -58,6 +62,8 @@ async def registrar_evento(
         id_reserva=id_reserva,
         id_pago=id_pago,
         id_viaje=id_viaje,
+        id_cuenta_autora=id_cuenta_autora,
+        clave_solicitud=clave_solicitud,
     )
     db.add(evento)
     await db.flush()

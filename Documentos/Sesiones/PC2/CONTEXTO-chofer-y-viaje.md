@@ -1,5 +1,73 @@
 # Contexto vivo · Chofer y viaje en curso (Martín)
 
+## Integración de main y runbook — 16/11/2026
+
+- Main vigente `8c422e1` (#300/#301) recibido mediante merge normal, único conflicto en contexto general; se conservan ambos trabajos. Código/modelo/SQL/migraciones, CU-035, contrato, UUID y RNF-008 idénticos a `e673f98`. Sin repetir suites locales por integración exclusivamente documental; CI del nuevo HEAD debe observarse por separado en #281.
+- Martín comunica verificación técnica de Martiniano sobre `e673f98`, sin aprobación formal. [Contraste del runbook recibido](../PC3/ENTREGA-MANUAL-CU030-280.md#integración-del-runbook-de-neon--16112026): coordinar vigencia del respaldo/ausencia de escritores hasta merge, repetición por cambio de HEAD y limitaciones de las comprobaciones. No se ejecuta. Facundo final, aprobación condicionada Marti, evidencia de Neon/restauración y ventana pendientes; ensayo 0002 ligado al HEAD final. Ficha/guion y sus notas locales excluidos de publicación.
+
+## Conformidad técnica informada de Martiniano — #281, 16/11/2026
+
+- Martín transmite revisión de modelo/SQL/0002/servicios en `6656794`: Martiniano conforme técnicamente, 917 pruebas backend en PostgreSQL local aislado y Ruff/formato correctos. Evidencia informada, sin repetirla aquí; **no aprobación formal**, espera respaldo de Neon. No acredita backup/restauración de Neon ni ventana.
+- Reparación puntual de texto UTF-8 en `backend/db/README.md`; limitación conocida documentada: `ck_aviso_metadatos` restringe metadatos de autoría/correlación a `aviso_demora`/`aviso_problema`. Sin ampliar constraint/modelo/migración ni cambios propios productivos. Diff/whitespace revisados; sin suites funcionales locales por documentación.
+- Main concurrente `5cd091d` incorporado por merge normal `f483b05` para desbloquear CI; conflicto solo en contexto general, ambos bloques conservados y contrato de ambos padres preservado. [Entrega y procedencia](../PC3/ENTREGA-MANUAL-CU030-280.md#revisión-técnica-de-martiniano-informada-por-martín--16112026). SHA/CI del HEAD final en #281 tras observarlos. Guion local sin publicar intacto. Pendientes Facundo final, respaldo Neon actual restaurado y ventana/responsable; sin merge hacia main, despliegue ni operaciones remotas.
+
+## Revisión UUID de recuperación #281 — 16/11/2026
+
+- Usuario informa que Facundo revisó `8b3466f` y considera resueltos los P1/P2 anteriores; nuevo P2 por retiro literal de clave mayúscula, sin aprobación final Flutter. Reproducción fallida antes de corregir: confirmación visible pero referencia incierta conservada.
+- Corrección normaliza `trim().toLowerCase()` antes de consultar y en la representación de referencias para conservar/comparar/retirar por viaje/clave. Pruebas de retiro selectivo, deduplicación, errores/UUID inválida y respuestas tardías entre sesiones; permisos, navegación y RNF-008 conservados. [Procedencia y aceptación](../PC3/ENTREGA-MANUAL-CU030-280.md#revisión-de-facundo-sobre-8b3466f--uuid-de-recuperación-16112026); SHA, resultados y CI exacta en #281 tras observarlos.
+- Guion local sin publicar preservado con T06 controlado; no se incluye en commit. Pendientes aprobación final Facundo, revisión models/migrations, backup Neon actual restaurado, ventana/responsable. CU-037 separado. Sin cambios backend/contrato/modelo/migración, merge hacia main ni operaciones remotas.
+
+## Auditoría de Facundo sobre #281 — 16/11/2026, sin aprobación atribuida
+
+- **Estado posterior:** avance concurrente de main a `6f111c1` (#272/#292/#294) produjo conflicto documental/CI no iniciada tras `482c49d`. Merge normal `9edfebc` conserva ambos bloques de contexto y RNF-008 idéntico a main; fixes CU-030 idénticos a `482c49d`. Modelo/migración intactos, sin cambios propios de ETA. Analyze posterior sin observaciones (11,3 s); pruebas/CI posteriores en #281, sin heredar las 139 previas. Históricos siguientes conservan sus cortes.
+
+- Remoto `4c92b768` confirmado; main `4198022` incorporado por merge normal `c75e368`, conservando CU-023/CU-033 y #291. Sin rebase/force-push ni merge hacia main; contrato conserva operaciones/schemas de ambos padres y equivalencia YAML/JSON.
+- P1 reproducido en alta/recuperación: 403 no activaba la protección común. Corrección preserva status HTTP hasta `_protegerAcceso` y conserva controles de sesión antes/después. P2 reproducido: recuperación global encima de rutas internas; pasa al listado. Además, retorno del sistema delegado por `maybePop` respeta `PopScope` durante POST, con reproducción previa.
+- [Entrega y diff específico de cada hallazgo](../PC3/ENTREGA-MANUAL-CU030-280.md#corrección-de-auditoría-de-facundo--16112026). Analyze sin observaciones; pruebas locales y CI del HEAD final registradas en #281 tras observarlas. Facundo debe revisar de nuevo: su auditoría de `4c92b768` no es aprobación.
+- Revisión models/migrations, respaldo **actual de Neon con restauración probada** y ventana sin uso siguen pendientes antes del merge. CU-037 entre los tres sin asignaciones. RNF-008/ETA/APK preservados; sin operaciones remotas ni despliegue. Históricos siguientes conservados.
+
+## Condiciones anteriores al merge #281 — precisiones de Martiniano comunicadas por Martín
+
+- Requieren revisión models/migrations por Martiniano y revisión del diff por Facundo, respaldo actual de Neon con restauración aislada probada y ventana acordada sin uso de la base **antes del merge**. El respaldo/ensayo local previo no acredita Neon. [Procedimiento concreto preparado](../PC3/ENTREGA-MANUAL-CU030-280.md#procedimiento-operativo-concreto--preparado-no-ejecutado-bloquea-el-merge-hasta-acreditarlo), no ejecutado; sin aprobación formal del HEAD.
+- `render.yaml` prevé despliegue de main tras CI; `arrancar.sh` ejecuta `alembic upgrade head`. Merge puede llevar 0002 automáticamente a Neon, sin orden manual posterior. No se ejecutaron migraciones remotas durante este trabajo; no es garantía sobre el efecto futuro del merge. Configuración efectiva del panel/SHA Live no inspeccionados.
+- GitHub informa abierta/no fusionada/mergeable con base `df1ad20`, mientras main remoto es `d15a5d92f593dfc994a2acb236a6878d3b91be29` (#288). Simulación de unión con HEAD `449ba07` sin conflictos; sin merge nuevo ni modificación productiva, sin atribuir CI al árbol simulado.
+- CU-037: coordinación pendiente entre los tres; sin asignación vigente a Martiniano ni otro integrante. Repartos anteriores preservados como propuestas históricas **no aceptadas**; proveedor/plataformas/accesos pendientes. CU-030 continúa parcial respecto de comunicación. Históricos siguientes conservan su corte.
+
+## Integración main efectivo en #281 — 15/11/2026
+
+- Main remoto avanzó a `df1ad20729b5a5c1eb1d1ac77ef2450ff004a929` (CU-013/#286); `7107233` ya estaba integrado. Se incorpora por merge normal `7792c645fbbb1db0a32ca8747adc00d8aebd3012`, con primer padre `c9c977d`, sin rebase/force-push ni reescritura. Unión automática revisada, sin conflicto textual pendiente; no se inventa una resolución manual.
+- [Diff completo y evidencia para Martiniano/Facundo](../PC3/ENTREGA-MANUAL-CU030-280.md#integración-del-main-efectivo-para-revisión--15112026): CU-013 conservado, cada operación/schema de ambas referencias intactos y YAML/JSON equivalentes; CU-005, correcciones CU-030, SQL/ORM/migración y APK sin cambios. Local: Ruff/formato, 71 backend y 41 Flutter focalizadas aprobadas; CI completa del HEAD final en #281 tras observarla.
+- Martiniano conforme con diseño en `bb1ceb5` según Martín, sin aprobación formal; revisión del HEAD final y de Facundo pendientes. Sin merge de PR hacia main, despliegues ni bases remotas; CU-037 separado. Históricos siguientes conservados.
+
+## Observaciones de Martiniano comunicadas por Martín — PR #281, 15/11/2026
+
+- Martiniano revisó `bb1ceb5`: conforme con idempotencia, permisos y locks, **sin aprobación formal**; revisará el HEAD final. El acuerdo estructural fue comunicado por Martín; Facundo todavía debe revisar el diff publicado. No atribuir aprobación conjunta ni ampliar la revisión de un corte al siguiente.
+- Merge normal de main `7107233` ya conservado (`046173b`), sin rebase ni force-push. [Entrega manual](../PC3/ENTREGA-MANUAL-CU030-280.md) incluye el diff de MisReservas para revisión, con CU-005/#275 y mensaje de demora coexistentes.
+- Ajustes: SQL ordenado sin alterar modelo/migración/históricos; fecha legible y hora local; carga, ausencia, error y reporte fechado diferenciados; acción específica en lugar de actualización genérica. Salida incierta/recuperación por sesión conservadas, más prueba del formulario con teclado abierto y prueba conjunta CU-005/demora. Resultados y HEAD/CI exactos en #281 tras observarlos. Sin merge de PR, despliegue ni operaciones remotas sobre bases. Históricos siguientes conservados.
+
+## Corrección solicitada en revisión de PR #281 — 15/11/2026
+
+- **Estado posterior:** corrección publicada como `a9546e4` + documentación `becab45`. Luego el usuario autorizó actualizar la rama con main: merge `046173bce3bd7dc9dc34228f7ca16ee9344ee138` incorpora `7107233b7097870ca5731cf9137209faf326608d`, conservando CU-005 y mensaje contextual, sin conflictos ni reescribir commits publicados. No se fusionó la PR en main. Los puntos siguientes conservan el corte anterior a esta autorización. CI exacta del HEAD posterior se registra en #281.
+
+- Sobre `bb1ceb53f89960420c6bda975354b6cbd261c3e0`, sin incorporar cambios independientes de main `7107233b7097870ca5731cf9137209faf326608d`: salir después de resultado incierto/fallos de consulta ya no bloquea las acciones del viaje. Advertencia explícita: salida no equivale a cancelación/rechazo.
+- Shell conserva viaje/clave solo dentro de su sesión; «Resultado propio» permite seleccionar y consultar explícitamente. Sin texto interno almacenado en referencias ni reenvíos/consultas automáticos; al cambiar/cerrar sesión se descartan referencias y respuestas tardías. Recuperación desplazable y prueba de teléfono con teclado abierto.
+- [Entrega manual](../PC3/ENTREGA-MANUAL-CU030-280.md) contiene procedimiento futuro de migración 0002 con respaldo/verificación/restauración, identificación de SHA efectivos backend/Web y dataset a acordar antes del ensayo. Ninguna operación remota ejecutada; no se atribuyen SHA desplegados actuales desde los históricos PC2.
+- CU-037 conserva brecha de comunicación: proveedor/canales, plataformas, accesos, tokens/sesión y evidencia de aceptación/entrega pendientes. La asignación de coordinación anterior era propuesta no confirmada; no se atribuyen responsables. HEAD publicado y CI exacta se registran después de observarlos en #281, sin extender resultados de HEAD anteriores.
+
+## Publicaci?n manual CU-030 efectiva ? 15/11/2026, PR #281
+
+- [PR #281](https://github.com/Martiherenu1/ProyectoVanFull/pull/281) abierta, push normal; primer HEAD fe14da1f9b868fff23c0f891c84a67f969db9f44 sobre base 71739f4. Revisi?n solicitada efectivamente a Martiherenu1 y facubarrientos; sin aprobaci?n atribuida. ?nico cierre previsto #280, solo alcance manual.
+- CI inicial [43767428954](https://github.com/Martiherenu1/ProyectoVanFull/actions/runs/43767428954) success para ese primer HEAD, no para el ajuste posterior de navegaci?n/UUID. HEAD final y CI propia se registran en PR/Issue tras observarlos. Sin merge/despliegue.
+- Ajuste posterior: recuperaci?n propia dentro del navegador de la sesi?n y UUID pegado con may?sculas reconocido. Prueba integrada de cambio de cuenta y regresiones shell: 8 aprobadas; validaci?n final del adaptador registrada en PR. C?digo/modelo/contrato y resultados separados de las evidencias PC2 siguientes.
+- [Entrega y aceptaci?n](../PC3/ENTREGA-MANUAL-CU030-280.md): comunicaci?n CU-037/push/WhatsApp sigue pendiente; mensaje contextual no reemplaza notificaci?n. No CU completo; CU-007 y RNF-008/#39/#273 preservados.
+
+
+## CU-030 manual para revisi?n ? 15/11/2026, #280
+
+- Worktree aislado, rama feat/chofer-avisos-manual-cu030, base 71739f49b1427aa3523e46011e6085fa9cbe4c91. Autor?a/correlaci?n y recuperaci?n hist?rica propias aprobadas seg?n comunicaci?n de Mart?n; contrato/modelo e implementaci?n en preparaci?n para PR, sin merge/despliegue.
+- [Aceptaci?n ?nica, l?mites y propuesta push](../PC3/ENTREGA-MANUAL-CU030-280.md). Contextual para reserva propia consolidada, sin descripci?n interna ni afirmar demora activa. CU-037 sin mecanismo disponible: comunicaci?n pendiente; CU-030 parcial. Aclaraci?n push/destinatarios de Mart?n pendiente VanFull, no aprobaci?n de proveedor.
+- Migraci?n 0002 additive, hist?ricos sin autores inferidos. Contrato aditivo; sin cambios de sesi?n/Checkout ni RNF-008/#39/#273/CU-007. Pruebas/HEAD/CI propios se registran despu?s de observarlos, separados de los hist?ricos siguientes.
+
 ## Candidata Flutter RNF-008 / #293 — 16/11/2026
 
 - Continuación autorizada por Martín, rama aislada sobre #292 HEAD
@@ -117,7 +185,6 @@
   Ruff y formato (119 archivos) correctos, diff --check limpio. Sin red/base.
   No suite completa, Flutter, CI remota ni resolución de regresiones.
   Sin commit ni publicación.
-
 ## Publicación documental CU-007 efectiva — 10/11/2026
 
 - Martín autorizó publicación tras revisar el diff. [Issue #267](https://github.com/Martiherenu1/ProyectoVanFull/issues/267) específico y [PR #268](https://github.com/Martiherenu1/ProyectoVanFull/pull/268) abierta hacia main, sin merge; único cierre automático #267, sin cerrar CU-007 ni sus preguntas funcionales.

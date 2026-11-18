@@ -521,6 +521,133 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
 
+  /administracion/tarifas:
+    get:
+      tags: [administracion]
+      summary: Listar las tarifas para su gestión
+      description: |
+        Solo el dueño (RN-027). Todas las filas de `tarifa`, sin paginar. No es la consulta de la
+        tarifa aplicable a un viaje (esa es `GET /tarifas?id_viaje`). (CU-031 flujo principal)
+      x-cu: CU-031
+      responses:
+        '200':
+          description: Tarifas
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TarifaGestionLista'
+        '401':
+          $ref: '#/components/responses/NoAutenticado'
+        '403':
+          $ref: '#/components/responses/SinPermiso'
+    post:
+      tags: [administracion]
+      summary: Crear una tarifa
+      description: |
+        Solo el dueño. Registra la tarifa tal como llega. Estructura de parámetros, vigencias e
+        historial tarifario son PENDIENTE DE DISEÑO en la v1.3 del CU: `tipo` y `fecha_vigencia` se
+        guardan sin interpretarlos. No hay descuentos especiales (A1: sin tabla ni regla aprobada) y
+        el 15 % por efectivo (RN-011) no es una tarifa editable. (CU-031 flujo principal)
+      x-cu: CU-031
+      x-cobertura: parcial
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TarifaGestionCreate'
+      responses:
+        '201':
+          description: Tarifa creada
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TarifaGestion'
+        '400':
+          description: VALIDACION — cuerpo inválido
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          $ref: '#/components/responses/NoAutenticado'
+        '403':
+          $ref: '#/components/responses/SinPermiso'
+
+  /administracion/tarifas/{id_tarifa}:
+    get:
+      tags: [administracion]
+      summary: Consultar una tarifa
+      description: Solo el dueño. (CU-031)
+      x-cu: CU-031
+      parameters:
+        - name: id_tarifa
+          in: path
+          required: true
+          schema: { type: integer, minimum: 1 }
+      responses:
+        '200':
+          description: Tarifa
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TarifaGestion'
+        '401':
+          $ref: '#/components/responses/NoAutenticado'
+        '403':
+          $ref: '#/components/responses/SinPermiso'
+        '404':
+          description: TARIFA_NO_ENCONTRADA
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+    patch:
+      tags: [administracion]
+      summary: Modificar una tarifa
+      description: |
+        Solo el dueño. Cambia solo los campos enviados y pisa la fila: no hay historial (PENDIENTE
+        en la v1.3). **No recalcula** contrataciones, reservas ni saldos: la contratación conserva
+        su `importe_acordado`; si un cambio puede afectar un saldo pendiente (A2, RN-012) es una
+        decisión sin cerrar. `tipo` y `fecha_vigencia` admiten `null`; `nombre` e `importe` no.
+        (CU-031 flujo principal, A2)
+      x-cu: CU-031
+      x-cobertura: parcial
+      parameters:
+        - name: id_tarifa
+          in: path
+          required: true
+          schema: { type: integer, minimum: 1 }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TarifaGestionUpdate'
+      responses:
+        '200':
+          description: Tarifa modificada
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TarifaGestion'
+        '400':
+          description: VALIDACION — cuerpo vacío o inválido
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          $ref: '#/components/responses/NoAutenticado'
+        '403':
+          $ref: '#/components/responses/SinPermiso'
+        '404':
+          description: TARIFA_NO_ENCONTRADA
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
   /clientes-corporativos:
     get:
       tags: [administracion]
@@ -2880,6 +3007,47 @@ components:
         email: { type: string, minLength: 1, maxLength: 120 }
         telefono: { type: string, minLength: 1, maxLength: 30 }
         identificador_acceso: { type: string, minLength: 3, maxLength: 120 }
+
+    TarifaGestion:
+      type: object
+      required: [id_tarifa, nombre, importe, fecha_creacion]
+      properties:
+        id_tarifa: { type: integer }
+        nombre: { type: string, maxLength: 120 }
+        tipo: { type: string, maxLength: 40, description: Texto libre; sin convención aprobada. }
+        importe: { type: number, format: double }
+        fecha_creacion: { type: string, format: date }
+        fecha_vigencia: { type: string, format: date, description: Se guarda sin interpretar (PENDIENTE en la v1.3). }
+
+    TarifaGestionLista:
+      type: object
+      required: [items, total]
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/TarifaGestion'
+        total: { type: integer }
+
+    TarifaGestionCreate:
+      type: object
+      additionalProperties: false
+      required: [nombre, importe]
+      properties:
+        nombre: { type: string, minLength: 1, maxLength: 120 }
+        importe: { type: number, minimum: 0, maximum: 9999999999.99, multipleOf: 0.01 }
+        tipo: { type: string, minLength: 1, maxLength: 40 }
+        fecha_vigencia: { type: string, format: date }
+
+    TarifaGestionUpdate:
+      type: object
+      additionalProperties: false
+      minProperties: 1
+      properties:
+        nombre: { type: string, minLength: 1, maxLength: 120 }
+        importe: { type: number, minimum: 0, maximum: 9999999999.99, multipleOf: 0.01 }
+        tipo: { type: string, minLength: 1, maxLength: 40, nullable: true }
+        fecha_vigencia: { type: string, format: date, nullable: true }
 
     ClienteCorporativo:
       type: object

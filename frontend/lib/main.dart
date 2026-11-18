@@ -42,6 +42,8 @@ import 'services/admin/pagos_admin_api.dart';
 import 'services/admin/deuda_admin_api.dart';
 import 'screens/admin/consultar_deuda_admin_screen.dart';
 import 'services/admin/reservas_admin_api.dart';
+import 'services/admin/administradores_admin_api.dart';
+import 'screens/admin/administradores_admin_screen.dart';
 import 'screens/admin/consultar_reservas_admin_screen.dart';
 import 'screens/admin/pagos_pendientes_screen.dart';
 import 'models/admin/pago_admin.dart';
@@ -118,6 +120,7 @@ class _VanFullBootstrapState extends State<VanFullBootstrap> {
   late final PagosAdminApi _pagosAdmin;
   late final DeudaAdminApi _deudaAdmin;
   late final ReservasAdminApi _reservasAdmin;
+  late final AdministradoresAdminApi _administradoresAdmin;
   late final ViajesChoferApi _viajesChofer;
   late final DetalleViajeChoferApi _detalleChofer;
   late final EjecucionViajeApi _ejecucionChofer;
@@ -152,6 +155,7 @@ class _VanFullBootstrapState extends State<VanFullBootstrap> {
     _pagosAdmin = PagosAdminApi(httpClient);
     _deudaAdmin = DeudaAdminApi(httpClient);
     _reservasAdmin = ReservasAdminApi(httpClient);
+    _administradoresAdmin = AdministradoresAdminApi(httpClient);
     _viajesChofer = ViajesChoferApi(httpClient);
     _detalleChofer = DetalleViajeChoferApi(httpClient);
     _ejecucionChofer = EjecucionViajeApi(httpClient);
@@ -187,6 +191,27 @@ class _VanFullBootstrapState extends State<VanFullBootstrap> {
     _transporte.close();
     super.dispose();
   }
+
+  /// La administración y el dueño comparten la entrada: el dueño suma la
+  /// gestión de administradores (CU-032), que FastAPI restringe al rol `dueno`.
+  Widget _entradaAdministracion(
+    SesionController controller, {
+    bool dueno = false,
+  }) => _EntradaAdministracion(
+    controller: controller,
+    listar: _viajesDiaAdmin,
+    crear: _viajesAdmin,
+    registrarPagos: _registroPagosAdmin,
+    pagos: _pagosAdmin,
+    deuda: _deudaAdmin,
+    reservas: _reservasAdmin,
+    configuracionMapa: widget.configuracionMapa,
+    prepararMapa: widget.prepararMapa,
+    crearVisorMapa: widget.crearVisorMapa,
+    gpsApi: _gpsApi,
+    onSalir: controller.salir,
+    administradores: dueno ? _administradoresAdmin : null,
+  );
 
   /// Callbacks estables ligados a la sesión que originó la interacción.
   void _prepararAusencias(SesionController controller) {
@@ -268,20 +293,9 @@ class _VanFullBootstrapState extends State<VanFullBootstrap> {
             _pantallaUbicacionPasajero(controller, idViaje),
       );
     },
-    entradaAdministrador: (controller) => _EntradaAdministracion(
-      controller: controller,
-      listar: _viajesDiaAdmin,
-      crear: _viajesAdmin,
-      registrarPagos: _registroPagosAdmin,
-      pagos: _pagosAdmin,
-      deuda: _deudaAdmin,
-      reservas: _reservasAdmin,
-      configuracionMapa: widget.configuracionMapa,
-      prepararMapa: widget.prepararMapa,
-      crearVisorMapa: widget.crearVisorMapa,
-      gpsApi: _gpsApi,
-      onSalir: controller.salir,
-    ),
+    entradaAdministrador: _entradaAdministracion,
+    entradaDueno: (controller) =>
+        _entradaAdministracion(controller, dueno: true),
     entradaChofer: (controller) => _EntradaChofer(
       controller: controller,
       listar: _viajesChofer,
@@ -310,6 +324,7 @@ class _EntradaAdministracion extends StatefulWidget {
     required this.crearVisorMapa,
     required this.gpsApi,
     required this.onSalir,
+    this.administradores,
   });
 
   final SesionController controller;
@@ -324,6 +339,7 @@ class _EntradaAdministracion extends StatefulWidget {
   final ConstructorVisorMapa? crearVisorMapa;
   final UbicacionApi gpsApi;
   final VoidCallback onSalir;
+  final AdministradoresAdminApi? administradores;
 
   @override
   State<_EntradaAdministracion> createState() => _EntradaAdministracionState();
@@ -377,6 +393,12 @@ class _EntradaAdministracionState extends State<_EntradaAdministracion> {
                       onPressed: _abrirRegistroPago,
                       child: const Text('Registrar pago'),
                     ),
+                    if (widget.administradores != null)
+                      OutlinedButton(
+                        key: const Key('admin-administradores'),
+                        onPressed: _abrirAdministradores,
+                        child: const Text('Administradores'),
+                      ),
                     OutlinedButton(
                       key: const Key('admin-consultar-deuda'),
                       onPressed: _abrirDeuda,
@@ -399,6 +421,45 @@ class _EntradaAdministracionState extends State<_EntradaAdministracion> {
             ),
           ],
         );
+
+  void _abrirAdministradores() {
+    final controller = widget.controller;
+    final generacion = controller.generacion;
+    final token = controller.token;
+    final api = widget.administradores;
+    bool vigente() =>
+        api != null &&
+        mounted &&
+        !_accesoDenegado &&
+        token != null &&
+        controller.generacion == generacion &&
+        controller.token == token;
+    if (!vigente()) return;
+    Future<T> protegida<T>(
+      Future<T> Function(AdministradoresAdminApi) pedir,
+    ) async {
+      if (!vigente()) throw StateError('La sesión ya no está vigente.');
+      final resultado = await _protegerAcceso(
+        controller: controller,
+        solicitud: () => pedir(api!),
+        onAccesoDenegado: _denegarAcceso,
+      );
+      if (!vigente()) throw StateError('La sesión ya no está vigente.');
+      return resultado;
+    }
+
+    Navigator.of(context).push(
+      MaterialPageRoute<void>(
+        builder: (_) => AdministradoresAdminScreen(
+          listar: () => protegida((a) => a.listar()),
+          crear: (datos) => protegida((a) => a.crear(datos)),
+          modificar: (id, cambios) =>
+              protegida((a) => a.modificar(id, cambios)),
+          deshabilitar: (id) => protegida((a) => a.deshabilitar(id)),
+        ),
+      ),
+    );
+  }
 
   void _abrirRegistroPago() {
     final controller = widget.controller;

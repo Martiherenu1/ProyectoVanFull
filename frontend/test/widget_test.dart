@@ -42,6 +42,7 @@ void main() {
     expect(AppRole.fromApiValue('pasajero'), AppRole.passenger);
     expect(AppRole.fromApiValue('chofer'), AppRole.driver);
     expect(AppRole.fromApiValue('administrador'), AppRole.admin);
+    expect(AppRole.fromApiValue('dueno'), AppRole.owner);
     expect(AppRole.fromApiValue('rol_inexistente'), isNull);
   });
 
@@ -198,12 +199,23 @@ void main() {
     expect(find.text('Viajes del día'), findsNothing);
   });
 
-  testWidgets('dueno permanece bloqueado sin una interfaz inventada', (
+  testWidgets('dueno entra a la vista de administración (CU-032)', (
     WidgetTester tester,
   ) async {
     await tester.pumpWidget(const VanFullApp(roles: ['dueno']));
 
-    expect(find.text('Rol no reconocido'), findsOneWidget);
+    expect(find.text('Rol no reconocido'), findsNothing);
+    expect(find.byType(ViajesDiaAdminScreen), findsOneWidget);
+  });
+
+  testWidgets('dueno junto a otro rol sigue sin elegirse solo', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(
+      const VanFullApp(roles: ['dueno', 'administrador']),
+    );
+
+    expect(find.text('Selección de rol pendiente'), findsOneWidget);
     expect(find.byType(ViajesDiaAdminScreen), findsNothing);
   });
 }

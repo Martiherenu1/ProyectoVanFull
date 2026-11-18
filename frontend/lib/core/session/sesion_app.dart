@@ -14,6 +14,7 @@ class SesionApp extends StatelessWidget {
     this.entradaPasajero,
     this.entradaChofer,
     this.entradaAdministrador,
+    this.entradaDueno,
     this.fechaAdmin,
     this.cargarViajesAdmin,
     this.onViajeAdminSeleccionado,
@@ -26,6 +27,7 @@ class SesionApp extends StatelessWidget {
   final Widget Function(SesionController controller)? entradaPasajero;
   final Widget Function(SesionController controller)? entradaChofer;
   final Widget Function(SesionController controller)? entradaAdministrador;
+  final Widget Function(SesionController controller)? entradaDueno;
 
   /// Dependencias de Viajes del día (administración), que [RoleRouter] recibe
   /// de quien arma la app. Sin ellas la pantalla muestra su estado de error.
@@ -53,6 +55,9 @@ class SesionApp extends StatelessWidget {
               entradaAdministrador: entradaAdministrador == null
                   ? null
                   : (_) => entradaAdministrador!(controller),
+              entradaDueno: entradaDueno == null
+                  ? null
+                  : (_) => entradaDueno!(controller),
               fechaAdmin: fechaAdmin,
               cargarViajesAdmin: cargarViajesAdmin,
               onViajeAdminSeleccionado: onViajeAdminSeleccionado,

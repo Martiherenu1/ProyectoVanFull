@@ -347,6 +347,180 @@ paths:
   # ---------------------------------------------------------------------------
   # CLIENTES CORPORATIVOS (administración, CU-023)
   # ---------------------------------------------------------------------------
+  /administradores:
+    get:
+      tags: [administracion]
+      summary: Listar administradores
+      description: |
+        Solo el dueño (RN-027). Cuentas con el rol `administrador`; las que además son `dueno` no
+        se gestionan acá. Sin paginar: son pocas. (CU-032, RF-041)
+      x-cu: CU-032
+      responses:
+        '200':
+          description: Administradores
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AdministradorLista'
+        '401':
+          $ref: '#/components/responses/NoAutenticado'
+        '403':
+          $ref: '#/components/responses/SinPermiso'
+    post:
+      tags: [administracion]
+      summary: Crear una cuenta de administrador
+      description: |
+        Solo el dueño. Crea la persona, la cuenta de acceso (estado `activo`, contraseña guardada
+        como hash) y le asigna el rol `administrador`. El dueño define la contraseña inicial.
+        Permisos más finos que el rol, recuperación y política de contraseñas son pendientes
+        técnicos del propio CU (v1.3). Un DNI de otra persona ya registrada responde
+        `DNI_DUPLICADO`: reutilizarla no está definido. (CU-032, flujo principal)
+      x-cu: CU-032
+      x-cobertura: parcial
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AdministradorCreate'
+      responses:
+        '201':
+          description: Administrador creado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Administrador'
+        '400':
+          description: VALIDACION — cuerpo inválido
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          $ref: '#/components/responses/NoAutenticado'
+        '403':
+          $ref: '#/components/responses/SinPermiso'
+        '409':
+          description: DNI_DUPLICADO o IDENTIFICADOR_EN_USO
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /administradores/{id_cuenta_acceso}:
+    get:
+      tags: [administracion]
+      summary: Consultar un administrador
+      description: Solo el dueño. (CU-032)
+      x-cu: CU-032
+      parameters:
+        - name: id_cuenta_acceso
+          in: path
+          required: true
+          schema: { type: integer, minimum: 1 }
+      responses:
+        '200':
+          description: Administrador
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Administrador'
+        '401':
+          $ref: '#/components/responses/NoAutenticado'
+        '403':
+          $ref: '#/components/responses/SinPermiso'
+        '404':
+          description: ADMINISTRADOR_NO_ENCONTRADO
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+    patch:
+      tags: [administracion]
+      summary: Modificar un administrador
+      description: |
+        Solo el dueño. Cambia datos personales e identificador de acceso, todo o nada. El estado
+        tiene su propia operación. (CU-032 A1)
+      x-cu: CU-032
+      parameters:
+        - name: id_cuenta_acceso
+          in: path
+          required: true
+          schema: { type: integer, minimum: 1 }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AdministradorUpdate'
+      responses:
+        '200':
+          description: Administrador modificado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Administrador'
+        '400':
+          description: VALIDACION — cuerpo vacío o inválido
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          $ref: '#/components/responses/NoAutenticado'
+        '403':
+          $ref: '#/components/responses/SinPermiso'
+        '404':
+          description: ADMINISTRADOR_NO_ENCONTRADO
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '409':
+          description: DNI_DUPLICADO o IDENTIFICADOR_EN_USO
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /administradores/{id_cuenta_acceso}/deshabilitacion:
+    post:
+      tags: [administracion]
+      summary: Deshabilitar un administrador
+      description: |
+        Solo el dueño. Pasa la cuenta a `deshabilitado`: deja de poder iniciar sesión. No se borra
+        nada (RF-041). Un token ya emitido sigue valiendo hasta que vence. Repetirla responde
+        ADMINISTRADOR_YA_DESHABILITADO. (CU-032 A2)
+      x-cu: CU-032
+      parameters:
+        - name: id_cuenta_acceso
+          in: path
+          required: true
+          schema: { type: integer, minimum: 1 }
+      responses:
+        '200':
+          description: Administrador deshabilitado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Administrador'
+        '401':
+          $ref: '#/components/responses/NoAutenticado'
+        '403':
+          $ref: '#/components/responses/SinPermiso'
+        '404':
+          description: ADMINISTRADOR_NO_ENCONTRADO
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '409':
+          description: ADMINISTRADOR_YA_DESHABILITADO
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
   /clientes-corporativos:
     get:
       tags: [administracion]
@@ -2657,6 +2831,55 @@ components:
         telefono: { type: string, minLength: 1, maxLength: 30 }
         direccion: { type: string, minLength: 1, maxLength: 200 }
         categoria: { type: string, minLength: 1, maxLength: 30 }
+
+    Administrador:
+      type: object
+      required: [id_cuenta_acceso, id_persona, nombre, apellido, dni, identificador_acceso, estado]
+      properties:
+        id_cuenta_acceso: { type: integer }
+        id_persona: { type: integer }
+        nombre: { type: string }
+        apellido: { type: string }
+        dni: { type: string }
+        email: { type: string }
+        telefono: { type: string }
+        identificador_acceso: { type: string }
+        estado: { type: string, enum: [activo, deshabilitado] }
+
+    AdministradorLista:
+      type: object
+      required: [items, total]
+      properties:
+        items:
+          type: array
+          items: { $ref: '#/components/schemas/Administrador' }
+        total: { type: integer }
+
+    AdministradorCreate:
+      type: object
+      additionalProperties: false
+      required: [nombre, apellido, dni, identificador_acceso, contrasena]
+      properties:
+        nombre: { type: string, minLength: 1, maxLength: 80 }
+        apellido: { type: string, minLength: 1, maxLength: 80 }
+        dni: { type: string, minLength: 1, maxLength: 20 }
+        email: { type: string, minLength: 1, maxLength: 120 }
+        telefono: { type: string, minLength: 1, maxLength: 30 }
+        identificador_acceso: { type: string, minLength: 3, maxLength: 120 }
+        contrasena: { type: string, format: password, minLength: 8, maxLength: 128, writeOnly: true }
+
+    AdministradorUpdate:
+      type: object
+      additionalProperties: false
+      minProperties: 1
+      description: Omitir un campo lo deja sin cambios; null no está admitido.
+      properties:
+        nombre: { type: string, minLength: 1, maxLength: 80 }
+        apellido: { type: string, minLength: 1, maxLength: 80 }
+        dni: { type: string, minLength: 1, maxLength: 20 }
+        email: { type: string, minLength: 1, maxLength: 120 }
+        telefono: { type: string, minLength: 1, maxLength: 30 }
+        identificador_acceso: { type: string, minLength: 3, maxLength: 120 }
 
     ClienteCorporativo:
       type: object

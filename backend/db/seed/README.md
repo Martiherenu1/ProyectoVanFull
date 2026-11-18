@@ -27,18 +27,18 @@ verifica, incluido que se pueda iniciar sesión con cada cuenta.
 
 | Archivo | Contenido |
 |---|---|
-| `persona`, `pasajero`, `cliente`, `cliente_individual` | 5 personas: 2 pasajeros (con su cliente individual), 2 choferes y 1 administrador |
+| `persona`, `pasajero`, `cliente`, `cliente_individual` | 6 personas: 2 pasajeros (con su cliente individual), 2 choferes, 1 administrador y 1 dueño |
 | `chofer` | Las personas 3 y 5. La 3 tiene la cuenta `chofer1@vanfull.test`; la 5 ("Chofer Dos") **no tiene cuenta de acceso**: existe solo para probar la reasignación de CU-018. `chofer` usa `id_persona` como PK/FK; no tiene otro identificador |
 | `cuenta_corriente` | Una cuenta corriente para cada uno de los 2 clientes individuales |
-| `cuenta_acceso`, `cuenta_rol` | Una cuenta por persona, **salvo la persona 5** (chofer sin cuenta: no puede iniciar sesión ni publicar GPS, solo recibir asignaciones). Roles: `pasajero` ×2, `chofer`, `administrador` |
+| `cuenta_acceso`, `cuenta_rol` | Una cuenta por persona, **salvo la persona 5** (chofer sin cuenta: no puede iniciar sesión ni publicar GPS, solo recibir asignaciones). Roles: `pasajero` ×2, `chofer`, `administrador`, `dueno` |
 | `servicio` | Un servicio universitario y uno laboral |
 | `recorrido`, `parada`, `parada_recorrido` | Un recorrido con 3 paradas (nombres y sin coordenadas: son de prueba) |
 | `vehiculo` | Vehículos 1 y 2, patentes sintéticas `VF029AA` y `VF030AA`, capacidad 20 cada uno (el 2 es para probar la reasignación) |
 | `viaje` | Viajes 1 a 3 del 30/10/2026 sobre servicio y recorrido 1; horarios 07:30, 12:30 y 18:00, capacidad planificada 18 |
 | `contrasenas-de-prueba.csv` | Contraseña de cada cuenta. **No es una tabla**: el cargador la hashea con bcrypt y la guarda en `cuenta_acceso.hash_contrasena` |
 
-Cuentas: `pasajero1@vanfull.test`, `pasajero2@vanfull.test`, `chofer1@vanfull.test` y
-`admin1@vanfull.test`. Las contraseñas están en `contrasenas-de-prueba.csv`. Los datos son ficticios
+Cuentas: `pasajero1@vanfull.test`, `pasajero2@vanfull.test`, `chofer1@vanfull.test`,
+`admin1@vanfull.test` y `dueno1@vanfull.test` (CU-032: el dueño gestiona administradores). Las contraseñas están en `contrasenas-de-prueba.csv`. Los datos son ficticios
 (DNI que empiezan con 9, dominio `.test`).
 
 ## Qué NO hay, y por qué

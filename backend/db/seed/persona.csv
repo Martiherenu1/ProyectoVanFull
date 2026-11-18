@@ -4,3 +4,4 @@ id_persona,nombre,apellido,dni,direccion,telefono,email
 3,Chofer,Uno,90000003,,,chofer1@vanfull.test
 4,Administrador,Uno,90000004,,,admin1@vanfull.test
 5,Chofer,Dos,90000005,,,
+6,Dueño,Uno,90000006,,,dueno1@vanfull.test

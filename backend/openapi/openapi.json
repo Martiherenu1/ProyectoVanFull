@@ -973,6 +973,419 @@
         }
       }
     },
+    "/administracion/paradas": {
+      "get": {
+        "tags": [
+          "administracion"
+        ],
+        "summary": "Listar las paradas del catálogo",
+        "description": "Administrador o dueño. Sin paginar. (CU-019)",
+        "x-cu": "CU-019",
+        "responses": {
+          "200": {
+            "description": "Paradas",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ParadaGestionLista"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/NoAutenticado"
+          },
+          "403": {
+            "$ref": "#/components/responses/SinPermiso"
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "administracion"
+        ],
+        "summary": "Crear una parada",
+        "description": "Administrador o dueño. Latitud y longitud van juntas o ninguna. Una parada nueva no está\ncomprometida. (CU-019 flujo principal)\n",
+        "x-cu": "CU-019",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ParadaGestionCreate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Parada creada",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ParadaGestion"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "VALIDACION — cuerpo inválido",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/NoAutenticado"
+          },
+          "403": {
+            "$ref": "#/components/responses/SinPermiso"
+          }
+        }
+      }
+    },
+    "/administracion/paradas/{id_parada}": {
+      "get": {
+        "tags": [
+          "administracion"
+        ],
+        "summary": "Consultar una parada",
+        "description": "Administrador o dueño. (CU-019)",
+        "x-cu": "CU-019",
+        "parameters": [
+          {
+            "name": "id_parada",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "minimum": 1
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Parada",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ParadaGestion"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/NoAutenticado"
+          },
+          "403": {
+            "$ref": "#/components/responses/SinPermiso"
+          },
+          "404": {
+            "description": "PARADA_NO_ENCONTRADA",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      },
+      "patch": {
+        "tags": [
+          "administracion"
+        ],
+        "summary": "Modificar una parada",
+        "description": "Administrador o dueño. Cambia solo los campos enviados; `direccion`, `latitud` y `longitud`\nadmiten `null` (las coordenadas siguen yendo juntas). Una parada que está **comprometida** en\nalgún recorrido no se modifica: RN-021, `PARADA_COMPROMETIDA`. (CU-019, A2)\n",
+        "x-cu": "CU-019",
+        "parameters": [
+          {
+            "name": "id_parada",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "minimum": 1
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ParadaGestionUpdate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Parada modificada",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ParadaGestion"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "VALIDACION — cuerpo vacío o inválido",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/NoAutenticado"
+          },
+          "403": {
+            "$ref": "#/components/responses/SinPermiso"
+          },
+          "404": {
+            "description": "PARADA_NO_ENCONTRADA",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "PARADA_COMPROMETIDA — RN-021",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/administracion/recorridos": {
+      "get": {
+        "tags": [
+          "administracion"
+        ],
+        "summary": "Listar los recorridos con sus paradas",
+        "description": "Administrador o dueño. Sin paginar. (CU-019)",
+        "x-cu": "CU-019",
+        "responses": {
+          "200": {
+            "description": "Recorridos",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RecorridoGestionLista"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/NoAutenticado"
+          },
+          "403": {
+            "$ref": "#/components/responses/SinPermiso"
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "administracion"
+        ],
+        "summary": "Crear un recorrido",
+        "description": "Administrador o dueño. `id_paradas` son paradas existentes del catálogo, en orden: la primera\nes el orden 1. Las paradas entran sin comprometer. (CU-019 flujo principal)\n",
+        "x-cu": "CU-019",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RecorridoParadas"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Recorrido creado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RecorridoGestion"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "VALIDACION — cuerpo inválido",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/NoAutenticado"
+          },
+          "403": {
+            "$ref": "#/components/responses/SinPermiso"
+          },
+          "404": {
+            "description": "PARADA_NO_ENCONTRADA — alguna parada indicada no existe",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/administracion/recorridos/{id_recorrido}": {
+      "get": {
+        "tags": [
+          "administracion"
+        ],
+        "summary": "Consultar un recorrido con sus paradas",
+        "description": "Administrador o dueño. (CU-019)",
+        "x-cu": "CU-019",
+        "parameters": [
+          {
+            "name": "id_recorrido",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "minimum": 1
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Recorrido",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RecorridoGestion"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/NoAutenticado"
+          },
+          "403": {
+            "$ref": "#/components/responses/SinPermiso"
+          },
+          "404": {
+            "description": "RECORRIDO_NO_ENCONTRADO",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/administracion/recorridos/{id_recorrido}/paradas": {
+      "put": {
+        "tags": [
+          "administracion"
+        ],
+        "summary": "Reemplazar las paradas de un recorrido",
+        "description": "Administrador o dueño. Deja el recorrido con estas paradas, en este orden, todo o nada\n(flujo principal y A1, modificación operativa).\n\n**RN-021 / A2:** cada parada comprometida debe seguir en el mismo orden y ser la misma; si\nno, `PARADA_COMPROMETIDA` (con los `ordenes` afectados) y el recorrido no cambia. Tampoco se\nquita ni se cambia una parada con reservas o abordajes (`PARADA_CON_RESERVAS`): las reservas\napuntan a (recorrido, orden).\n\nPENDIENTE (v1.3): cómo una parada pasa a estar comprometida no está definido; esta operación\nconserva la marca, no la fija. No hay baja de recorridos ni de paradas.\n",
+        "x-cu": "CU-019",
+        "x-cobertura": "parcial",
+        "parameters": [
+          {
+            "name": "id_recorrido",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "minimum": 1
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RecorridoParadas"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Recorrido con sus paradas actualizadas",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RecorridoGestion"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "VALIDACION — cuerpo inválido",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/NoAutenticado"
+          },
+          "403": {
+            "$ref": "#/components/responses/SinPermiso"
+          },
+          "404": {
+            "description": "RECORRIDO_NO_ENCONTRADO o PARADA_NO_ENCONTRADA",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "PARADA_COMPROMETIDA (RN-021) o PARADA_CON_RESERVAS",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/clientes-corporativos": {
       "get": {
         "tags": [
@@ -4683,6 +5096,203 @@
             "type": "string",
             "format": "date",
             "nullable": true
+          }
+        }
+      },
+      "ParadaGestion": {
+        "type": "object",
+        "required": [
+          "id_parada"
+        ],
+        "properties": {
+          "id_parada": {
+            "type": "integer"
+          },
+          "nombre_descripcion": {
+            "type": "string",
+            "maxLength": 150
+          },
+          "direccion": {
+            "type": "string",
+            "maxLength": 200
+          },
+          "latitud": {
+            "type": "number",
+            "format": "double"
+          },
+          "longitud": {
+            "type": "number",
+            "format": "double"
+          }
+        }
+      },
+      "ParadaGestionLista": {
+        "type": "object",
+        "required": [
+          "items",
+          "total"
+        ],
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ParadaGestion"
+            }
+          },
+          "total": {
+            "type": "integer"
+          }
+        }
+      },
+      "ParadaGestionCreate": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "nombre_descripcion"
+        ],
+        "properties": {
+          "nombre_descripcion": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 150
+          },
+          "direccion": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 200
+          },
+          "latitud": {
+            "type": "number",
+            "minimum": -90,
+            "maximum": 90,
+            "multipleOf": 1e-06
+          },
+          "longitud": {
+            "type": "number",
+            "minimum": -180,
+            "maximum": 180,
+            "multipleOf": 1e-06
+          }
+        }
+      },
+      "ParadaGestionUpdate": {
+        "type": "object",
+        "additionalProperties": false,
+        "minProperties": 1,
+        "properties": {
+          "nombre_descripcion": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 150
+          },
+          "direccion": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 200,
+            "nullable": true
+          },
+          "latitud": {
+            "type": "number",
+            "minimum": -90,
+            "maximum": 90,
+            "multipleOf": 1e-06,
+            "nullable": true
+          },
+          "longitud": {
+            "type": "number",
+            "minimum": -180,
+            "maximum": 180,
+            "multipleOf": 1e-06,
+            "nullable": true
+          }
+        }
+      },
+      "ParadaEnRecorrido": {
+        "type": "object",
+        "required": [
+          "orden",
+          "id_parada",
+          "comprometida"
+        ],
+        "properties": {
+          "orden": {
+            "type": "integer"
+          },
+          "id_parada": {
+            "type": "integer"
+          },
+          "nombre_descripcion": {
+            "type": "string"
+          },
+          "direccion": {
+            "type": "string"
+          },
+          "latitud": {
+            "type": "number",
+            "format": "double"
+          },
+          "longitud": {
+            "type": "number",
+            "format": "double"
+          },
+          "comprometida": {
+            "type": "boolean",
+            "description": "Solo lectura. Esta API la conserva (RN-021); no la fija."
+          }
+        }
+      },
+      "RecorridoGestion": {
+        "type": "object",
+        "required": [
+          "id_recorrido",
+          "paradas"
+        ],
+        "properties": {
+          "id_recorrido": {
+            "type": "integer"
+          },
+          "paradas": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ParadaEnRecorrido"
+            }
+          }
+        }
+      },
+      "RecorridoGestionLista": {
+        "type": "object",
+        "required": [
+          "items",
+          "total"
+        ],
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/RecorridoGestion"
+            }
+          },
+          "total": {
+            "type": "integer"
+          }
+        }
+      },
+      "RecorridoParadas": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id_paradas"
+        ],
+        "properties": {
+          "id_paradas": {
+            "type": "array",
+            "minItems": 1,
+            "maxItems": 100,
+            "items": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "description": "Paradas del catálogo, en orden. La primera es el orden 1."
           }
         }
       },

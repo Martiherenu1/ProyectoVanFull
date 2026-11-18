@@ -7,6 +7,7 @@ from app.core.config import get_settings
 from app.core.cors import opciones_cors
 from app.core.errors import registrar_manejadores
 from app.routers import (
+    administradores,
     ausencias,
     auth,
     avisos,
@@ -56,6 +57,7 @@ app.include_router(auth.router, prefix=settings.api_prefix)
 app.include_router(ausencias.router, prefix=settings.api_prefix)
 app.include_router(perfil.router, prefix=settings.api_prefix)
 app.include_router(pasajeros.router, prefix=settings.api_prefix)
+app.include_router(administradores.router, prefix=settings.api_prefix)
 app.include_router(deuda.router, prefix=settings.api_prefix)
 app.include_router(comprobantes.router, prefix=settings.api_prefix)
 app.include_router(corporativos.router, prefix=settings.api_prefix)

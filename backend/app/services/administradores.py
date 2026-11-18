@@ -130,7 +130,9 @@ async def crear_administrador(db: AsyncSession, datos: AdministradorCreate) -> A
     if await _identificador_en_uso(db, datos.identificador_acceso):
         raise _error_identificador(datos.identificador_acceso)
 
-    id_rol = await db.scalar(select(RolAcceso.id_rol_acceso).where(RolAcceso.rol == ROL_ADMINISTRADOR))
+    id_rol = await db.scalar(
+        select(RolAcceso.id_rol_acceso).where(RolAcceso.rol == ROL_ADMINISTRADOR)
+    )
     persona = Persona(**datos.model_dump(include=set(_CAMPOS_PERSONA)))
     db.add(persona)
     try:

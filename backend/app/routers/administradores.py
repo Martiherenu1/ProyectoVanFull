@@ -22,24 +22,18 @@ _DUENO = Depends(requiere_rol("dueno"))
 
 
 @router.get("", response_model=AdministradorLista, response_model_exclude_none=True)
-async def listar_administradores(
-    _: UsuarioActual = _DUENO, db: AsyncSession = Depends(get_db)
-):
+async def listar_administradores(_: UsuarioActual = _DUENO, db: AsyncSession = Depends(get_db)):
     return await servicio.listar_administradores(db)
 
 
-@router.post(
-    "", response_model=Administrador, response_model_exclude_none=True, status_code=201
-)
+@router.post("", response_model=Administrador, response_model_exclude_none=True, status_code=201)
 async def crear_administrador(
     datos: AdministradorCreate, _: UsuarioActual = _DUENO, db: AsyncSession = Depends(get_db)
 ):
     return await servicio.crear_administrador(db, datos)
 
 
-@router.get(
-    "/{id_cuenta_acceso}", response_model=Administrador, response_model_exclude_none=True
-)
+@router.get("/{id_cuenta_acceso}", response_model=Administrador, response_model_exclude_none=True)
 async def consultar_administrador(
     id_cuenta_acceso: int = Path(gt=0),
     _: UsuarioActual = _DUENO,
@@ -48,9 +42,7 @@ async def consultar_administrador(
     return await servicio.obtener_administrador(db, id_cuenta_acceso)
 
 
-@router.patch(
-    "/{id_cuenta_acceso}", response_model=Administrador, response_model_exclude_none=True
-)
+@router.patch("/{id_cuenta_acceso}", response_model=Administrador, response_model_exclude_none=True)
 async def modificar_administrador(
     datos: AdministradorUpdate,
     id_cuenta_acceso: int = Path(gt=0),

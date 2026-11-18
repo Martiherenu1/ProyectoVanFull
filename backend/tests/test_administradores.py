@@ -33,9 +33,8 @@ def _alta(cliente, **datos):
 
 @pytest.fixture(scope="module")
 def entorno():
-    with base_migrada() as base:
-        with cliente_api(base) as cliente:
-            yield base, cliente
+    with base_migrada() as base, cliente_api(base) as cliente:
+        yield base, cliente
 
 
 def test_sin_token_es_401(entorno):
@@ -44,7 +43,9 @@ def test_sin_token_es_401(entorno):
     assert cliente.post(RUTA, json={}).status_code == 401
 
 
-@pytest.mark.parametrize("rol", ["administrador", "pasajero", "chofer", "representante_corporativo"])
+@pytest.mark.parametrize(
+    "rol", ["administrador", "pasajero", "chofer", "representante_corporativo"]
+)
 def test_solo_el_dueno_opera(entorno, rol):
     _, cliente = entorno
     otro = _con(rol)
@@ -144,8 +145,8 @@ def test_no_gestiona_cuentas_que_no_son_de_administrador(entorno):
         consultar(
             base,
             "INSERT INTO cuenta_rol (id_cuenta_acceso, id_rol_acceso) "
-            "SELECT $1, id_rol_acceso FROM rol_acceso WHERE rol = 'pasajero' "
-            "UNION ALL SELECT $2, id_rol_acceso FROM rol_acceso "
+            "SELECT $1::bigint, id_rol_acceso FROM rol_acceso WHERE rol = 'pasajero' "
+            "UNION ALL SELECT $2::bigint, id_rol_acceso FROM rol_acceso "
             "WHERE rol IN ('administrador', 'dueno') RETURNING 1",
             ids["cuenta9001"],
             ids["cuenta9002"],
@@ -157,9 +158,7 @@ def test_no_gestiona_cuentas_que_no_son_de_administrador(entorno):
         respuesta = cliente.get(f"{RUTA}/{id_cuenta}", headers=DUENO)
         assert respuesta.status_code == 404
         assert respuesta.json()["error"]["codigo"] == "ADMINISTRADOR_NO_ENCONTRADO"
-        assert (
-            cliente.post(f"{RUTA}/{id_cuenta}/deshabilitacion", headers=DUENO).status_code == 404
-        )
+        assert cliente.post(f"{RUTA}/{id_cuenta}/deshabilitacion", headers=DUENO).status_code == 404
 
 
 def test_modificar_datos_e_identificador(entorno):
@@ -167,7 +166,9 @@ def test_modificar_datos_e_identificador(entorno):
     creado = _alta(cliente).json()
     url = f"{RUTA}/{creado['id_cuenta_acceso']}"
     respuesta = cliente.patch(
-        url, json={"apellido": "Nuevo", "identificador_acceso": "nuevo-id@prueba.test"}, headers=DUENO
+        url,
+        json={"apellido": "Nuevo", "identificador_acceso": "nuevo-id@prueba.test"},
+        headers=DUENO,
     )
     assert respuesta.status_code == 200, respuesta.text
     assert respuesta.json()["apellido"] == "Nuevo"

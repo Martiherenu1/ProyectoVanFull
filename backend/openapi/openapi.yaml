@@ -855,11 +855,9 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
-
-  /administracion/recorridos/{id_recorrido}/paradas:
-    put:
+    patch:
       tags: [administracion]
-      summary: Reemplazar las paradas de un recorrido
+      summary: Reemplazar las paradas de un recorrido (PATCH)
       description: |
         Administrador o dueño. Deja el recorrido con estas paradas, en este orden, todo o nada
         (flujo principal y A1, modificación operativa).

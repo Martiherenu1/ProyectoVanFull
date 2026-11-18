@@ -44,9 +44,7 @@ def _recorrido(cliente, ids):
 
 
 def _reemplazar(cliente, id_recorrido, ids, headers=ADMIN):
-    return cliente.put(
-        f"{RECORRIDOS}/{id_recorrido}/paradas", json={"id_paradas": ids}, headers=headers
-    )
+    return cliente.patch(f"{RECORRIDOS}/{id_recorrido}", json={"id_paradas": ids}, headers=headers)
 
 
 def _ordenes(cliente, id_recorrido):
@@ -312,8 +310,8 @@ def test_la_api_no_permite_comprometer_una_parada(entorno):
     id_recorrido = _recorrido(cliente, [a])
     detalle = cliente.get(f"{RECORRIDOS}/{id_recorrido}", headers=ADMIN).json()
     assert detalle["paradas"][0]["comprometida"] is False
-    respuesta = cliente.put(
-        f"{RECORRIDOS}/{id_recorrido}/paradas",
+    respuesta = cliente.patch(
+        f"{RECORRIDOS}/{id_recorrido}",
         json={"id_paradas": [a], "comprometida": True},
         headers=ADMIN,
     )

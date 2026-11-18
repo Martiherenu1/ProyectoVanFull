@@ -74,7 +74,7 @@ async def consultar_recorrido(
     return await servicio.obtener_recorrido(db, id_recorrido)
 
 
-@router.put("/recorridos/{id_recorrido}/paradas", response_model=RecorridoGestion, **_SIN_NULOS)
+@router.patch("/recorridos/{id_recorrido}", response_model=RecorridoGestion, **_SIN_NULOS)
 async def reemplazar_paradas(
     datos: RecorridoParadas,
     id_recorrido: int = Path(gt=0),

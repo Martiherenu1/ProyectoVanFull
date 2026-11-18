@@ -1304,14 +1304,12 @@
             }
           }
         }
-      }
-    },
-    "/administracion/recorridos/{id_recorrido}/paradas": {
-      "put": {
+      },
+      "patch": {
         "tags": [
           "administracion"
         ],
-        "summary": "Reemplazar las paradas de un recorrido",
+        "summary": "Reemplazar las paradas de un recorrido (PATCH)",
         "description": "Administrador o dueño. Deja el recorrido con estas paradas, en este orden, todo o nada\n(flujo principal y A1, modificación operativa).\n\n**RN-021 / A2:** cada parada comprometida debe seguir en el mismo orden y ser la misma; si\nno, `PARADA_COMPROMETIDA` (con los `ordenes` afectados) y el recorrido no cambia. Tampoco se\nquita ni se cambia una parada con reservas o abordajes (`PARADA_CON_RESERVAS`): las reservas\napuntan a (recorrido, orden).\n\nPENDIENTE (v1.3): cómo una parada pasa a estar comprometida no está definido; esta operación\nconserva la marca, no la fija. No hay baja de recorridos ni de paradas.\n",
         "x-cu": "CU-019",
         "x-cobertura": "parcial",

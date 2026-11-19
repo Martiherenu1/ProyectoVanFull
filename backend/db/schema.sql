@@ -211,6 +211,8 @@ CREATE TABLE viaje (
     capacidad_planificada INTEGER CHECK (capacidad_planificada IS NULL OR capacidad_planificada >= 0),
     orden_ultimo_paso INTEGER,
     fecha_ultimo_paso TIMESTAMPTZ,
+    CONSTRAINT ck_viaje_ultimo_paso_completo
+        CHECK ((orden_ultimo_paso IS NULL) = (fecha_ultimo_paso IS NULL)),
     UNIQUE (id_viaje, id_recorrido),                      -- soporte de FK compuesta (reserva/abordaje)
     UNIQUE (id_viaje, id_vehiculo)                        -- soporte de FK compuesta (abordaje)
 );
@@ -240,6 +242,8 @@ CREATE TABLE reserva (
     estado                  VARCHAR(20) NOT NULL DEFAULT 'provisional'
         CHECK (estado IN ('provisional', 'consolidada', 'cancelada')),
     orden_descenso          INTEGER,
+    CONSTRAINT ck_reserva_orden_descenso_posterior
+        CHECK (orden_descenso IS NULL OR orden_descenso > orden_parada),
     UNIQUE (id_pasajero, id_viaje),                       -- máx. una reserva por pasajero+viaje (MR-R15)
     -- Respaldo exactamente uno: PeriodoAbono XOR Contratación directa (MR-R13)
     CHECK ((id_periodo_abono IS NOT NULL) <> (id_contratacion_directa IS NOT NULL))

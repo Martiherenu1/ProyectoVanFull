@@ -22,7 +22,7 @@ class EtaReserva {
         (destino != null && (destino is! int || destino < 0)) ||
         ascensoPasado is! bool ||
         destinoPasado is! bool ||
-        segundos is! int || segundos < 0 || segundos > 30) {
+        segundos is! int || segundos < 0) {
       throw const FormatException('ETA inválido');
     }
     return EtaReserva(

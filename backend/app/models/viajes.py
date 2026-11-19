@@ -84,6 +84,10 @@ class Viaje(Base):
         check_en("sentido", SENTIDOS),
         check_en("estado", ESTADOS_VIAJE),
         CheckConstraint("capacidad_planificada IS NULL OR capacidad_planificada >= 0"),
+        CheckConstraint(
+            "(orden_ultimo_paso IS NULL) = (fecha_ultimo_paso IS NULL)",
+            name="ck_viaje_ultimo_paso_completo",
+        ),
         ForeignKeyConstraint(
             ["id_recorrido", "orden_ultimo_paso"],
             ["parada_recorrido.id_recorrido", "parada_recorrido.orden"],
@@ -162,6 +166,10 @@ class Reserva(Base):
             ["descenso_habilitado.id_viaje", "descenso_habilitado.orden_parada"],
         ),
         check_en("estado", ESTADOS_RESERVA),
+        CheckConstraint(
+            "orden_descenso IS NULL OR orden_descenso > orden_parada",
+            name="ck_reserva_orden_descenso_posterior",
+        ),
         # Máximo una reserva por pasajero y viaje (MR-R15).
         UniqueConstraint("id_pasajero", "id_viaje"),
         # Respaldo exactamente uno: período de abono XOR contratación directa (MR-R13).

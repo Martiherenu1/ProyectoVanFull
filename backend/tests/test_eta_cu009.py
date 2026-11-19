@@ -2,6 +2,7 @@
 
 from decimal import Decimal
 
+import asyncpg
 import pytest
 
 from app.core.config import get_settings
@@ -13,6 +14,7 @@ from tests.test_ausencias import entorno as entorno
 @pytest.fixture(scope="module")
 def recorrido(entorno):
     _sql(entorno, "UPDATE parada SET latitud=-34.57, longitud=-58.69")
+    _sql(entorno, "UPDATE vehiculo SET capacidad=2 WHERE id_vehiculo=$1", entorno["vehiculo"])
     for orden, lat, lon, nombre in [
         (2, -34.572994, -58.692181, "YPF"),
         (3, -34.617882, -58.381599, "UADE"),
@@ -35,6 +37,25 @@ def recorrido(entorno):
     return entorno
 
 
+def test_base_rechaza_paso_incompleto_y_descenso_no_posterior(recorrido):
+    e = recorrido
+    _, viaje, reserva = _caso(e)
+    for cambio in ("orden_ultimo_paso=1", "fecha_ultimo_paso=now()"):
+        with pytest.raises(asyncpg.CheckViolationError) as error:
+            _sql(e, f"UPDATE viaje SET {cambio} WHERE id_viaje=$1", viaje)
+        assert error.value.constraint_name == "ck_viaje_ultimo_paso_completo"
+
+    _sql(
+        e,
+        "INSERT INTO descenso_habilitado (id_viaje, id_recorrido, orden_parada) VALUES ($1, $2, 1)",
+        viaje,
+        e["recorrido"],
+    )
+    with pytest.raises(asyncpg.CheckViolationError) as error:
+        _sql(e, "UPDATE reserva SET orden_descenso=1 WHERE id_reserva=$1", reserva)
+    assert error.value.constraint_name == "ck_reserva_orden_descenso_posterior"
+
+
 def test_descenso_explicito_paso_y_fin(recorrido, monkeypatch):
     e = recorrido
     persona, viaje, existente = _caso(e)
@@ -53,7 +74,15 @@ def test_descenso_explicito_paso_y_fin(recorrido, monkeypatch):
     reserva = http.post("/api/reservas", headers=pasajero, json={**datos, "orden_descenso": 3})
     assert reserva.status_code == 201, reserva.text
     assert reserva.json()["orden_descenso"] == 3
-    assert http.patch(descensos, headers=admin, json={"ordenes": []}).status_code == 409
+    conflicto = http.patch(descensos, headers=admin, json={"ordenes": [1]})
+    assert conflicto.status_code == 409
+    assert conflicto.json()["error"]["codigo"] == "DESCENSO_CON_RESERVAS"
+    assert http.get(descensos, headers=pasajero).json() == {"ordenes": [3]}
+    otro_pasajero = _token(_persona(e))
+    sin_descenso = http.post(
+        "/api/reservas", headers=otro_pasajero, json={"id_viaje": viaje, "orden_parada": 2}
+    )
+    assert sin_descenso.status_code == 201, sin_descenso.text
     assert (
         http.post(
             f"/api/reservas/{reserva.json()['id_reserva']}/cambio-parada",
@@ -88,6 +117,12 @@ def test_descenso_explicito_paso_y_fin(recorrido, monkeypatch):
         antes = http.get(ruta, headers=pasajero)
         assert antes.headers["Cache-Control"] == "no-store"
         assert (antes.json()["ascenso_minutos"], antes.json()["destino_minutos"]) == (6, 51)
+        eta_sin_descenso = http.get(
+            f"/api/reservas/{sin_descenso.json()['id_reserva']}/eta", headers=otro_pasajero
+        )
+        assert eta_sin_descenso.status_code == 200
+        assert eta_sin_descenso.json()["destino_minutos"] is None
+        assert eta_sin_descenso.json()["destino_pasado"] is False
         assert http.get(ruta, headers=_token(_persona(e))).status_code == 404
         assert http.get(ruta, headers=pasajero).status_code == 200 and len(pedidos) == 1
         assert http.get(ubicacion, headers=pasajero).json()["eta_minutos"] is None

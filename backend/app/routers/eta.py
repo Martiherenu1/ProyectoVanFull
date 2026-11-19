@@ -8,10 +8,10 @@ from app.core.security import UsuarioActual, requiere_rol
 from app.schemas.eta import EtaReserva, OrdenesDescenso, PasoParada
 from app.services import eta
 
-router = APIRouter(tags=["gps"])
+router = APIRouter()
 
 
-@router.get("/viajes/{id_viaje}/descensos", response_model=OrdenesDescenso)
+@router.get("/viajes/{id_viaje}/descensos", response_model=OrdenesDescenso, tags=["reservas"])
 async def listar_descensos(
     id_viaje: int = Path(gt=0),
     _: UsuarioActual = Depends(requiere_rol("pasajero", "administrador", "dueno")),
@@ -20,7 +20,7 @@ async def listar_descensos(
     return await eta.listar_descensos(db, id_viaje)
 
 
-@router.patch("/viajes/{id_viaje}/descensos", response_model=OrdenesDescenso)
+@router.patch("/viajes/{id_viaje}/descensos", response_model=OrdenesDescenso, tags=["viajes"])
 async def configurar_descensos(
     datos: OrdenesDescenso,
     id_viaje: int = Path(gt=0),
@@ -30,7 +30,7 @@ async def configurar_descensos(
     return await eta.configurar_descensos(db, id_viaje, datos)
 
 
-@router.post("/viajes/{id_viaje}/paso-parada", response_model=PasoParada)
+@router.post("/viajes/{id_viaje}/paso-parada", response_model=PasoParada, tags=["chofer"])
 async def registrar_paso(
     datos: PasoParada,
     id_viaje: int = Path(gt=0),
@@ -40,7 +40,7 @@ async def registrar_paso(
     return await eta.registrar_paso(db, usuario, id_viaje, datos)
 
 
-@router.get("/reservas/{id_reserva}/eta", response_model=EtaReserva)
+@router.get("/reservas/{id_reserva}/eta", response_model=EtaReserva, tags=["gps"])
 async def consultar(
     response: Response,
     id_reserva: int = Path(gt=0),

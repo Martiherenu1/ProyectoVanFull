@@ -16,7 +16,7 @@ from tests.test_migracion import CONSULTAS, SCHEMA
 
 def test_head_habitual_no_descubre_migracion_mp():
     cadena = ScriptDirectory.from_config(Config(str(BACKEND / "alembic.ini")))
-    assert cadena.get_current_head() == "0003"  # CU-009; CU-036 sigue fuera del head normal.
+    assert cadena.get_current_head() == "0004"  # CU-009; CU-036 sigue fuera del head normal.
     assert all(not revision.revision.startswith("mp_") for revision in cadena.walk_revisions())
 
 

@@ -2365,7 +2365,7 @@ paths:
   /viajes/{id_viaje}/descensos:
     get:
       tags:
-      - gps
+      - reservas
       summary: Consultar descensos habilitados
       description: Pasajero, administrador o dueño. Devuelve los órdenes habilitados
         expresamente para el viaje.
@@ -2408,10 +2408,12 @@ paths:
                 $ref: '#/components/schemas/Error'
     patch:
       tags:
-      - gps
+      - viajes
       summary: Configurar descensos habilitados
-      description: Administrador o dueño. Reemplaza los descensos de un viaje programado
-        y conserva los que tengan reservas.
+      description: >-
+        Administrador o dueño. Reemplaza el conjunto de descensos habilitados de un viaje
+        programado. Si el nuevo conjunto omite algún descenso referenciado por una reserva,
+        rechaza toda la actualización con 409 DESCENSO_CON_RESERVAS.
       x-cu: CU-018
       x-cobertura: parcial
       security:
@@ -2464,7 +2466,7 @@ paths:
   /viajes/{id_viaje}/paso-parada:
     post:
       tags:
-      - gps
+      - chofer
       summary: Confirmar el paso del vehículo por una parada
       description: Solo el chofer asignado de un viaje en curso. El avance no retrocede
         con reintentos. No registra el abordaje ni el descenso de ninguna persona.
@@ -2524,7 +2526,8 @@ paths:
       summary: Consultar ETA a ascenso y destino
       description: Pasajero con reserva propia consolidada y viaje en curso. Cada tiempo
         puede ser nulo por separado. Se retira el ETA de una parada al confirmar el
-        paso del vehículo. El tiempo cero no confirma una llegada.
+        paso del vehículo. Una reserva sin descenso devuelve destino_minutos nulo
+        y destino_pasado falso. El tiempo cero no confirma una llegada.
       x-cu: CU-009
       x-cobertura: parcial
       security:
@@ -4601,7 +4604,10 @@ components:
         destino_minutos: { type: integer, minimum: 0, nullable: true }
         ascenso_pasado: { type: boolean }
         destino_pasado: { type: boolean }
-        vigencia_segundos: { type: integer, minimum: 0, maximum: 30 }
+        vigencia_segundos:
+          type: integer
+          minimum: 0
+          description: Segundos restantes de vigencia de la estimación. Cero indica que no hay una estimación vigente.
 
     Ubicacion:
       type: object

@@ -20,4 +20,4 @@ class EtaReserva(BaseModel):
     destino_minutos: int | None = None
     ascenso_pasado: bool = False
     destino_pasado: bool = False
-    vigencia_segundos: int = 0
+    vigencia_segundos: int = Field(default=0, ge=0)

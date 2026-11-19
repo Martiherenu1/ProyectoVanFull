@@ -1,6 +1,6 @@
 # CONTEXTO VANFULL — Carga rápida de sesión
 
-> **CU-009 / ETA, 19/11/2026:** candidato con descenso por reserva, paso confirmado por chofer y estimaciones separadas en «Ver ubicación». La coordinación del contrato, modelo y despliegue sigue pendiente de revisión. [Contexto de chofer y viaje en curso](PC2/CONTEXTO-chofer-y-viaje.md#eta-del-pasajero--19112026).
+> **CU-009 / ETA, 19/11/2026:** candidato #327 con descenso por reserva, paso confirmado por chofer y estimaciones separadas en «Ver ubicación». La revisión de Martiniano precisó el contrato y dos restricciones de integridad que incorpora la migración 0004. Quedan pendientes la confirmación de Facundo sobre #283, la política de vigencia y consultas a Routes, y la coordinación del despliegue. [Contexto de chofer y viaje en curso](PC2/CONTEXTO-chofer-y-viaje.md#eta-del-pasajero--19112026).
 
 > **CU-021 / #279, 19/11/2026:** #277 ya mergeada en main 55ee8b5. Integración local retomada desde 2cfe1ed mediante merge normal sin commit; Choferes y Vehículos comparten la navegación vigente, preservando los demás módulos y permisos del dueño. Flutter 1111/analyze, backend sin BD 66 y Ruff aprobados. PostgreSQL 16 local sin motor Docker; CI del futuro HEAD pendiente. Diff listo para revisión/autorización de publicación; sin push/merge a main ni Neon/Render. Detalle: [contexto de Administración](PC2/CONTEXTO-administracion-y-flutter.md).
 

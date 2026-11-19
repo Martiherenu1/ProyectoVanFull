@@ -35,7 +35,6 @@ async def listar_historial(
 ):
     return await servicio.listar(
         db,
-        hoy=date.today(),
         desde=desde,
         hasta=hasta,
         estado=estado,
@@ -52,4 +51,4 @@ async def listar_historial(
 async def consultar_historial(
     id_viaje: int = Path(gt=0), _: UsuarioActual = _ADMIN, db: AsyncSession = Depends(get_db)
 ):
-    return await servicio.detalle(db, id_viaje, hoy=date.today())
+    return await servicio.detalle(db, id_viaje)

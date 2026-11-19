@@ -1,8 +1,9 @@
 """Historial de viajes para administración y dueño (CU-026, RF-040). Solo lectura.
 
-Qué es un viaje «anterior» (interpretación a validar con Martín, el CU no lo define): uno cuya fecha
-es anterior a hoy, o que ya terminó (`finalizado` o `cancelado`) aunque sea de hoy. Un viaje
-programado o en curso de hoy o futuro no es historia.
+Qué es un viaje «anterior» (respuesta funcional de Martín del 18/11, el CU no lo define): uno que
+ya terminó, `finalizado` o `cancelado`, mostrando su estado. Un viaje programado o en curso no es
+historia aunque su fecha ya haya pasado: se lo encuentra en la consulta operativa de viajes
+(CU-018). La fecha por sí sola no hace histórico a un viaje.
 
 «Información operativa asociada»: servicio, recorrido y paradas, chofer, vehículo y cantidades de
 reservas, abordajes y ausencias. No se exponen datos de los pasajeros: el CU pide solo lo
@@ -14,7 +15,7 @@ borra nada ni aplica plazos: lo que existe en la base se puede consultar.
 
 from datetime import date
 
-from sqlalchemy import Select, and_, func, or_, select
+from sqlalchemy import Select, and_, func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.errors import ApiError
@@ -42,8 +43,8 @@ from app.schemas.historial_viajes import (
 _TERMINADOS = ("finalizado", "cancelado")
 
 
-def _es_historico(hoy: date):
-    return or_(Viaje.fecha < hoy, Viaje.estado.in_(_TERMINADOS))
+def _es_historico():
+    return Viaje.estado.in_(_TERMINADOS)
 
 
 def _base() -> Select:
@@ -83,7 +84,6 @@ def _resumen(viaje: Viaje, tipo_servicio: str, chofer: Persona | None, vehiculo:
 async def listar(
     db: AsyncSession,
     *,
-    hoy: date,
     desde: date | None,
     hasta: date | None,
     estado: str | None,
@@ -97,7 +97,7 @@ async def listar(
     if desde and hasta and desde > hasta:
         raise ApiError(400, "VALIDACION", "`desde` no puede ser posterior a `hasta`.")
 
-    criterios = [_es_historico(hoy)]
+    criterios = [_es_historico()]
     if desde:
         criterios.append(Viaje.fecha >= desde)
     if hasta:
@@ -129,9 +129,9 @@ async def listar(
     return HistorialViajeLista(items=[HistorialViaje(**_resumen(*f)) for f in filas], total=total)
 
 
-async def detalle(db: AsyncSession, id_viaje: int, *, hoy: date) -> HistorialViajeDetalle:
+async def detalle(db: AsyncSession, id_viaje: int) -> HistorialViajeDetalle:
     fila = (
-        await db.execute(_base().where(Viaje.id_viaje == id_viaje, _es_historico(hoy)))
+        await db.execute(_base().where(Viaje.id_viaje == id_viaje, _es_historico()))
     ).one_or_none()
     # Un viaje que todavía no es historia se ve en la operación del día, no acá.
     if fila is None:

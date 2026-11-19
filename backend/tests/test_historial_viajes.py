@@ -172,17 +172,34 @@ def test_administrador_y_dueno_pueden(entorno, headers):
 # --- Qué es historia -------------------------------------------------------------------------
 
 
-def test_son_historia_los_de_fecha_pasada_y_los_terminados(entorno):
+def test_son_historia_solo_los_finalizados_y_cancelados(entorno):
     base, cliente = entorno
     m = Mundo(base, cliente)
-    pasado_programado = m.viaje(HACE_RATO, "programado")
     pasado_finalizado = m.viaje(HACE_RATO, "finalizado")
+    pasado_cancelado = m.viaje(HACE_RATO, "cancelado")
     terminado_hoy = m.viaje(HOY, "cancelado")
+    # Programados y en curso quedan afuera, también con fecha pasada: la fecha sola no hace historia.
+    m.viaje(HACE_RATO, "programado")
+    m.viaje(HACE_RATO, "en_curso")
     m.viaje(HOY, "programado")
     m.viaje(HOY, "en_curso")
     m.viaje(FUTURO, "programado")
 
-    assert sorted(m.ids(cliente)) == sorted([pasado_programado, pasado_finalizado, terminado_hoy])
+    assert sorted(m.ids(cliente)) == sorted([pasado_finalizado, pasado_cancelado, terminado_hoy])
+
+
+def test_el_estado_se_muestra_y_programado_o_en_curso_dan_vacio(entorno):
+    base, cliente = entorno
+    m = Mundo(base, cliente)
+    finalizado = m.viaje(HACE_RATO, "finalizado")
+    cancelado = m.viaje(HACE_RATO, "cancelado")
+    m.viaje(HACE_RATO, "programado")
+    m.viaje(HACE_RATO, "en_curso")
+
+    estados = {v["id_viaje"]: v["estado"] for v in m.listar(cliente).json()["items"]}
+    assert estados == {finalizado: "finalizado", cancelado: "cancelado"}
+    for estado in ("programado", "en_curso"):
+        assert m.ids(cliente, estado=estado) == []
 
 
 def test_sin_resultados_informa_vacio(entorno):
@@ -336,7 +353,12 @@ def test_detalle_de_un_viaje_sin_chofer_ni_vehiculo(entorno):
 def test_detalle_de_un_viaje_que_todavia_no_es_historia_es_404(entorno):
     base, cliente = entorno
     m = Mundo(base, cliente)
-    for fecha, estado in ((FUTURO, "programado"), (HOY, "en_curso")):
+    for fecha, estado in (
+        (FUTURO, "programado"),
+        (HOY, "en_curso"),
+        (HACE_RATO, "programado"),
+        (HACE_RATO, "en_curso"),
+    ):
         viaje = m.viaje(fecha, estado)
         respuesta = cliente.get(f"{HISTORIAL}/{viaje}", headers=ADMIN)
         assert respuesta.status_code == 404
@@ -368,8 +390,10 @@ def test_el_historial_es_solo_lectura(entorno):
     assert despues == antes
 
 
-def test_lo_pasado_hace_poco_tambien_es_historia(entorno):
+def test_lo_terminado_ayer_es_historia_y_lo_programado_de_ayer_no(entorno):
     base, cliente = entorno
     m = Mundo(base, cliente)
-    ayer = m.viaje(HOY - timedelta(days=1), "programado")
-    assert m.ids(cliente) == [ayer]
+    ayer = HOY - timedelta(days=1)
+    terminado = m.viaje(ayer, "finalizado")
+    m.viaje(ayer, "programado")  # vencido sin resolver: se lo busca en CU-018, no acá
+    assert m.ids(cliente) == [terminado]

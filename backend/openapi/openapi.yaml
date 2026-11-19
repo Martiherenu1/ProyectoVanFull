@@ -922,8 +922,11 @@ paths:
       tags: [administracion]
       summary: Consultar el historial de viajes
       description: |
-        Administrador o dueño. Solo lectura. Un viaje es «anterior» si su fecha es anterior a hoy o si
-        ya terminó (`finalizado` o `cancelado`). Todos los criterios son opcionales y se combinan.
+        Administrador o dueño. Solo lectura. Un viaje es «anterior» si ya terminó: `finalizado` o
+        `cancelado`, y el estado se muestra. Un viaje `programado` o `en_curso` no es historia aunque
+        su fecha haya pasado; se lo encuentra en la consulta operativa de viajes (`GET /viajes`,
+        CU-018). Por eso `estado=programado` o `estado=en_curso` devuelven `items` vacío. Todos los
+        criterios son opcionales y se combinan.
         Orden: fecha y horario descendentes. Sin resultados devuelve `items` vacío y `total` 0 (el
         cliente informa que no se encontraron registros). (CU-026)
       x-cu: CU-026

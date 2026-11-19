@@ -57,8 +57,8 @@ Actor entre paréntesis. «Ops» = operaciones del contrato con ruta. **(c)** = 
 | 018 | Viajes y asignaciones | Parcial | 4 | `viajes_dia_admin_screen`, `crear_viaje_admin_screen` | Conflictos de asignación de chofer y vehículo (pendiente del CU); sobrecapacidad al asignar (PV28-02) |
 | 019 | Recorridos y paradas | Parcial | 8 | `recorridos_admin_screen` | Cómo una parada pasa a «comprometida»; sin baja; **RN-021 es interpretación mía, a validar con Martín (#314)** |
 | 020 | Optimizar recorrido | Pendiente | 0 | — | Necesita la clave de Google Maps y fallback sin definir. Asignado a Martín |
-| 021 | Gestionar choferes | Pendiente | 0 | — | **No figura en el reparto del 18/11**; ver «Para decidir» |
-| 022 | Gestionar vehículos | Pendiente | 0 | — | **No figura en el reparto del 18/11**; ver «Para decidir» |
+| 021 | Gestionar choferes | Pendiente (en `main`) | 0 | — | Facundo tiene el [PR #279](https://github.com/Martiherenu1/ProyectoVanFull/pull/279) abierto, con implementación y pruebas, **en conflicto con `main`**. Si se mergea antes del corte pasa a Parcial; hasta entonces no cuenta |
+| 022 | Gestionar vehículos | Pendiente (en `main`) | 0 | — | Facundo tiene el [PR #277](https://github.com/Martiherenu1/ProyectoVanFull/pull/277) abierto («primera entrega»), **en conflicto con `main`**. Mismo criterio que CU-021 |
 | 023 | Clientes corporativos | Parcial | 8 | **sin pantalla** | Condiciones comerciales y modalidades de pago (RN-014 sin catálogo), catálogos de estado, corporativo que sea cliente individual |
 | 024 | Facturación | Pendiente | 0 | — | Fiscal/ARCA fuera del alcance. Propuesto a Facundo |
 | 025 | Reportes y exportación | Pendiente | 0 | — | Reservado al dueño (RN-027); export Excel/PDF y clasificación de reportes sin definir. Propuesto a Facundo |
@@ -80,10 +80,11 @@ Operaciones con ruta que el contrato no atribuye a un CU: `GET /tarifas` (pendie
 
 ## Para decidir antes de entregar
 
-1. **CU-021 (choferes) y CU-022 (vehículos) no están en ninguna lista.** El mensaje del 18/11 enumera CU-017,
-   020, 024 y 025 como «sin operaciones» y el reparto propuesto no los incluye, pero tampoco tienen contrato ni
-   ruta (el 29/10 se los contó entre los 17 pendientes). O se dicen pendientes documentados, o se agregan al
-   reparto. **No se implementan por inferencia.**
+1. **CU-021 (choferes) y CU-022 (vehículos) dependen del merge de #279 y #277 (Facundo).** Tienen
+   implementación y pruebas, pero siguen en conflicto con `main`. La lista del 18/11 («sin operaciones») no los
+   nombraba porque ya están hechos fuera de `main`. El estado final depende de si se mergean antes del corte:
+   si sí, pasan a Parcial (y la cuenta del resumen cambia a 23 parciales y 7 pendientes); si no, quedan como
+   están, con el PR como evidencia.
 2. **CU-007:** el contrato lo trae, el código no. En la tabla va como pendiente (no hay ruta); en el texto hay
    que decir «contrato aprobado, implementación pendiente».
 3. **Los tres «Hecho (c)»** (016, 026, 029) y la clasificación de los 21 parciales.

@@ -1,5 +1,7 @@
 # CONTEXTO VANFULL — Carga rápida de sesión
 
+> **CU-022 / #277, cierre local sobre main d169da5:** merge sin commit desde HEAD 8839deb; conserva CU-032/031/019/026/028 y suma Vehículos a la entrada vigente del dueño, sin reemplazarla. Flutter 1079/analyze y backend sin BD 46/Ruff aprobados; PostgreSQL 16 local no ejecutado por ausencia de motor Docker. Diff pendiente de revisión y autorización de publicación; sin merge a main ni Neon/Render. Detalle: [contexto de Administración](PC2/CONTEXTO-administracion-y-flutter.md). #279 sigue separada.
+
 > **Corte del 18/11/2026 (entrega final: viernes 20/11).** Martiniano sumó **cinco CU de administración y dueño**, todos en `main` y recortados a lo que la v1.3 aprueba (lo demás quedó como PENDIENTE documentado, nada inventado):
 > - **CU-032** administradores, solo dueño (#312, Issue #310) · **CU-031** tarifas, solo dueño (#313/#316, #311) · **CU-019** recorridos y paradas (#315/#316, #314) · **CU-026** historial de viajes (#318, #317) · **CU-028** abonos mensuales (#320, #319). Cada uno trae backend, contrato y pantalla Flutter en la entrada de administración.
 > - **Flutter:** `AppRole.owner` (`dueno`) y `entradaDueno`: el dueño ya no cae en «Rol no reconocido». Seed local: `dueno1@vanfull.test` (**no existe en Neon**: crearla desde la terminal de Martiniano).

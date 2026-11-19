@@ -49,6 +49,10 @@
       "description": "Gestión operativa de viajes (CU-018) — administración"
     },
     {
+      "name": "vehiculos",
+      "description": "Administración de vehículos (CU-022)"
+    },
+    {
       "name": "corporativo",
       "description": "Representante de cliente corporativo, dentro de su organización (CU-033)"
     },
@@ -3897,6 +3901,197 @@
         }
       }
     },
+    "/vehiculos": {
+      "get": {
+        "tags": [
+          "vehiculos"
+        ],
+        "summary": "Consultar vehículos",
+        "description": "Lista los vehículos por identificador para administración y dueño. No calcula\ndisponibilidad ni expone documentación todavía no modelada. (CU-022, RF-026)\n",
+        "x-cu": "CU-022",
+        "x-cobertura": "parcial",
+        "responses": {
+          "200": {
+            "description": "Vehículos registrados; lista vacía si no hay resultados.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Vehiculo"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/NoAutenticado"
+          },
+          "403": {
+            "$ref": "#/components/responses/SinPermiso"
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "vehiculos"
+        ],
+        "summary": "Registrar un vehículo",
+        "description": "Registra los campos existentes del modelo: patente, marca, modelo, capacidad y\ndisponibilidad. No crea documentación ni modifica asignaciones. (CU-022, RF-026)\n",
+        "x-cu": "CU-022",
+        "x-cobertura": "parcial",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/VehiculoCreate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Vehículo registrado.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Vehiculo"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Campo ausente, desconocido o inválido (VALIDACION).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/NoAutenticado"
+          },
+          "403": {
+            "$ref": "#/components/responses/SinPermiso"
+          },
+          "409": {
+            "description": "Ya existe otro vehículo con la patente (PATENTE_DUPLICADA).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/vehiculos/{id_vehiculo}": {
+      "parameters": [
+        {
+          "name": "id_vehiculo",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "integer"
+          }
+        }
+      ],
+      "get": {
+        "tags": [
+          "vehiculos"
+        ],
+        "summary": "Consultar un vehículo",
+        "description": "Consulta los campos disponibles de un vehículo. (CU-022, RF-026)",
+        "x-cu": "CU-022",
+        "x-cobertura": "parcial",
+        "responses": {
+          "200": {
+            "description": "Vehículo encontrado.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Vehiculo"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/NoAutenticado"
+          },
+          "403": {
+            "$ref": "#/components/responses/SinPermiso"
+          },
+          "404": {
+            "$ref": "#/components/responses/NoEncontrado"
+          }
+        }
+      },
+      "patch": {
+        "tags": [
+          "vehiculos"
+        ],
+        "summary": "Modificar un vehículo",
+        "description": "Modifica solamente los campos persistidos por el modelo vigente. La disponibilidad\nse almacena como fue informada, sin inferir efectos sobre viajes. (CU-022, RF-026)\n",
+        "x-cu": "CU-022",
+        "x-cobertura": "parcial",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/VehiculoUpdate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Vehículo actualizado.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Vehiculo"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Cuerpo vacío, campo desconocido o valor inválido (VALIDACION).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/NoAutenticado"
+          },
+          "403": {
+            "$ref": "#/components/responses/SinPermiso"
+          },
+          "404": {
+            "$ref": "#/components/responses/NoEncontrado"
+          },
+          "409": {
+            "description": "Ya existe otro vehículo con la patente (PATENTE_DUPLICADA).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/viajes": {
       "get": {
         "tags": [
@@ -7230,6 +7425,106 @@
           "dni": {
             "type": "string",
             "maxLength": 20
+          }
+        }
+      },
+      "VehiculoCreate": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "patente",
+          "capacidad"
+        ],
+        "properties": {
+          "patente": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 10
+          },
+          "marca": {
+            "type": "string",
+            "maxLength": 50,
+            "nullable": true
+          },
+          "modelo": {
+            "type": "string",
+            "maxLength": 50,
+            "nullable": true
+          },
+          "capacidad": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "disponibilidad": {
+            "type": "boolean",
+            "default": true
+          }
+        }
+      },
+      "VehiculoUpdate": {
+        "type": "object",
+        "additionalProperties": false,
+        "minProperties": 1,
+        "properties": {
+          "patente": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 10
+          },
+          "marca": {
+            "type": "string",
+            "maxLength": 50,
+            "nullable": true
+          },
+          "modelo": {
+            "type": "string",
+            "maxLength": 50,
+            "nullable": true
+          },
+          "capacidad": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "disponibilidad": {
+            "type": "boolean"
+          }
+        }
+      },
+      "Vehiculo": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id_vehiculo",
+          "patente",
+          "marca",
+          "modelo",
+          "capacidad",
+          "disponibilidad"
+        ],
+        "properties": {
+          "id_vehiculo": {
+            "type": "integer"
+          },
+          "patente": {
+            "type": "string",
+            "maxLength": 10
+          },
+          "marca": {
+            "type": "string",
+            "maxLength": 50,
+            "nullable": true
+          },
+          "modelo": {
+            "type": "string",
+            "maxLength": 50,
+            "nullable": true
+          },
+          "capacidad": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "disponibilidad": {
+            "type": "boolean"
           }
         }
       },

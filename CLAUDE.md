@@ -102,6 +102,10 @@ commits chicos con el CU/RN → PR con la plantilla → CI en verde → merge (m
 squash). La revisión de otro integrante es opcional (CONTRIBUTING §1.7). Desde el 13/10/2026 trabajan tres personas en el código: no se commitea directo a `main`. `.env` nunca se sube. El tag **`pc1`** es la foto de la entrega; se congela después de la
 presentación y de ahí en más cada cambio lleva tag nuevo.
 
+**No apilar PR:** uno cuya base no es `main` se mergea contra la rama anterior y **no llega a `main`** (pasó con
+#313 y #315, rescatados con #316). Abrir siempre contra `main`; si dos cambios comparten `main.dart`, `openapi.yaml`
+o `main.py`, abrir el segundo después del merge del primero.
+
 Mover un tag con `--force` **lo bloquea el clasificador de permisos**: hay que pasarle el comando a Martiniano.
 
 ## Al cerrar una sesión

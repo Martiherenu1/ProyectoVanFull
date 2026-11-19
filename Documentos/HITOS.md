@@ -210,6 +210,25 @@
   esperando, todas quedan registradas, y cada una tiene su prueba automática contra un gateway simulado.
 - **Tecnologías:** FastAPI, OpenRouter (function calling), httpx, pytest, Render.
 
+### [2026-11-18] Cinco casos de uso de administración entregados de punta a punta, sin inventar reglas de negocio
+
+- **Qué:** en un día se implementaron y mergearon **CU-032** (administradores), **CU-031** (tarifas), **CU-019**
+  (recorridos y paradas), **CU-026** (historial de viajes) y **CU-028** (abonos mensuales): cada uno con backend
+  FastAPI por capas, contrato OpenAPI, pantalla Flutter y pruebas contra PostgreSQL real (suites completas de 1074
+  pruebas de backend y 1050 de Flutter en el último PR). Se agregó además el rol «dueño» a la app, que antes caía en
+  «Rol no reconocido».
+- **Rol de Martiniano:** decidió el alcance de cada caso de uso leyendo la especificación aprobada y **recortando a lo
+  definido**: lo que la v1.3 deja pendiente (estados del abono, suspensión y habilitación excepcional, descuentos
+  especiales, plazo de retención) quedó **documentado como pendiente** en el Issue, el PR y el contexto, y las
+  interpretaciones que tomó (qué es un viaje «anterior», cómo se protege una parada comprometida, alta de cliente
+  al contratar un abono) se marcaron para validar con el analista. Detectó que dos PR apilados no habían llegado a
+  `main` y los rescató con un PR contra `main`.
+- **Por qué importa (CV):** muestra criterio de **ingeniería en un dominio ambiguo**: entregar rápido sin
+  fabricar reglas de negocio, dejar trazabilidad (Issue → rama → PR → contexto), pruebas que verifican privacidad y
+  atomicidad (sin datos de pasajeros en el historial, sin restos si un alta falla) y control de integración en
+  Git (detección de PR apilados que no llegan a la rama principal).
+- **Tecnologías:** FastAPI, SQLAlchemy async, PostgreSQL, OpenAPI 3.0, pytest, Flutter, GitHub Actions.
+
 <!-- Próximos hitos a documentar a medida que se implementen:
      - Esquema de datos PostgreSQL y migraciones
      - Contrato OpenAPI de las tools de AG-01

@@ -6,8 +6,29 @@ Nombres del contrato: `TarifaGestion`, `TarifaGestionLista`, `TarifaGestionCreat
 
 from datetime import date
 from decimal import Decimal
+from typing import Annotated
 
-from pydantic import BaseModel, ConfigDict, Field, field_validator
+from pydantic import BaseModel, BeforeValidator, ConfigDict, Field, field_validator
+
+
+def _numero_json(valor: object) -> object:
+    if isinstance(valor, bool) or not isinstance(valor, (int, float)):
+        raise ValueError("el importe debe ser un número")
+    return valor
+
+
+def _fecha_iso(valor: object) -> date:
+    if isinstance(valor, str):
+        fecha = date.fromisoformat(valor)
+        if fecha.isoformat() == valor:
+            return fecha
+    raise ValueError("la vigencia debe tener formato AAAA-MM-DD")
+
+
+ImporteTarifa = Annotated[
+    Decimal, Field(ge=0, max_digits=12, decimal_places=2), BeforeValidator(_numero_json)
+]
+FechaVigencia = Annotated[date, BeforeValidator(_fecha_iso)]
 
 
 class TarifaGestion(BaseModel):
@@ -35,9 +56,16 @@ class TarifaGestionCreate(BaseModel):
     model_config = ConfigDict(extra="forbid", str_strip_whitespace=True)
 
     nombre: str = Field(min_length=1, max_length=120)
-    importe: Decimal = Field(ge=0, max_digits=12, decimal_places=2)
+    importe: ImporteTarifa
     tipo: str | None = Field(default=None, min_length=1, max_length=40)
-    fecha_vigencia: date | None = None
+    fecha_vigencia: FechaVigencia | None = None
+
+    @field_validator("tipo", "fecha_vigencia")
+    @classmethod
+    def _opcional_no_nulo(cls, valor):
+        if valor is None:
+            raise ValueError("omití el campo si no tiene valor")
+        return valor
 
 
 class TarifaGestionUpdate(BaseModel):
@@ -46,9 +74,9 @@ class TarifaGestionUpdate(BaseModel):
     model_config = ConfigDict(extra="forbid", str_strip_whitespace=True)
 
     nombre: str | None = Field(default=None, min_length=1, max_length=120)
-    importe: Decimal | None = Field(default=None, ge=0, max_digits=12, decimal_places=2)
+    importe: ImporteTarifa | None = None
     tipo: str | None = Field(default=None, min_length=1, max_length=40)
-    fecha_vigencia: date | None = None
+    fecha_vigencia: FechaVigencia | None = None
 
     @field_validator("nombre", "importe", mode="after")
     @classmethod

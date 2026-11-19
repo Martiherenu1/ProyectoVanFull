@@ -93,14 +93,19 @@ void main() {
       find.byKey(const Key('tarifa-campo-nombre')),
       'Laboral vuelta',
     );
-    await tester.enterText(
-      find.byKey(const Key('tarifa-campo-importe')),
-      '10,123',
-    );
-    await tester.tap(find.byKey(const Key('tarifa-guardar')));
-    await tester.pumpAndSettle();
-    expect(find.text('Importe válido, con hasta 2 decimales'), findsOneWidget);
-    expect(doble.creadas, isEmpty);
+    for (final importe in ['10,123', '10000000000']) {
+      await tester.enterText(
+        find.byKey(const Key('tarifa-campo-importe')),
+        importe,
+      );
+      await tester.tap(find.byKey(const Key('tarifa-guardar')));
+      await tester.pumpAndSettle();
+      expect(
+        find.text('Importe válido, con hasta 2 decimales'),
+        findsOneWidget,
+      );
+      expect(doble.creadas, isEmpty);
+    }
 
     await tester.enterText(
       find.byKey(const Key('tarifa-campo-importe')),
@@ -115,7 +120,9 @@ void main() {
     expect(find.byKey(const Key('tarifa-99')), findsOneWidget);
   });
 
-  testWidgets('la vigencia debe tener formato de fecha', (tester) async {
+  testWidgets('la vigencia debe ser una fecha válida en formato ISO', (
+    tester,
+  ) async {
     final doble = Doble([]);
     await tester.pumpWidget(doble.pantalla());
     await tester.pumpAndSettle();
@@ -123,14 +130,24 @@ void main() {
     await tester.pumpAndSettle();
     await tester.enterText(find.byKey(const Key('tarifa-campo-nombre')), 'A');
     await tester.enterText(find.byKey(const Key('tarifa-campo-importe')), '10');
+    for (final fecha in ['1/12/2026', '2026-02-30', '0000-01-01']) {
+      await tester.enterText(
+        find.byKey(const Key('tarifa-campo-vigencia')),
+        fecha,
+      );
+      await tester.tap(find.byKey(const Key('tarifa-guardar')));
+      await tester.pumpAndSettle();
+      expect(find.text('Formato AAAA-MM-DD'), findsOneWidget);
+      expect(doble.creadas, isEmpty);
+    }
+
     await tester.enterText(
       find.byKey(const Key('tarifa-campo-vigencia')),
-      '1/12/2026',
+      '2028-02-29',
     );
     await tester.tap(find.byKey(const Key('tarifa-guardar')));
     await tester.pumpAndSettle();
-    expect(find.text('Formato AAAA-MM-DD'), findsOneWidget);
-    expect(doble.creadas, isEmpty);
+    expect(doble.creadas.single.fechaVigencia, '2028-02-29');
   });
 
   testWidgets('un error del backend se muestra y deja el diálogo', (

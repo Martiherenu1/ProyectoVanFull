@@ -49,6 +49,31 @@ Future<void> mostrar(
 );
 
 void main() {
+  testWidgets('a 390 px la fila compacta abre el detalle', (tester) async {
+    await tester.binding.setSurfaceSize(const Size(390, 800));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+    int? seleccionado;
+    await mostrar(
+      tester,
+      (_) async => [viaje(41)],
+      seleccionar: (id) {
+        seleccionado = id;
+      },
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.byType(DataTable), findsNothing);
+    expect(
+      find.byKey(const ValueKey('seleccionar-fecha-viajes')),
+      findsOneWidget,
+    );
+    await tester.tap(find.byKey(const ValueKey('viaje-41')));
+    await tester.pumpAndSettle();
+    expect(seleccionado, 41);
+    expect(find.byType(AlertDialog), findsOneWidget);
+    expect(tester.takeException(), isNull);
+  });
+
   testWidgets(
     'consulta la fecha explícita, muestra carga, vacío y tema admin',
     (tester) async {

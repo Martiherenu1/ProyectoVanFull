@@ -1,5 +1,7 @@
 # CONTEXTO VANFULL — Carga rápida de sesión
 
+> **P1 Administración / #323, 19/11/2026:** MarcoAdmin integrado en el piloto local sobre `00f58c2`, con navegación de administrador y dueño, Viajes del día y Crear viaje (CU-018). Detalle de la integración y evidencia en el [contexto de Administración](PC2/CONTEXTO-administracion-y-flutter.md).
+
 > **CU-021 / #279, 19/11/2026:** #277 ya mergeada en main 55ee8b5. Integración local retomada desde 2cfe1ed mediante merge normal sin commit; Choferes y Vehículos comparten la navegación vigente, preservando los demás módulos y permisos del dueño. Flutter 1111/analyze, backend sin BD 66 y Ruff aprobados. PostgreSQL 16 local sin motor Docker; CI del futuro HEAD pendiente. Diff listo para revisión/autorización de publicación; sin push/merge a main ni Neon/Render. Detalle: [contexto de Administración](PC2/CONTEXTO-administracion-y-flutter.md).
 
 > **CU-022 / #277, cierre local sobre main d169da5:** merge sin commit desde HEAD 8839deb; conserva CU-032/031/019/026/028 y suma Vehículos a la entrada vigente del dueño, sin reemplazarla. Flutter 1079/analyze y backend sin BD 46/Ruff aprobados; PostgreSQL 16 local no ejecutado por ausencia de motor Docker. Diff pendiente de revisión y autorización de publicación; sin merge a main ni Neon/Render. Detalle: [contexto de Administración](PC2/CONTEXTO-administracion-y-flutter.md). #279 sigue separada.

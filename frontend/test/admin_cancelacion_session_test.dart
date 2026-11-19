@@ -10,6 +10,8 @@ import 'package:http/testing.dart';
 
 import 'services/admin/viajes_admin_api_test.dart' as datos;
 
+import 'admin_menu_helpers.dart';
+
 void main() {
   for (final estado in [200, 401]) {
     testWidgets('respuesta tardía $estado no afecta otra sesión', (
@@ -56,7 +58,7 @@ void main() {
       final operacion = cancelar(10);
       final expectativa = expectLater(operacion, throwsA(anything));
       await tester.pump();
-      await tester.tap(find.byKey(const Key('admin-salir')));
+      await tocarMenuAdmin(tester, const Key('admin-salir'));
       await tester.pumpAndSettle();
       await login();
       pendiente.complete(

@@ -60,6 +60,33 @@ Future<void> tocarCrear(WidgetTester tester) async {
 }
 
 void main() {
+  testWidgets('a 390 px todos los campos quedan en una columna', (
+    tester,
+  ) async {
+    await tester.binding.setSurfaceSize(const Size(390, 800));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+    await mostrar(tester, creadorSimulado((_) async {}));
+
+    final campos = [
+      for (final id in [
+        'fecha',
+        'horario',
+        'sentido',
+        'id-servicio',
+        'id-recorrido',
+        'id-vehiculo',
+        'id-chofer',
+        'capacidad-planificada',
+      ])
+        tester.getRect(find.byKey(Key(id))),
+    ];
+    for (var i = 1; i < campos.length; i++) {
+      expect(campos[i].left, campos.first.left);
+      expect(campos[i].top, greaterThanOrEqualTo(campos[i - 1].bottom));
+    }
+    expect(tester.takeException(), isNull);
+  });
+
   testWidgets('muestra solo los campos de ViajeCreate con tema admin', (
     tester,
   ) async {

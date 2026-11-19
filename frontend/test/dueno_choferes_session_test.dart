@@ -11,6 +11,8 @@ import 'package:http/testing.dart';
 import 'admin_choferes_session_test.dart' as base;
 import 'services/admin/choferes_admin_api_test.dart' as datos;
 
+import 'admin_menu_helpers.dart';
+
 http.Response fallo(int status) => http.Response(
   jsonEncode({
     'error': {'codigo': 'PRUEBA', 'mensaje': 'Error informado'},
@@ -59,7 +61,7 @@ void main() {
       });
       await montar(t, transporte);
       await base.login(t);
-      await t.tap(find.byKey(const Key('admin-choferes')));
+      await tocarMenuAdmin(t, const Key('admin-choferes'));
       await t.pumpAndSettle();
       if (status == 401) {
         expect(find.text('Ingresar'), findsOneWidget);
@@ -74,6 +76,7 @@ void main() {
         expect(find.text('Ana Pérez'), findsOneWidget);
         await t.pageBack();
         await t.pumpAndSettle();
+        await abrirMenuAdmin(t);
         for (final modulo in [
           'admin-salir',
           'admin-crear-viaje',
@@ -112,7 +115,7 @@ void main() {
       });
       await montar(t, transporte);
       await base.login(t);
-      await t.tap(find.byKey(const Key('admin-choferes')));
+      await tocarMenuAdmin(t, const Key('admin-choferes'));
       await t.pumpAndSettle();
       await t.tap(find.byKey(const Key('registrar-chofer')));
       await t.pumpAndSettle();
@@ -161,7 +164,7 @@ void main() {
         await t.tap(find.text('Ingresar'));
         await t.pump();
         await t.pump(const Duration(milliseconds: 400));
-        await t.tap(find.byKey(const Key('admin-choferes')));
+        await tocarMenuAdmin(t, const Key('admin-choferes'));
         await t.pump();
         await t.pump(const Duration(milliseconds: 400));
         final cargar = t
@@ -169,7 +172,7 @@ void main() {
             .cargar;
         await t.pageBack();
         await t.pumpAndSettle();
-        await t.tap(find.byKey(const Key('admin-salir')));
+        await tocarMenuAdmin(t, const Key('admin-salir'));
         await t.pumpAndSettle();
         await base.login(t);
         pendiente.complete(
@@ -178,6 +181,7 @@ void main() {
               : fallo(status),
         );
         await t.pumpAndSettle();
+        await abrirMenuAdmin(t);
         expect(find.byKey(const Key('admin-choferes')), findsOneWidget);
         expect(find.text('Ana Pérez'), findsNothing);
         expect(find.text('Ingresar'), findsNothing);

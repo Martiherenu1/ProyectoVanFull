@@ -9,6 +9,8 @@ import 'package:frontend/screens/admin/viajes_dia_admin_screen.dart';
 import 'package:frontend/screens/chofer/chofer_shell.dart';
 import 'package:http/http.dart' as http;
 
+import 'admin_menu_helpers.dart';
+
 final class _TransporteControlado extends http.BaseClient {
   _TransporteControlado({
     this.rol = 'administrador',
@@ -187,7 +189,7 @@ void main() {
       await tester.pageBack();
       await tester.pumpAndSettle();
 
-      await tester.tap(find.byKey(const Key('admin-salir')));
+      await tocarMenuAdmin(tester, const Key('admin-salir'));
       await tester.pumpAndSettle();
       expect(find.text('Ingresar'), findsOneWidget);
       expect(transporte.cierres, 0);
@@ -400,9 +402,10 @@ void main() {
     await tester.tap(find.text('Ingresar'));
     await tester.pump();
     await tester.pump();
+    await abrirMenuAdmin(tester);
     expect(find.byKey(const Key('admin-salir')), findsOneWidget);
 
-    await tester.tap(find.byKey(const Key('admin-salir')));
+    await tocarMenuAdmin(tester, const Key('admin-salir'));
     await tester.pumpAndSettle();
     await _login(tester);
     expect(
@@ -452,7 +455,7 @@ void main() {
     await tester.tap(find.text('Ingresar'));
     await tester.pump();
     await tester.pump();
-    await tester.tap(find.byKey(const Key('admin-salir')));
+    await tocarMenuAdmin(tester, const Key('admin-salir'));
     await tester.pumpAndSettle();
     await _login(tester);
 

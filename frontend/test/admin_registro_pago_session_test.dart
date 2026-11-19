@@ -12,6 +12,8 @@ import 'package:http/testing.dart';
 
 import 'services/admin/registro_pagos_admin_api_test.dart' as datos;
 
+import 'admin_menu_helpers.dart';
+
 void main() {
   for (final estado in [201, 401, 403]) {
     testWidgets('registro tardío $estado no afecta a la cuenta siguiente', (
@@ -56,7 +58,7 @@ void main() {
         ),
       );
       await login();
-      await tester.tap(find.byKey(const Key('admin-registrar-pago')));
+      await tocarMenuAdmin(tester, const Key('admin-registrar-pago'));
       await tester.pumpAndSettle();
       final registrar = tester
           .widget<RegistrarPagoAdminScreen>(
@@ -72,7 +74,7 @@ void main() {
       await tester.pump();
       await tester.pageBack();
       await tester.pumpAndSettle();
-      await tester.tap(find.byKey(const Key('admin-salir')));
+      await tocarMenuAdmin(tester, const Key('admin-salir'));
       await tester.pumpAndSettle();
       await login();
       pendiente.complete(

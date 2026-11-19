@@ -13,6 +13,8 @@ import 'dueno_choferes_session_test.dart' as sesion;
 import 'services/admin/choferes_admin_api_test.dart' as choferes;
 import 'services/admin/vehiculos_admin_api_test.dart' as vehiculos;
 
+import 'admin_menu_helpers.dart';
+
 http.Response lista(String recurso) => http.Response(
   jsonEncode([
     recurso == 'choferes' ? choferes.choferJson() : vehiculos.vehiculo(),
@@ -40,6 +42,7 @@ void main() {
         });
         await sesion.montar(t, transporte);
         await base.login(t);
+        await abrirMenuAdmin(t);
         for (final exclusivo in ['admin-administradores', 'admin-tarifas']) {
           expect(
             find.byKey(Key(exclusivo)),
@@ -51,13 +54,14 @@ void main() {
           ('vehiculos', VehiculosAdminScreen, 'VF022AA'),
           ('choferes', ChoferesAdminScreen, 'Ana Pérez'),
         ]) {
-          await t.tap(find.byKey(Key('admin-$recurso')));
+          await tocarMenuAdmin(t, Key('admin-$recurso'));
           await t.pumpAndSettle();
           expect(find.byType(tipo), findsOneWidget);
           expect(find.text(texto), findsOneWidget);
           expect(consultas, contains('/api/$recurso'));
           await t.pageBack();
           await t.pumpAndSettle();
+          await abrirMenuAdmin(t);
           for (final key in [
             'admin-choferes',
             'admin-vehiculos',
@@ -105,7 +109,7 @@ void main() {
           });
           await sesion.montar(t, transporte);
           await base.login(t);
-          await t.tap(find.byKey(Key('admin-$saliente')));
+          await tocarMenuAdmin(t, Key('admin-$saliente'));
           await t.pump();
           await t.pump(const Duration(milliseconds: 400));
           final cargar = saliente == 'choferes'
@@ -121,10 +125,10 @@ void main() {
                     .cargar;
           await t.pageBack();
           await t.pumpAndSettle();
-          await t.tap(find.byKey(const Key('admin-salir')));
+          await tocarMenuAdmin(t, const Key('admin-salir'));
           await t.pumpAndSettle();
           await base.login(t);
-          await t.tap(find.byKey(Key('admin-$entrante')));
+          await tocarMenuAdmin(t, Key('admin-$entrante'));
           await t.pumpAndSettle();
           pendiente.complete(
             status == 200 ? lista(saliente) : sesion.fallo(status),

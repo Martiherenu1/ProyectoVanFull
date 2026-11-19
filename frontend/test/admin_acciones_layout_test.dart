@@ -10,6 +10,8 @@ import 'package:frontend/screens/admin/consultar_reservas_admin_screen.dart';
 import 'package:http/http.dart' as http;
 import 'package:http/testing.dart';
 
+import 'admin_menu_helpers.dart';
+
 void main() {
   for (final ancho in [320.0, 1440.0]) {
     testWidgets('acciones administrativas sin desborde a $ancho', (
@@ -44,6 +46,14 @@ void main() {
       await tester.enterText(find.byType(TextField).at(1), 'clave');
       await tester.tap(find.text('Ingresar'));
       await tester.pumpAndSettle();
+      await abrirMenuAdmin(tester);
+      final crear = find.byKey(const Key('admin-crear-viaje'));
+      expect(crear, findsOneWidget);
+      final rectCrear = tester.getRect(crear);
+      expect(rectCrear.left, greaterThanOrEqualTo(0));
+      expect(rectCrear.right, lessThanOrEqualTo(ancho));
+      expect(rectCrear.top, greaterThanOrEqualTo(0));
+      expect(rectCrear.bottom, lessThanOrEqualTo(900));
       for (final key in [
         'admin-consultar-reservas',
         'admin-consultar-deuda',
@@ -51,10 +61,10 @@ void main() {
         'admin-registrar-pago',
         'admin-pagos-pendientes',
         'admin-choferes',
-        'admin-crear-viaje',
       ]) {
         final boton = find.byKey(Key(key));
         expect(boton, findsOneWidget);
+        await tester.ensureVisible(boton);
         final rect = tester.getRect(boton);
         expect(rect.left, greaterThanOrEqualTo(0));
         expect(rect.right, lessThanOrEqualTo(ancho));
@@ -62,20 +72,20 @@ void main() {
         expect(rect.bottom, lessThanOrEqualTo(900));
       }
       expect(tester.takeException(), isNull);
-      await tester.tap(find.byKey(const Key('admin-consultar-deuda')));
+      await tocarMenuAdmin(tester, const Key('admin-consultar-deuda'));
       await tester.pumpAndSettle();
       expect(find.byType(ConsultarDeudaAdminScreen), findsOneWidget);
       expect(tester.takeException(), isNull);
       await tester.pageBack();
       await tester.pumpAndSettle();
-      await tester.tap(find.byKey(const Key('admin-consultar-reservas')));
+      await tocarMenuAdmin(tester, const Key('admin-consultar-reservas'));
       await tester.pumpAndSettle();
       expect(find.byType(ConsultarReservasAdminScreen), findsOneWidget);
       expect(find.text('No hay reservas para mostrar.'), findsOneWidget);
       expect(tester.takeException(), isNull);
       await tester.pageBack();
       await tester.pumpAndSettle();
-      await tester.tap(find.byKey(const Key('admin-registrar-pago')));
+      await tocarMenuAdmin(tester, const Key('admin-registrar-pago'));
       await tester.pumpAndSettle();
       expect(find.byType(RegistrarPagoAdminScreen), findsOneWidget);
       expect(tester.takeException(), isNull);
@@ -87,7 +97,7 @@ void main() {
       expect(tester.takeException(), isNull);
       await tester.pageBack();
       await tester.pumpAndSettle();
-      await tester.tap(find.byKey(const Key('admin-pagos-pendientes')));
+      await tocarMenuAdmin(tester, const Key('admin-pagos-pendientes'));
       await tester.pumpAndSettle();
       expect(find.byType(PagosPendientesScreen), findsOneWidget);
       expect(tester.takeException(), isNull);

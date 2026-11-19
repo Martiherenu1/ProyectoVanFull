@@ -485,7 +485,7 @@ Estos dos diagramas completan la vista de la arquitectura de la sección 2.5: el
 
 *(Figura en el documento del Drive: Diagrama de despliegue de VanFull.)*
 
-**Qué muestra.** En desarrollo, cada integrante levanta el servidor y la base con Docker Compose. Para la demostración el sistema está **desplegado sin costo**: la base PostgreSQL en **Neon** (región us-east-2, conexión directa), el servidor FastAPI en **Render** (`vanfull-api.onrender.com/api`) y la versión web de Flutter como sitio estático en **Render** (`vanfull.onrender.com`), construida por un flujo de GitHub Actions; **GitHub Pages** queda como respaldo de la versión web. El servidor ejecuta `alembic upgrade head` en cada arranque, de modo que **un cambio que toque `backend/**` y llegue a `main` puede migrar la base de Neon**; por eso esos cambios se coordinan entre los integrantes. Las claves viven solo en las variables de entorno de cada servicio, nunca en el repositorio. Los planes gratuitos se duermen cuando no tienen tráfico (Render, a los 15 minutos), así que hay que despertarlos antes de cada demostración. Si el producto se vende, se pasa a un plan pago cambiando una variable de configuración. El procedimiento completo está en `DESPLIEGUE.md` y en el instructivo.
+**Qué muestra.** En desarrollo, cada integrante levanta el servidor y la base con Docker Compose. Para la demostración el sistema está **desplegado sin costo**: la base PostgreSQL en **Neon** (región us-east-2, conexión directa), el servidor FastAPI en **Render** (`vanfull-api.onrender.com/api`) y la versión web de Flutter como sitio estático en **Render** (`vanfull.onrender.com`), construida por un flujo de GitHub Actions; **GitHub Pages** queda como respaldo de la versión web. El servidor ejecuta `alembic upgrade head` en cada arranque, de modo que **un cambio que toque la carpeta `backend` y llegue a `main` puede migrar la base de Neon**; por eso esos cambios se coordinan entre los integrantes. Las claves viven solo en las variables de entorno de cada servicio, nunca en el repositorio. Los planes gratuitos se duermen cuando no tienen tráfico (Render, a los 15 minutos), así que hay que despertarlos antes de cada demostración. Si el producto se vende, se pasa a un plan pago cambiando una variable de configuración. El procedimiento completo está en `DESPLIEGUE.md` y en el instructivo.
 
 ---
 
@@ -1123,7 +1123,7 @@ administración. El archivo `REPARTO-PC2.md` define quién es dueño de qué par
   y, si dos cambios comparten un archivo, abrir el segundo después de incorporar el primero.
 - **Migración de la base de demostración sin respaldo previo.** Al incorporar #281, la base de Neon pasó a la
   migración 0002 sin haber guardado antes un punto de restauración (#304, pendiente de cerrar). Es la razón por la
-  que los cambios en `backend/**` se coordinan entre los tres.
+  que los cambios en la carpeta `backend` se coordinan entre los tres.
 - **Incorporación sin la revisión pedida.** #277 y #279 (CU-022 y CU-021) se incorporaron sin la revisión solicitada;
   quedó registrado y la revisión posterior sigue disponible. Es la consecuencia directa de que la revisión sea
   opcional.

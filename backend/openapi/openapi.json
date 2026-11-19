@@ -1384,6 +1384,178 @@
         }
       }
     },
+    "/administracion/historial-viajes": {
+      "get": {
+        "tags": [
+          "administracion"
+        ],
+        "summary": "Consultar el historial de viajes",
+        "description": "Administrador o dueño. Solo lectura. Un viaje es «anterior» si su fecha es anterior a hoy o si\nya terminó (`finalizado` o `cancelado`). Todos los criterios son opcionales y se combinan.\nOrden: fecha y horario descendentes. Sin resultados devuelve `items` vacío y `total` 0 (el\ncliente informa que no se encontraron registros). (CU-026)\n",
+        "x-cu": "CU-026",
+        "parameters": [
+          {
+            "name": "desde",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "date"
+            }
+          },
+          {
+            "name": "hasta",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "date"
+            }
+          },
+          {
+            "name": "estado",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "programado",
+                "en_curso",
+                "finalizado",
+                "cancelado"
+              ]
+            }
+          },
+          {
+            "name": "id_servicio",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "minimum": 1
+            }
+          },
+          {
+            "name": "id_chofer",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "minimum": 1
+            }
+          },
+          {
+            "name": "id_vehiculo",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "minimum": 1
+            }
+          },
+          {
+            "name": "sentido",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "IDA",
+                "VUELTA"
+              ]
+            }
+          },
+          {
+            "name": "limite",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 200,
+              "default": 50
+            }
+          },
+          {
+            "name": "desplazamiento",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "minimum": 0,
+              "default": 0
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Viajes que cumplen los criterios",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HistorialViajeLista"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "VALIDACION — criterio inválido o `desde` posterior a `hasta`",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/NoAutenticado"
+          },
+          "403": {
+            "$ref": "#/components/responses/SinPermiso"
+          }
+        }
+      }
+    },
+    "/administracion/historial-viajes/{id_viaje}": {
+      "get": {
+        "tags": [
+          "administracion"
+        ],
+        "summary": "Consultar un viaje anterior con su información operativa",
+        "description": "Administrador o dueño. Devuelve servicio, recorrido y paradas, chofer, vehículo y cantidades\nde reservas, abordajes y ausencias. No incluye datos de los pasajeros. (CU-026 paso 6)\n",
+        "x-cu": "CU-026",
+        "parameters": [
+          {
+            "name": "id_viaje",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "minimum": 1
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Viaje anterior",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HistorialViajeDetalle"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/NoAutenticado"
+          },
+          "403": {
+            "$ref": "#/components/responses/SinPermiso"
+          },
+          "404": {
+            "description": "VIAJE_NO_ENCONTRADO — no existe, o todavía no es un viaje anterior",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/clientes-corporativos": {
       "get": {
         "tags": [
@@ -5293,6 +5465,189 @@
             "description": "Paradas del catálogo, en orden. La primera es el orden 1."
           }
         }
+      },
+      "HistorialPersona": {
+        "type": "object",
+        "required": [
+          "id_persona",
+          "nombre",
+          "apellido"
+        ],
+        "properties": {
+          "id_persona": {
+            "type": "integer"
+          },
+          "nombre": {
+            "type": "string"
+          },
+          "apellido": {
+            "type": "string"
+          }
+        }
+      },
+      "HistorialVehiculo": {
+        "type": "object",
+        "required": [
+          "id_vehiculo",
+          "patente"
+        ],
+        "properties": {
+          "id_vehiculo": {
+            "type": "integer"
+          },
+          "patente": {
+            "type": "string"
+          }
+        }
+      },
+      "HistorialViaje": {
+        "type": "object",
+        "required": [
+          "id_viaje",
+          "fecha",
+          "sentido",
+          "estado",
+          "id_servicio",
+          "tipo_servicio",
+          "id_recorrido"
+        ],
+        "properties": {
+          "id_viaje": {
+            "type": "integer"
+          },
+          "fecha": {
+            "type": "string",
+            "format": "date"
+          },
+          "horario": {
+            "type": "string",
+            "description": "HH:MM"
+          },
+          "sentido": {
+            "type": "string",
+            "enum": [
+              "IDA",
+              "VUELTA"
+            ]
+          },
+          "estado": {
+            "type": "string",
+            "enum": [
+              "programado",
+              "en_curso",
+              "finalizado",
+              "cancelado"
+            ]
+          },
+          "id_servicio": {
+            "type": "integer"
+          },
+          "tipo_servicio": {
+            "type": "string"
+          },
+          "id_recorrido": {
+            "type": "integer"
+          },
+          "chofer": {
+            "$ref": "#/components/schemas/HistorialPersona"
+          },
+          "vehiculo": {
+            "$ref": "#/components/schemas/HistorialVehiculo"
+          }
+        }
+      },
+      "HistorialViajeLista": {
+        "type": "object",
+        "required": [
+          "items",
+          "total"
+        ],
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/HistorialViaje"
+            }
+          },
+          "total": {
+            "type": "integer",
+            "description": "Cantidad que cumple los criterios, sin contar la paginación."
+          }
+        }
+      },
+      "HistorialParada": {
+        "type": "object",
+        "required": [
+          "orden",
+          "id_parada"
+        ],
+        "properties": {
+          "orden": {
+            "type": "integer"
+          },
+          "id_parada": {
+            "type": "integer"
+          },
+          "nombre_descripcion": {
+            "type": "string"
+          }
+        }
+      },
+      "HistorialConteos": {
+        "type": "object",
+        "description": "Solo cantidades; el historial no expone datos de los pasajeros.",
+        "required": [
+          "reservas_provisionales",
+          "reservas_consolidadas",
+          "reservas_canceladas",
+          "abordajes",
+          "ausencias"
+        ],
+        "properties": {
+          "reservas_provisionales": {
+            "type": "integer"
+          },
+          "reservas_consolidadas": {
+            "type": "integer"
+          },
+          "reservas_canceladas": {
+            "type": "integer"
+          },
+          "abordajes": {
+            "type": "integer"
+          },
+          "ausencias": {
+            "type": "integer"
+          }
+        }
+      },
+      "HistorialViajeDetalle": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/HistorialViaje"
+          },
+          {
+            "type": "object",
+            "required": [
+              "paradas",
+              "conteos"
+            ],
+            "properties": {
+              "capacidad_planificada": {
+                "type": "integer"
+              },
+              "paradas": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/HistorialParada"
+                }
+              },
+              "conteos": {
+                "$ref": "#/components/schemas/HistorialConteos"
+              }
+            }
+          }
+        ]
       },
       "ClienteCorporativo": {
         "type": "object",

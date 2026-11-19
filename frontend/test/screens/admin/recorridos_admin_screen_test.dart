@@ -126,6 +126,30 @@ void main() {
     expect(find.byKey(const Key('editor-guardar')), findsNothing);
   });
 
+  testWidgets('alta: permite guardar un recorrido con una sola parada', (
+    tester,
+  ) async {
+    final doble = Doble([]);
+    await tester.pumpWidget(doble.pantalla());
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const Key('recorridos-nuevo')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const Key('editor-agregar')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const Key('editor-opcion-2')));
+    await tester.pumpAndSettle();
+
+    final guardar = find.byKey(const Key('editor-guardar'));
+    expect(tester.widget<FilledButton>(guardar).onPressed, isNotNull);
+    await tester.tap(guardar);
+    await tester.pumpAndSettle();
+
+    expect(doble.creados, [
+      [2],
+    ]);
+    expect(guardar, findsNothing);
+  });
+
   testWidgets('una parada ya elegida no se ofrece de nuevo', (tester) async {
     await tester.pumpWidget(Doble([]).pantalla());
     await tester.pumpAndSettle();

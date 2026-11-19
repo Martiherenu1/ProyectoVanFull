@@ -45,6 +45,8 @@ import 'services/admin/reservas_admin_api.dart';
 import 'services/admin/administradores_admin_api.dart';
 import 'services/admin/tarifas_admin_api.dart';
 import 'services/admin/recorridos_admin_api.dart';
+import 'services/admin/abonos_admin_api.dart';
+import 'screens/admin/abonos_admin_screen.dart';
 import 'services/admin/historial_viajes_admin_api.dart';
 import 'screens/admin/historial_viajes_screen.dart';
 import 'screens/admin/recorridos_admin_screen.dart';
@@ -129,6 +131,7 @@ class _VanFullBootstrapState extends State<VanFullBootstrap> {
   late final AdministradoresAdminApi _administradoresAdmin;
   late final TarifasAdminApi _tarifasAdmin;
   late final RecorridosAdminApi _recorridosAdmin;
+  late final AbonosAdminApi _abonosAdmin;
   late final HistorialViajesAdminApi _historialAdmin;
   late final ViajesChoferApi _viajesChofer;
   late final DetalleViajeChoferApi _detalleChofer;
@@ -167,6 +170,7 @@ class _VanFullBootstrapState extends State<VanFullBootstrap> {
     _administradoresAdmin = AdministradoresAdminApi(httpClient);
     _tarifasAdmin = TarifasAdminApi(httpClient);
     _recorridosAdmin = RecorridosAdminApi(httpClient);
+    _abonosAdmin = AbonosAdminApi(httpClient);
     _historialAdmin = HistorialViajesAdminApi(httpClient);
     _viajesChofer = ViajesChoferApi(httpClient);
     _detalleChofer = DetalleViajeChoferApi(httpClient);
@@ -225,6 +229,7 @@ class _VanFullBootstrapState extends State<VanFullBootstrap> {
     administradores: dueno ? _administradoresAdmin : null,
     tarifas: dueno ? _tarifasAdmin : null,
     recorridos: _recorridosAdmin,
+    abonos: _abonosAdmin,
     historial: _historialAdmin,
   );
 
@@ -342,6 +347,7 @@ class _EntradaAdministracion extends StatefulWidget {
     this.administradores,
     this.tarifas,
     this.recorridos,
+    this.abonos,
     this.historial,
   });
 
@@ -360,6 +366,7 @@ class _EntradaAdministracion extends StatefulWidget {
   final AdministradoresAdminApi? administradores;
   final TarifasAdminApi? tarifas;
   final RecorridosAdminApi? recorridos;
+  final AbonosAdminApi? abonos;
   final HistorialViajesAdminApi? historial;
 
   @override
@@ -432,6 +439,12 @@ class _EntradaAdministracionState extends State<_EntradaAdministracion> {
                         onPressed: _abrirRecorridos,
                         child: const Text('Recorridos'),
                       ),
+                    if (widget.abonos != null)
+                      OutlinedButton(
+                        key: const Key('admin-abonos'),
+                        onPressed: _abrirAbonos,
+                        child: const Text('Abonos'),
+                      ),
                     if (widget.historial != null)
                       OutlinedButton(
                         key: const Key('admin-historial-viajes'),
@@ -492,6 +505,46 @@ class _EntradaAdministracionState extends State<_EntradaAdministracion> {
         builder: (_) => HistorialViajesScreen(
           listar: (filtros) => protegida((a) => a.listar(filtros)),
           detalle: (id) => protegida((a) => a.detalle(id)),
+        ),
+      ),
+    );
+  }
+
+  void _abrirAbonos() {
+    final controller = widget.controller;
+    final generacion = controller.generacion;
+    final token = controller.token;
+    final api = widget.abonos;
+    bool vigente() =>
+        api != null &&
+        mounted &&
+        !_accesoDenegado &&
+        token != null &&
+        controller.generacion == generacion &&
+        controller.token == token;
+    if (!vigente()) return;
+    Future<T> protegida<T>(Future<T> Function(AbonosAdminApi) pedir) async {
+      if (!vigente()) throw StateError('La sesión ya no está vigente.');
+      final resultado = await _protegerAcceso(
+        controller: controller,
+        solicitud: () => pedir(api!),
+        onAccesoDenegado: _denegarAcceso,
+      );
+      if (!vigente()) throw StateError('La sesión ya no está vigente.');
+      return resultado;
+    }
+
+    Navigator.of(context).push(
+      MaterialPageRoute<void>(
+        builder: (_) => AbonosAdminScreen(
+          listar: (idPasajero) =>
+              protegida((a) => a.listar(idPasajero: idPasajero)),
+          listarServicios: () => protegida((a) => a.listarServicios()),
+          crear: (datos) => protegida((a) => a.crear(datos)),
+          modificar: (id, cambios) =>
+              protegida((a) => a.modificar(id, cambios)),
+          agregarPeriodo: (id, periodo) =>
+              protegida((a) => a.agregarPeriodo(id, periodo)),
         ),
       ),
     );

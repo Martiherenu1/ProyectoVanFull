@@ -54,6 +54,9 @@ tags:
   - name: integraciones
     description: Webhooks de sistemas externos (CU-036)
 
+  - name: choferes
+    description: Administración de choferes (CU-021)
+
 security:
   - bearerAuth: []
 
@@ -919,8 +922,11 @@ paths:
       tags: [administracion]
       summary: Consultar el historial de viajes
       description: |
-        Administrador o dueño. Solo lectura. Un viaje es «anterior» si su fecha es anterior a hoy o si
-        ya terminó (`finalizado` o `cancelado`). Todos los criterios son opcionales y se combinan.
+        Administrador o dueño. Solo lectura. Un viaje es «anterior» si ya terminó: `finalizado` o
+        `cancelado`, y el estado se muestra. Un viaje `programado` o `en_curso` no es historia aunque
+        su fecha haya pasado; se lo encuentra en la consulta operativa de viajes (`GET /viajes`,
+        CU-018). Por eso `estado=programado` o `estado=en_curso` devuelven `items` vacío. Todos los
+        criterios son opcionales y se combinan.
         Orden: fecha y horario descendentes. Sin resultados devuelve `items` vacío y `total` 0 (el
         cliente informa que no se encontraron registros). (CU-026)
       x-cu: CU-026
@@ -3454,6 +3460,135 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
 
+  /choferes:
+    get:
+      tags: [choferes]
+      summary: Consultar choferes
+      description: |
+        Lista las personas registradas como chofer por identificador. No expone cuentas,
+        roles, estados ni documentación todavía no modelada. (CU-021, RF-023)
+      x-cu: CU-021
+      x-cobertura: parcial
+      responses:
+        '200':
+          description: Choferes registrados; lista vacía si no hay resultados.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ChoferAdmin'
+        '401':
+          $ref: '#/components/responses/NoAutenticado'
+        '403':
+          $ref: '#/components/responses/SinPermiso'
+    post:
+      tags: [choferes]
+      summary: Registrar un chofer
+      description: |
+        Crea Persona y Chofer en una transacción usando únicamente sus campos vigentes.
+        No crea cuenta de acceso, rol ni estado administrativo. (CU-021, RF-023)
+      x-cu: CU-021
+      x-cobertura: parcial
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ChoferAdminCreate'
+      responses:
+        '201':
+          description: Chofer registrado.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ChoferAdmin'
+        '400':
+          description: Campo ausente, desconocido o inválido (VALIDACION).
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          $ref: '#/components/responses/NoAutenticado'
+        '403':
+          $ref: '#/components/responses/SinPermiso'
+        '409':
+          description: Ya existe una persona con el DNI (DNI_DUPLICADO).
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /choferes/{id_persona}:
+    parameters:
+      - name: id_persona
+        in: path
+        required: true
+        schema: { type: integer }
+    get:
+      tags: [choferes]
+      summary: Consultar un chofer
+      description: Consulta los campos disponibles de Persona y Chofer. (CU-021, RF-023)
+      x-cu: CU-021
+      x-cobertura: parcial
+      responses:
+        '200':
+          description: Chofer encontrado.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ChoferAdmin'
+        '401':
+          $ref: '#/components/responses/NoAutenticado'
+        '403':
+          $ref: '#/components/responses/SinPermiso'
+        '404':
+          $ref: '#/components/responses/NoEncontrado'
+    patch:
+      tags: [choferes]
+      summary: Modificar un chofer
+      description: |
+        Modifica únicamente campos existentes de Persona y Chofer. No crea ni cambia
+        cuentas, roles, estados o asignaciones. (CU-021, RF-023)
+      x-cu: CU-021
+      x-cobertura: parcial
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ChoferAdminUpdate'
+      responses:
+        '200':
+          description: Chofer actualizado.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ChoferAdmin'
+        '400':
+          description: Cuerpo vacío, campo desconocido o valor inválido (VALIDACION).
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          $ref: '#/components/responses/NoAutenticado'
+        '403':
+          $ref: '#/components/responses/SinPermiso'
+        '404':
+          $ref: '#/components/responses/NoEncontrado'
+        '409':
+          description: Ya existe una persona con el DNI (DNI_DUPLICADO).
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  # ---------------------------------------------------------------------------
+  # VIAJES (administración)
+  # ---------------------------------------------------------------------------
+
 components:
 
   securitySchemes:
@@ -4614,3 +4749,48 @@ components:
           type: string
           format: date-time
           nullable: true
+    ChoferAdminCreate:
+      type: object
+      additionalProperties: false
+      required: [nombre, apellido, dni]
+      properties:
+        nombre: { type: string, minLength: 1, maxLength: 80 }
+        apellido: { type: string, minLength: 1, maxLength: 80 }
+        dni: { type: string, minLength: 1, maxLength: 20 }
+        direccion: { type: string, maxLength: 200, nullable: true }
+        telefono: { type: string, maxLength: 30, nullable: true }
+        email: { type: string, maxLength: 120, nullable: true }
+        cuil: { type: string, maxLength: 20, nullable: true }
+        registro_conducir: { type: string, maxLength: 40, nullable: true }
+        fecha_vencimiento_registro: { type: string, format: date, nullable: true }
+
+    ChoferAdminUpdate:
+      type: object
+      additionalProperties: false
+      minProperties: 1
+      properties:
+        nombre: { type: string, minLength: 1, maxLength: 80 }
+        apellido: { type: string, minLength: 1, maxLength: 80 }
+        dni: { type: string, minLength: 1, maxLength: 20 }
+        direccion: { type: string, maxLength: 200, nullable: true }
+        telefono: { type: string, maxLength: 30, nullable: true }
+        email: { type: string, maxLength: 120, nullable: true }
+        cuil: { type: string, maxLength: 20, nullable: true }
+        registro_conducir: { type: string, maxLength: 40, nullable: true }
+        fecha_vencimiento_registro: { type: string, format: date, nullable: true }
+
+    ChoferAdmin:
+      type: object
+      additionalProperties: false
+      required: [id_persona, nombre, apellido, dni, direccion, telefono, email, cuil, registro_conducir, fecha_vencimiento_registro]
+      properties:
+        id_persona: { type: integer }
+        nombre: { type: string, maxLength: 80 }
+        apellido: { type: string, maxLength: 80 }
+        dni: { type: string, maxLength: 20 }
+        direccion: { type: string, maxLength: 200, nullable: true }
+        telefono: { type: string, maxLength: 30, nullable: true }
+        email: { type: string, maxLength: 120, nullable: true }
+        cuil: { type: string, maxLength: 20, nullable: true }
+        registro_conducir: { type: string, maxLength: 40, nullable: true }
+        fecha_vencimiento_registro: { type: string, format: date, nullable: true }

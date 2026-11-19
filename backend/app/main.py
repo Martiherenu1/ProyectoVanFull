@@ -13,6 +13,7 @@ from app.routers import (
     avisos,
     chat,
     chofer,
+    choferes_admin,
     comprobantes,
     corporativos,
     deuda,
@@ -76,6 +77,7 @@ app.include_router(reservas.router, prefix=settings.api_prefix)
 app.include_router(pagos.router, prefix=settings.api_prefix)
 app.include_router(vehiculos.router, prefix=settings.api_prefix)
 app.include_router(viajes.router, prefix=settings.api_prefix)
+app.include_router(choferes_admin.router, prefix=settings.api_prefix)
 app.include_router(chofer.router, prefix=settings.api_prefix)
 app.include_router(chat.router, prefix=settings.api_prefix)
 app.include_router(ejecucion_viajes.router, prefix=settings.api_prefix)

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../core/theme/app_spacing.dart';
 import '../../core/theme/app_theme.dart';
+import '../../widgets/admin/seccion_formulario_admin.dart';
 
 /// Función inyectable para crear un viaje con los campos de `ViajeCreate`.
 typedef CrearViaje = Future<void> Function({
@@ -96,89 +97,102 @@ class _CrearViajeAdminScreenState extends State<CrearViajeAdminScreen> {
             padding: const EdgeInsets.all(AppSpacing.lg),
             child: Center(
               child: ConstrainedBox(
-                constraints: const BoxConstraints(maxWidth: 720),
+                constraints: const BoxConstraints(maxWidth: 920),
                 child: Form(
                   key: _formulario,
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
-                      Text(
-                        'Datos del viaje',
-                        style: Theme.of(context).textTheme.headlineSmall,
-                      ),
-                      const SizedBox(height: AppSpacing.lg),
-                      _campoEntero(
-                        key: const Key('id-servicio'),
-                        controller: _servicio,
-                        label: 'Servicio (ID)',
-                        obligatorio: true,
-                      ),
-                      _campoEntero(
-                        key: const Key('id-recorrido'),
-                        controller: _recorrido,
-                        label: 'Recorrido (ID)',
-                        obligatorio: true,
-                      ),
-                      _campoEntero(
-                        key: const Key('id-vehiculo'),
-                        controller: _vehiculo,
-                        label: 'Vehículo (ID, opcional)',
-                        obligatorio: false,
-                      ),
-                      _campoEntero(
-                        key: const Key('id-chofer'),
-                        controller: _chofer,
-                        label: 'Chofer (ID, opcional)',
-                        obligatorio: false,
-                      ),
-                      TextFormField(
-                        key: const Key('fecha'),
-                        controller: _fecha,
-                        decoration: const InputDecoration(
-                          labelText: 'Fecha (AAAA-MM-DD)',
-                        ),
-                        validator: _validarFecha,
-                      ),
-                      const SizedBox(height: AppSpacing.md),
-                      TextFormField(
-                        key: const Key('horario'),
-                        controller: _horario,
-                        decoration: const InputDecoration(
-                          labelText: 'Horario (opcional)',
-                        ),
-                      ),
-                      const SizedBox(height: AppSpacing.md),
-                      DropdownButtonFormField<String>(
-                        key: const Key('sentido'),
-                        initialValue: _sentido,
-                        decoration: const InputDecoration(labelText: 'Sentido'),
-                        items: const [
-                          DropdownMenuItem(value: 'IDA', child: Text('Ida')),
-                          DropdownMenuItem(
-                            value: 'VUELTA',
-                            child: Text('Vuelta'),
+                      SeccionFormularioAdmin(
+                        titulo: 'Fecha y horario',
+                        campos: [
+                          TextFormField(
+                            key: const Key('fecha'),
+                            controller: _fecha,
+                            decoration: const InputDecoration(
+                              labelText: 'Fecha (AAAA-MM-DD)',
+                            ),
+                            validator: _validarFecha,
+                          ),
+                          TextFormField(
+                            key: const Key('horario'),
+                            controller: _horario,
+                            decoration: const InputDecoration(
+                              labelText: 'Horario (opcional)',
+                            ),
+                          ),
+                          DropdownButtonFormField<String>(
+                            key: const Key('sentido'),
+                            initialValue: _sentido,
+                            decoration: const InputDecoration(
+                              labelText: 'Sentido',
+                            ),
+                            items: const [
+                              DropdownMenuItem(
+                                value: 'IDA',
+                                child: Text('Ida'),
+                              ),
+                              DropdownMenuItem(
+                                value: 'VUELTA',
+                                child: Text('Vuelta'),
+                              ),
+                            ],
+                            onChanged: _enviando
+                                ? null
+                                : (valor) => setState(() => _sentido = valor),
+                            validator: (valor) =>
+                                valor == null ? 'Seleccioná un sentido.' : null,
                           ),
                         ],
-                        onChanged: _enviando
-                            ? null
-                            : (valor) => setState(() => _sentido = valor),
-                        validator: (valor) =>
-                            valor == null ? 'Seleccioná un sentido.' : null,
                       ),
                       const SizedBox(height: AppSpacing.md),
-                      _campoEntero(
-                        key: const Key('capacidad-planificada'),
-                        controller: _capacidad,
-                        label: 'Capacidad planificada (opcional)',
-                        obligatorio: false,
+                      SeccionFormularioAdmin(
+                        titulo: 'Servicio y recorrido',
+                        campos: [
+                          _campoEntero(
+                            key: const Key('id-servicio'),
+                            controller: _servicio,
+                            label: 'Servicio (ID)',
+                            obligatorio: true,
+                          ),
+                          _campoEntero(
+                            key: const Key('id-recorrido'),
+                            controller: _recorrido,
+                            label: 'Recorrido (ID)',
+                            obligatorio: true,
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: AppSpacing.md),
+                      SeccionFormularioAdmin(
+                        titulo: 'Asignaciones y capacidad',
+                        campos: [
+                          _campoEntero(
+                            key: const Key('id-vehiculo'),
+                            controller: _vehiculo,
+                            label: 'Vehículo (ID, opcional)',
+                            obligatorio: false,
+                          ),
+                          _campoEntero(
+                            key: const Key('id-chofer'),
+                            controller: _chofer,
+                            label: 'Chofer (ID, opcional)',
+                            obligatorio: false,
+                          ),
+                          _campoEntero(
+                            key: const Key('capacidad-planificada'),
+                            controller: _capacidad,
+                            label: 'Capacidad planificada (opcional)',
+                            obligatorio: false,
+                          ),
+                        ],
                       ),
                       const SizedBox(height: AppSpacing.xl),
                       ElevatedButton(
                         key: const Key('crear-viaje'),
                         onPressed: _enviando ? null : _enviar,
                         style: ElevatedButton.styleFrom(
-                          minimumSize: const Size(0, AppSpacing.adminRowHeight),
-                          tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                          minimumSize: const Size(0, AppSpacing.touchTarget),
                         ),
                         child: Text(
                           _enviando ? 'Creando viaje…' : 'Crear viaje',
@@ -217,15 +231,12 @@ class _CrearViajeAdminScreenState extends State<CrearViajeAdminScreen> {
     required TextEditingController controller,
     required String label,
     required bool obligatorio,
-  }) => Padding(
-    padding: const EdgeInsets.only(bottom: AppSpacing.md),
-    child: TextFormField(
-      key: key,
-      controller: controller,
-      keyboardType: const TextInputType.numberWithOptions(signed: true),
-      decoration: InputDecoration(labelText: label),
-      validator: (valor) => _validarEntero(valor, obligatorio: obligatorio),
-    ),
+  }) => TextFormField(
+    key: key,
+    controller: controller,
+    keyboardType: const TextInputType.numberWithOptions(signed: true),
+    decoration: InputDecoration(labelText: label),
+    validator: (valor) => _validarEntero(valor, obligatorio: obligatorio),
   );
 
   static String? _validarEntero(String? valor, {required bool obligatorio}) {

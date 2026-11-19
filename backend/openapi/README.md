@@ -71,7 +71,7 @@ python -c "import yaml,json,io; io.open('backend/openapi/openapi.json','w',encod
 - `redocly preview-docs backend/openapi/openapi.yaml`, o
 - al implementar el backend: `http://localhost:8000/docs` (Swagger UI de FastAPI).
 
-Validado con `openapi-spec-validator`: **OpenAPI 3.0.3 · 65 rutas · 87 operaciones HTTP · 86 schemas**.
+Validado con `openapi-spec-validator`: **OpenAPI 3.0.3 · 67 rutas · 91 operaciones HTTP · 89 schemas**.
 
 ## Cobertura de esta versión (v0.1)
 
@@ -94,7 +94,7 @@ de solo lectura (administrador/dueno), reutilizando Deuda. Sin cuenta informa 0.
 inexistente CLIENTE_NO_ENCONTRADO. CU-006 conserva su comportamiento. La gestión de
 consecuencias RN-004/005/006 sigue pendiente; CU-015 conserva cobertura parcial.
 
-> **v0.1 representa 30 de los 37 casos de uso, además de RF-028.** Los otros **7 CU** todavía no tienen
+> **v0.1 representa 31 de los 37 casos de uso, además de RF-028.** Los otros **6 CU** todavía no tienen
 > operaciones y se listan al final. Estos indicadores describen la **cobertura contractual de diseño**;
 > no indican funcionalidades implementadas en el backend ni en el frontend.
 
@@ -109,6 +109,7 @@ Se cuentan las rutas distintas de `paths`, los métodos HTTP de cada ruta, los s
 | **CU-014** Registrar pagos y comprobantes | `POST /pagos` registra PENDIENTE; formulario administrativo transferencia/billetera (#214); `x-cobertura: parcial` | Tipo/evidencia, efectivo/15 %, señas y acuerdos (#84); registro no confirma ni genera recibo/movimiento |
 | **CU-015** Gestionar deuda | `GET /clientes/{id_cliente}/deuda`: consulta administrativa de solo lectura | RN-004/005/006: suspensión, habilitación excepcional y límite mensual |
 | **CU-018** Gestionar viajes | Creación, listado por fecha, actualización programada y cancelación lógica limitada (#189/#208), integrados | RN-019 y CU-017/#75 (reintegros); cambiar servicio/recorrido; reglas de solapamiento |
+| **CU-021** Gestionar choferes | Registrar, listar, consultar y modificar Persona/Chofer (#278) | Documentación habilitante, obligatoriedad, cuenta/rol, baja y alertas pendientes |
 | **CU-022** Gestionar vehículos | Registrar, listar, consultar y modificar los campos existentes del vehículo (#276) | Documentación operativa sin persistencia definida; reglas de disponibilidad pendientes |
 | **CU-027** Consultar reservas por administración | `GET /reservas` para administrador/dueño: todas las reservas, con `id_pasajero`, por `id_reserva` ascendente, solo lectura | Criterios de búsqueda adicionales, nombres y contactos de los pasajeros |
 | **CU-030** Ejecutar viaje | Inicio, finalización y recepción de posiciones GPS | Avisos de demora y problemas, pendientes para otra tarea |
@@ -175,6 +176,7 @@ y frontend continúa pendiente; documentar el contrato no implementa los servici
 | CU-015 Gestionar deuda ⚠️ *parcial* | `GET /clientes/{id_cliente}/deuda` | RF-010, MR-R30; RN-004/005/006 pendientes |
 | CU-016 Confirmar/rechazar pago | `POST /pagos/{id}/confirmacion` | RF-011, RN-015 — validación administrativa cuando el medio no acredita automáticamente |
 | CU-018 Gestionar viajes ⚠️ *parcial* | `POST /viajes`, `PATCH /viajes/{id_viaje}` | RF-017/018, RN-001 |
+| CU-021 Gestionar choferes ⚠️ *parcial* | `GET/POST /choferes`, `GET/PATCH /choferes/{id_persona}` | RF-023 |
 | CU-022 Gestionar vehículos ⚠️ *parcial* | `GET/POST /vehiculos`, `GET/PATCH /vehiculos/{id_vehiculo}` | RF-026; RN-001 consume capacidad desde viajes |
 | CU-029 Consultar operación asignada | `GET /choferes/me/viajes` | RF-024, RN-029 |
 | CU-029 Consultar operación asignada | `GET /choferes/me/viajes/{id_viaje}` | RF-024, RN-029 |
@@ -191,8 +193,8 @@ ubicación en CU-009/CU-034 y no es una regla directa del POST GPS.
 
 ## CU pendientes de contrato (próxima iteración)
 
-Estos **7 CU** todavía no tienen operaciones en el contrato:
-créditos/devoluciones (CU-017), optimización de recorrido (CU-020), choferes (CU-021),
+Estos **6 CU** todavía no tienen operaciones en el contrato:
+créditos/devoluciones (CU-017), optimización de recorrido (CU-020),
 facturación (CU-024), reportes (CU-025), corporativos (CU-034) y notificaciones (CU-037).
 
 

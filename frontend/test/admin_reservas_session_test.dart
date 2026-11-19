@@ -10,6 +10,8 @@ import 'package:http/testing.dart';
 
 import 'services/admin/reservas_admin_api_test.dart' as datos;
 
+import 'admin_menu_helpers.dart';
+
 Future<void> login(WidgetTester tester) async {
   await tester.enterText(find.byType(TextField).at(0), 'admin@vanfull.test');
   await tester.enterText(find.byType(TextField).at(1), 'clave');
@@ -62,7 +64,7 @@ void main() {
         ),
       );
       await login(tester);
-      await tester.tap(find.byKey(const Key('admin-consultar-reservas')));
+      await tocarMenuAdmin(tester, const Key('admin-consultar-reservas'));
       await tester.pumpAndSettle();
       if (status == 401) {
         expect(find.text('Ingresar'), findsOneWidget);
@@ -117,7 +119,7 @@ void main() {
         ),
       );
       await login(tester);
-      await tester.tap(find.byKey(const Key('admin-consultar-reservas')));
+      await tocarMenuAdmin(tester, const Key('admin-consultar-reservas'));
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 400));
       final consulta = tester
@@ -127,7 +129,7 @@ void main() {
           .consulta;
       await tester.pageBack();
       await tester.pumpAndSettle();
-      await tester.tap(find.byKey(const Key('admin-salir')));
+      await tocarMenuAdmin(tester, const Key('admin-salir'));
       await tester.pumpAndSettle();
       await login(tester);
       pendiente.complete(
@@ -143,6 +145,7 @@ void main() {
         ),
       );
       await tester.pumpAndSettle();
+      await abrirMenuAdmin(tester);
       expect(find.byKey(const Key('admin-consultar-reservas')), findsOneWidget);
       expect(find.byKey(const Key('reserva-7')), findsNothing);
       expect(find.byKey(const Key('admin-acceso-denegado')), findsNothing);

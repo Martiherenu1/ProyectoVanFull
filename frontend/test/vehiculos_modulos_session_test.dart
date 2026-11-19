@@ -16,6 +16,8 @@ import 'admin_vehiculos_session_test.dart' as base;
 import 'dueno_vehiculos_session_test.dart' as sesion;
 import 'services/admin/vehiculos_admin_api_test.dart' as datos;
 
+import 'admin_menu_helpers.dart';
+
 void main() {
   for (final rol in ['dueno', 'administrador']) {
     testWidgets(
@@ -37,13 +39,14 @@ void main() {
         });
         await sesion.montar(t, transporte);
         await base.login(t);
+        await abrirMenuAdmin(t);
         for (final key in ['admin-administradores', 'admin-tarifas']) {
           expect(
             find.byKey(Key(key)),
             rol == 'dueno' ? findsOneWidget : findsNothing,
           );
         }
-        await t.tap(find.byKey(const Key('admin-vehiculos')));
+        await tocarMenuAdmin(t, const Key('admin-vehiculos'));
         await t.pumpAndSettle();
         expect(find.text('VF022AA'), findsOneWidget);
         await t.pageBack();
@@ -74,13 +77,14 @@ void main() {
           ('admin-abonos', AbonosAdminScreen, '/api/administracion/abonos'),
         ];
         for (final (key, pantalla, ruta) in modulos) {
-          await t.tap(find.byKey(Key(key)));
+          await tocarMenuAdmin(t, Key(key));
           await t.pumpAndSettle();
           expect(find.byType(pantalla), findsOneWidget);
           expect(consultas, contains(ruta));
           expect(t.takeException(), isNull);
           await t.pageBack();
           await t.pumpAndSettle();
+          await abrirMenuAdmin(t);
           expect(find.byKey(const Key('admin-vehiculos')), findsOneWidget);
         }
         await t.pumpWidget(const SizedBox());
@@ -110,7 +114,7 @@ void main() {
         });
         await sesion.montar(t, transporte);
         await base.login(t);
-        await t.tap(find.byKey(const Key('admin-vehiculos')));
+        await tocarMenuAdmin(t, const Key('admin-vehiculos'));
         await t.pump();
         await t.pump(const Duration(milliseconds: 400));
         final cargar = t
@@ -118,10 +122,10 @@ void main() {
             .cargar;
         await t.pageBack();
         await t.pumpAndSettle();
-        await t.tap(find.byKey(const Key('admin-salir')));
+        await tocarMenuAdmin(t, const Key('admin-salir'));
         await t.pumpAndSettle();
         await base.login(t);
-        await t.tap(find.byKey(const Key('admin-historial-viajes')));
+        await tocarMenuAdmin(t, const Key('admin-historial-viajes'));
         await t.pumpAndSettle();
         pendiente.complete(
           status == 200

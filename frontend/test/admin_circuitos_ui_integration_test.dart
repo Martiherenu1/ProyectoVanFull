@@ -13,8 +13,17 @@ import 'services/admin/registro_pagos_admin_api_test.dart' as pagos;
 import 'services/admin/viajes_dia_admin_api_test.dart' as viajes;
 
 Future<void> abrir(WidgetTester tester, String key) async {
-  await tester.tap(find.byKey(Key(key)));
+  final destino = find.byKey(Key(key));
+  await tester.ensureVisible(destino);
+  await tester.tap(destino);
   await tester.pumpAndSettle();
+}
+
+void montarEscritorio(WidgetTester tester) {
+  tester.view.physicalSize = const Size(1440, 1000);
+  tester.view.devicePixelRatio = 1;
+  addTearDown(tester.view.resetPhysicalSize);
+  addTearDown(tester.view.resetDevicePixelRatio);
 }
 
 void main() {
@@ -22,6 +31,7 @@ void main() {
     testWidgets(
       'UI registro→pendientes→$decision→deuda con sesión compartida',
       (tester) async {
+        montarEscritorio(tester);
         Map<String, dynamic>? pago;
         var saldoInformado = 2000.0;
         final operaciones = <String>[];
@@ -143,6 +153,7 @@ void main() {
   testWidgets('edición UI usa PATCH autenticado y renueva detalle/listado', (
     tester,
   ) async {
+    montarEscritorio(tester);
     var viaje = viajes.viaje(41);
     var listados = 0;
     var actualizaciones = 0;

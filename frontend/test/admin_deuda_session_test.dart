@@ -8,6 +8,8 @@ import 'package:frontend/screens/admin/consultar_deuda_admin_screen.dart';
 import 'package:http/http.dart' as http;
 import 'package:http/testing.dart';
 
+import 'admin_menu_helpers.dart';
+
 Future<void> login(WidgetTester tester) async {
   await tester.enterText(find.byType(TextField).at(0), 'admin@vanfull.test');
   await tester.enterText(find.byType(TextField).at(1), 'clave');
@@ -58,7 +60,7 @@ void main() {
         ),
       );
       await login(tester);
-      await tester.tap(find.byKey(const Key('admin-consultar-deuda')));
+      await tocarMenuAdmin(tester, const Key('admin-consultar-deuda'));
       await tester.pumpAndSettle();
       await tester.enterText(find.byKey(const Key('deuda-id-cliente')), '12');
       await tester.tap(find.byKey(const Key('consultar-deuda-admin')));
@@ -107,7 +109,7 @@ void main() {
         ),
       );
       await login(tester);
-      await tester.tap(find.byKey(const Key('admin-consultar-deuda')));
+      await tocarMenuAdmin(tester, const Key('admin-consultar-deuda'));
       await tester.pumpAndSettle();
       final consulta = tester
           .widget<ConsultarDeudaAdminScreen>(
@@ -119,7 +121,7 @@ void main() {
       await tester.pump();
       await tester.pageBack();
       await tester.pumpAndSettle();
-      await tester.tap(find.byKey(const Key('admin-salir')));
+      await tocarMenuAdmin(tester, const Key('admin-salir'));
       await tester.pumpAndSettle();
       await login(tester);
       pendiente.complete(
@@ -137,6 +139,7 @@ void main() {
       await tester.pumpAndSettle();
       // Errores HTTP se propagan, pero no invalidan ni deniegan la cuenta siguiente.
       await expectativa;
+      await abrirMenuAdmin(tester);
       expect(find.byKey(const Key('admin-consultar-deuda')), findsOneWidget);
       expect(find.byKey(const Key('admin-acceso-denegado')), findsNothing);
       await expectLater(consulta.consultar(12), throwsStateError);

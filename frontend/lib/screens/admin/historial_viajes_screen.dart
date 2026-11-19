@@ -118,7 +118,11 @@ class _HistorialViajesScreenState extends State<HistorialViajesScreen> {
           hint: const Text('Estado'),
           items: [
             const DropdownMenuItem(value: null, child: Text('Todos')),
-            for (final e in _estados.entries)
+            // El historial solo tiene viajes terminados: programado y en curso se buscan en
+            // «Viajes del día», no acá (respuesta funcional de Martín, 18/11).
+            for (final e in _estados.entries.where(
+              (e) => e.key == 'finalizado' || e.key == 'cancelado',
+            ))
               DropdownMenuItem(value: e.key, child: Text(e.value)),
           ],
           onChanged: (v) => setState(() => _estado = v),

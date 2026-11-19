@@ -1,5 +1,9 @@
 # CONTEXTO VANFULL — Carga rápida de sesión
 
+> **P1 Administración / #323, 19/11/2026:** MarcoAdmin integrado en el piloto local sobre `00f58c2`, con navegación de administrador y dueño, Viajes del día y Crear viaje (CU-018). Detalle de la integración y evidencia en el [contexto de Administración](PC2/CONTEXTO-administracion-y-flutter.md).
+
+> **CU-021 / #279, 19/11/2026:** #277 ya mergeada en main 55ee8b5. Integración local retomada desde 2cfe1ed mediante merge normal sin commit; Choferes y Vehículos comparten la navegación vigente, preservando los demás módulos y permisos del dueño. Flutter 1111/analyze, backend sin BD 66 y Ruff aprobados. PostgreSQL 16 local sin motor Docker; CI del futuro HEAD pendiente. Diff listo para revisión/autorización de publicación; sin push/merge a main ni Neon/Render. Detalle: [contexto de Administración](PC2/CONTEXTO-administracion-y-flutter.md).
+
 > **CU-022 / #277, cierre local sobre main d169da5:** merge sin commit desde HEAD 8839deb; conserva CU-032/031/019/026/028 y suma Vehículos a la entrada vigente del dueño, sin reemplazarla. Flutter 1079/analyze y backend sin BD 46/Ruff aprobados; PostgreSQL 16 local no ejecutado por ausencia de motor Docker. Diff pendiente de revisión y autorización de publicación; sin merge a main ni Neon/Render. Detalle: [contexto de Administración](PC2/CONTEXTO-administracion-y-flutter.md). #279 sigue separada.
 
 > **Corte del 18/11/2026 (entrega final: viernes 20/11).** Martiniano sumó **cinco CU de administración y dueño**, todos en `main` y recortados a lo que la v1.3 aprueba (lo demás quedó como PENDIENTE documentado, nada inventado):
@@ -590,3 +594,8 @@ verificación nueva de despliegue. Se conserva íntegra su información y proced
 ## Antecedente pasajero conservado al integrar main — 16/11/2026
 
 > **Pasajero, CU-005 — 12/11/2026:** pantalla Flutter de cambio de parada ([Issue #274](https://github.com/Martiherenu1/ProyectoVanFull/issues/274)), sobre el backend ya en `main` (#243). Sin cambios de contrato, backend ni modelo. Verificada con `flutter analyze` y pruebas de widget; **sin probar contra Render**. La interpretación de «disponibilidad compatible» (RN-020) **sigue sin validar** (#242 se cerró sin consulta registrada). Siguen pendientes: lista de espera FIFO (CU-003, #34), y CU-013/019/035 sin contrato. Detalle: PC2/CONTEXTO-pasajero-y-base-comun.md.
+
+## Antecedente de preparación CU-021 del 17/11 (no describe el estado actual)
+
+
+> **Administración PC3 / CU-021, 17/11/2026:** #279 `fc761ef` con merge local sin commit contra main `d00c1ee`; conflictos resueltos y acceso de dueño limitado a Choferes preparado. Flutter 993/analyze aprobados; backend sin BD 29/Ruff aprobados; PostgreSQL 16 local no ejecutado por ausencia de motor Docker. #277 `8839deb` sigue abierta: integración conjunta requiere resolución explícita de OpenAPI y composición Flutter del dueño, no aplicada. Diff pendiente de revisión del usuario; sin commit/push/merge a main, despliegue ni Neon/Render. Detalle y condición de reanudación en [contexto de Administración](PC2/CONTEXTO-administracion-y-flutter.md).

@@ -12,6 +12,8 @@ import 'package:http/testing.dart';
 
 import 'services/admin/pagos_admin_api_test.dart' as datos;
 
+import 'admin_menu_helpers.dart';
+
 void main() {
   for (final estado in [200, 401, 403]) {
     testWidgets('decisión tardía $estado no afecta la sesión siguiente', (
@@ -59,7 +61,7 @@ void main() {
         ),
       );
       await login();
-      await tester.tap(find.byKey(const Key('admin-pagos-pendientes')));
+      await tocarMenuAdmin(tester, const Key('admin-pagos-pendientes'));
       await tester.pumpAndSettle();
       final decidir = tester
           .widget<PagosPendientesScreen>(find.byType(PagosPendientesScreen))
@@ -69,7 +71,7 @@ void main() {
       await tester.pump();
       await tester.pageBack();
       await tester.pumpAndSettle();
-      await tester.tap(find.byKey(const Key('admin-salir')));
+      await tocarMenuAdmin(tester, const Key('admin-salir'));
       await tester.pumpAndSettle();
       await login();
       pendiente.complete(

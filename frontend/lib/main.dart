@@ -893,9 +893,9 @@ class _EntradaAdministracionState extends State<_EntradaAdministracion> {
     bool vigente() => mounted && widget.controller.generacion == generacion && !_accesoDenegado;
     try {
       final paradas = await widget.paradas.cargarParadas(viaje.idRecorrido);
-      if (!vigente()) return;
+      if (!mounted || !vigente()) return;
       final ordenes = await widget.paradas.cargarDescensos(viaje.idViaje);
-      if (!vigente()) return;
+      if (!mounted || !vigente()) return;
       await showDialog<void>(
         context: context,
         builder: (_) => DescensosViajeDialog(
@@ -908,7 +908,7 @@ class _EntradaAdministracionState extends State<_EntradaAdministracion> {
         ),
       );
     } catch (_) {
-      if (vigente()) {
+      if (mounted && vigente()) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('No se pudieron cargar los descensos.')),
         );

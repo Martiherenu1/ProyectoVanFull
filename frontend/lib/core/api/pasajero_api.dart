@@ -86,7 +86,7 @@ class PasajeroApi {
         body: {
           'id_viaje': idViaje,
           'orden_parada': ordenParada,
-          if (ordenDescenso != null) 'orden_descenso': ordenDescenso,
+          'orden_descenso': ?ordenDescenso,
         },
       );
       return Reserva.fromJson(cuerpo! as Map<String, dynamic>);

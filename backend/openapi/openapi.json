@@ -1556,6 +1556,335 @@
         }
       }
     },
+    "/administracion/abonos": {
+      "get": {
+        "tags": [
+          "administracion"
+        ],
+        "summary": "Listar los abonos mensuales",
+        "description": "Administrador o dueño. Filtros opcionales y combinables: pasajero, estado, tipo de servicio.\nCada abono trae sus períodos (el más reciente primero). Sin paginar. (CU-028)\n",
+        "x-cu": "CU-028",
+        "parameters": [
+          {
+            "name": "id_pasajero",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "minimum": 1
+            }
+          },
+          {
+            "name": "estado",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 30
+            }
+          },
+          {
+            "name": "tipo_servicio",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "UNIVERSITARIO",
+                "LABORAL"
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Abonos",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AbonoGestionLista"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "VALIDACION — filtro inválido",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/NoAutenticado"
+          },
+          "403": {
+            "$ref": "#/components/responses/SinPermiso"
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "administracion"
+        ],
+        "summary": "Crear un abono mensual",
+        "description": "Administrador o dueño. Crea la contratación y el abono (estado `activo`) y, si se indica\n`periodo`, su primer período (`vigente`). Solo servicios UNIVERSITARIO y LABORAL. Si el\npasajero todavía no es cliente individual, se crea junto con su cuenta corriente. No reserva\nviajes ni asigna cupo. (CU-028 flujo principal)\n",
+        "x-cu": "CU-028",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AbonoGestionCreate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Abono creado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AbonoGestion"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "VALIDACION — cuerpo inválido",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/NoAutenticado"
+          },
+          "403": {
+            "$ref": "#/components/responses/SinPermiso"
+          },
+          "404": {
+            "description": "PASAJERO_NO_ENCONTRADO, SERVICIO_NO_ENCONTRADO o TARIFA_NO_ENCONTRADA",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "PASAJERO_DADO_DE_BAJA o SERVICIO_SIN_ABONO (servicio que no es universitario ni laboral)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/administracion/abonos/{id_abono}": {
+      "get": {
+        "tags": [
+          "administracion"
+        ],
+        "summary": "Consultar un abono con sus períodos",
+        "description": "Administrador o dueño. (CU-028)",
+        "x-cu": "CU-028",
+        "parameters": [
+          {
+            "name": "id_abono",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "minimum": 1
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Abono",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AbonoGestion"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/NoAutenticado"
+          },
+          "403": {
+            "$ref": "#/components/responses/SinPermiso"
+          },
+          "404": {
+            "description": "ABONO_NO_ENCONTRADO",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      },
+      "patch": {
+        "tags": [
+          "administracion"
+        ],
+        "summary": "Modificar la modalidad o los días de un abono",
+        "description": "Administrador o dueño. Solo modalidad y días contratados. El estado no se edita a mano: el\ncatálogo de estados y las consecuencias de RN-004 están pendientes en la v1.3. (CU-028)\n",
+        "x-cu": "CU-028",
+        "parameters": [
+          {
+            "name": "id_abono",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "minimum": 1
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AbonoGestionUpdate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Abono actualizado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AbonoGestion"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "VALIDACION — cuerpo inválido o vacío",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/NoAutenticado"
+          },
+          "403": {
+            "$ref": "#/components/responses/SinPermiso"
+          },
+          "404": {
+            "description": "ABONO_NO_ENCONTRADO",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/administracion/abonos/{id_abono}/periodos": {
+      "post": {
+        "tags": [
+          "administracion"
+        ],
+        "summary": "Registrar un período del abono",
+        "description": "Administrador o dueño. `periodo` con formato `YYYY-MM`; nace `vigente`. Un abono no repite\nperíodo. (CU-028)\n",
+        "x-cu": "CU-028",
+        "parameters": [
+          {
+            "name": "id_abono",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "minimum": 1
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PeriodoAbonoCreate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Abono con el período agregado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AbonoGestion"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "VALIDACION — período inválido",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/NoAutenticado"
+          },
+          "403": {
+            "$ref": "#/components/responses/SinPermiso"
+          },
+          "404": {
+            "description": "ABONO_NO_ENCONTRADO",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "PERIODO_DUPLICADO — el abono ya tiene ese período",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/clientes-corporativos": {
       "get": {
         "tags": [
@@ -5648,6 +5977,190 @@
             }
           }
         ]
+      },
+      "PeriodoAbonoGestion": {
+        "type": "object",
+        "required": [
+          "id_periodo_abono",
+          "periodo",
+          "estado"
+        ],
+        "properties": {
+          "id_periodo_abono": {
+            "type": "integer"
+          },
+          "periodo": {
+            "type": "string",
+            "description": "YYYY-MM"
+          },
+          "estado": {
+            "type": "string"
+          }
+        }
+      },
+      "AbonoGestion": {
+        "type": "object",
+        "required": [
+          "id_abono_mensual",
+          "id_contratacion",
+          "id_pasajero",
+          "nombre",
+          "apellido",
+          "id_servicio",
+          "tipo_servicio",
+          "estado",
+          "periodos"
+        ],
+        "properties": {
+          "id_abono_mensual": {
+            "type": "integer"
+          },
+          "id_contratacion": {
+            "type": "integer"
+          },
+          "id_pasajero": {
+            "type": "integer"
+          },
+          "nombre": {
+            "type": "string"
+          },
+          "apellido": {
+            "type": "string"
+          },
+          "id_servicio": {
+            "type": "integer"
+          },
+          "tipo_servicio": {
+            "type": "string",
+            "enum": [
+              "UNIVERSITARIO",
+              "LABORAL"
+            ]
+          },
+          "id_tarifa": {
+            "type": "integer"
+          },
+          "importe_acordado": {
+            "type": "number"
+          },
+          "modalidad": {
+            "type": "string",
+            "enum": [
+              "IDA",
+              "VUELTA",
+              "IDA_VUELTA"
+            ]
+          },
+          "dias_semanales": {
+            "type": "string",
+            "description": "Días contratados, por ejemplo L,M,X,J,V"
+          },
+          "estado": {
+            "type": "string"
+          },
+          "periodos": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PeriodoAbonoGestion"
+            }
+          }
+        }
+      },
+      "AbonoGestionLista": {
+        "type": "object",
+        "required": [
+          "items",
+          "total"
+        ],
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AbonoGestion"
+            }
+          },
+          "total": {
+            "type": "integer"
+          }
+        }
+      },
+      "AbonoGestionCreate": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id_pasajero",
+          "id_servicio",
+          "modalidad",
+          "dias_semanales"
+        ],
+        "properties": {
+          "id_pasajero": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "id_servicio": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "modalidad": {
+            "type": "string",
+            "enum": [
+              "IDA",
+              "VUELTA",
+              "IDA_VUELTA"
+            ]
+          },
+          "dias_semanales": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 30
+          },
+          "id_tarifa": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "importe_acordado": {
+            "type": "number",
+            "minimum": 0
+          },
+          "periodo": {
+            "type": "string",
+            "description": "YYYY-MM; crea el primer período"
+          }
+        }
+      },
+      "AbonoGestionUpdate": {
+        "type": "object",
+        "additionalProperties": false,
+        "minProperties": 1,
+        "properties": {
+          "modalidad": {
+            "type": "string",
+            "enum": [
+              "IDA",
+              "VUELTA",
+              "IDA_VUELTA"
+            ]
+          },
+          "dias_semanales": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 30
+          }
+        }
+      },
+      "PeriodoAbonoCreate": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "periodo"
+        ],
+        "properties": {
+          "periodo": {
+            "type": "string",
+            "description": "YYYY-MM"
+          }
+        }
       },
       "ClienteCorporativo": {
         "type": "object",

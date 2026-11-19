@@ -113,6 +113,20 @@ void main() {
     expect(doble.consultas.last.sentido, 'VUELTA');
   });
 
+  testWidgets('el filtro de estado solo ofrece los viajes terminados', (tester) async {
+    final doble = Doble([viaje(7)]);
+    await tester.pumpWidget(doble.pantalla());
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.byKey(const Key('historial-estado')));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Finalizado'), findsWidgets);
+    expect(find.text('Cancelado'), findsWidgets);
+    expect(find.text('Programado'), findsNothing);
+    expect(find.text('En curso'), findsNothing);
+  });
+
   testWidgets('elegir una fecha la manda como criterio', (tester) async {
     final doble = Doble([]);
     await tester.pumpWidget(doble.pantalla());

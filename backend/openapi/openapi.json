@@ -25,10 +25,6 @@
       "description": "Operación asignada y ejecución del viaje por el chofer (CU-029, CU-030)"
     },
     {
-      "name": "choferes",
-      "description": "Administración de choferes (CU-021)"
-    },
-    {
       "name": "servicios",
       "description": "Consulta de servicios, disponibilidad, recorridos y tarifas (CU-002)"
     },
@@ -53,6 +49,10 @@
       "description": "Gestión operativa de viajes (CU-018) — administración"
     },
     {
+      "name": "vehiculos",
+      "description": "Administración de vehículos (CU-022)"
+    },
+    {
       "name": "corporativo",
       "description": "Representante de cliente corporativo, dentro de su organización (CU-033)"
     },
@@ -63,6 +63,10 @@
     {
       "name": "integraciones",
       "description": "Webhooks de sistemas externos (CU-036)"
+    },
+    {
+      "name": "choferes",
+      "description": "Administración de choferes (CU-021)"
     }
   ],
   "security": [
@@ -504,6 +508,1380 @@
           },
           "409": {
             "description": "PASAJERO_YA_DADO_DE_BAJA",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/administradores": {
+      "get": {
+        "tags": [
+          "administracion"
+        ],
+        "summary": "Listar administradores",
+        "description": "Solo el dueño (RN-027). Cuentas con el rol `administrador`; las que además son `dueno` no\nse gestionan acá. Sin paginar: son pocas. (CU-032, RF-041)\n",
+        "x-cu": "CU-032",
+        "responses": {
+          "200": {
+            "description": "Administradores",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdministradorLista"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/NoAutenticado"
+          },
+          "403": {
+            "$ref": "#/components/responses/SinPermiso"
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "administracion"
+        ],
+        "summary": "Crear una cuenta de administrador",
+        "description": "Solo el dueño. Crea la persona, la cuenta de acceso (estado `activo`, contraseña guardada\ncomo hash) y le asigna el rol `administrador`. El dueño define la contraseña inicial.\nPermisos más finos que el rol, recuperación y política de contraseñas son pendientes\ntécnicos del propio CU (v1.3). Un DNI de otra persona ya registrada responde\n`DNI_DUPLICADO`: reutilizarla no está definido. (CU-032, flujo principal)\n",
+        "x-cu": "CU-032",
+        "x-cobertura": "parcial",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AdministradorCreate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Administrador creado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Administrador"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "VALIDACION — cuerpo inválido",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/NoAutenticado"
+          },
+          "403": {
+            "$ref": "#/components/responses/SinPermiso"
+          },
+          "409": {
+            "description": "DNI_DUPLICADO o IDENTIFICADOR_EN_USO",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/administradores/{id_cuenta_acceso}": {
+      "get": {
+        "tags": [
+          "administracion"
+        ],
+        "summary": "Consultar un administrador",
+        "description": "Solo el dueño. (CU-032)",
+        "x-cu": "CU-032",
+        "parameters": [
+          {
+            "name": "id_cuenta_acceso",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "minimum": 1
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Administrador",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Administrador"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/NoAutenticado"
+          },
+          "403": {
+            "$ref": "#/components/responses/SinPermiso"
+          },
+          "404": {
+            "description": "ADMINISTRADOR_NO_ENCONTRADO",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      },
+      "patch": {
+        "tags": [
+          "administracion"
+        ],
+        "summary": "Modificar un administrador",
+        "description": "Solo el dueño. Cambia datos personales e identificador de acceso, todo o nada. El estado\ntiene su propia operación. (CU-032 A1)\n",
+        "x-cu": "CU-032",
+        "parameters": [
+          {
+            "name": "id_cuenta_acceso",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "minimum": 1
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AdministradorUpdate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Administrador modificado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Administrador"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "VALIDACION — cuerpo vacío o inválido",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/NoAutenticado"
+          },
+          "403": {
+            "$ref": "#/components/responses/SinPermiso"
+          },
+          "404": {
+            "description": "ADMINISTRADOR_NO_ENCONTRADO",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "DNI_DUPLICADO o IDENTIFICADOR_EN_USO",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/administradores/{id_cuenta_acceso}/deshabilitacion": {
+      "post": {
+        "tags": [
+          "administracion"
+        ],
+        "summary": "Deshabilitar un administrador",
+        "description": "Solo el dueño. Pasa la cuenta a `deshabilitado`: deja de poder iniciar sesión. No se borra\nnada (RF-041). Un token ya emitido sigue valiendo hasta que vence. Repetirla responde\nADMINISTRADOR_YA_DESHABILITADO. (CU-032 A2)\n",
+        "x-cu": "CU-032",
+        "parameters": [
+          {
+            "name": "id_cuenta_acceso",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "minimum": 1
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Administrador deshabilitado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Administrador"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/NoAutenticado"
+          },
+          "403": {
+            "$ref": "#/components/responses/SinPermiso"
+          },
+          "404": {
+            "description": "ADMINISTRADOR_NO_ENCONTRADO",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "ADMINISTRADOR_YA_DESHABILITADO",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/administracion/tarifas": {
+      "get": {
+        "tags": [
+          "administracion"
+        ],
+        "summary": "Listar las tarifas para su gestión",
+        "description": "Solo el dueño (RN-027). Todas las filas de `tarifa`, sin paginar. No es la consulta de la\ntarifa aplicable a un viaje (esa es `GET /tarifas?id_viaje`). (CU-031 flujo principal)\n",
+        "x-cu": "CU-031",
+        "responses": {
+          "200": {
+            "description": "Tarifas",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TarifaGestionLista"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/NoAutenticado"
+          },
+          "403": {
+            "$ref": "#/components/responses/SinPermiso"
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "administracion"
+        ],
+        "summary": "Crear una tarifa",
+        "description": "Solo el dueño. Registra la tarifa tal como llega. Estructura de parámetros, vigencias e\nhistorial tarifario son PENDIENTE DE DISEÑO en la v1.3 del CU: `tipo` y `fecha_vigencia` se\nguardan sin interpretarlos. No hay descuentos especiales (A1: sin tabla ni regla aprobada) y\nel 15 % por efectivo (RN-011) no es una tarifa editable. (CU-031 flujo principal)\n",
+        "x-cu": "CU-031",
+        "x-cobertura": "parcial",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TarifaGestionCreate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Tarifa creada",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TarifaGestion"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "VALIDACION — cuerpo inválido",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/NoAutenticado"
+          },
+          "403": {
+            "$ref": "#/components/responses/SinPermiso"
+          }
+        }
+      }
+    },
+    "/administracion/tarifas/{id_tarifa}": {
+      "get": {
+        "tags": [
+          "administracion"
+        ],
+        "summary": "Consultar una tarifa",
+        "description": "Solo el dueño. (CU-031)",
+        "x-cu": "CU-031",
+        "parameters": [
+          {
+            "name": "id_tarifa",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "minimum": 1
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Tarifa",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TarifaGestion"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/NoAutenticado"
+          },
+          "403": {
+            "$ref": "#/components/responses/SinPermiso"
+          },
+          "404": {
+            "description": "TARIFA_NO_ENCONTRADA",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      },
+      "patch": {
+        "tags": [
+          "administracion"
+        ],
+        "summary": "Modificar una tarifa",
+        "description": "Solo el dueño. Cambia solo los campos enviados y pisa la fila: no hay historial (PENDIENTE\nen la v1.3). **No recalcula** contrataciones, reservas ni saldos: la contratación conserva\nsu `importe_acordado`; si un cambio puede afectar un saldo pendiente (A2, RN-012) es una\ndecisión sin cerrar. `tipo` y `fecha_vigencia` admiten `null`; `nombre` e `importe` no.\n(CU-031 flujo principal, A2)\n",
+        "x-cu": "CU-031",
+        "x-cobertura": "parcial",
+        "parameters": [
+          {
+            "name": "id_tarifa",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "minimum": 1
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TarifaGestionUpdate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Tarifa modificada",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TarifaGestion"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "VALIDACION — cuerpo vacío o inválido",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/NoAutenticado"
+          },
+          "403": {
+            "$ref": "#/components/responses/SinPermiso"
+          },
+          "404": {
+            "description": "TARIFA_NO_ENCONTRADA",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/administracion/paradas": {
+      "get": {
+        "tags": [
+          "administracion"
+        ],
+        "summary": "Listar las paradas del catálogo",
+        "description": "Administrador o dueño. Sin paginar. (CU-019)",
+        "x-cu": "CU-019",
+        "responses": {
+          "200": {
+            "description": "Paradas",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ParadaGestionLista"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/NoAutenticado"
+          },
+          "403": {
+            "$ref": "#/components/responses/SinPermiso"
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "administracion"
+        ],
+        "summary": "Crear una parada",
+        "description": "Administrador o dueño. Latitud y longitud van juntas o ninguna. Una parada nueva no está\ncomprometida. (CU-019 flujo principal)\n",
+        "x-cu": "CU-019",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ParadaGestionCreate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Parada creada",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ParadaGestion"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "VALIDACION — cuerpo inválido",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/NoAutenticado"
+          },
+          "403": {
+            "$ref": "#/components/responses/SinPermiso"
+          }
+        }
+      }
+    },
+    "/administracion/paradas/{id_parada}": {
+      "get": {
+        "tags": [
+          "administracion"
+        ],
+        "summary": "Consultar una parada",
+        "description": "Administrador o dueño. (CU-019)",
+        "x-cu": "CU-019",
+        "parameters": [
+          {
+            "name": "id_parada",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "minimum": 1
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Parada",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ParadaGestion"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/NoAutenticado"
+          },
+          "403": {
+            "$ref": "#/components/responses/SinPermiso"
+          },
+          "404": {
+            "description": "PARADA_NO_ENCONTRADA",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      },
+      "patch": {
+        "tags": [
+          "administracion"
+        ],
+        "summary": "Modificar una parada",
+        "description": "Administrador o dueño. Cambia solo los campos enviados; `direccion`, `latitud` y `longitud`\nadmiten `null` (las coordenadas siguen yendo juntas). Una parada que está **comprometida** en\nalgún recorrido no se modifica: RN-021, `PARADA_COMPROMETIDA`. (CU-019, A2)\n",
+        "x-cu": "CU-019",
+        "parameters": [
+          {
+            "name": "id_parada",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "minimum": 1
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ParadaGestionUpdate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Parada modificada",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ParadaGestion"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "VALIDACION — cuerpo vacío o inválido",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/NoAutenticado"
+          },
+          "403": {
+            "$ref": "#/components/responses/SinPermiso"
+          },
+          "404": {
+            "description": "PARADA_NO_ENCONTRADA",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "PARADA_COMPROMETIDA — RN-021",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/administracion/recorridos": {
+      "get": {
+        "tags": [
+          "administracion"
+        ],
+        "summary": "Listar los recorridos con sus paradas",
+        "description": "Administrador o dueño. Sin paginar. (CU-019)",
+        "x-cu": "CU-019",
+        "responses": {
+          "200": {
+            "description": "Recorridos",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RecorridoGestionLista"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/NoAutenticado"
+          },
+          "403": {
+            "$ref": "#/components/responses/SinPermiso"
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "administracion"
+        ],
+        "summary": "Crear un recorrido",
+        "description": "Administrador o dueño. `id_paradas` son paradas existentes del catálogo, en orden: la primera\nes el orden 1. Las paradas entran sin comprometer. (CU-019 flujo principal)\n",
+        "x-cu": "CU-019",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RecorridoParadas"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Recorrido creado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RecorridoGestion"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "VALIDACION — cuerpo inválido",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/NoAutenticado"
+          },
+          "403": {
+            "$ref": "#/components/responses/SinPermiso"
+          },
+          "404": {
+            "description": "PARADA_NO_ENCONTRADA — alguna parada indicada no existe",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/administracion/recorridos/{id_recorrido}": {
+      "get": {
+        "tags": [
+          "administracion"
+        ],
+        "summary": "Consultar un recorrido con sus paradas",
+        "description": "Administrador o dueño. (CU-019)",
+        "x-cu": "CU-019",
+        "parameters": [
+          {
+            "name": "id_recorrido",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "minimum": 1
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Recorrido",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RecorridoGestion"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/NoAutenticado"
+          },
+          "403": {
+            "$ref": "#/components/responses/SinPermiso"
+          },
+          "404": {
+            "description": "RECORRIDO_NO_ENCONTRADO",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      },
+      "patch": {
+        "tags": [
+          "administracion"
+        ],
+        "summary": "Reemplazar las paradas de un recorrido (PATCH)",
+        "description": "Administrador o dueño. Deja el recorrido con estas paradas, en este orden, todo o nada\n(flujo principal y A1, modificación operativa).\n\n**RN-021 / A2:** cada parada comprometida debe seguir en el mismo orden y ser la misma; si\nno, `PARADA_COMPROMETIDA` (con los `ordenes` afectados) y el recorrido no cambia. Tampoco se\nquita ni se cambia una parada con reservas o abordajes (`PARADA_CON_RESERVAS`): las reservas\napuntan a (recorrido, orden).\n\nPENDIENTE (v1.3): cómo una parada pasa a estar comprometida no está definido; esta operación\nconserva la marca, no la fija. No hay baja de recorridos ni de paradas.\n",
+        "x-cu": "CU-019",
+        "x-cobertura": "parcial",
+        "parameters": [
+          {
+            "name": "id_recorrido",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "minimum": 1
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RecorridoParadas"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Recorrido con sus paradas actualizadas",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RecorridoGestion"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "VALIDACION — cuerpo inválido",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/NoAutenticado"
+          },
+          "403": {
+            "$ref": "#/components/responses/SinPermiso"
+          },
+          "404": {
+            "description": "RECORRIDO_NO_ENCONTRADO o PARADA_NO_ENCONTRADA",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "PARADA_COMPROMETIDA (RN-021) o PARADA_CON_RESERVAS",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/administracion/historial-viajes": {
+      "get": {
+        "tags": [
+          "administracion"
+        ],
+        "summary": "Consultar el historial de viajes",
+        "description": "Administrador o dueño. Solo lectura. Un viaje es «anterior» si su fecha es anterior a hoy o si\nya terminó (`finalizado` o `cancelado`). Todos los criterios son opcionales y se combinan.\nOrden: fecha y horario descendentes. Sin resultados devuelve `items` vacío y `total` 0 (el\ncliente informa que no se encontraron registros). (CU-026)\n",
+        "x-cu": "CU-026",
+        "parameters": [
+          {
+            "name": "desde",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "date"
+            }
+          },
+          {
+            "name": "hasta",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "date"
+            }
+          },
+          {
+            "name": "estado",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "programado",
+                "en_curso",
+                "finalizado",
+                "cancelado"
+              ]
+            }
+          },
+          {
+            "name": "id_servicio",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "minimum": 1
+            }
+          },
+          {
+            "name": "id_chofer",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "minimum": 1
+            }
+          },
+          {
+            "name": "id_vehiculo",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "minimum": 1
+            }
+          },
+          {
+            "name": "sentido",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "IDA",
+                "VUELTA"
+              ]
+            }
+          },
+          {
+            "name": "limite",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 200,
+              "default": 50
+            }
+          },
+          {
+            "name": "desplazamiento",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "minimum": 0,
+              "default": 0
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Viajes que cumplen los criterios",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HistorialViajeLista"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "VALIDACION — criterio inválido o `desde` posterior a `hasta`",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/NoAutenticado"
+          },
+          "403": {
+            "$ref": "#/components/responses/SinPermiso"
+          }
+        }
+      }
+    },
+    "/administracion/historial-viajes/{id_viaje}": {
+      "get": {
+        "tags": [
+          "administracion"
+        ],
+        "summary": "Consultar un viaje anterior con su información operativa",
+        "description": "Administrador o dueño. Devuelve servicio, recorrido y paradas, chofer, vehículo y cantidades\nde reservas, abordajes y ausencias. No incluye datos de los pasajeros. (CU-026 paso 6)\n",
+        "x-cu": "CU-026",
+        "parameters": [
+          {
+            "name": "id_viaje",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "minimum": 1
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Viaje anterior",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HistorialViajeDetalle"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/NoAutenticado"
+          },
+          "403": {
+            "$ref": "#/components/responses/SinPermiso"
+          },
+          "404": {
+            "description": "VIAJE_NO_ENCONTRADO — no existe, o todavía no es un viaje anterior",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/administracion/abonos": {
+      "get": {
+        "tags": [
+          "administracion"
+        ],
+        "summary": "Listar los abonos mensuales",
+        "description": "Administrador o dueño. Filtros opcionales y combinables: pasajero, estado, tipo de servicio.\nCada abono trae sus períodos (el más reciente primero). Sin paginar. (CU-028)\n",
+        "x-cu": "CU-028",
+        "parameters": [
+          {
+            "name": "id_pasajero",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "minimum": 1
+            }
+          },
+          {
+            "name": "estado",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 30
+            }
+          },
+          {
+            "name": "tipo_servicio",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "UNIVERSITARIO",
+                "LABORAL"
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Abonos",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AbonoGestionLista"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "VALIDACION — filtro inválido",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/NoAutenticado"
+          },
+          "403": {
+            "$ref": "#/components/responses/SinPermiso"
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "administracion"
+        ],
+        "summary": "Crear un abono mensual",
+        "description": "Administrador o dueño. Crea la contratación y el abono (estado `activo`) y, si se indica\n`periodo`, su primer período (`vigente`). Solo servicios UNIVERSITARIO y LABORAL. Si el\npasajero todavía no es cliente individual, se crea junto con su cuenta corriente. No reserva\nviajes ni asigna cupo. (CU-028 flujo principal)\n",
+        "x-cu": "CU-028",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AbonoGestionCreate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Abono creado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AbonoGestion"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "VALIDACION — cuerpo inválido",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/NoAutenticado"
+          },
+          "403": {
+            "$ref": "#/components/responses/SinPermiso"
+          },
+          "404": {
+            "description": "PASAJERO_NO_ENCONTRADO, SERVICIO_NO_ENCONTRADO o TARIFA_NO_ENCONTRADA",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "PASAJERO_DADO_DE_BAJA o SERVICIO_SIN_ABONO (servicio que no es universitario ni laboral)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/administracion/abonos/{id_abono}": {
+      "get": {
+        "tags": [
+          "administracion"
+        ],
+        "summary": "Consultar un abono con sus períodos",
+        "description": "Administrador o dueño. (CU-028)",
+        "x-cu": "CU-028",
+        "parameters": [
+          {
+            "name": "id_abono",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "minimum": 1
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Abono",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AbonoGestion"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/NoAutenticado"
+          },
+          "403": {
+            "$ref": "#/components/responses/SinPermiso"
+          },
+          "404": {
+            "description": "ABONO_NO_ENCONTRADO",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      },
+      "patch": {
+        "tags": [
+          "administracion"
+        ],
+        "summary": "Modificar la modalidad o los días de un abono",
+        "description": "Administrador o dueño. Solo modalidad y días contratados. El estado no se edita a mano: el\ncatálogo de estados y las consecuencias de RN-004 están pendientes en la v1.3. (CU-028)\n",
+        "x-cu": "CU-028",
+        "parameters": [
+          {
+            "name": "id_abono",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "minimum": 1
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AbonoGestionUpdate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Abono actualizado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AbonoGestion"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "VALIDACION — cuerpo inválido o vacío",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/NoAutenticado"
+          },
+          "403": {
+            "$ref": "#/components/responses/SinPermiso"
+          },
+          "404": {
+            "description": "ABONO_NO_ENCONTRADO",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/administracion/abonos/{id_abono}/periodos": {
+      "post": {
+        "tags": [
+          "administracion"
+        ],
+        "summary": "Registrar un período del abono",
+        "description": "Administrador o dueño. `periodo` con formato `YYYY-MM`; nace `vigente`. Un abono no repite\nperíodo. (CU-028)\n",
+        "x-cu": "CU-028",
+        "parameters": [
+          {
+            "name": "id_abono",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "minimum": 1
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PeriodoAbonoCreate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Abono con el período agregado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AbonoGestion"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "VALIDACION — período inválido",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/NoAutenticado"
+          },
+          "403": {
+            "$ref": "#/components/responses/SinPermiso"
+          },
+          "404": {
+            "description": "ABONO_NO_ENCONTRADO",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "PERIODO_DUPLICADO — el abono ya tiene ese período",
             "content": {
               "application/json": {
                 "schema": {
@@ -2527,24 +3905,24 @@
         }
       }
     },
-    "/choferes": {
+    "/vehiculos": {
       "get": {
         "tags": [
-          "choferes"
+          "vehiculos"
         ],
-        "summary": "Consultar choferes",
-        "description": "Lista las personas registradas como chofer por identificador. No expone cuentas,\nroles, estados ni documentación todavía no modelada. (CU-021, RF-023)\n",
-        "x-cu": "CU-021",
+        "summary": "Consultar vehículos",
+        "description": "Lista los vehículos por identificador para administración y dueño. No calcula\ndisponibilidad ni expone documentación todavía no modelada. (CU-022, RF-026)\n",
+        "x-cu": "CU-022",
         "x-cobertura": "parcial",
         "responses": {
           "200": {
-            "description": "Choferes registrados; lista vacía si no hay resultados.",
+            "description": "Vehículos registrados; lista vacía si no hay resultados.",
             "content": {
               "application/json": {
                 "schema": {
                   "type": "array",
                   "items": {
-                    "$ref": "#/components/schemas/ChoferAdmin"
+                    "$ref": "#/components/schemas/Vehiculo"
                   }
                 }
               }
@@ -2560,29 +3938,29 @@
       },
       "post": {
         "tags": [
-          "choferes"
+          "vehiculos"
         ],
-        "summary": "Registrar un chofer",
-        "description": "Crea Persona y Chofer en una transacción usando únicamente sus campos vigentes.\nNo crea cuenta de acceso, rol ni estado administrativo. (CU-021, RF-023)\n",
-        "x-cu": "CU-021",
+        "summary": "Registrar un vehículo",
+        "description": "Registra los campos existentes del modelo: patente, marca, modelo, capacidad y\ndisponibilidad. No crea documentación ni modifica asignaciones. (CU-022, RF-026)\n",
+        "x-cu": "CU-022",
         "x-cobertura": "parcial",
         "requestBody": {
           "required": true,
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/ChoferAdminCreate"
+                "$ref": "#/components/schemas/VehiculoCreate"
               }
             }
           }
         },
         "responses": {
           "201": {
-            "description": "Chofer registrado.",
+            "description": "Vehículo registrado.",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ChoferAdmin"
+                  "$ref": "#/components/schemas/Vehiculo"
                 }
               }
             }
@@ -2604,7 +3982,7 @@
             "$ref": "#/components/responses/SinPermiso"
           },
           "409": {
-            "description": "Ya existe una persona con el DNI (DNI_DUPLICADO).",
+            "description": "Ya existe otro vehículo con la patente (PATENTE_DUPLICADA).",
             "content": {
               "application/json": {
                 "schema": {
@@ -2616,10 +3994,10 @@
         }
       }
     },
-    "/choferes/{id_persona}": {
+    "/vehiculos/{id_vehiculo}": {
       "parameters": [
         {
-          "name": "id_persona",
+          "name": "id_vehiculo",
           "in": "path",
           "required": true,
           "schema": {
@@ -2629,19 +4007,19 @@
       ],
       "get": {
         "tags": [
-          "choferes"
+          "vehiculos"
         ],
-        "summary": "Consultar un chofer",
-        "description": "Consulta los campos disponibles de Persona y Chofer. (CU-021, RF-023)",
-        "x-cu": "CU-021",
+        "summary": "Consultar un vehículo",
+        "description": "Consulta los campos disponibles de un vehículo. (CU-022, RF-026)",
+        "x-cu": "CU-022",
         "x-cobertura": "parcial",
         "responses": {
           "200": {
-            "description": "Chofer encontrado.",
+            "description": "Vehículo encontrado.",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ChoferAdmin"
+                  "$ref": "#/components/schemas/Vehiculo"
                 }
               }
             }
@@ -2659,29 +4037,29 @@
       },
       "patch": {
         "tags": [
-          "choferes"
+          "vehiculos"
         ],
-        "summary": "Modificar un chofer",
-        "description": "Modifica únicamente campos existentes de Persona y Chofer. No crea ni cambia\ncuentas, roles, estados o asignaciones. (CU-021, RF-023)\n",
-        "x-cu": "CU-021",
+        "summary": "Modificar un vehículo",
+        "description": "Modifica solamente los campos persistidos por el modelo vigente. La disponibilidad\nse almacena como fue informada, sin inferir efectos sobre viajes. (CU-022, RF-026)\n",
+        "x-cu": "CU-022",
         "x-cobertura": "parcial",
         "requestBody": {
           "required": true,
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/ChoferAdminUpdate"
+                "$ref": "#/components/schemas/VehiculoUpdate"
               }
             }
           }
         },
         "responses": {
           "200": {
-            "description": "Chofer actualizado.",
+            "description": "Vehículo actualizado.",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ChoferAdmin"
+                  "$ref": "#/components/schemas/Vehiculo"
                 }
               }
             }
@@ -2706,7 +4084,7 @@
             "$ref": "#/components/responses/NoEncontrado"
           },
           "409": {
-            "description": "Ya existe una persona con el DNI (DNI_DUPLICADO).",
+            "description": "Ya existe otro vehículo con la patente (PATENTE_DUPLICADA).",
             "content": {
               "application/json": {
                 "schema": {
@@ -3748,6 +5126,197 @@
           }
         }
       }
+    },
+    "/choferes": {
+      "get": {
+        "tags": [
+          "choferes"
+        ],
+        "summary": "Consultar choferes",
+        "description": "Lista las personas registradas como chofer por identificador. No expone cuentas,\nroles, estados ni documentación todavía no modelada. (CU-021, RF-023)\n",
+        "x-cu": "CU-021",
+        "x-cobertura": "parcial",
+        "responses": {
+          "200": {
+            "description": "Choferes registrados; lista vacía si no hay resultados.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ChoferAdmin"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/NoAutenticado"
+          },
+          "403": {
+            "$ref": "#/components/responses/SinPermiso"
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "choferes"
+        ],
+        "summary": "Registrar un chofer",
+        "description": "Crea Persona y Chofer en una transacción usando únicamente sus campos vigentes.\nNo crea cuenta de acceso, rol ni estado administrativo. (CU-021, RF-023)\n",
+        "x-cu": "CU-021",
+        "x-cobertura": "parcial",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ChoferAdminCreate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Chofer registrado.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ChoferAdmin"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Campo ausente, desconocido o inválido (VALIDACION).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/NoAutenticado"
+          },
+          "403": {
+            "$ref": "#/components/responses/SinPermiso"
+          },
+          "409": {
+            "description": "Ya existe una persona con el DNI (DNI_DUPLICADO).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/choferes/{id_persona}": {
+      "parameters": [
+        {
+          "name": "id_persona",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "integer"
+          }
+        }
+      ],
+      "get": {
+        "tags": [
+          "choferes"
+        ],
+        "summary": "Consultar un chofer",
+        "description": "Consulta los campos disponibles de Persona y Chofer. (CU-021, RF-023)",
+        "x-cu": "CU-021",
+        "x-cobertura": "parcial",
+        "responses": {
+          "200": {
+            "description": "Chofer encontrado.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ChoferAdmin"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/NoAutenticado"
+          },
+          "403": {
+            "$ref": "#/components/responses/SinPermiso"
+          },
+          "404": {
+            "$ref": "#/components/responses/NoEncontrado"
+          }
+        }
+      },
+      "patch": {
+        "tags": [
+          "choferes"
+        ],
+        "summary": "Modificar un chofer",
+        "description": "Modifica únicamente campos existentes de Persona y Chofer. No crea ni cambia\ncuentas, roles, estados o asignaciones. (CU-021, RF-023)\n",
+        "x-cu": "CU-021",
+        "x-cobertura": "parcial",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ChoferAdminUpdate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Chofer actualizado.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ChoferAdmin"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Cuerpo vacío, campo desconocido o valor inválido (VALIDACION).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/NoAutenticado"
+          },
+          "403": {
+            "$ref": "#/components/responses/SinPermiso"
+          },
+          "404": {
+            "$ref": "#/components/responses/NoEncontrado"
+          },
+          "409": {
+            "description": "Ya existe una persona con el DNI (DNI_DUPLICADO).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
@@ -4152,6 +5721,834 @@
             "type": "string",
             "minLength": 1,
             "maxLength": 30
+          }
+        }
+      },
+      "Administrador": {
+        "type": "object",
+        "required": [
+          "id_cuenta_acceso",
+          "id_persona",
+          "nombre",
+          "apellido",
+          "dni",
+          "identificador_acceso",
+          "estado"
+        ],
+        "properties": {
+          "id_cuenta_acceso": {
+            "type": "integer"
+          },
+          "id_persona": {
+            "type": "integer"
+          },
+          "nombre": {
+            "type": "string"
+          },
+          "apellido": {
+            "type": "string"
+          },
+          "dni": {
+            "type": "string"
+          },
+          "email": {
+            "type": "string"
+          },
+          "telefono": {
+            "type": "string"
+          },
+          "identificador_acceso": {
+            "type": "string"
+          },
+          "estado": {
+            "type": "string",
+            "enum": [
+              "activo",
+              "deshabilitado"
+            ]
+          }
+        }
+      },
+      "AdministradorLista": {
+        "type": "object",
+        "required": [
+          "items",
+          "total"
+        ],
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Administrador"
+            }
+          },
+          "total": {
+            "type": "integer"
+          }
+        }
+      },
+      "AdministradorCreate": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "nombre",
+          "apellido",
+          "dni",
+          "identificador_acceso",
+          "contrasena"
+        ],
+        "properties": {
+          "nombre": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 80
+          },
+          "apellido": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 80
+          },
+          "dni": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 20
+          },
+          "email": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 120
+          },
+          "telefono": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 30
+          },
+          "identificador_acceso": {
+            "type": "string",
+            "minLength": 3,
+            "maxLength": 120
+          },
+          "contrasena": {
+            "type": "string",
+            "format": "password",
+            "minLength": 8,
+            "maxLength": 128,
+            "writeOnly": true
+          }
+        }
+      },
+      "AdministradorUpdate": {
+        "type": "object",
+        "additionalProperties": false,
+        "minProperties": 1,
+        "description": "Omitir un campo lo deja sin cambios; null no está admitido.",
+        "properties": {
+          "nombre": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 80
+          },
+          "apellido": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 80
+          },
+          "dni": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 20
+          },
+          "email": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 120
+          },
+          "telefono": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 30
+          },
+          "identificador_acceso": {
+            "type": "string",
+            "minLength": 3,
+            "maxLength": 120
+          }
+        }
+      },
+      "TarifaGestion": {
+        "type": "object",
+        "required": [
+          "id_tarifa",
+          "nombre",
+          "importe",
+          "fecha_creacion"
+        ],
+        "properties": {
+          "id_tarifa": {
+            "type": "integer"
+          },
+          "nombre": {
+            "type": "string",
+            "maxLength": 120
+          },
+          "tipo": {
+            "type": "string",
+            "maxLength": 40,
+            "description": "Texto libre; sin convención aprobada."
+          },
+          "importe": {
+            "type": "number",
+            "format": "double"
+          },
+          "fecha_creacion": {
+            "type": "string",
+            "format": "date"
+          },
+          "fecha_vigencia": {
+            "type": "string",
+            "format": "date",
+            "description": "Se guarda sin interpretar (PENDIENTE en la v1.3)."
+          }
+        }
+      },
+      "TarifaGestionLista": {
+        "type": "object",
+        "required": [
+          "items",
+          "total"
+        ],
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/TarifaGestion"
+            }
+          },
+          "total": {
+            "type": "integer"
+          }
+        }
+      },
+      "TarifaGestionCreate": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "nombre",
+          "importe"
+        ],
+        "properties": {
+          "nombre": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 120
+          },
+          "importe": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 9999999999.99,
+            "multipleOf": 0.01
+          },
+          "tipo": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 40
+          },
+          "fecha_vigencia": {
+            "type": "string",
+            "format": "date"
+          }
+        }
+      },
+      "TarifaGestionUpdate": {
+        "type": "object",
+        "additionalProperties": false,
+        "minProperties": 1,
+        "properties": {
+          "nombre": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 120
+          },
+          "importe": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 9999999999.99,
+            "multipleOf": 0.01
+          },
+          "tipo": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 40,
+            "nullable": true
+          },
+          "fecha_vigencia": {
+            "type": "string",
+            "format": "date",
+            "nullable": true
+          }
+        }
+      },
+      "ParadaGestion": {
+        "type": "object",
+        "required": [
+          "id_parada"
+        ],
+        "properties": {
+          "id_parada": {
+            "type": "integer"
+          },
+          "nombre_descripcion": {
+            "type": "string",
+            "maxLength": 150
+          },
+          "direccion": {
+            "type": "string",
+            "maxLength": 200
+          },
+          "latitud": {
+            "type": "number",
+            "format": "double"
+          },
+          "longitud": {
+            "type": "number",
+            "format": "double"
+          }
+        }
+      },
+      "ParadaGestionLista": {
+        "type": "object",
+        "required": [
+          "items",
+          "total"
+        ],
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ParadaGestion"
+            }
+          },
+          "total": {
+            "type": "integer"
+          }
+        }
+      },
+      "ParadaGestionCreate": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "nombre_descripcion"
+        ],
+        "properties": {
+          "nombre_descripcion": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 150
+          },
+          "direccion": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 200
+          },
+          "latitud": {
+            "type": "number",
+            "minimum": -90,
+            "maximum": 90,
+            "multipleOf": 1e-06
+          },
+          "longitud": {
+            "type": "number",
+            "minimum": -180,
+            "maximum": 180,
+            "multipleOf": 1e-06
+          }
+        }
+      },
+      "ParadaGestionUpdate": {
+        "type": "object",
+        "additionalProperties": false,
+        "minProperties": 1,
+        "properties": {
+          "nombre_descripcion": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 150
+          },
+          "direccion": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 200,
+            "nullable": true
+          },
+          "latitud": {
+            "type": "number",
+            "minimum": -90,
+            "maximum": 90,
+            "multipleOf": 1e-06,
+            "nullable": true
+          },
+          "longitud": {
+            "type": "number",
+            "minimum": -180,
+            "maximum": 180,
+            "multipleOf": 1e-06,
+            "nullable": true
+          }
+        }
+      },
+      "ParadaEnRecorrido": {
+        "type": "object",
+        "required": [
+          "orden",
+          "id_parada",
+          "comprometida"
+        ],
+        "properties": {
+          "orden": {
+            "type": "integer"
+          },
+          "id_parada": {
+            "type": "integer"
+          },
+          "nombre_descripcion": {
+            "type": "string"
+          },
+          "direccion": {
+            "type": "string"
+          },
+          "latitud": {
+            "type": "number",
+            "format": "double"
+          },
+          "longitud": {
+            "type": "number",
+            "format": "double"
+          },
+          "comprometida": {
+            "type": "boolean",
+            "description": "Solo lectura. Esta API la conserva (RN-021); no la fija."
+          }
+        }
+      },
+      "RecorridoGestion": {
+        "type": "object",
+        "required": [
+          "id_recorrido",
+          "paradas"
+        ],
+        "properties": {
+          "id_recorrido": {
+            "type": "integer"
+          },
+          "paradas": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ParadaEnRecorrido"
+            }
+          }
+        }
+      },
+      "RecorridoGestionLista": {
+        "type": "object",
+        "required": [
+          "items",
+          "total"
+        ],
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/RecorridoGestion"
+            }
+          },
+          "total": {
+            "type": "integer"
+          }
+        }
+      },
+      "RecorridoParadas": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id_paradas"
+        ],
+        "properties": {
+          "id_paradas": {
+            "type": "array",
+            "minItems": 1,
+            "maxItems": 100,
+            "items": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "description": "Paradas del catálogo, en orden. La primera es el orden 1."
+          }
+        }
+      },
+      "HistorialPersona": {
+        "type": "object",
+        "required": [
+          "id_persona",
+          "nombre",
+          "apellido"
+        ],
+        "properties": {
+          "id_persona": {
+            "type": "integer"
+          },
+          "nombre": {
+            "type": "string"
+          },
+          "apellido": {
+            "type": "string"
+          }
+        }
+      },
+      "HistorialVehiculo": {
+        "type": "object",
+        "required": [
+          "id_vehiculo",
+          "patente"
+        ],
+        "properties": {
+          "id_vehiculo": {
+            "type": "integer"
+          },
+          "patente": {
+            "type": "string"
+          }
+        }
+      },
+      "HistorialViaje": {
+        "type": "object",
+        "required": [
+          "id_viaje",
+          "fecha",
+          "sentido",
+          "estado",
+          "id_servicio",
+          "tipo_servicio",
+          "id_recorrido"
+        ],
+        "properties": {
+          "id_viaje": {
+            "type": "integer"
+          },
+          "fecha": {
+            "type": "string",
+            "format": "date"
+          },
+          "horario": {
+            "type": "string",
+            "description": "HH:MM"
+          },
+          "sentido": {
+            "type": "string",
+            "enum": [
+              "IDA",
+              "VUELTA"
+            ]
+          },
+          "estado": {
+            "type": "string",
+            "enum": [
+              "programado",
+              "en_curso",
+              "finalizado",
+              "cancelado"
+            ]
+          },
+          "id_servicio": {
+            "type": "integer"
+          },
+          "tipo_servicio": {
+            "type": "string"
+          },
+          "id_recorrido": {
+            "type": "integer"
+          },
+          "chofer": {
+            "$ref": "#/components/schemas/HistorialPersona"
+          },
+          "vehiculo": {
+            "$ref": "#/components/schemas/HistorialVehiculo"
+          }
+        }
+      },
+      "HistorialViajeLista": {
+        "type": "object",
+        "required": [
+          "items",
+          "total"
+        ],
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/HistorialViaje"
+            }
+          },
+          "total": {
+            "type": "integer",
+            "description": "Cantidad que cumple los criterios, sin contar la paginación."
+          }
+        }
+      },
+      "HistorialParada": {
+        "type": "object",
+        "required": [
+          "orden",
+          "id_parada"
+        ],
+        "properties": {
+          "orden": {
+            "type": "integer"
+          },
+          "id_parada": {
+            "type": "integer"
+          },
+          "nombre_descripcion": {
+            "type": "string"
+          }
+        }
+      },
+      "HistorialConteos": {
+        "type": "object",
+        "description": "Solo cantidades; el historial no expone datos de los pasajeros.",
+        "required": [
+          "reservas_provisionales",
+          "reservas_consolidadas",
+          "reservas_canceladas",
+          "abordajes",
+          "ausencias"
+        ],
+        "properties": {
+          "reservas_provisionales": {
+            "type": "integer"
+          },
+          "reservas_consolidadas": {
+            "type": "integer"
+          },
+          "reservas_canceladas": {
+            "type": "integer"
+          },
+          "abordajes": {
+            "type": "integer"
+          },
+          "ausencias": {
+            "type": "integer"
+          }
+        }
+      },
+      "HistorialViajeDetalle": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/HistorialViaje"
+          },
+          {
+            "type": "object",
+            "required": [
+              "paradas",
+              "conteos"
+            ],
+            "properties": {
+              "capacidad_planificada": {
+                "type": "integer"
+              },
+              "paradas": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/HistorialParada"
+                }
+              },
+              "conteos": {
+                "$ref": "#/components/schemas/HistorialConteos"
+              }
+            }
+          }
+        ]
+      },
+      "PeriodoAbonoGestion": {
+        "type": "object",
+        "required": [
+          "id_periodo_abono",
+          "periodo",
+          "estado"
+        ],
+        "properties": {
+          "id_periodo_abono": {
+            "type": "integer"
+          },
+          "periodo": {
+            "type": "string",
+            "description": "YYYY-MM"
+          },
+          "estado": {
+            "type": "string"
+          }
+        }
+      },
+      "AbonoGestion": {
+        "type": "object",
+        "required": [
+          "id_abono_mensual",
+          "id_contratacion",
+          "id_pasajero",
+          "nombre",
+          "apellido",
+          "id_servicio",
+          "tipo_servicio",
+          "estado",
+          "periodos"
+        ],
+        "properties": {
+          "id_abono_mensual": {
+            "type": "integer"
+          },
+          "id_contratacion": {
+            "type": "integer"
+          },
+          "id_pasajero": {
+            "type": "integer"
+          },
+          "nombre": {
+            "type": "string"
+          },
+          "apellido": {
+            "type": "string"
+          },
+          "id_servicio": {
+            "type": "integer"
+          },
+          "tipo_servicio": {
+            "type": "string",
+            "enum": [
+              "UNIVERSITARIO",
+              "LABORAL"
+            ]
+          },
+          "id_tarifa": {
+            "type": "integer"
+          },
+          "importe_acordado": {
+            "type": "number"
+          },
+          "modalidad": {
+            "type": "string",
+            "enum": [
+              "IDA",
+              "VUELTA",
+              "IDA_VUELTA"
+            ]
+          },
+          "dias_semanales": {
+            "type": "string",
+            "description": "Días contratados, por ejemplo L,M,X,J,V"
+          },
+          "estado": {
+            "type": "string"
+          },
+          "periodos": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PeriodoAbonoGestion"
+            }
+          }
+        }
+      },
+      "AbonoGestionLista": {
+        "type": "object",
+        "required": [
+          "items",
+          "total"
+        ],
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AbonoGestion"
+            }
+          },
+          "total": {
+            "type": "integer"
+          }
+        }
+      },
+      "AbonoGestionCreate": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id_pasajero",
+          "id_servicio",
+          "modalidad",
+          "dias_semanales"
+        ],
+        "properties": {
+          "id_pasajero": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "id_servicio": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "modalidad": {
+            "type": "string",
+            "enum": [
+              "IDA",
+              "VUELTA",
+              "IDA_VUELTA"
+            ]
+          },
+          "dias_semanales": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 30
+          },
+          "id_tarifa": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "importe_acordado": {
+            "type": "number",
+            "minimum": 0
+          },
+          "periodo": {
+            "type": "string",
+            "description": "YYYY-MM; crea el primer período"
+          }
+        }
+      },
+      "AbonoGestionUpdate": {
+        "type": "object",
+        "additionalProperties": false,
+        "minProperties": 1,
+        "properties": {
+          "modalidad": {
+            "type": "string",
+            "enum": [
+              "IDA",
+              "VUELTA",
+              "IDA_VUELTA"
+            ]
+          },
+          "dias_semanales": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 30
+          }
+        }
+      },
+      "PeriodoAbonoCreate": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "periodo"
+        ],
+        "properties": {
+          "periodo": {
+            "type": "string",
+            "description": "YYYY-MM"
           }
         }
       },
@@ -5226,174 +7623,103 @@
           }
         }
       },
-      "ChoferAdminCreate": {
+      "VehiculoCreate": {
         "type": "object",
         "additionalProperties": false,
         "required": [
-          "nombre",
-          "apellido",
-          "dni"
+          "patente",
+          "capacidad"
         ],
         "properties": {
-          "nombre": {
+          "patente": {
             "type": "string",
             "minLength": 1,
-            "maxLength": 80
+            "maxLength": 10
           },
-          "apellido": {
+          "marca": {
             "type": "string",
-            "minLength": 1,
-            "maxLength": 80
-          },
-          "dni": {
-            "type": "string",
-            "minLength": 1,
-            "maxLength": 20
-          },
-          "direccion": {
-            "type": "string",
-            "maxLength": 200,
+            "maxLength": 50,
             "nullable": true
           },
-          "telefono": {
+          "modelo": {
             "type": "string",
-            "maxLength": 30,
+            "maxLength": 50,
             "nullable": true
           },
-          "email": {
-            "type": "string",
-            "maxLength": 120,
-            "nullable": true
+          "capacidad": {
+            "type": "integer",
+            "minimum": 1
           },
-          "cuil": {
-            "type": "string",
-            "maxLength": 20,
-            "nullable": true
-          },
-          "registro_conducir": {
-            "type": "string",
-            "maxLength": 40,
-            "nullable": true
-          },
-          "fecha_vencimiento_registro": {
-            "type": "string",
-            "format": "date",
-            "nullable": true
+          "disponibilidad": {
+            "type": "boolean",
+            "default": true
           }
         }
       },
-      "ChoferAdminUpdate": {
+      "VehiculoUpdate": {
         "type": "object",
         "additionalProperties": false,
         "minProperties": 1,
         "properties": {
-          "nombre": {
+          "patente": {
             "type": "string",
             "minLength": 1,
-            "maxLength": 80
+            "maxLength": 10
           },
-          "apellido": {
+          "marca": {
             "type": "string",
-            "minLength": 1,
-            "maxLength": 80
-          },
-          "dni": {
-            "type": "string",
-            "minLength": 1,
-            "maxLength": 20
-          },
-          "direccion": {
-            "type": "string",
-            "maxLength": 200,
+            "maxLength": 50,
             "nullable": true
           },
-          "telefono": {
+          "modelo": {
             "type": "string",
-            "maxLength": 30,
+            "maxLength": 50,
             "nullable": true
           },
-          "email": {
-            "type": "string",
-            "maxLength": 120,
-            "nullable": true
+          "capacidad": {
+            "type": "integer",
+            "minimum": 1
           },
-          "cuil": {
-            "type": "string",
-            "maxLength": 20,
-            "nullable": true
-          },
-          "registro_conducir": {
-            "type": "string",
-            "maxLength": 40,
-            "nullable": true
-          },
-          "fecha_vencimiento_registro": {
-            "type": "string",
-            "format": "date",
-            "nullable": true
+          "disponibilidad": {
+            "type": "boolean"
           }
         }
       },
-      "ChoferAdmin": {
+      "Vehiculo": {
         "type": "object",
         "additionalProperties": false,
         "required": [
-          "id_persona",
-          "nombre",
-          "apellido",
-          "dni",
-          "direccion",
-          "telefono",
-          "email",
-          "cuil",
-          "registro_conducir",
-          "fecha_vencimiento_registro"
+          "id_vehiculo",
+          "patente",
+          "marca",
+          "modelo",
+          "capacidad",
+          "disponibilidad"
         ],
         "properties": {
-          "id_persona": {
+          "id_vehiculo": {
             "type": "integer"
           },
-          "nombre": {
+          "patente": {
             "type": "string",
-            "maxLength": 80
+            "maxLength": 10
           },
-          "apellido": {
+          "marca": {
             "type": "string",
-            "maxLength": 80
-          },
-          "dni": {
-            "type": "string",
-            "maxLength": 20
-          },
-          "direccion": {
-            "type": "string",
-            "maxLength": 200,
+            "maxLength": 50,
             "nullable": true
           },
-          "telefono": {
+          "modelo": {
             "type": "string",
-            "maxLength": 30,
+            "maxLength": 50,
             "nullable": true
           },
-          "email": {
-            "type": "string",
-            "maxLength": 120,
-            "nullable": true
+          "capacidad": {
+            "type": "integer",
+            "minimum": 1
           },
-          "cuil": {
-            "type": "string",
-            "maxLength": 20,
-            "nullable": true
-          },
-          "registro_conducir": {
-            "type": "string",
-            "maxLength": 40,
-            "nullable": true
-          },
-          "fecha_vencimiento_registro": {
-            "type": "string",
-            "format": "date",
-            "nullable": true
+          "disponibilidad": {
+            "type": "boolean"
           }
         }
       },
@@ -5665,6 +7991,177 @@
           "fecha_hora_reporte": {
             "type": "string",
             "format": "date-time",
+            "nullable": true
+          }
+        }
+      },
+      "ChoferAdminCreate": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "nombre",
+          "apellido",
+          "dni"
+        ],
+        "properties": {
+          "nombre": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 80
+          },
+          "apellido": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 80
+          },
+          "dni": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 20
+          },
+          "direccion": {
+            "type": "string",
+            "maxLength": 200,
+            "nullable": true
+          },
+          "telefono": {
+            "type": "string",
+            "maxLength": 30,
+            "nullable": true
+          },
+          "email": {
+            "type": "string",
+            "maxLength": 120,
+            "nullable": true
+          },
+          "cuil": {
+            "type": "string",
+            "maxLength": 20,
+            "nullable": true
+          },
+          "registro_conducir": {
+            "type": "string",
+            "maxLength": 40,
+            "nullable": true
+          },
+          "fecha_vencimiento_registro": {
+            "type": "string",
+            "format": "date",
+            "nullable": true
+          }
+        }
+      },
+      "ChoferAdminUpdate": {
+        "type": "object",
+        "additionalProperties": false,
+        "minProperties": 1,
+        "properties": {
+          "nombre": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 80
+          },
+          "apellido": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 80
+          },
+          "dni": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 20
+          },
+          "direccion": {
+            "type": "string",
+            "maxLength": 200,
+            "nullable": true
+          },
+          "telefono": {
+            "type": "string",
+            "maxLength": 30,
+            "nullable": true
+          },
+          "email": {
+            "type": "string",
+            "maxLength": 120,
+            "nullable": true
+          },
+          "cuil": {
+            "type": "string",
+            "maxLength": 20,
+            "nullable": true
+          },
+          "registro_conducir": {
+            "type": "string",
+            "maxLength": 40,
+            "nullable": true
+          },
+          "fecha_vencimiento_registro": {
+            "type": "string",
+            "format": "date",
+            "nullable": true
+          }
+        }
+      },
+      "ChoferAdmin": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id_persona",
+          "nombre",
+          "apellido",
+          "dni",
+          "direccion",
+          "telefono",
+          "email",
+          "cuil",
+          "registro_conducir",
+          "fecha_vencimiento_registro"
+        ],
+        "properties": {
+          "id_persona": {
+            "type": "integer"
+          },
+          "nombre": {
+            "type": "string",
+            "maxLength": 80
+          },
+          "apellido": {
+            "type": "string",
+            "maxLength": 80
+          },
+          "dni": {
+            "type": "string",
+            "maxLength": 20
+          },
+          "direccion": {
+            "type": "string",
+            "maxLength": 200,
+            "nullable": true
+          },
+          "telefono": {
+            "type": "string",
+            "maxLength": 30,
+            "nullable": true
+          },
+          "email": {
+            "type": "string",
+            "maxLength": 120,
+            "nullable": true
+          },
+          "cuil": {
+            "type": "string",
+            "maxLength": 20,
+            "nullable": true
+          },
+          "registro_conducir": {
+            "type": "string",
+            "maxLength": 40,
+            "nullable": true
+          },
+          "fecha_vencimiento_registro": {
+            "type": "string",
+            "format": "date",
             "nullable": true
           }
         }

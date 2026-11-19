@@ -42,12 +42,25 @@ import 'services/admin/pagos_admin_api.dart';
 import 'services/admin/deuda_admin_api.dart';
 import 'screens/admin/consultar_deuda_admin_screen.dart';
 import 'services/admin/reservas_admin_api.dart';
+import 'services/admin/administradores_admin_api.dart';
+import 'services/admin/tarifas_admin_api.dart';
+import 'services/admin/recorridos_admin_api.dart';
+import 'services/admin/abonos_admin_api.dart';
+import 'screens/admin/abonos_admin_screen.dart';
+import 'services/admin/historial_viajes_admin_api.dart';
+import 'screens/admin/historial_viajes_screen.dart';
+import 'screens/admin/recorridos_admin_screen.dart';
+import 'screens/admin/tarifas_admin_screen.dart';
+import 'screens/admin/administradores_admin_screen.dart';
 import 'screens/admin/consultar_reservas_admin_screen.dart';
 import 'screens/admin/pagos_pendientes_screen.dart';
 import 'models/admin/pago_admin.dart';
+import 'models/admin/vehiculo_admin.dart';
 import 'models/admin/chofer_admin.dart';
 import 'screens/admin/choferes_admin_screen.dart';
 import 'services/admin/choferes_admin_api.dart';
+import 'screens/admin/vehiculos_admin_screen.dart';
+import 'services/admin/vehiculos_admin_api.dart';
 import 'services/admin/viajes_dia_admin_api.dart';
 import 'services/chofer/detalle_viaje_chofer_api.dart';
 import 'services/chofer/ejecucion_viaje_api.dart';
@@ -121,7 +134,13 @@ class _VanFullBootstrapState extends State<VanFullBootstrap> {
   late final PagosAdminApi _pagosAdmin;
   late final DeudaAdminApi _deudaAdmin;
   late final ReservasAdminApi _reservasAdmin;
+  late final VehiculosAdminApi _vehiculosAdmin;
   late final ChoferesAdminApi _choferesAdmin;
+  late final AdministradoresAdminApi _administradoresAdmin;
+  late final TarifasAdminApi _tarifasAdmin;
+  late final RecorridosAdminApi _recorridosAdmin;
+  late final AbonosAdminApi _abonosAdmin;
+  late final HistorialViajesAdminApi _historialAdmin;
   late final ViajesChoferApi _viajesChofer;
   late final DetalleViajeChoferApi _detalleChofer;
   late final EjecucionViajeApi _ejecucionChofer;
@@ -156,7 +175,13 @@ class _VanFullBootstrapState extends State<VanFullBootstrap> {
     _pagosAdmin = PagosAdminApi(httpClient);
     _deudaAdmin = DeudaAdminApi(httpClient);
     _reservasAdmin = ReservasAdminApi(httpClient);
+    _vehiculosAdmin = VehiculosAdminApi(httpClient);
     _choferesAdmin = ChoferesAdminApi(httpClient);
+    _administradoresAdmin = AdministradoresAdminApi(httpClient);
+    _tarifasAdmin = TarifasAdminApi(httpClient);
+    _recorridosAdmin = RecorridosAdminApi(httpClient);
+    _abonosAdmin = AbonosAdminApi(httpClient);
+    _historialAdmin = HistorialViajesAdminApi(httpClient);
     _viajesChofer = ViajesChoferApi(httpClient);
     _detalleChofer = DetalleViajeChoferApi(httpClient);
     _ejecucionChofer = EjecucionViajeApi(httpClient);
@@ -192,6 +217,33 @@ class _VanFullBootstrapState extends State<VanFullBootstrap> {
     _transporte.close();
     super.dispose();
   }
+
+  /// La administración y el dueño comparten la entrada: el dueño suma la
+  /// gestión de administradores (CU-032), que FastAPI restringe al rol `dueno`.
+  Widget _entradaAdministracion(
+    SesionController controller, {
+    bool dueno = false,
+  }) => _EntradaAdministracion(
+    controller: controller,
+    listar: _viajesDiaAdmin,
+    crear: _viajesAdmin,
+    registrarPagos: _registroPagosAdmin,
+    pagos: _pagosAdmin,
+    deuda: _deudaAdmin,
+    reservas: _reservasAdmin,
+    vehiculos: _vehiculosAdmin,
+    choferes: _choferesAdmin,
+    configuracionMapa: widget.configuracionMapa,
+    prepararMapa: widget.prepararMapa,
+    crearVisorMapa: widget.crearVisorMapa,
+    gpsApi: _gpsApi,
+    onSalir: controller.salir,
+    administradores: dueno ? _administradoresAdmin : null,
+    tarifas: dueno ? _tarifasAdmin : null,
+    recorridos: _recorridosAdmin,
+    abonos: _abonosAdmin,
+    historial: _historialAdmin,
+  );
 
   /// Callbacks estables ligados a la sesión que originó la interacción.
   void _prepararAusencias(SesionController controller) {
@@ -273,23 +325,9 @@ class _VanFullBootstrapState extends State<VanFullBootstrap> {
             _pantallaUbicacionPasajero(controller, idViaje),
       );
     },
-    entradaAdministrador: (controller) => _EntradaAdministracion(
-      controller: controller,
-      listar: _viajesDiaAdmin,
-      crear: _viajesAdmin,
-      registrarPagos: _registroPagosAdmin,
-      pagos: _pagosAdmin,
-      deuda: _deudaAdmin,
-      reservas: _reservasAdmin,
-      choferes: _choferesAdmin,
-      configuracionMapa: widget.configuracionMapa,
-      prepararMapa: widget.prepararMapa,
-      crearVisorMapa: widget.crearVisorMapa,
-      gpsApi: _gpsApi,
-      onSalir: controller.salir,
-    ),
+    entradaAdministrador: _entradaAdministracion,
     entradaDueno: (controller) =>
-        _EntradaChoferesDueno(controller: controller, api: _choferesAdmin),
+        _entradaAdministracion(controller, dueno: true),
     entradaChofer: (controller) => _EntradaChofer(
       controller: controller,
       listar: _viajesChofer,
@@ -313,12 +351,18 @@ class _EntradaAdministracion extends StatefulWidget {
     required this.pagos,
     required this.deuda,
     required this.reservas,
+    required this.vehiculos,
     required this.choferes,
     required this.configuracionMapa,
     required this.prepararMapa,
     required this.crearVisorMapa,
     required this.gpsApi,
     required this.onSalir,
+    this.administradores,
+    this.tarifas,
+    this.recorridos,
+    this.abonos,
+    this.historial,
   });
 
   final SesionController controller;
@@ -328,12 +372,18 @@ class _EntradaAdministracion extends StatefulWidget {
   final PagosAdminApi pagos;
   final DeudaAdminApi deuda;
   final ReservasAdminApi reservas;
+  final VehiculosAdminApi vehiculos;
   final ChoferesAdminApi choferes;
   final ConfiguracionMapa? configuracionMapa;
   final PrepararMapa? prepararMapa;
   final ConstructorVisorMapa? crearVisorMapa;
   final UbicacionApi gpsApi;
   final VoidCallback onSalir;
+  final AdministradoresAdminApi? administradores;
+  final TarifasAdminApi? tarifas;
+  final RecorridosAdminApi? recorridos;
+  final AbonosAdminApi? abonos;
+  final HistorialViajesAdminApi? historial;
 
   @override
   State<_EntradaAdministracion> createState() => _EntradaAdministracionState();
@@ -387,10 +437,45 @@ class _EntradaAdministracionState extends State<_EntradaAdministracion> {
                       onPressed: _abrirRegistroPago,
                       child: const Text('Registrar pago'),
                     ),
+                    if (widget.administradores != null)
+                      OutlinedButton(
+                        key: const Key('admin-administradores'),
+                        onPressed: _abrirAdministradores,
+                        child: const Text('Administradores'),
+                      ),
+                    if (widget.tarifas != null)
+                      OutlinedButton(
+                        key: const Key('admin-tarifas'),
+                        onPressed: _abrirTarifas,
+                        child: const Text('Tarifas'),
+                      ),
+                    if (widget.recorridos != null)
+                      OutlinedButton(
+                        key: const Key('admin-recorridos'),
+                        onPressed: _abrirRecorridos,
+                        child: const Text('Recorridos'),
+                      ),
+                    if (widget.abonos != null)
+                      OutlinedButton(
+                        key: const Key('admin-abonos'),
+                        onPressed: _abrirAbonos,
+                        child: const Text('Abonos'),
+                      ),
+                    if (widget.historial != null)
+                      OutlinedButton(
+                        key: const Key('admin-historial-viajes'),
+                        onPressed: _abrirHistorial,
+                        child: const Text('Historial de viajes'),
+                      ),
                     OutlinedButton(
                       key: const Key('admin-consultar-deuda'),
                       onPressed: _abrirDeuda,
                       child: const Text('Consultar deuda'),
+                    ),
+                    OutlinedButton(
+                      key: const Key('admin-vehiculos'),
+                      onPressed: _abrirVehiculos,
+                      child: const Text('Vehículos'),
                     ),
                     OutlinedButton(
                       key: const Key('admin-choferes'),
@@ -414,6 +499,195 @@ class _EntradaAdministracionState extends State<_EntradaAdministracion> {
             ),
           ],
         );
+
+  void _abrirHistorial() {
+    final controller = widget.controller;
+    final generacion = controller.generacion;
+    final token = controller.token;
+    final api = widget.historial;
+    bool vigente() =>
+        api != null &&
+        mounted &&
+        !_accesoDenegado &&
+        token != null &&
+        controller.generacion == generacion &&
+        controller.token == token;
+    if (!vigente()) return;
+    Future<T> protegida<T>(
+      Future<T> Function(HistorialViajesAdminApi) pedir,
+    ) async {
+      if (!vigente()) throw StateError('La sesión ya no está vigente.');
+      final resultado = await _protegerAcceso(
+        controller: controller,
+        solicitud: () => pedir(api!),
+        onAccesoDenegado: _denegarAcceso,
+      );
+      if (!vigente()) throw StateError('La sesión ya no está vigente.');
+      return resultado;
+    }
+
+    Navigator.of(context).push(
+      MaterialPageRoute<void>(
+        builder: (_) => HistorialViajesScreen(
+          listar: (filtros) => protegida((a) => a.listar(filtros)),
+          detalle: (id) => protegida((a) => a.detalle(id)),
+        ),
+      ),
+    );
+  }
+
+  void _abrirAbonos() {
+    final controller = widget.controller;
+    final generacion = controller.generacion;
+    final token = controller.token;
+    final api = widget.abonos;
+    bool vigente() =>
+        api != null &&
+        mounted &&
+        !_accesoDenegado &&
+        token != null &&
+        controller.generacion == generacion &&
+        controller.token == token;
+    if (!vigente()) return;
+    Future<T> protegida<T>(Future<T> Function(AbonosAdminApi) pedir) async {
+      if (!vigente()) throw StateError('La sesión ya no está vigente.');
+      final resultado = await _protegerAcceso(
+        controller: controller,
+        solicitud: () => pedir(api!),
+        onAccesoDenegado: _denegarAcceso,
+      );
+      if (!vigente()) throw StateError('La sesión ya no está vigente.');
+      return resultado;
+    }
+
+    Navigator.of(context).push(
+      MaterialPageRoute<void>(
+        builder: (_) => AbonosAdminScreen(
+          listar: (idPasajero) =>
+              protegida((a) => a.listar(idPasajero: idPasajero)),
+          listarServicios: () => protegida((a) => a.listarServicios()),
+          crear: (datos) => protegida((a) => a.crear(datos)),
+          modificar: (id, cambios) =>
+              protegida((a) => a.modificar(id, cambios)),
+          agregarPeriodo: (id, periodo) =>
+              protegida((a) => a.agregarPeriodo(id, periodo)),
+        ),
+      ),
+    );
+  }
+
+  void _abrirRecorridos() {
+    final controller = widget.controller;
+    final generacion = controller.generacion;
+    final token = controller.token;
+    final api = widget.recorridos;
+    bool vigente() =>
+        api != null &&
+        mounted &&
+        !_accesoDenegado &&
+        token != null &&
+        controller.generacion == generacion &&
+        controller.token == token;
+    if (!vigente()) return;
+    Future<T> protegida<T>(Future<T> Function(RecorridosAdminApi) pedir) async {
+      if (!vigente()) throw StateError('La sesión ya no está vigente.');
+      final resultado = await _protegerAcceso(
+        controller: controller,
+        solicitud: () => pedir(api!),
+        onAccesoDenegado: _denegarAcceso,
+      );
+      if (!vigente()) throw StateError('La sesión ya no está vigente.');
+      return resultado;
+    }
+
+    Navigator.of(context).push(
+      MaterialPageRoute<void>(
+        builder: (_) => RecorridosAdminScreen(
+          listar: () => protegida((a) => a.listarRecorridos()),
+          listarParadas: () => protegida((a) => a.listarParadas()),
+          crearParada: (datos) => protegida((a) => a.crearParada(datos)),
+          crear: (ids) => protegida((a) => a.crearRecorrido(ids)),
+          reemplazar: (id, ids) =>
+              protegida((a) => a.reemplazarParadas(id, ids)),
+        ),
+      ),
+    );
+  }
+
+  void _abrirTarifas() {
+    final controller = widget.controller;
+    final generacion = controller.generacion;
+    final token = controller.token;
+    final api = widget.tarifas;
+    bool vigente() =>
+        api != null &&
+        mounted &&
+        !_accesoDenegado &&
+        token != null &&
+        controller.generacion == generacion &&
+        controller.token == token;
+    if (!vigente()) return;
+    Future<T> protegida<T>(Future<T> Function(TarifasAdminApi) pedir) async {
+      if (!vigente()) throw StateError('La sesión ya no está vigente.');
+      final resultado = await _protegerAcceso(
+        controller: controller,
+        solicitud: () => pedir(api!),
+        onAccesoDenegado: _denegarAcceso,
+      );
+      if (!vigente()) throw StateError('La sesión ya no está vigente.');
+      return resultado;
+    }
+
+    Navigator.of(context).push(
+      MaterialPageRoute<void>(
+        builder: (_) => TarifasAdminScreen(
+          listar: () => protegida((a) => a.listar()),
+          crear: (datos) => protegida((a) => a.crear(datos)),
+          modificar: (id, cambios) =>
+              protegida((a) => a.modificar(id, cambios)),
+        ),
+      ),
+    );
+  }
+
+  void _abrirAdministradores() {
+    final controller = widget.controller;
+    final generacion = controller.generacion;
+    final token = controller.token;
+    final api = widget.administradores;
+    bool vigente() =>
+        api != null &&
+        mounted &&
+        !_accesoDenegado &&
+        token != null &&
+        controller.generacion == generacion &&
+        controller.token == token;
+    if (!vigente()) return;
+    Future<T> protegida<T>(
+      Future<T> Function(AdministradoresAdminApi) pedir,
+    ) async {
+      if (!vigente()) throw StateError('La sesión ya no está vigente.');
+      final resultado = await _protegerAcceso(
+        controller: controller,
+        solicitud: () => pedir(api!),
+        onAccesoDenegado: _denegarAcceso,
+      );
+      if (!vigente()) throw StateError('La sesión ya no está vigente.');
+      return resultado;
+    }
+
+    Navigator.of(context).push(
+      MaterialPageRoute<void>(
+        builder: (_) => AdministradoresAdminScreen(
+          listar: () => protegida((a) => a.listar()),
+          crear: (datos) => protegida((a) => a.crear(datos)),
+          modificar: (id, cambios) =>
+              protegida((a) => a.modificar(id, cambios)),
+          deshabilitar: (id) => protegida((a) => a.deshabilitar(id)),
+        ),
+      ),
+    );
+  }
 
   void _abrirRegistroPago() {
     final controller = widget.controller;
@@ -534,6 +808,38 @@ class _EntradaAdministracionState extends State<_EntradaAdministracion> {
     final pantalla = PagosPendientesScreen(
       cargar: () => proteger<List<PagoAdmin>>(api.pendientes),
       decidir: (id, decision) => proteger(() => api.decidir(id, decision)),
+    );
+    Navigator.of(context)
+        .push(MaterialPageRoute<void>(builder: (_) => pantalla));
+  }
+
+  void _abrirVehiculos() {
+    final controller = widget.controller;
+    final generacion = controller.generacion;
+    final token = controller.token;
+    final api = widget.vehiculos;
+    bool vigente() =>
+        mounted &&
+        !_accesoDenegado &&
+        token != null &&
+        controller.generacion == generacion &&
+        controller.token == token;
+    Future<T> proteger<T>(Future<T> Function() operacion) async {
+      if (!vigente()) throw StateError('La sesión ya no está vigente.');
+      final resultado = await _protegerAcceso(
+        controller: controller,
+        solicitud: operacion,
+        onAccesoDenegado: _denegarAcceso,
+      );
+      if (!vigente()) throw StateError('La sesión ya no está vigente.');
+      return resultado;
+    }
+
+    if (!vigente()) return;
+    final pantalla = VehiculosAdminScreen(
+      cargar: () => proteger<List<VehiculoAdmin>>(api.listar),
+      crear: (datos) => proteger(() => api.crear(datos)),
+      actualizar: (id, datos) => proteger(() => api.actualizar(id, datos)),
     );
     Navigator.of(context)
         .push(MaterialPageRoute<void>(builder: (_) => pantalla));
@@ -681,71 +987,6 @@ class _EntradaAdministracionState extends State<_EntradaAdministracion> {
     Navigator.of(context).popUntil((route) => route.isFirst);
     setState(() => _accesoDenegado = true);
   }
-}
-
-class _EntradaChoferesDueno extends StatefulWidget {
-  const _EntradaChoferesDueno({required this.controller, required this.api});
-
-  final SesionController controller;
-  final ChoferesAdminApi api;
-
-  @override
-  State<_EntradaChoferesDueno> createState() => _EntradaChoferesDuenoState();
-}
-
-class _EntradaChoferesDuenoState extends State<_EntradaChoferesDueno> {
-  late final int _generacion = widget.controller.generacion;
-  late final String? _token = widget.controller.token;
-  bool _accesoDenegado = false;
-
-  bool get _vigente =>
-      mounted &&
-      !_accesoDenegado &&
-      _token != null &&
-      widget.controller.generacion == _generacion &&
-      widget.controller.token == _token;
-
-  Future<T> _proteger<T>(Future<T> Function() operacion) async {
-    if (!_vigente) throw StateError('La sesión ya no está vigente.');
-    final resultado = await _protegerAcceso(
-      controller: widget.controller,
-      solicitud: operacion,
-      onAccesoDenegado: () {
-        if (!_vigente) return;
-        Navigator.of(context).popUntil((route) => route.isFirst);
-        setState(() => _accesoDenegado = true);
-      },
-    );
-    if (!_vigente) throw StateError('La sesión ya no está vigente.');
-    return resultado;
-  }
-
-  @override
-  Widget build(BuildContext context) => _accesoDenegado
-      ? _AccesoDenegado(
-          key: const Key('dueno-acceso-denegado'),
-          onSalir: widget.controller.salir,
-        )
-      : Column(
-          children: [
-            Expanded(
-              child: ChoferesAdminScreen(
-                cargar: () => _proteger(widget.api.listar),
-                crear: (datos) => _proteger(() => widget.api.crear(datos)),
-                actualizar: (id, datos) =>
-                    _proteger(() => widget.api.actualizar(id, datos)),
-              ),
-            ),
-            SafeArea(
-              minimum: const EdgeInsets.all(AppSpacing.md),
-              child: OutlinedButton(
-                key: const Key('dueno-salir'),
-                onPressed: widget.controller.salir,
-                child: const Text('Cerrar sesión'),
-              ),
-            ),
-          ],
-        );
 }
 
 class _EntradaChofer extends StatefulWidget {

@@ -7,6 +7,7 @@ from app.core.config import get_settings
 from app.core.cors import opciones_cors
 from app.core.errors import registrar_manejadores
 from app.routers import (
+    administradores,
     ausencias,
     auth,
     avisos,
@@ -17,14 +18,19 @@ from app.routers import (
     corporativos,
     deuda,
     ejecucion_viajes,
+    gestion_abonos,
+    gestion_recorridos,
+    gestion_tarifas,
     gps,
     health,
+    historial_viajes,
     organizaciones,
     pagos,
     pasajeros,
     perfil,
     reservas,
     servicios,
+    vehiculos,
     viajes,
 )
 from app.routers.checkout import registrar_checkout_si_habilitado
@@ -57,6 +63,11 @@ app.include_router(auth.router, prefix=settings.api_prefix)
 app.include_router(ausencias.router, prefix=settings.api_prefix)
 app.include_router(perfil.router, prefix=settings.api_prefix)
 app.include_router(pasajeros.router, prefix=settings.api_prefix)
+app.include_router(administradores.router, prefix=settings.api_prefix)
+app.include_router(gestion_tarifas.router, prefix=settings.api_prefix)
+app.include_router(gestion_abonos.router, prefix=settings.api_prefix)
+app.include_router(gestion_recorridos.router, prefix=settings.api_prefix)
+app.include_router(historial_viajes.router, prefix=settings.api_prefix)
 app.include_router(deuda.router, prefix=settings.api_prefix)
 app.include_router(comprobantes.router, prefix=settings.api_prefix)
 app.include_router(corporativos.router, prefix=settings.api_prefix)
@@ -64,6 +75,7 @@ app.include_router(organizaciones.router, prefix=settings.api_prefix)
 app.include_router(servicios.router, prefix=settings.api_prefix)
 app.include_router(reservas.router, prefix=settings.api_prefix)
 app.include_router(pagos.router, prefix=settings.api_prefix)
+app.include_router(vehiculos.router, prefix=settings.api_prefix)
 app.include_router(viajes.router, prefix=settings.api_prefix)
 app.include_router(choferes_admin.router, prefix=settings.api_prefix)
 app.include_router(chofer.router, prefix=settings.api_prefix)

@@ -31,15 +31,6 @@ class RoleRouter extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Solo una entrada explícita: no hereda el menú administrativo completo.
-    if (roles.length == 1 && roles.single == 'dueno' && entradaDueno != null) {
-      return MaterialApp(
-        title: 'VanFull',
-        debugShowCheckedModeBanner: false,
-        theme: AppTheme.admin,
-        home: Builder(builder: entradaDueno!),
-      );
-    }
     final resolution = _resolve(roles);
 
     return MaterialApp(
@@ -62,9 +53,10 @@ class RoleRouter extends StatelessWidget {
       AppRole.passenger => entradaPasajero,
       AppRole.driver => entradaChofer,
       AppRole.admin => entradaAdministrador,
+      AppRole.owner => entradaDueno ?? entradaAdministrador,
     };
     if (entrada != null) return entrada(context);
-    if (role == AppRole.admin) {
+    if (role == AppRole.admin || role == AppRole.owner) {
       return ViajesDiaAdminScreen(
         fecha: fechaAdmin ?? DateTime.now(),
         cargarViajes: cargarViajesAdmin ?? _cargarViajesAdminPendiente,
@@ -190,30 +182,32 @@ extension on AppRole {
   ThemeData get theme => switch (this) {
     AppRole.passenger => AppTheme.passenger,
     AppRole.driver => AppTheme.driver,
-    AppRole.admin => AppTheme.admin,
+    AppRole.admin || AppRole.owner => AppTheme.admin,
   };
 
   String get label => switch (this) {
     AppRole.passenger => 'Pasajero',
     AppRole.driver => 'Chofer',
     AppRole.admin => 'Administración',
+    AppRole.owner => 'Dueño',
   };
 
   String get entryTitle => switch (this) {
     AppRole.passenger => 'Buscar servicio',
     AppRole.driver => 'Lista del viaje',
-    AppRole.admin => 'Viajes del día',
+    AppRole.admin || AppRole.owner => 'Viajes del día',
   };
 
   String get useCase => switch (this) {
     AppRole.passenger => 'CU-002',
     AppRole.driver => 'CU-029',
     AppRole.admin => 'CU-018',
+    AppRole.owner => 'CU-032',
   };
 
   double get touchTargetHeight => switch (this) {
     AppRole.passenger => AppSpacing.passengerRowHeight,
     AppRole.driver => AppSpacing.driverRowHeight,
-    AppRole.admin => AppSpacing.adminRowHeight,
+    AppRole.admin || AppRole.owner => AppSpacing.adminRowHeight,
   };
 }

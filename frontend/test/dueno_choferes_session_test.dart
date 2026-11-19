@@ -38,7 +38,7 @@ Future<void> montar(WidgetTester tester, http.Client transporte) =>
 
 void main() {
   for (final status in [200, 401, 403, 500]) {
-    testWidgets('dueño consulta choferes HTTP $status, sin otras áreas', (
+    testWidgets('dueño consulta choferes HTTP $status, desde el menú vigente', (
       t,
     ) async {
       var consultas = 0;
@@ -53,15 +53,18 @@ void main() {
               ? http.Response(jsonEncode([datos.choferJson()]), 200)
               : fallo(codigo);
         }
+        if (r.url.path.endsWith('/viajes')) return http.Response('[]', 200);
         otras.add(r.url.path);
         return http.Response('[]', 200);
       });
       await montar(t, transporte);
       await base.login(t);
+      await t.tap(find.byKey(const Key('admin-choferes')));
+      await t.pumpAndSettle();
       if (status == 401) {
         expect(find.text('Ingresar'), findsOneWidget);
       } else if (status == 403) {
-        expect(find.byKey(const Key('dueno-acceso-denegado')), findsOneWidget);
+        expect(find.byKey(const Key('admin-acceso-denegado')), findsOneWidget);
         expect(find.text('Ingresar'), findsNothing);
       } else {
         if (status == 500) {
@@ -69,10 +72,22 @@ void main() {
           await t.pumpAndSettle();
         }
         expect(find.text('Ana Pérez'), findsOneWidget);
-        expect(find.byKey(const Key('dueno-salir')), findsOneWidget);
+        await t.pageBack();
+        await t.pumpAndSettle();
+        for (final modulo in [
+          'admin-salir',
+          'admin-crear-viaje',
+          'admin-administradores',
+          'admin-tarifas',
+          'admin-recorridos',
+          'admin-historial-viajes',
+          'admin-abonos',
+          'admin-vehiculos',
+        ]) {
+          expect(find.byKey(Key(modulo)), findsOneWidget);
+        }
       }
       expect(otras, isEmpty);
-      expect(find.byKey(const Key('admin-crear-viaje')), findsNothing);
     });
   }
 
@@ -83,6 +98,7 @@ void main() {
       Map<String, dynamic>? guardado;
       final transporte = MockClient((r) async {
         if (r.url.path.endsWith('/auth/login')) return ingreso(['dueno']);
+        if (r.url.path.endsWith('/viajes')) return http.Response('[]', 200);
         expect(r.url.path, startsWith('/api/choferes'));
         expect(r.headers['authorization'], 'Bearer dueno-token');
         metodos.add(r.method);
@@ -96,6 +112,8 @@ void main() {
       });
       await montar(t, transporte);
       await base.login(t);
+      await t.tap(find.byKey(const Key('admin-choferes')));
+      await t.pumpAndSettle();
       await t.tap(find.byKey(const Key('registrar-chofer')));
       await t.pumpAndSettle();
       await t.enterText(find.byKey(const Key('chofer-nombre')), 'Andrea');
@@ -143,10 +161,15 @@ void main() {
         await t.tap(find.text('Ingresar'));
         await t.pump();
         await t.pump(const Duration(milliseconds: 400));
+        await t.tap(find.byKey(const Key('admin-choferes')));
+        await t.pump();
+        await t.pump(const Duration(milliseconds: 400));
         final cargar = t
             .widget<ChoferesAdminScreen>(find.byType(ChoferesAdminScreen))
             .cargar;
-        await t.tap(find.byKey(const Key('dueno-salir')));
+        await t.pageBack();
+        await t.pumpAndSettle();
+        await t.tap(find.byKey(const Key('admin-salir')));
         await t.pumpAndSettle();
         await base.login(t);
         pendiente.complete(

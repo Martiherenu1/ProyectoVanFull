@@ -17,6 +17,8 @@ from app.routers import (
     corporativos,
     deuda,
     ejecucion_viajes,
+    gestion_recorridos,
+    gestion_tarifas,
     gps,
     health,
     organizaciones,
@@ -58,6 +60,8 @@ app.include_router(ausencias.router, prefix=settings.api_prefix)
 app.include_router(perfil.router, prefix=settings.api_prefix)
 app.include_router(pasajeros.router, prefix=settings.api_prefix)
 app.include_router(administradores.router, prefix=settings.api_prefix)
+app.include_router(gestion_tarifas.router, prefix=settings.api_prefix)
+app.include_router(gestion_recorridos.router, prefix=settings.api_prefix)
 app.include_router(deuda.router, prefix=settings.api_prefix)
 app.include_router(comprobantes.router, prefix=settings.api_prefix)
 app.include_router(corporativos.router, prefix=settings.api_prefix)

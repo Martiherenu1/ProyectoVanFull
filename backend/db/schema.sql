@@ -209,8 +209,17 @@ CREATE TABLE viaje (
     estado               VARCHAR(20) NOT NULL DEFAULT 'programado'
         CHECK (estado IN ('programado', 'en_curso', 'finalizado', 'cancelado')),
     capacidad_planificada INTEGER CHECK (capacidad_planificada IS NULL OR capacidad_planificada >= 0),
+    orden_ultimo_paso INTEGER,
+    fecha_ultimo_paso TIMESTAMPTZ,
     UNIQUE (id_viaje, id_recorrido),                      -- soporte de FK compuesta (reserva/abordaje)
     UNIQUE (id_viaje, id_vehiculo)                        -- soporte de FK compuesta (abordaje)
+);
+
+CREATE TABLE descenso_habilitado (
+    id_viaje      BIGINT NOT NULL,
+    orden_parada  INTEGER NOT NULL,
+    id_recorrido  BIGINT NOT NULL,
+    PRIMARY KEY (id_viaje, orden_parada)
 );
 
 CREATE TABLE posicion_gps (
@@ -230,6 +239,7 @@ CREATE TABLE reserva (
     id_contratacion_directa BIGINT,                       -- respaldo directo (XOR)
     estado                  VARCHAR(20) NOT NULL DEFAULT 'provisional'
         CHECK (estado IN ('provisional', 'consolidada', 'cancelada')),
+    orden_descenso          INTEGER,
     UNIQUE (id_pasajero, id_viaje),                       -- máx. una reserva por pasajero+viaje (MR-R15)
     -- Respaldo exactamente uno: PeriodoAbono XOR Contratación directa (MR-R13)
     CHECK ((id_periodo_abono IS NOT NULL) <> (id_contratacion_directa IS NOT NULL))
@@ -390,6 +400,10 @@ ALTER TABLE viaje ADD FOREIGN KEY (id_recorrido) REFERENCES recorrido (id_recorr
 ALTER TABLE viaje ADD FOREIGN KEY (id_vehiculo)  REFERENCES vehiculo (id_vehiculo);
 ALTER TABLE viaje ADD FOREIGN KEY (id_chofer)    REFERENCES chofer (id_persona);
 ALTER TABLE posicion_gps ADD FOREIGN KEY (id_viaje) REFERENCES viaje (id_viaje);
+ALTER TABLE viaje ADD FOREIGN KEY (id_recorrido, orden_ultimo_paso) REFERENCES parada_recorrido (id_recorrido, orden);
+ALTER TABLE descenso_habilitado ADD FOREIGN KEY (id_viaje, id_recorrido) REFERENCES viaje (id_viaje, id_recorrido);
+ALTER TABLE descenso_habilitado ADD FOREIGN KEY (id_recorrido, orden_parada) REFERENCES parada_recorrido (id_recorrido, orden);
+ALTER TABLE reserva ADD FOREIGN KEY (id_viaje, orden_descenso) REFERENCES descenso_habilitado (id_viaje, orden_parada);
 ALTER TABLE reserva ADD FOREIGN KEY (id_pasajero) REFERENCES pasajero (id_persona);
 ALTER TABLE reserva ADD FOREIGN KEY (id_viaje, id_recorrido) REFERENCES viaje (id_viaje, id_recorrido);
 ALTER TABLE reserva ADD FOREIGN KEY (id_recorrido, orden_parada) REFERENCES parada_recorrido (id_recorrido, orden);

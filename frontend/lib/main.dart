@@ -2,6 +2,7 @@ import 'services/chofer/avisos_api.dart';
 import 'services/pasajero/ausencias_api.dart';
 import 'screens/pasajero/accion_informar_ausencia.dart';
 import 'models/gps/ubicacion_viaje.dart';
+import 'models/pasajero/reserva.dart';
 import 'core/maps/configuracion_mapa.dart';
 import 'widgets/gps/mapa_ultima_posicion.dart';
 import 'adapters/chofer/captura_gps_android.dart';
@@ -32,6 +33,7 @@ import 'models/admin/viaje_update.dart';
 import 'models/chofer/operacion_asignada.dart';
 import 'models/chofer/viaje_resumen.dart';
 import 'screens/admin/crear_viaje_admin_screen.dart';
+import 'screens/admin/descensos_viaje_dialog.dart';
 import 'screens/admin/viajes_dia_admin_screen.dart';
 import 'screens/chofer/chofer_shell.dart';
 import 'screens/pasajero/pasajero_shell.dart';
@@ -224,6 +226,7 @@ class _VanFullBootstrapState extends State<VanFullBootstrap> {
     SesionController controller, {
     bool dueno = false,
   }) => _EntradaAdministracion(
+    paradas: _pasajero,
     controller: controller,
     listar: _viajesDiaAdmin,
     crear: _viajesAdmin,
@@ -268,7 +271,7 @@ class _VanFullBootstrapState extends State<VanFullBootstrap> {
   /// Ubicación del viaje de una reserva consolidada (RN-030). A diferencia de
   /// Administración, un 403 acá no cierra la sesión: significa que esa reserva
   /// no da acceso, y la pantalla lo muestra como «ubicación no disponible».
-  Widget _pantallaUbicacionPasajero(SesionController controller, int idViaje) {
+  Widget _pantallaUbicacionPasajero(SesionController controller, Reserva reserva) {
     final sesion = controller.sesion;
     final generacion = controller.generacion;
     bool vigente() =>
@@ -276,7 +279,12 @@ class _VanFullBootstrapState extends State<VanFullBootstrap> {
         controller.generacion == generacion &&
         identical(controller.sesion, sesion);
     return UbicacionScreen(
-      idViaje: idViaje,
+      idViaje: reserva.idViaje,
+      tieneDescenso: reserva.ordenDescenso != null,
+      consultarEta: () async {
+        if (!vigente()) throw StateError('La sesión de esta vista ya no está vigente.');
+        return _gpsApi.consultarEta(reserva.idReserva);
+      },
       consultar: (viaje) {
         if (!vigente()) {
           throw StateError('La sesión de esta vista ya no está vigente.');
@@ -321,8 +329,8 @@ class _VanFullBootstrapState extends State<VanFullBootstrap> {
             controller.generacion == generacion &&
             identical(controller.sesion, sesion),
         onSalir: controller.salir,
-        pantallaUbicacion: (idViaje) =>
-            _pantallaUbicacionPasajero(controller, idViaje),
+        pantallaUbicacionReserva: (reserva) =>
+            _pantallaUbicacionPasajero(controller, reserva),
       );
     },
     entradaAdministrador: _entradaAdministracion,
@@ -344,6 +352,7 @@ class _VanFullBootstrapState extends State<VanFullBootstrap> {
 
 class _EntradaAdministracion extends StatefulWidget {
   const _EntradaAdministracion({
+    required this.paradas,
     required this.controller,
     required this.listar,
     required this.crear,
@@ -381,6 +390,7 @@ class _EntradaAdministracion extends StatefulWidget {
   final VoidCallback onSalir;
   final AdministradoresAdminApi? administradores;
   final TarifasAdminApi? tarifas;
+  final PasajeroApi paradas;
   final RecorridosAdminApi? recorridos;
   final AbonosAdminApi? abonos;
   final HistorialViajesAdminApi? historial;
@@ -405,6 +415,7 @@ class _EntradaAdministracionState extends State<_EntradaAdministracion> {
               cargarViajes: _cargarViajes,
               onViajeSeleccionado: _abrirUbicacion,
               actualizarViaje: _actualizarViaje,
+              configurarDescensos: _configurarDescensos,
               cancelarViaje: _cancelarViaje,
             ),
             Positioned(
@@ -877,6 +888,34 @@ class _EntradaAdministracionState extends State<_EntradaAdministracion> {
         .push(MaterialPageRoute<void>(builder: (_) => pantalla));
   }
 
+  Future<void> _configurarDescensos(ViajeResumen viaje) async {
+    final generacion = widget.controller.generacion;
+    bool vigente() => mounted && widget.controller.generacion == generacion && !_accesoDenegado;
+    try {
+      final paradas = await widget.paradas.cargarParadas(viaje.idRecorrido);
+      if (!vigente()) return;
+      final ordenes = await widget.paradas.cargarDescensos(viaje.idViaje);
+      if (!vigente()) return;
+      await showDialog<void>(
+        context: context,
+        builder: (_) => DescensosViajeDialog(
+          paradas: paradas,
+          iniciales: ordenes,
+          guardar: (elegidas) async {
+            if (!vigente()) throw StateError('La sesión ya no está vigente.');
+            await widget.gpsApi.configurarDescensos(viaje.idViaje, elegidas);
+          },
+        ),
+      );
+    } catch (_) {
+      if (vigente()) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('No se pudieron cargar los descensos.')),
+        );
+      }
+    }
+  }
+
   void _abrirUbicacion(int id) {
     final controller = widget.controller;
     final sesion = controller.sesion;
@@ -1120,6 +1159,16 @@ class _EntradaChoferState extends State<_EntradaChofer> {
             cargarViajes: _cargarViajes,
             cargarDetalle: _cargarDetalle,
             acciones: _acciones,
+            registrarPaso: (id, orden) async {
+              _exigirSesion();
+              final paso = await _protegerAcceso(
+                controller: widget.controller,
+                solicitud: () => widget.gpsApi.registrarPaso(id, orden, _token!),
+                onAccesoDenegado: _denegarAcceso,
+              );
+              _exigirSesion();
+              return paso;
+            },
             registrarAviso: (id, clave, clase, detalle) async {
               _exigirSesion();
               final r = await _protegerAcceso(

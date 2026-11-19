@@ -84,6 +84,10 @@ class Viaje(Base):
         check_en("sentido", SENTIDOS),
         check_en("estado", ESTADOS_VIAJE),
         CheckConstraint("capacidad_planificada IS NULL OR capacidad_planificada >= 0"),
+        ForeignKeyConstraint(
+            ["id_recorrido", "orden_ultimo_paso"],
+            ["parada_recorrido.id_recorrido", "parada_recorrido.orden"],
+        ),
         # Soporte de las FK compuestas de reserva y abordaje.
         UniqueConstraint("id_viaje", "id_recorrido"),
         UniqueConstraint("id_viaje", "id_vehiculo"),
@@ -100,6 +104,28 @@ class Viaje(Base):
     sentido: Mapped[str] = mapped_column(String(10))
     estado: Mapped[str] = mapped_column(String(20), server_default="programado")
     capacidad_planificada: Mapped[int | None] = mapped_column(Integer)
+
+    orden_ultimo_paso: Mapped[int | None] = mapped_column(Integer)
+    fecha_ultimo_paso: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+
+
+class DescensoHabilitado(Base):
+    """Parada habilitada explícitamente para descenso en un viaje."""
+
+    __tablename__ = "descenso_habilitado"
+    __table_args__ = (
+        ForeignKeyConstraint(
+            ["id_viaje", "id_recorrido"], ["viaje.id_viaje", "viaje.id_recorrido"]
+        ),
+        ForeignKeyConstraint(
+            ["id_recorrido", "orden_parada"],
+            ["parada_recorrido.id_recorrido", "parada_recorrido.orden"],
+        ),
+    )
+
+    id_viaje: Mapped[int] = mapped_column(BigInteger, primary_key=True)
+    orden_parada: Mapped[int] = mapped_column(Integer, primary_key=True)
+    id_recorrido: Mapped[int] = mapped_column(BigInteger)
 
 
 class PosicionGps(Base):
@@ -131,6 +157,10 @@ class Reserva(Base):
             ["id_periodo_abono", "id_viaje"],
             ["periodo_abono_viaje.id_periodo_abono", "periodo_abono_viaje.id_viaje"],
         ),
+        ForeignKeyConstraint(
+            ["id_viaje", "orden_descenso"],
+            ["descenso_habilitado.id_viaje", "descenso_habilitado.orden_parada"],
+        ),
         check_en("estado", ESTADOS_RESERVA),
         # Máximo una reserva por pasajero y viaje (MR-R15).
         UniqueConstraint("id_pasajero", "id_viaje"),
@@ -143,6 +173,7 @@ class Reserva(Base):
     id_viaje: Mapped[int] = mapped_column(BigInteger)
     id_recorrido: Mapped[int] = mapped_column(BigInteger)
     orden_parada: Mapped[int] = mapped_column(Integer)
+    orden_descenso: Mapped[int | None] = mapped_column(Integer)
     id_periodo_abono: Mapped[int | None] = mapped_column(BigInteger)
     id_contratacion_directa: Mapped[int | None] = mapped_column(
         BigInteger, ForeignKey("contratacion.id_contratacion")

@@ -26,6 +26,7 @@ class ViajesDiaAdminScreen extends StatefulWidget {
     required this.cargarViajes,
     required this.onViajeSeleccionado,
     this.actualizarViaje,
+    this.configurarDescensos,
     this.cancelarViaje,
     super.key,
   });
@@ -34,6 +35,7 @@ class ViajesDiaAdminScreen extends StatefulWidget {
   final CargarViajesDelDia cargarViajes;
   final ValueChanged<int> onViajeSeleccionado;
   final ActualizarViaje? actualizarViaje;
+  final ValueChanged<ViajeResumen>? configurarDescensos;
   final Future<ViajeResumen> Function(int)? cancelarViaje;
 
   @override
@@ -120,6 +122,7 @@ class _ViajesDiaAdminScreenState extends State<ViajesDiaAdminScreen> {
       builder: (context) => _DetalleViajeAdminDialog(
         viaje: viaje,
         actualizarViaje: widget.actualizarViaje,
+        configurarDescensos: widget.configurarDescensos,
         cancelarViaje: cancelar == null ? null : cancelarYRecargar,
         onActualizado: (_) => _cargar(),
       ),
@@ -362,10 +365,12 @@ class _DetalleViajeAdminDialog extends StatefulWidget {
     required this.actualizarViaje,
     required this.onActualizado,
     required this.cancelarViaje,
+    required this.configurarDescensos,
   });
 
   final ViajeResumen viaje;
   final ActualizarViaje? actualizarViaje;
+  final ValueChanged<ViajeResumen>? configurarDescensos;
   final Future<void> Function(ViajeResumen viaje) onActualizado;
   final Future<ViajeResumen> Function(int)? cancelarViaje;
 
@@ -492,6 +497,11 @@ class _DetalleViajeAdminDialogState extends State<_DetalleViajeAdminDialog> {
       ),
     ),
     actions: [
+      if (_viaje.estado == EstadoViaje.programado && widget.configurarDescensos != null)
+        TextButton(
+          onPressed: _cancelando ? null : () => widget.configurarDescensos!(_viaje),
+          child: const Text('Configurar descensos'),
+        ),
       if (_viaje.estado == EstadoViaje.programado &&
           widget.actualizarViaje != null)
         FilledButton(

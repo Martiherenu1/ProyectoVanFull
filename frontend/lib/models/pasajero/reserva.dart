@@ -25,6 +25,7 @@ class Reserva {
     required this.sentido,
     required this.estado,
     this.horario,
+    this.ordenDescenso,
   });
 
   factory Reserva.fromJson(Map<String, dynamic> json) {
@@ -44,6 +45,7 @@ class Reserva {
       idViaje: json['id_viaje'] as int,
       idRecorrido: json['id_recorrido'] as int,
       ordenParada: json['orden_parada'] as int,
+      ordenDescenso: json['orden_descenso'] as int?,
       fecha: fecha,
       horario: json['horario'] as String?,
       sentido: SentidoViaje.values.firstWhere(
@@ -63,6 +65,7 @@ class Reserva {
 
   /// Parada de ascenso dentro del recorrido (GET /recorridos/{id}/paradas).
   final int ordenParada;
+  final int? ordenDescenso;
   final DateTime fecha;
 
   /// "HH:MM". Es `null` si el viaje todavía no tiene horario.

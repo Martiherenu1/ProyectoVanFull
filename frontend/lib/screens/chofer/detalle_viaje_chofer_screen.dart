@@ -21,6 +21,7 @@ class DetalleViajeChoferScreen extends StatefulWidget {
     required this.cargarDetalle,
     this.acciones,
     this.registrarAviso,
+    this.registrarPaso,
     this.recuperarAviso,
     this.onAvisoIncierto,
     this.onAvisoConfirmado,
@@ -32,6 +33,7 @@ class DetalleViajeChoferScreen extends StatefulWidget {
 
   final int idViaje;
   final RegistrarAviso? registrarAviso;
+  final Future<int> Function(int, int)? registrarPaso;
   final RecuperarAviso? recuperarAviso;
   final ValueChanged<ReferenciaAviso>? onAvisoIncierto;
   final ValueChanged<ReferenciaAviso>? onAvisoConfirmado;
@@ -52,6 +54,39 @@ class DetalleViajeChoferScreen extends StatefulWidget {
 class _DetalleViajeChoferScreenState extends State<DetalleViajeChoferScreen> {
   late EjecucionViajeController _controlador;
   late bool _propio;
+  int _ultimoPaso = 0;
+  bool _registrandoPaso = false;
+
+  Future<void> _confirmarPaso(ParadaOperacion parada) async {
+    final id = widget.idViaje;
+    final registrar = widget.registrarPaso;
+    if (registrar == null || _registrandoPaso) return;
+    final si = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Confirmar paso del vehículo'),
+        content: Text(parada.nombreDescripcion ?? 'Parada ${parada.orden}'),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(context), child: const Text('Volver')),
+          FilledButton(onPressed: () => Navigator.pop(context, true), child: const Text('Confirmar')),
+        ],
+      ),
+    );
+    if (!mounted || si != true || widget.idViaje != id || _registrandoPaso) return;
+    setState(() => _registrandoPaso = true);
+    try {
+      final paso = await registrar(id, parada.orden);
+      if (mounted && widget.idViaje == id) setState(() => _ultimoPaso = paso);
+    } catch (_) {
+      if (mounted && widget.idViaje == id) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('No se pudo confirmar el paso. Podés reintentar.')),
+        );
+      }
+    } finally {
+      if (mounted && widget.idViaje == id) setState(() => _registrandoPaso = false);
+    }
+  }
 
   @override
   void initState() {
@@ -228,11 +263,18 @@ class _DetalleViajeChoferScreenState extends State<DetalleViajeChoferScreen> {
         _titulo(context, 'Paradas del recorrido'),
         if (detalle.paradas.isEmpty) _fila('No hay paradas informadas.'),
         // Se conserva el orden recibido, sin invertirlo por el sentido del viaje.
-        for (final parada in detalle.paradas)
+        for (final parada in detalle.paradas) ...[
           _fila(
             'Parada ${parada.orden}: ${parada.nombreDescripcion ?? 'Sin descripción'}',
             key: ValueKey('parada-${parada.idParada}'),
           ),
+          if (viaje.estado == EstadoViaje.enCurso && widget.registrarPaso != null &&
+              parada.orden > _ultimoPaso)
+            OutlinedButton(
+              onPressed: _registrandoPaso ? null : () => _confirmarPaso(parada),
+              child: const Text('Confirmar paso por esta parada'),
+            ),
+        ],
         _titulo(context, 'Pasajeros con reserva'),
         if (detalle.pasajerosConReserva.isEmpty)
           _fila('No hay pasajeros con reserva informados.'),

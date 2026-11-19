@@ -24,6 +24,8 @@ class ConfirmarReservaScreen extends StatefulWidget {
     required this.viaje,
     required this.cargarParadas,
     required this.crearReserva,
+    this.cargarDescensos,
+    this.crearReservaConDescenso,
     required this.onTerminar,
   });
 
@@ -31,6 +33,8 @@ class ConfirmarReservaScreen extends StatefulWidget {
   final DisponibilidadViaje viaje;
   final CargarParadas cargarParadas;
   final CrearReserva crearReserva;
+  final Future<Set<int>> Function(int)? cargarDescensos;
+  final Future<Reserva> Function(int, int, int)? crearReservaConDescenso;
 
   /// El pasajero vio su reserva creada y sigue con la app.
   final ValueChanged<Reserva> onTerminar;
@@ -42,6 +46,8 @@ class ConfirmarReservaScreen extends StatefulWidget {
 class _ConfirmarReservaScreenState extends State<ConfirmarReservaScreen> {
   late Future<List<Parada>> _paradas;
   Parada? _paradaElegida;
+  int? _descenso;
+  late Future<Set<int>> _descensos;
   bool _enviando = false;
   _Aviso? _aviso;
   Reserva? _reserva;
@@ -50,15 +56,20 @@ class _ConfirmarReservaScreenState extends State<ConfirmarReservaScreen> {
   void initState() {
     super.initState();
     _paradas = _pedirParadas();
+    _descensos = _pedirDescensos();
   }
 
   @override
   void didUpdateWidget(covariant ConfirmarReservaScreen oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.cargarParadas != widget.cargarParadas ||
+        oldWidget.cargarDescensos != widget.cargarDescensos ||
+        oldWidget.viaje.idViaje != widget.viaje.idViaje ||
         oldWidget.viaje.idRecorrido != widget.viaje.idRecorrido) {
       _paradaElegida = null;
+      _descenso = null;
       _paradas = _pedirParadas();
+      _descensos = _pedirDescensos();
     }
   }
 
@@ -68,6 +79,13 @@ class _ConfirmarReservaScreenState extends State<ConfirmarReservaScreen> {
     // el error se mostraría igual pero Dart lo reportaría como no manejado.
     paradas.ignore();
     return paradas;
+  }
+
+  Future<Set<int>> _pedirDescensos() {
+    final futuro = widget.cargarDescensos?.call(widget.viaje.idViaje) ??
+        Future.value(<int>{});
+    futuro.ignore();
+    return futuro;
   }
 
   void _reintentarParadas() {
@@ -84,7 +102,10 @@ class _ConfirmarReservaScreenState extends State<ConfirmarReservaScreen> {
       _aviso = null;
     });
     try {
-      final reserva = await widget.crearReserva(widget.viaje.idViaje, orden);
+      final descenso = _descenso;
+      final reserva = descenso == null
+          ? await widget.crearReserva(widget.viaje.idViaje, orden)
+          : await widget.crearReservaConDescenso!(widget.viaje.idViaje, orden, descenso);
       if (!mounted) return;
       setState(() {
         _enviando = false;
@@ -226,10 +247,38 @@ class _ConfirmarReservaScreenState extends State<ConfirmarReservaScreen> {
                               ? null
                               : () => setState(() {
                                   _paradaElegida = parada;
+                                  if ((_descenso ?? 0) <= parada.orden) _descenso = null;
                                   if (!(_aviso?.definitivo ?? false)) {
                                     _aviso = null;
                                   }
                                 }),
+                        ),
+                      if (_paradaElegida != null && widget.crearReservaConDescenso != null)
+                        FutureBuilder<Set<int>>(
+                          future: _descensos,
+                          builder: (context, destinos) {
+                            if (destinos.hasError) {
+                              return TextButton(
+                                onPressed: () => setState(() => _descensos = _pedirDescensos()),
+                                child: const Text('Reintentar carga de descensos'),
+                              );
+                            }
+                            if (!destinos.hasData) return const LinearProgressIndicator();
+                            final opciones = lista.where((p) =>
+                                p.orden > _paradaElegida!.orden &&
+                                destinos.data!.contains(p.orden)).toList();
+                            if (opciones.isEmpty) return const SizedBox.shrink();
+                            return DropdownButton<int>(
+                              hint: const Text('Elegí dónde bajás'),
+                              isExpanded: true,
+                              value: _descenso,
+                              onChanged: _enviando ? null : (v) => setState(() => _descenso = v),
+                              items: [
+                                for (final p in opciones)
+                                  DropdownMenuItem(value: p.orden, child: Text(p.titulo)),
+                              ],
+                            );
+                          },
                         ),
                     ],
                   );

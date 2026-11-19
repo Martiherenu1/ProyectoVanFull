@@ -71,7 +71,7 @@ python -c "import yaml,json,io; io.open('backend/openapi/openapi.json','w',encod
 - `redocly preview-docs backend/openapi/openapi.yaml`, o
 - al implementar el backend: `http://localhost:8000/docs` (Swagger UI de FastAPI).
 
-Validado con `openapi-spec-validator`: **OpenAPI 3.0.3 · 51 rutas · 63 operaciones HTTP · 57 schemas**.
+Validado con `openapi-spec-validator`: **OpenAPI 3.0.3 · 65 rutas · 87 operaciones HTTP · 86 schemas**.
 
 ## Cobertura de esta versión (v0.1)
 
@@ -94,7 +94,7 @@ de solo lectura (administrador/dueno), reutilizando Deuda. Sin cuenta informa 0.
 inexistente CLIENTE_NO_ENCONTRADO. CU-006 conserva su comportamiento. La gestión de
 consecuencias RN-004/005/006 sigue pendiente; CU-015 conserva cobertura parcial.
 
-> **v0.1 representa 25 de los 37 casos de uso, además de RF-028.** Los otros **12 CU** todavía no tienen
+> **v0.1 representa 30 de los 37 casos de uso, además de RF-028.** Los otros **7 CU** todavía no tienen
 > operaciones y se listan al final. Estos indicadores describen la **cobertura contractual de diseño**;
 > no indican funcionalidades implementadas en el backend ni en el frontend.
 
@@ -191,11 +191,9 @@ ubicación en CU-009/CU-034 y no es una regla directa del POST GPS.
 
 ## CU pendientes de contrato (próxima iteración)
 
-Estos **12 CU** todavía no tienen operaciones en el contrato (CU-013, CU-023, CU-033 y CU-035 las tienen desde los Issues #285, #287, #289 y #295, parciales):
-créditos/devoluciones (CU-017), recorridos (CU-019),
-optimización de recorrido (CU-020), choferes (CU-021), corporativos (CU-034),
-facturación (CU-024), reportes (CU-025), historial (CU-026), abonos (CU-028),
-tarifas y administradores del dueño (CU-031, CU-032), notificaciones (CU-037).
+Estos **7 CU** todavía no tienen operaciones en el contrato:
+créditos/devoluciones (CU-017), optimización de recorrido (CU-020), choferes (CU-021),
+facturación (CU-024), reportes (CU-025), corporativos (CU-034) y notificaciones (CU-037).
 
 
 ### CU-030 manual, seguimiento #280 (15/11/2026)

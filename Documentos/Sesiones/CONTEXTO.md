@@ -1,5 +1,16 @@
 # CONTEXTO VANFULL — Carga rápida de sesión
 
+> **CU-022 / #277, cierre local sobre main d169da5:** merge sin commit desde HEAD 8839deb; conserva CU-032/031/019/026/028 y suma Vehículos a la entrada vigente del dueño, sin reemplazarla. Flutter 1079/analyze y backend sin BD 46/Ruff aprobados; PostgreSQL 16 local no ejecutado por ausencia de motor Docker. Diff pendiente de revisión y autorización de publicación; sin merge a main ni Neon/Render. Detalle: [contexto de Administración](PC2/CONTEXTO-administracion-y-flutter.md). #279 sigue separada.
+
+> **Corte del 18/11/2026 (entrega final: viernes 20/11).** Martiniano sumó **cinco CU de administración y dueño**, todos en `main` y recortados a lo que la v1.3 aprueba (lo demás quedó como PENDIENTE documentado, nada inventado):
+> - **CU-032** administradores, solo dueño (#312, Issue #310) · **CU-031** tarifas, solo dueño (#313/#316, #311) · **CU-019** recorridos y paradas (#315/#316, #314) · **CU-026** historial de viajes (#318, #317) · **CU-028** abonos mensuales (#320, #319). Cada uno trae backend, contrato y pantalla Flutter en la entrada de administración.
+> - **Flutter:** `AppRole.owner` (`dueno`) y `entradaDueno`: el dueño ya no cae en «Rol no reconocido». Seed local: `dueno1@vanfull.test` (**no existe en Neon**: crearla desde la terminal de Martiniano).
+> - **Pruebas en el último PR (#320):** backend 1074, Flutter 1050. Neon no se tocó.
+> - **Para validar con Martín:** RN-021 en CU-019 (parada comprometida, #314), qué es un viaje «anterior» en CU-026 (#317) y que el alta de abono cree el cliente individual si falta (#319).
+> - **Sin nada todavía:** CU-017, 020, 024 y 025 (reparto propuesto al grupo el 18/11: Facundo 025/024/017 tras mergear #279 y #277; Martín CU-007 y 020). CU-034 y CU-037 siguen como pendiente documentado (#308).
+> - **Trampa de proceso:** un PR **apilado** (base distinta de `main`) se mergea contra la rama anterior y **no llega a `main`**; pasó con #313 y #315 y se rescató con #316. Abrir siempre contra `main`.
+> - **Falta, de Martiniano:** entrega individual (video, presentación, instructivo y documento final) sin empezar; #304 (SHA de Render Events y punto previo en Neon).
+
 > **Corte del 17/11/2026 (madrugada):**
 > - **#304 (0002 sin respaldo previo):** hay respaldo posterior y restauración aislada idéntica (#305, #306). Facundo revisó Flutter de #281 sobre `40fd608`: favorable, como revisión posterior al merge. En #304 quedaron registrados el procedimiento incumplido y el riesgo residual: sin manifiesto previo, no se puede probar que los datos anteriores al merge no cambiaron. **Falta:** el SHA y el estado del deploy en Render Events, y si la consola de Neon tiene un punto anterior a las 01:54 UTC. No se hacen pruebas nuevas sobre Neon hasta coordinarlo.
 > - **Tarifas (#9):** el contrato de `GET /tarifas` está en el [PR #307](https://github.com/Martiherenu1/ProyectoVanFull/pull/307), en borrador y solo contrato. Pide `id_viaje`, toma `tarifa.tipo = OCASIONAL:<servicio>:<sentido>`, `importe_base` (= `importe_acordado`) y `efectivo_informativo` aparte. Espera el OK de Martín y Facundo a los 5 puntos «Para decidir» del PR. Martín revisó que no choca con CU-007/ETA, sin aprobar todavía convención, contrato ni contabilidad.
@@ -69,7 +80,7 @@ Los apartados inferiores conservan sus cortes históricos.
 > datos de esta máquina. Los prompts de arranque por tipo de tarea, y el criterio de cuándo conviene
 > abrir un chat nuevo, están en `Documentos/Sesiones/PROMPT-INICIAL.md`.
 >
-> **Última actualización: 2026-11-15** (§11: CU-013, CU-023 y CU-033 recortados; el resto del documento sigue como el 2026-10-26: §13 composición compartida de Flutter integrada y chofer1 verificado contra Render; antes, 24/10: backend en Render y asistente AG-01 con modelo real) · Reemplaza y consolida todas las versiones anteriores.
+> **Última actualización: 2026-11-18** (§11: CU-032, 031, 019, 026 y 028 en `main`; antes, 15/11: CU-013, CU-023 y CU-033 recortados; el resto del documento sigue como el 2026-10-26: §13 composición compartida de Flutter integrada y chofer1 verificado contra Render; antes, 24/10: backend en Render y asistente AG-01 con modelo real) · Reemplaza y consolida todas las versiones anteriores.
 
 ---
 
@@ -288,6 +299,8 @@ registra en Deployments). Todavía sin endpoint: los abordajes (Martín).
 modelos y qué falta, en §13.
 
 **Para la entrega final (2026-11-15), backend y contrato de tres CU de administración y organización, recortados a lo definido** (las pantallas son de Facundo): CU-013 gestionar pasajeros (`/pasajeros`, #285, mergeado en #286), CU-023 clientes corporativos (`/clientes-corporativos`, #287, mergeado en #288) y CU-033 pasajeros de la organización para el representante corporativo (`/organizaciones`, #289). Qué quedó fuera por pendiente y por qué, en `PC2/CONTEXTO-pasajero-y-base-comun.md` (Decisiones del 2026-11-15). Martín aclaró funcionalmente CU-005/RN-020 (la parada nueva tiene que estar habilitada para el viaje) y condicionó el merge de #281 a un backup de Neon con restauración probada.
+
+**Para la entrega final (2026-11-18), cinco CU más de administración y dueño** (backend, contrato y pantalla en el mismo PR): CU-032 `/administradores` (#312, solo dueño), CU-031 `/administracion/tarifas` (#313, solo dueño), CU-019 `/administracion/paradas` y `/administracion/recorridos` (#315), CU-026 `/administracion/historial-viajes` (#318, solo lectura) y CU-028 `/administracion/abonos` (#320). Qué quedó fuera por pendiente de la v1.3 y por qué, en `PC2/CONTEXTO-pasajero-y-base-comun.md` (Decisiones del 2026-11-18).
 
 **Plan:** `services/` (reglas RN) → `routers/` (endpoints del OpenAPI) → tests. Los 37 CU entran en ~10 routers,
 no uno por CU.

@@ -1,7 +1,8 @@
 enum AppRole {
   passenger('pasajero'),
   driver('chofer'),
-  admin('administrador');
+  admin('administrador'),
+  owner('dueno');
 
   const AppRole(this.apiValue);
 

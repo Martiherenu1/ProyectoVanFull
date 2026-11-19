@@ -15,6 +15,7 @@ CUENTAS = {  # identificador_acceso -> roles esperados
     "pasajero2@vanfull.test": ["pasajero"],
     "chofer1@vanfull.test": ["chofer"],
     "admin1@vanfull.test": ["administrador"],
+    "dueno1@vanfull.test": ["dueno"],
 }
 
 
@@ -61,8 +62,8 @@ def test_el_csv_de_cuentas_no_trae_hashes_ni_contrasenas():
 
 def test_carga_las_tablas_y_devuelve_la_cantidad(base):
     resumen = _cargar(base)
-    assert resumen["persona"] == 5
-    assert resumen["cuenta_rol"] == 4
+    assert resumen["persona"] == 6
+    assert resumen["cuenta_rol"] == 5
     for tabla, cantidad in resumen.items():
         assert _uno(base, f'SELECT count(*) FROM "{tabla}"') == cantidad
 
@@ -198,7 +199,7 @@ def test_las_secuencias_siguen_despues_de_la_carga(base):
         "INSERT INTO persona (nombre, apellido, dni) VALUES ('Nueva', 'Persona', '90000099') "
         "RETURNING id_persona",
     )
-    assert nuevo == 6
+    assert nuevo == 7
 
 
 def test_la_carga_es_todo_o_nada(base, tmp_path):
@@ -216,7 +217,7 @@ def test_no_carga_dos_veces_sin_pedirlo(base):
     _cargar(base)
     with pytest.raises(seed.ErrorSeed, match="--reiniciar"):
         _cargar(base)
-    assert _uno(base, "SELECT count(*) FROM persona") == 5
+    assert _uno(base, "SELECT count(*) FROM persona") == 6
 
 
 def test_con_reiniciar_deja_el_mismo_estado(base):

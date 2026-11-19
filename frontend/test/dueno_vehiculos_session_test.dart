@@ -38,42 +38,64 @@ Future<void> montar(WidgetTester tester, http.Client transporte) =>
 
 void main() {
   for (final status in [200, 401, 403, 500]) {
-    testWidgets('dueño consulta vehículos HTTP $status, sin otras áreas', (
-      t,
-    ) async {
-      var consultas = 0;
-      final otras = <String>[];
-      final transporte = MockClient((r) async {
-        if (r.url.path.endsWith('/auth/login')) return ingreso(['dueno']);
-        if (r.url.path.endsWith('/vehiculos')) {
-          consultas++;
-          expect(r.headers['authorization'], 'Bearer dueno-token');
-          final codigo = consultas == 1 ? status : 200;
-          return codigo == 200
-              ? http.Response(jsonEncode([datos.vehiculo()]), 200)
-              : fallo(codigo);
+    testWidgets(
+      'dueño consulta vehículos HTTP $status desde su entrada vigente',
+      (t) async {
+        var consultas = 0;
+        final otras = <String>[];
+        final transporte = MockClient((r) async {
+          if (r.url.path.endsWith('/auth/login')) return ingreso(['dueno']);
+          if (r.url.path.endsWith('/vehiculos')) {
+            consultas++;
+            expect(r.headers['authorization'], 'Bearer dueno-token');
+            final codigo = consultas == 1 ? status : 200;
+            return codigo == 200
+                ? http.Response(jsonEncode([datos.vehiculo()]), 200)
+                : fallo(codigo);
+          }
+          if (r.url.path.endsWith('/viajes')) return http.Response('[]', 200);
+          otras.add(r.url.path);
+          return http.Response('[]', 200);
+        });
+        await montar(t, transporte);
+        await base.login(t);
+        await t.tap(find.byKey(const Key('admin-vehiculos')));
+        await t.pumpAndSettle();
+        if (status == 401) {
+          expect(find.text('Ingresar'), findsOneWidget);
+        } else if (status == 403) {
+          expect(
+            find.byKey(const Key('admin-acceso-denegado')),
+            findsOneWidget,
+          );
+          expect(find.text('Ingresar'), findsNothing);
+        } else {
+          if (status == 500) {
+            await t.tap(find.text('Reintentar'));
+            await t.pumpAndSettle();
+          }
+          expect(find.text('VF022AA'), findsOneWidget);
+          expect(find.byKey(const Key('vehiculo-1')), findsOneWidget);
         }
-        otras.add(r.url.path);
-        return http.Response('[]', 200);
-      });
-      await montar(t, transporte);
-      await base.login(t);
-      if (status == 401) {
-        expect(find.text('Ingresar'), findsOneWidget);
-      } else if (status == 403) {
-        expect(find.byKey(const Key('dueno-acceso-denegado')), findsOneWidget);
-        expect(find.text('Ingresar'), findsNothing);
-      } else {
-        if (status == 500) {
-          await t.tap(find.text('Reintentar'));
+        expect(otras, isEmpty);
+        if (status == 200 || status == 500) {
+          await t.pageBack();
           await t.pumpAndSettle();
+          expect(find.byKey(const Key('admin-crear-viaje')), findsOneWidget);
+          expect(
+            find.byKey(const Key('admin-administradores')),
+            findsOneWidget,
+          );
+          expect(find.byKey(const Key('admin-tarifas')), findsOneWidget);
+          expect(find.byKey(const Key('admin-recorridos')), findsOneWidget);
+          expect(
+            find.byKey(const Key('admin-historial-viajes')),
+            findsOneWidget,
+          );
+          expect(find.byKey(const Key('admin-abonos')), findsOneWidget);
         }
-        expect(find.text('VF022AA'), findsOneWidget);
-        expect(find.byKey(const Key('dueno-salir')), findsOneWidget);
-      }
-      expect(otras, isEmpty);
-      expect(find.byKey(const Key('admin-crear-viaje')), findsNothing);
-    });
+      },
+    );
   }
 
   testWidgets(
@@ -83,6 +105,7 @@ void main() {
       Map<String, dynamic>? guardado;
       final transporte = MockClient((r) async {
         if (r.url.path.endsWith('/auth/login')) return ingreso(['dueno']);
+        if (r.url.path.endsWith('/viajes')) return http.Response('[]', 200);
         expect(r.url.path, startsWith('/api/vehiculos'));
         expect(r.headers['authorization'], 'Bearer dueno-token');
         metodos.add(r.method);
@@ -96,6 +119,8 @@ void main() {
       });
       await montar(t, transporte);
       await base.login(t);
+      await t.tap(find.byKey(const Key('admin-vehiculos')));
+      await t.pumpAndSettle();
       await t.tap(find.byKey(const Key('registrar-vehiculo')));
       await t.pumpAndSettle();
       await t.enterText(find.byKey(const Key('vehiculo-patente')), 'VF022DD');
@@ -142,10 +167,15 @@ void main() {
         await t.tap(find.text('Ingresar'));
         await t.pump();
         await t.pump(const Duration(milliseconds: 400));
+        await t.tap(find.byKey(const Key('admin-vehiculos')));
+        await t.pump();
+        await t.pump(const Duration(milliseconds: 400));
         final cargar = t
             .widget<VehiculosAdminScreen>(find.byType(VehiculosAdminScreen))
             .cargar;
-        await t.tap(find.byKey(const Key('dueno-salir')));
+        await t.pageBack();
+        await t.pumpAndSettle();
+        await t.tap(find.byKey(const Key('admin-salir')));
         await t.pumpAndSettle();
         await base.login(t);
         pendiente.complete(

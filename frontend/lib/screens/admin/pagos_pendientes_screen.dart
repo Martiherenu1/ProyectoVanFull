@@ -179,18 +179,20 @@ class _PagosPendientesScreenState extends State<PagosPendientesScreen> {
                             Wrap(
                               spacing: 12,
                               children: [
-                                FilledButton(
-                                  key: ValueKey(
-                                    'confirmar-pago-${pago.idPago}',
+                                if (pago.medioPago !=
+                                    MedioPago.mercadoPago.valorApi)
+                                  FilledButton(
+                                    key: ValueKey(
+                                      'confirmar-pago-${pago.idPago}',
+                                    ),
+                                    onPressed: _decidiendo
+                                        ? null
+                                        : () => _decidir(
+                                            pago,
+                                            DecisionPago.confirmar,
+                                          ),
+                                    child: const Text('Confirmar'),
                                   ),
-                                  onPressed: _decidiendo
-                                      ? null
-                                      : () => _decidir(
-                                          pago,
-                                          DecisionPago.confirmar,
-                                        ),
-                                  child: const Text('Confirmar'),
-                                ),
                                 OutlinedButton(
                                   key: ValueKey('rechazar-pago-${pago.idPago}'),
                                   onPressed: _decidiendo

@@ -59,6 +59,53 @@ void main() {
       expect(find.textContaining('Pago 1:'), findsOneWidget);
     });
   }
+
+  testWidgets('Mercado Pago conserva el rechazo y omite la confirmación', (
+    tester,
+  ) async {
+    final mercadoPago = PagoAdmin.fromJson({
+      ...datos.pagoJson(),
+      'medio_pago': 'MERCADO_PAGO',
+    });
+    final transferencia = PagoAdmin.fromJson({
+      ...datos.pagoJson(),
+      'id_pago': 2,
+    });
+    final billetera = PagoAdmin.fromJson({
+      ...datos.pagoJson(),
+      'id_pago': 3,
+      'medio_pago': 'BILLETERA',
+    });
+    final decisiones = <(int, DecisionPago)>[];
+
+    await mostrar(
+      tester,
+      () async => [
+        if (decisiones.isEmpty) mercadoPago,
+        transferencia,
+        billetera,
+      ],
+      (id, decision) async {
+        decisiones.add((id, decision));
+        return PagoAdmin.fromJson({
+          ...datos.pagoJson(estado: decision.valorApi),
+          'medio_pago': 'MERCADO_PAGO',
+        });
+      },
+    );
+
+    expect(find.textContaining('MERCADO_PAGO'), findsOneWidget);
+    expect(find.byKey(const ValueKey('confirmar-pago-1')), findsNothing);
+    for (final id in [2, 3]) {
+      final boton = find.byKey(ValueKey('confirmar-pago-$id'));
+      expect(tester.widget<FilledButton>(boton).onPressed, isNotNull);
+    }
+    expect(decisiones, isEmpty);
+    await confirmar(tester, 'rechazar');
+    expect(decisiones, [(1, DecisionPago.rechazar)]);
+    expect(find.text('Pago 1: Rechazado.'), findsOneWidget);
+  });
+
   testWidgets('volver no envía y error backend permite reintento', (
     tester,
   ) async {

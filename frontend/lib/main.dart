@@ -56,6 +56,9 @@ import 'screens/admin/consultar_reservas_admin_screen.dart';
 import 'screens/admin/pagos_pendientes_screen.dart';
 import 'models/admin/pago_admin.dart';
 import 'models/admin/vehiculo_admin.dart';
+import 'models/admin/chofer_admin.dart';
+import 'screens/admin/choferes_admin_screen.dart';
+import 'services/admin/choferes_admin_api.dart';
 import 'screens/admin/vehiculos_admin_screen.dart';
 import 'services/admin/vehiculos_admin_api.dart';
 import 'services/admin/viajes_dia_admin_api.dart';
@@ -132,6 +135,7 @@ class _VanFullBootstrapState extends State<VanFullBootstrap> {
   late final DeudaAdminApi _deudaAdmin;
   late final ReservasAdminApi _reservasAdmin;
   late final VehiculosAdminApi _vehiculosAdmin;
+  late final ChoferesAdminApi _choferesAdmin;
   late final AdministradoresAdminApi _administradoresAdmin;
   late final TarifasAdminApi _tarifasAdmin;
   late final RecorridosAdminApi _recorridosAdmin;
@@ -172,6 +176,7 @@ class _VanFullBootstrapState extends State<VanFullBootstrap> {
     _deudaAdmin = DeudaAdminApi(httpClient);
     _reservasAdmin = ReservasAdminApi(httpClient);
     _vehiculosAdmin = VehiculosAdminApi(httpClient);
+    _choferesAdmin = ChoferesAdminApi(httpClient);
     _administradoresAdmin = AdministradoresAdminApi(httpClient);
     _tarifasAdmin = TarifasAdminApi(httpClient);
     _recorridosAdmin = RecorridosAdminApi(httpClient);
@@ -227,6 +232,7 @@ class _VanFullBootstrapState extends State<VanFullBootstrap> {
     deuda: _deudaAdmin,
     reservas: _reservasAdmin,
     vehiculos: _vehiculosAdmin,
+    choferes: _choferesAdmin,
     configuracionMapa: widget.configuracionMapa,
     prepararMapa: widget.prepararMapa,
     crearVisorMapa: widget.crearVisorMapa,
@@ -346,6 +352,7 @@ class _EntradaAdministracion extends StatefulWidget {
     required this.deuda,
     required this.reservas,
     required this.vehiculos,
+    required this.choferes,
     required this.configuracionMapa,
     required this.prepararMapa,
     required this.crearVisorMapa,
@@ -366,6 +373,7 @@ class _EntradaAdministracion extends StatefulWidget {
   final DeudaAdminApi deuda;
   final ReservasAdminApi reservas;
   final VehiculosAdminApi vehiculos;
+  final ChoferesAdminApi choferes;
   final ConfiguracionMapa? configuracionMapa;
   final PrepararMapa? prepararMapa;
   final ConstructorVisorMapa? crearVisorMapa;
@@ -468,6 +476,11 @@ class _EntradaAdministracionState extends State<_EntradaAdministracion> {
                       key: const Key('admin-vehiculos'),
                       onPressed: _abrirVehiculos,
                       child: const Text('Vehículos'),
+                    ),
+                    OutlinedButton(
+                      key: const Key('admin-choferes'),
+                      onPressed: _abrirChoferes,
+                      child: const Text('Choferes'),
                     ),
                     ElevatedButton.icon(
                       key: const Key('admin-crear-viaje'),
@@ -825,6 +838,38 @@ class _EntradaAdministracionState extends State<_EntradaAdministracion> {
     if (!vigente()) return;
     final pantalla = VehiculosAdminScreen(
       cargar: () => proteger<List<VehiculoAdmin>>(api.listar),
+      crear: (datos) => proteger(() => api.crear(datos)),
+      actualizar: (id, datos) => proteger(() => api.actualizar(id, datos)),
+    );
+    Navigator.of(context)
+        .push(MaterialPageRoute<void>(builder: (_) => pantalla));
+  }
+
+  void _abrirChoferes() {
+    final controller = widget.controller;
+    final generacion = controller.generacion;
+    final token = controller.token;
+    final api = widget.choferes;
+    bool vigente() =>
+        mounted &&
+        !_accesoDenegado &&
+        token != null &&
+        controller.generacion == generacion &&
+        controller.token == token;
+    Future<T> proteger<T>(Future<T> Function() operacion) async {
+      if (!vigente()) throw StateError('La sesión ya no está vigente.');
+      final resultado = await _protegerAcceso(
+        controller: controller,
+        solicitud: operacion,
+        onAccesoDenegado: _denegarAcceso,
+      );
+      if (!vigente()) throw StateError('La sesión ya no está vigente.');
+      return resultado;
+    }
+
+    if (!vigente()) return;
+    final pantalla = ChoferesAdminScreen(
+      cargar: () => proteger<List<ChoferAdmin>>(api.listar),
       crear: (datos) => proteger(() => api.crear(datos)),
       actualizar: (id, datos) => proteger(() => api.actualizar(id, datos)),
     );

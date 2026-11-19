@@ -50,6 +50,7 @@ void main() {
         'admin-salir',
         'admin-registrar-pago',
         'admin-pagos-pendientes',
+        'admin-choferes',
         'admin-crear-viaje',
       ]) {
         final boton = find.byKey(Key(key));

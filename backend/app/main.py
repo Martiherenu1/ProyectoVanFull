@@ -18,6 +18,7 @@ from app.routers import (
     corporativos,
     deuda,
     ejecucion_viajes,
+    eta,
     gestion_abonos,
     gestion_recorridos,
     gestion_tarifas,
@@ -59,6 +60,7 @@ registrar_manejadores(app)
 
 app.include_router(health.router, prefix=settings.api_prefix)
 app.include_router(gps.router, prefix=settings.api_prefix)
+app.include_router(eta.router, prefix=settings.api_prefix)
 app.include_router(auth.router, prefix=settings.api_prefix)
 app.include_router(ausencias.router, prefix=settings.api_prefix)
 app.include_router(perfil.router, prefix=settings.api_prefix)

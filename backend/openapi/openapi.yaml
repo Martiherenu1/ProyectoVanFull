@@ -2117,8 +2117,10 @@ paths:
                 $ref: '#/components/schemas/Reserva'
         '400':
           description: >-
-            Cuerpo inválido, o `orden_parada` que no pertenece al recorrido del viaje
-            (`PARADA_NO_VALIDA`).
+            Cuerpo inválido (`VALIDACION`). Si `orden_parada` no pertenece al recorrido,
+            devuelve `PARADA_NO_VALIDA`. Si el descenso no está habilitado para el viaje
+            o no es posterior al ascenso, devuelve `PARADA_NO_VALIDA` con
+            `error.detalles.orden_descenso` igual al descenso solicitado.
           content:
             application/json:
               schema:
@@ -2230,8 +2232,10 @@ paths:
                 $ref: '#/components/schemas/Reserva'
         '400':
           description: >-
-            Cuerpo inválido, o `orden_parada` que no pertenece al recorrido del viaje
-            (`PARADA_NO_VALIDA`).
+            Cuerpo inválido (`VALIDACION`). Si `orden_parada` no pertenece al recorrido,
+            devuelve `PARADA_NO_VALIDA`. Si el nuevo ascenso coincide con el descenso
+            elegido o es posterior, devuelve `PARADA_NO_VALIDA` con
+            `error.detalles.orden_descenso` igual al descenso elegido en la reserva.
           content:
             application/json:
               schema:
@@ -2362,6 +2366,217 @@ paths:
   # ---------------------------------------------------------------------------
   # GPS
   # ---------------------------------------------------------------------------
+  /viajes/{id_viaje}/descensos:
+    get:
+      tags:
+      - reservas
+      summary: Consultar descensos habilitados
+      description: Pasajero, administrador o dueño. Devuelve los órdenes habilitados
+        expresamente para el viaje.
+      x-cu: CU-003
+      x-cobertura: parcial
+      security:
+      - bearerAuth: []
+      parameters:
+      - $ref: '#/components/parameters/IdViaje'
+      responses:
+        '200':
+          description: Operación correcta.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OrdenesDescenso'
+        '400':
+          description: VALIDACION o PARADA_NO_VALIDA segun la operación.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: Sesión inválida.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '403':
+          description: Rol no autorizado.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: VIAJE_NO_ENCONTRADO.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+    patch:
+      tags:
+      - viajes
+      summary: Configurar descensos habilitados
+      description: >-
+        Administrador o dueño. Reemplaza el conjunto de descensos habilitados de un viaje
+        programado. Si el nuevo conjunto omite algún descenso referenciado por una reserva,
+        rechaza toda la actualización con 409 DESCENSO_CON_RESERVAS.
+      x-cu: CU-018
+      x-cobertura: parcial
+      security:
+      - bearerAuth: []
+      parameters:
+      - $ref: '#/components/parameters/IdViaje'
+      responses:
+        '200':
+          description: Operación correcta.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OrdenesDescenso'
+        '400':
+          description: VALIDACION o PARADA_NO_VALIDA segun la operación.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: Sesión inválida.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '403':
+          description: Rol no autorizado.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: VIAJE_NO_ENCONTRADO.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '409':
+          description: VIAJE_NO_MODIFICABLE o DESCENSO_CON_RESERVAS.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/OrdenesDescenso'
+  /viajes/{id_viaje}/paso-parada:
+    post:
+      tags:
+      - chofer
+      summary: Confirmar el paso del vehículo por una parada
+      description: Solo el chofer asignado de un viaje en curso. El avance no retrocede
+        con reintentos. No registra el abordaje ni el descenso de ninguna persona.
+      x-cu: CU-030
+      x-cobertura: parcial
+      security:
+      - bearerAuth: []
+      parameters:
+      - $ref: '#/components/parameters/IdViaje'
+      responses:
+        '200':
+          description: Operación correcta.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PasoParada'
+        '400':
+          description: VALIDACION o PARADA_NO_VALIDA segun la operación.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: Sesión inválida.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '403':
+          description: Rol no autorizado.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: VIAJE_NO_ENCONTRADO.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '409':
+          description: ESTADO_VIAJE_INVALIDO.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PasoParada'
+  /reservas/{id_reserva}/eta:
+    get:
+      tags:
+      - gps
+      summary: Consultar ETA a ascenso y destino
+      description: Pasajero con reserva propia consolidada y viaje en curso. Cada tiempo
+        puede ser nulo por separado. Se retira el ETA de una parada al confirmar el
+        paso del vehículo. Una reserva sin descenso devuelve destino_minutos nulo
+        y destino_pasado falso. El tiempo cero no confirma una llegada.
+      x-cu: CU-009
+      x-cobertura: parcial
+      security:
+      - bearerAuth: []
+      parameters:
+      - $ref: '#/components/parameters/IdReserva'
+      responses:
+        '200':
+          description: Operación correcta.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EtaReserva'
+          headers:
+            Cache-Control:
+              schema:
+                type: string
+                enum:
+                - no-store
+        '400':
+          description: VALIDACION o PARADA_NO_VALIDA segun la operación.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: Sesión inválida.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '403':
+          description: Rol no autorizado.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: ETA_NO_DISPONIBLE para reserva ausente, no propia, no consolidada
+            o viaje fuera de curso.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
   /viajes/{id_viaje}/ubicacion:
     get:
       tags: [gps]
@@ -2391,7 +2606,7 @@ paths:
         Sin S valido no se infiere vigencia desde false ni desde el reloj del cliente;
         true conserva su significado de desactualizacion acreditada por el servidor.
         Consumidores hacen polling (~10 s, RNF-007). (CU-009, RF-022)
-        COBERTURA PARCIAL: ETA todavía no está implementado; eta_minutos es null.
+        El campo histórico eta_minutos permanece null. Los ETA por reserva se consultan en GET /reservas/{id_reserva}/eta.
         No acredita continuidad GPS ni cumplimiento de RNF-008.
       x-cu: CU-009
       x-cobertura: parcial
@@ -2401,7 +2616,7 @@ paths:
         - $ref: '#/components/parameters/IdViaje'
       responses:
         '200':
-          description: Última ubicación del vehículo; eta_minutos es null mientras ETA no esté implementado.
+          description: Última ubicación del vehículo; eta_minutos permanece null.
           headers:
             Cache-Control:
               description: Respuesta fresca; no almacenar ni reutilizar como evaluacion nueva.
@@ -4304,6 +4519,7 @@ components:
       properties:
         id_viaje: { type: integer }
         orden_parada: { type: integer, description: Parada de ascenso dentro del recorrido del viaje. }
+        orden_descenso: { type: integer, minimum: 1, nullable: true, description: Descenso habilitado posterior al ascenso. }
 
     Reserva:
       type: object
@@ -4317,6 +4533,7 @@ components:
         id_viaje: { type: integer }
         id_recorrido: { type: integer, description: "Recorrido del viaje; con `orden_parada` identifica la parada (GET /recorridos/{id}/paradas)." }
         orden_parada: { type: integer }
+        orden_descenso: { type: integer, minimum: 1, nullable: true, description: Descenso elegido para esta reserva. }
         fecha: { type: string, format: date, description: Fecha del viaje. }
         horario: { type: string, nullable: true, example: "07:30", description: "Horario del viaje (HH:MM). null si el viaje todavía no tiene horario." }
         sentido: { type: string, enum: [IDA, VUELTA], description: Sentido del viaje. }
@@ -4367,6 +4584,34 @@ components:
         id_ausencia: { type: integer }
         id_pasajero: { type: integer }
         id_viaje: { type: integer }
+
+    OrdenesDescenso:
+      type: object
+      required: [ordenes]
+      properties:
+        ordenes:
+          type: array
+          maxItems: 200
+          items: { type: integer, minimum: 1, maximum: 2147483647 }
+
+    PasoParada:
+      type: object
+      required: [orden_parada]
+      properties:
+        orden_parada: { type: integer, minimum: 1, maximum: 2147483647 }
+
+    EtaReserva:
+      type: object
+      required: [ascenso_minutos, destino_minutos, ascenso_pasado, destino_pasado, vigencia_segundos]
+      properties:
+        ascenso_minutos: { type: integer, minimum: 0, nullable: true }
+        destino_minutos: { type: integer, minimum: 0, nullable: true }
+        ascenso_pasado: { type: boolean }
+        destino_pasado: { type: boolean }
+        vigencia_segundos:
+          type: integer
+          minimum: 0
+          description: Segundos restantes de vigencia de la estimación. Cero indica que no hay una estimación vigente.
 
     Ubicacion:
       type: object
@@ -4494,6 +4739,11 @@ components:
           minimum: 0
           nullable: true
           description: Valor de viaje.capacidad_planificada; no es cupo disponible.
+        orden_ultimo_paso:
+          type: integer
+          minimum: 1
+          nullable: true
+          description: Orden de la última parada cuyo paso fue confirmado, o null al comienzo.
         paradas:
           type: array
           description: Paradas de viaje.id_recorrido, ordenadas por orden ascendente.

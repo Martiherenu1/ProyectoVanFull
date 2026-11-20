@@ -131,6 +131,7 @@ def test_crea_la_reserva_consolidada_con_los_datos_del_viaje(entorno):
     assert (cuerpo["id_viaje"], cuerpo["orden_parada"]) == (viaje, 2)
     assert (cuerpo["fecha"], cuerpo["horario"], cuerpo["sentido"]) == (DIA, "07:30", "IDA")
     assert cuerpo["id_recorrido"] == entorno["recorrido"]
+    assert cuerpo["orden_descenso"] is None
     # Solo los campos del schema `Reserva` del contrato.
     assert set(cuerpo) == {
         "id_reserva",
@@ -138,6 +139,7 @@ def test_crea_la_reserva_consolidada_con_los_datos_del_viaje(entorno):
         "id_viaje",
         "id_recorrido",
         "orden_parada",
+        "orden_descenso",
         "fecha",
         "horario",
         "sentido",

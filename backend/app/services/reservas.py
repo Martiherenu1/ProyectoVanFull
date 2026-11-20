@@ -15,7 +15,7 @@ from app.core.errors import ApiError
 from app.core.security import UsuarioActual
 from app.models.personas import Cliente, ClienteIndividual, Pasajero
 from app.models.servicios import Contratacion, Servicio
-from app.models.viajes import Ausencia, ParadaRecorrido, Viaje
+from app.models.viajes import Ausencia, DescensoHabilitado, ParadaRecorrido, Viaje
 from app.models.viajes import Reserva as ReservaModelo
 from app.schemas.reservas import CambioParada, Reserva, ReservaCreate, ResultadoCancelacion
 from app.services.disponibilidad import ESTADO_OFRECIDO, cupo_del_viaje
@@ -38,6 +38,7 @@ def _a_schema(r: ReservaModelo, v: Viaje) -> Reserva:
         id_viaje=r.id_viaje,
         id_recorrido=r.id_recorrido,
         orden_parada=r.orden_parada,
+        orden_descenso=r.orden_descenso,
         fecha=v.fecha,
         horario=v.horario.strftime("%H:%M") if v.horario else None,
         sentido=v.sentido,
@@ -176,6 +177,16 @@ async def crear_reserva(db: AsyncSession, usuario: UsuarioActual, datos: Reserva
             {"orden_parada": datos.orden_parada, "id_recorrido": viaje.id_recorrido},
         )
 
+    if datos.orden_descenso is not None:
+        destino = await db.get(DescensoHabilitado, (viaje.id_viaje, datos.orden_descenso))
+        if destino is None or datos.orden_descenso <= datos.orden_parada:
+            raise ApiError(
+                400,
+                "PARADA_NO_VALIDA",
+                "Elegí un descenso habilitado después del ascenso.",
+                {"orden_descenso": datos.orden_descenso},
+            )
+
     # RN-031 / A2: una sola reserva de ida y una de vuelta por día. Una cancelada no cuenta.
     del_dia = await db.scalar(
         select(ReservaModelo.id_reserva)
@@ -227,6 +238,7 @@ async def crear_reserva(db: AsyncSession, usuario: UsuarioActual, datos: Reserva
         id_viaje=viaje.id_viaje,
         id_recorrido=viaje.id_recorrido,
         orden_parada=datos.orden_parada,
+        orden_descenso=datos.orden_descenso,
         id_contratacion_directa=contratacion.id_contratacion,
         estado="consolidada",
     )
@@ -386,6 +398,14 @@ async def cambiar_parada(
         )
     if reserva.orden_parada == datos.orden_parada:
         raise ApiError(409, "PARADA_SIN_CAMBIOS", "La reserva ya tiene esa parada.")
+
+    if reserva.orden_descenso is not None and datos.orden_parada >= reserva.orden_descenso:
+        raise ApiError(
+            400,
+            "PARADA_NO_VALIDA",
+            "Elegí un ascenso anterior al descenso de tu reserva.",
+            {"orden_descenso": reserva.orden_descenso},
+        )
 
     reserva.orden_parada = datos.orden_parada
     await db.flush()

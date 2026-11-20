@@ -1,5 +1,19 @@
 # Contexto vivo · Chofer y viaje en curso (Martín)
 
+## ETA del pasajero · 19/11/2026
+
+- Correcciones tras la revisión de Facundo sobre `a46a944`: el diálogo de descensos solo se abre desde el detalle visible que inició la carga. El detalle de chofer lee `orden_ultimo_paso` del viaje persistido. La consulta ETA de una continuidad anterior a la reanudación pierde vigencia.
+- Los rechazos 400 de alta y cambio de ascenso que involucran el descenso informan `error.detalles.orden_descenso`. OpenAPI y Flutter reflejan el motivo.
+- Verificación local de la candidata sobre `a46a944`: 1.127 pruebas Flutter y 1.182 pruebas de backend con PostgreSQL 16 aislado. Análisis Flutter, Ruff y equivalencia OpenAPI YAML/JSON aprobados.
+
+- CU-009, RF-022 y RN-030. Base de trabajo `289d2e8`. El piloto Python del viaje 16 probó GPS y Google Routes con VanFull → YPF Bella Vista → UADE, y Martín verificó en Chrome la reproducción de esos valores en Flutter. El retiro del ETA a YPF se ensayó con un cambio de etapa manual.
+- **Candidato para revisión del equipo.** Migración 0003: habilitación de descensos por viaje programado, referencia de descenso opcional por reserva y avance del vehículo con fecha. El pasajero elige una parada habilitada posterior al ascenso. Las reservas existentes mantienen descenso nulo y conservan el ETA de ascenso cuando corresponde. La elección y el cambio de ascenso se validan sin tocar tarifas, cupo ni checkout.
+- El chofer asignado confirma manualmente el paso en el detalle del viaje. Los reintentos conservan el avance; al avanzar se espera una posición GPS posterior al paso. Se retira cada ETA cuando el vehículo pasa por esa parada. Confirmar el paso no registra abordaje ni descenso de un pasajero.
+- `GET /reservas/{id_reserva}/eta` consulta una reserva propia consolidada y en curso. FastAPI calcula los ETA con `GOOGLE_ROUTES_API_KEY`; Flutter los muestra por separado. Una consulta de Google Routes por viaje y por proceso cada 60 s como máximo, con posición fuente de hasta 30 s y vencimiento explícito. Tras avanzar puede haber una pausa hasta el próximo cálculo. El presupuesto global en múltiples procesos, la inferencia por GPS y la conservación del ETA con GPS desactualizado de #39 quedan pendientes.
+- Ensayo en entorno aislado: Administración → Viajes del día → Configurar descensos (habilitar UADE), pasajero reserva con ascenso YPF y descenso UADE, chofer inicia y publica GPS, pasajero abre Mis reservas → Ver ubicación. Después el chofer confirma el paso por YPF y comparte otra posición. Verificar que se retira el primer ETA y reaparece el de UADE en la próxima ventana. Al finalizar, se retira el seguimiento. La migración debe revisarse con el equipo antes de cualquier deploy a Neon/Render.
+- Correcciones de revisión del #327: rechazar sin cambios el reemplazo de descensos si omite uno referenciado por una reserva, documentar el ETA para reservas sin descenso y usar el tag del CU de cada operación. Flutter respeta el tiempo de vigencia devuelto por el servidor y el contrato solo exige que sea un entero no negativo. Sigue pendiente acordar la política de vigencia y el intervalo entre consultas. La migración 0004 agrega dos CHECK sobre último paso completo y descenso posterior al ascenso, y puede aplicarse también a bases de ensayo que ya tengan 0003. La propuesta de dejar #283 solo para ascensos sigue pendiente de confirmación de Facundo.
+
+
 ## Integración de main y runbook — 16/11/2026
 
 - Main vigente `8c422e1` (#300/#301) recibido mediante merge normal, único conflicto en contexto general; se conservan ambos trabajos. Código/modelo/SQL/migraciones, CU-035, contrato, UUID y RNF-008 idénticos a `e673f98`. Sin repetir suites locales por integración exclusivamente documental; CI del nuevo HEAD debe observarse por separado en #281.

@@ -1,5 +1,9 @@
 # Contexto vivo · Administración y Flutter (Facundo)
 
+## P2 del diálogo de descensos / #327 — revisión de `5e91152`
+
+- La confirmación del PATCH cierra el diálogo de descensos solo si la ruta sigue activa y es la actual. Si el administrador lo descarta tocando afuera, la respuesta del PATCH durante la animación deja visible el detalle del viaje. La regresión reproduce esa secuencia con el transporte HTTP simulado y verifica también el guardado con el diálogo abierto.
+
 ## P1 Administración / #323 — integración local sobre main 00f58c2 (19/11/2026)
 
 - MarcoAdmin centraliza los accesos por rol en barra lateral y cajón móvil. Registrar pago y Pagos pendientes tienen entradas separadas. Se conservan Choferes, Vehículos, los módulos de dueño, la sesión y el retorno desde los detalles.

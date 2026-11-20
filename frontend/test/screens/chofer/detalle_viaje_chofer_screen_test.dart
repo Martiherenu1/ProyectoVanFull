@@ -22,6 +22,65 @@ Future<void> mostrar(
 );
 
 void main() {
+  testWidgets('reabrir el viaje respeta el último paso guardado', (
+    tester,
+  ) async {
+    await tester.binding.setSurfaceSize(const Size(1000, 2200));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+    int? ultimoPaso;
+    var lecturas = 0;
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Builder(
+          builder: (context) => TextButton(
+            onPressed: () => Navigator.of(context).push<void>(
+              MaterialPageRoute(
+                builder: (_) => DetalleViajeChoferScreen(
+                  idViaje: 41,
+                  cargarDetalle: (_) async {
+                    lecturas++;
+                    final json = detalleJson();
+                    (json['viaje'] as Map<String, dynamic>)['estado'] =
+                        'en_curso';
+                    json['orden_ultimo_paso'] = ultimoPaso;
+                    return OperacionAsignada.fromJson(json);
+                  },
+                  registrarPaso: (id, orden) async {
+                    expect(id, 41);
+                    expect(orden, 1);
+                    return ultimoPaso = orden;
+                  },
+                ),
+              ),
+            ),
+            child: const Text('Abrir viaje'),
+          ),
+        ),
+      ),
+    );
+    final botones = find.text('Confirmar paso por esta parada');
+    await tester.tap(find.text('Abrir viaje'));
+    await tester.pumpAndSettle();
+    expect(botones, findsNWidgets(2));
+    await tester.tap(botones.first);
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Confirmar'));
+    await tester.pumpAndSettle();
+    expect(botones, findsOneWidget);
+
+    await tester.pageBack();
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Abrir viaje'));
+    await tester.pumpAndSettle();
+
+    expect(lecturas, 2);
+    expect(find.text('Parada 1: Primera parada'), findsOneWidget);
+    expect(botones, findsOneWidget);
+    await tester.tap(botones);
+    await tester.pumpAndSettle();
+    expect(find.text('Parada 2'), findsOneWidget);
+  });
+
   testWidgets('los datos crecen con nombres largos y texto al 200 %', (
     tester,
   ) async {

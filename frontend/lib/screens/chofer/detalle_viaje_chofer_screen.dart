@@ -1,5 +1,4 @@
-import '../../models/chofer/viaje_resumen.dart';
-import 'reporte_aviso.dart';
+import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 
@@ -8,8 +7,10 @@ import '../../controllers/chofer/asistencia_ubicacion_inicio.dart';
 import '../../core/theme/app_spacing.dart';
 import '../../core/theme/app_theme.dart';
 import '../../models/chofer/operacion_asignada.dart';
+import '../../models/chofer/viaje_resumen.dart';
 
 import 'acciones_viaje_chofer.dart';
+import 'reporte_aviso.dart';
 
 // Conserva la interfaz de carga publicada por CU-029.
 export '../../controllers/chofer/ejecucion_viaje_controller.dart'
@@ -21,6 +22,7 @@ class DetalleViajeChoferScreen extends StatefulWidget {
     required this.cargarDetalle,
     this.acciones,
     this.registrarAviso,
+    this.registrarPaso,
     this.recuperarAviso,
     this.onAvisoIncierto,
     this.onAvisoConfirmado,
@@ -32,6 +34,7 @@ class DetalleViajeChoferScreen extends StatefulWidget {
 
   final int idViaje;
   final RegistrarAviso? registrarAviso;
+  final Future<int> Function(int, int)? registrarPaso;
   final RecuperarAviso? recuperarAviso;
   final ValueChanged<ReferenciaAviso>? onAvisoIncierto;
   final ValueChanged<ReferenciaAviso>? onAvisoConfirmado;
@@ -52,6 +55,69 @@ class DetalleViajeChoferScreen extends StatefulWidget {
 class _DetalleViajeChoferScreenState extends State<DetalleViajeChoferScreen> {
   late EjecucionViajeController _controlador;
   late bool _propio;
+  int _ultimoPasoConfirmado = 0;
+  bool _registrandoPaso = false;
+  Object _alcancePaso = Object();
+
+  // Una lectura iniciada antes del POST puede traer un avance anterior.
+  int get _ultimoPaso => math.max(
+    _ultimoPasoConfirmado,
+    _controlador.detalle?.ordenUltimoPaso ?? 0,
+  );
+
+  Future<void> _confirmarPaso(ParadaOperacion parada) async {
+    final id = widget.idViaje;
+    final registrar = widget.registrarPaso;
+    final alcance = _alcancePaso;
+    bool mismoAlcance() => identical(alcance, _alcancePaso);
+    if (registrar == null || _registrandoPaso || parada.orden <= _ultimoPaso) {
+      return;
+    }
+    final si = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Confirmar paso del vehículo'),
+        content: Text(parada.nombreDescripcion ?? 'Parada ${parada.orden}'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Volver'),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.pop(context, true),
+            child: const Text('Confirmar'),
+          ),
+        ],
+      ),
+    );
+    if (!mounted ||
+        !mismoAlcance() ||
+        si != true ||
+        _registrandoPaso ||
+        _controlador.detalle?.viaje.estado != EstadoViaje.enCurso ||
+        parada.orden <= _ultimoPaso) {
+      return;
+    }
+    setState(() => _registrandoPaso = true);
+    try {
+      final paso = await registrar(id, parada.orden);
+      if (mounted && mismoAlcance()) {
+        setState(() => _ultimoPasoConfirmado = math.max(_ultimoPaso, paso));
+      }
+    } catch (_) {
+      if (mounted && mismoAlcance()) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('No se pudo confirmar el paso. Podés reintentar.'),
+          ),
+        );
+      }
+    } finally {
+      if (mounted && mismoAlcance()) {
+        setState(() => _registrandoPaso = false);
+      }
+    }
+  }
 
   @override
   void initState() {
@@ -85,6 +151,12 @@ class _DetalleViajeChoferScreenState extends State<DetalleViajeChoferScreen> {
   @override
   void didUpdateWidget(covariant DetalleViajeChoferScreen oldWidget) {
     super.didUpdateWidget(oldWidget);
+    if (oldWidget.idViaje != widget.idViaje ||
+        oldWidget.controlador != widget.controlador) {
+      _alcancePaso = Object();
+      _ultimoPasoConfirmado = 0;
+      _registrandoPaso = false;
+    }
     if (oldWidget.controlador != widget.controlador) {
       _desvincular();
       _vincular();
@@ -228,11 +300,19 @@ class _DetalleViajeChoferScreenState extends State<DetalleViajeChoferScreen> {
         _titulo(context, 'Paradas del recorrido'),
         if (detalle.paradas.isEmpty) _fila('No hay paradas informadas.'),
         // Se conserva el orden recibido, sin invertirlo por el sentido del viaje.
-        for (final parada in detalle.paradas)
+        for (final parada in detalle.paradas) ...[
           _fila(
             'Parada ${parada.orden}: ${parada.nombreDescripcion ?? 'Sin descripción'}',
             key: ValueKey('parada-${parada.idParada}'),
           ),
+          if (viaje.estado == EstadoViaje.enCurso &&
+              widget.registrarPaso != null &&
+              parada.orden > _ultimoPaso)
+            OutlinedButton(
+              onPressed: _registrandoPaso ? null : () => _confirmarPaso(parada),
+              child: const Text('Confirmar paso por esta parada'),
+            ),
+        ],
         _titulo(context, 'Pasajeros con reserva'),
         if (detalle.pasajerosConReserva.isEmpty)
           _fila('No hay pasajeros con reserva informados.'),

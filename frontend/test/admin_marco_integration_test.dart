@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
@@ -8,6 +9,7 @@ import 'package:frontend/screens/admin/administradores_admin_screen.dart';
 import 'package:frontend/screens/admin/choferes_admin_screen.dart';
 import 'package:frontend/screens/admin/consultar_deuda_admin_screen.dart';
 import 'package:frontend/screens/admin/consultar_reservas_admin_screen.dart';
+import 'package:frontend/screens/admin/descensos_viaje_dialog.dart';
 import 'package:frontend/screens/admin/historial_viajes_screen.dart';
 import 'package:frontend/screens/admin/pagos_pendientes_screen.dart';
 import 'package:frontend/screens/admin/recorridos_admin_screen.dart';
@@ -24,6 +26,141 @@ import 'admin_menu_helpers.dart';
 import 'services/admin/viajes_dia_admin_api_test.dart' as datos;
 
 void main() {
+  testWidgets('cerrar el detalle descarta una carga tardía de descensos', (
+    t,
+  ) async {
+    await t.binding.setSurfaceSize(const Size(1440, 900));
+    addTearDown(() => t.binding.setSurfaceSize(null));
+    final descensos = Completer<http.Response>();
+    var consultasDescensos = 0;
+    final transporte = MockClient((r) async {
+      final ruta = r.url.path;
+      if (ruta.endsWith('/auth/login')) {
+        return http.Response(
+          '{"access_token":"token","token_type":"bearer","roles":["administrador"]}',
+          200,
+        );
+      }
+      if (ruta.endsWith('/viajes')) {
+        return http.Response(jsonEncode([datos.viaje(41)]), 200);
+      }
+      if (ruta.endsWith('/recorridos/3/paradas')) {
+        return http.Response('[]', 200);
+      }
+      if (ruta.endsWith('/viajes/41/descensos')) {
+        consultasDescensos++;
+        return descensos.future;
+      }
+      return http.Response('[]', 200);
+    });
+    await t.pumpWidget(
+      VanFullBootstrap(
+        apiBaseUrl: 'https://vanfull.test/api/',
+        crearTransporte: () => transporte,
+      ),
+    );
+    await t.enterText(find.byType(TextField).at(0), 'admin@vanfull.test');
+    await t.enterText(find.byType(TextField).at(1), 'sintetica');
+    await t.tap(find.text('Ingresar'));
+    await t.pumpAndSettle();
+    await t.tap(find.text('41'));
+    await t.pumpAndSettle();
+    await t.tap(find.text('Configurar descensos'));
+    await t.pump();
+    expect(consultasDescensos, 1);
+    await t.tap(find.text('Cerrar'));
+    await t.pumpAndSettle();
+    await tocarMenuAdmin(t, DestinoAdmin.reservas.clave);
+    await t.pumpAndSettle();
+    expect(find.byType(ConsultarReservasAdminScreen), findsOneWidget);
+
+    descensos.complete(http.Response('{"ordenes":[]}', 200));
+    await t.pumpAndSettle();
+
+    expect(find.text('Descensos habilitados'), findsNothing);
+    expect(find.byType(ConsultarReservasAdminScreen), findsOneWidget);
+    await tocarMenuAdmin(t, DestinoAdmin.viajes.clave);
+    await t.pumpAndSettle();
+    await t.tap(find.text('41'));
+    await t.pumpAndSettle();
+    await t.tap(find.text('Configurar descensos'));
+    await t.pumpAndSettle();
+    expect(consultasDescensos, 2);
+    expect(find.text('Descensos habilitados'), findsOneWidget);
+  });
+
+  testWidgets('guardar descensos durante el cierre conserva el detalle', (
+    t,
+  ) async {
+    await t.binding.setSurfaceSize(const Size(1440, 900));
+    addTearDown(() => t.binding.setSurfaceSize(null));
+    final respuestaPatch = Completer<http.Response>();
+    var guardados = 0;
+    final transporte = MockClient((r) async {
+      final ruta = r.url.path;
+      if (ruta.endsWith('/auth/login')) {
+        return http.Response(
+          '{"access_token":"token","token_type":"bearer","roles":["administrador"]}',
+          200,
+        );
+      }
+      if (ruta.endsWith('/viajes')) {
+        return http.Response(jsonEncode([datos.viaje(41)]), 200);
+      }
+      if (ruta.endsWith('/viajes/41/descensos')) {
+        if (r.method == 'PATCH') {
+          guardados++;
+          return respuestaPatch.future;
+        }
+        return http.Response('{"ordenes":[]}', 200);
+      }
+      return http.Response('[]', 200);
+    });
+    await t.pumpWidget(
+      VanFullBootstrap(
+        apiBaseUrl: 'https://vanfull.test/api/',
+        crearTransporte: () => transporte,
+      ),
+    );
+    await t.enterText(find.byType(TextField).at(0), 'admin@vanfull.test');
+    await t.enterText(find.byType(TextField).at(1), 'sintetica');
+    await t.tap(find.text('Ingresar'));
+    await t.pumpAndSettle();
+    await t.tap(find.text('41'));
+    await t.pumpAndSettle();
+    final configurar = find.text('Configurar descensos');
+    final dialogo = find.byType(DescensosViajeDialog);
+
+    await t.tap(configurar);
+    await t.pumpAndSettle();
+    final contextoDialogo = t.element(dialogo);
+    final rutaDialogo = ModalRoute.of(contextoDialogo)!;
+    await t.tap(find.text('Guardar'));
+    await t.pump();
+    expect(guardados, 1);
+    expect(rutaDialogo.isCurrent, isTrue);
+
+    await t.tapAt(const Offset(8, 8));
+    await t.pump();
+    await t.pump(const Duration(milliseconds: 20));
+    // El contexto aún existe, pero la ruta ya está saliendo.
+    expect(contextoDialogo.mounted, isTrue);
+    expect(rutaDialogo.isCurrent, isFalse);
+    respuestaPatch.complete(http.Response('{"ordenes":[]}', 200));
+    await t.pumpAndSettle();
+
+    expect(dialogo, findsNothing);
+    expect(configurar, findsOneWidget);
+
+    await t.tap(configurar);
+    await t.pumpAndSettle();
+    await t.tap(find.text('Guardar'));
+    await t.pumpAndSettle();
+    expect(guardados, 2);
+    expect(dialogo, findsNothing);
+    expect(configurar, findsOneWidget);
+  });
+
   const pantallas = {
     DestinoAdmin.viajes: ViajesDiaAdminScreen,
     DestinoAdmin.historial: HistorialViajesScreen,

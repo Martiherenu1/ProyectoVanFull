@@ -1,5 +1,6 @@
 import '../../core/api/api_client.dart';
 import '../../models/gps/ubicacion_viaje.dart';
+import '../../models/gps/eta_reserva.dart';
 
 class UbicacionApi {
   const UbicacionApi(this._cliente);
@@ -27,6 +28,23 @@ class UbicacionApi {
             null) {
       throw const FormatException('Respuesta GPS inválida');
     }
+  }
+
+  Future<void> configurarDescensos(int idViaje, Set<int> ordenes) async {
+    await _cliente.patch('viajes/$idViaje/descensos', body: {'ordenes': ordenes.toList()});
+  }
+
+  Future<EtaReserva> consultarEta(int idReserva) async => EtaReserva.fromJson(
+    await _cliente.get('reservas/$idReserva/eta'),
+  );
+
+  Future<int> registrarPaso(int idViaje, int orden, String token) async {
+    final respuesta = await _cliente.post(
+      'viajes/$idViaje/paso-parada',
+      accessToken: token,
+      body: {'orden_parada': orden},
+    );
+    return (respuesta as Map)['orden_parada'] as int;
   }
 
   Future<UbicacionViaje> consultar(int id) async {

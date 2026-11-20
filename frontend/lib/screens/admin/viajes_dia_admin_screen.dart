@@ -25,6 +25,7 @@ class ViajesDiaAdminScreen extends StatefulWidget {
     required this.fecha,
     required this.cargarViajes,
     required this.onViajeSeleccionado,
+    this.onCrearViaje,
     this.actualizarViaje,
     this.configurarDescensos,
     this.cancelarViaje,
@@ -34,6 +35,7 @@ class ViajesDiaAdminScreen extends StatefulWidget {
   final DateTime fecha;
   final CargarViajesDelDia cargarViajes;
   final ValueChanged<int> onViajeSeleccionado;
+  final VoidCallback? onCrearViaje;
   final ActualizarViaje? actualizarViaje;
   final ValueChanged<ViajeResumen>? configurarDescensos;
   final Future<ViajeResumen> Function(int)? cancelarViaje;
@@ -152,20 +154,27 @@ class _ViajesDiaAdminScreenState extends State<ViajesDiaAdminScreen> {
                   spacing: AppSpacing.lg,
                   runSpacing: AppSpacing.sm,
                   children: [
-                    Text(
-                      'Fecha: ${fechaLegible(_fecha)}',
-                      style: AppTypography.h2.copyWith(color: AppColors.ink900),
-                    ),
                     OutlinedButton.icon(
                       key: const ValueKey('seleccionar-fecha-viajes'),
                       onPressed: _seleccionarFecha,
                       style: OutlinedButton.styleFrom(
-                        minimumSize: const Size(0, AppSpacing.adminRowHeight),
-                        tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                        minimumSize: const Size(0, AppSpacing.touchTarget),
                       ),
                       icon: const Icon(Icons.calendar_month_outlined),
-                      label: const Text('Cambiar fecha'),
+                      label: Text(
+                        'Fecha: ${fechaLegible(_fecha)}',
+                        style: AppTypography.data,
+                      ),
                     ),
+                    if (widget.onCrearViaje case final crear?)
+                      ElevatedButton(
+                        key: const Key('admin-crear-viaje'),
+                        onPressed: crear,
+                        style: ElevatedButton.styleFrom(
+                          minimumSize: const Size(0, AppSpacing.touchTarget),
+                        ),
+                        child: const Text('Crear viaje'),
+                      ),
                   ],
                 ),
               ),
@@ -215,101 +224,135 @@ class _ViajesDiaAdminScreenState extends State<ViajesDiaAdminScreen> {
     }
 
     return LayoutBuilder(
-      builder: (context, constraints) => Scrollbar(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.all(AppSpacing.lg),
-          child: SingleChildScrollView(
-            scrollDirection: Axis.horizontal,
-            child: ConstrainedBox(
-              constraints: BoxConstraints(
-                minWidth: constraints.maxWidth - AppSpacing.lg * 2,
-              ),
-              child: DataTable(
-                decoration: BoxDecoration(
-                  color: AppColors.paper,
-                  border: Border.all(color: AppColors.ink200, width: 2),
-                  borderRadius: BorderRadius.circular(AppSpacing.borderRadius),
-                ),
-                headingRowColor: const WidgetStatePropertyAll(AppColors.ink100),
-                headingTextStyle: AppTypography.small.copyWith(
-                  color: AppColors.ink600,
-                  fontWeight: FontWeight.w600,
-                ),
-                dataTextStyle: AppTypography.small.copyWith(
-                  color: AppColors.ink900,
-                ),
-                columnSpacing: AppSpacing.xl,
-                horizontalMargin: AppSpacing.lg,
-                headingRowHeight: AppSpacing.adminRowHeight,
-                dataRowMinHeight: AppSpacing.adminRowHeight,
-                dataRowMaxHeight: AppSpacing.adminRowHeight,
-                showCheckboxColumn: false,
-                columns: const [
-                  DataColumn(label: Text('Hora')),
-                  DataColumn(label: Text('Viaje'), numeric: true),
-                  DataColumn(label: Text('Sentido')),
-                  DataColumn(label: Text('Estado')),
-                  DataColumn(label: Text('Servicio'), numeric: true),
-                  DataColumn(label: Text('Recorrido'), numeric: true),
-                  DataColumn(label: Text('Vehículo'), numeric: true),
-                  DataColumn(label: Text('Chofer'), numeric: true),
-                ],
-                rows: [
-                  for (final viaje in _viajes)
-                    DataRow(
-                      key: ValueKey('viaje-${viaje.idViaje}'),
-                      onSelectChanged: (_) => _seleccionarViaje(viaje),
-                      cells: [
-                        DataCell(
-                          Text(
-                            viaje.horario ?? 'Sin horario',
-                            style: AppTypography.data,
-                          ),
+      builder: (context, constraints) => constraints.maxWidth < 600
+          ? _listaCompacta()
+          : Scrollbar(
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.all(AppSpacing.lg),
+                child: SingleChildScrollView(
+                  scrollDirection: Axis.horizontal,
+                  child: ConstrainedBox(
+                    constraints: BoxConstraints(
+                      minWidth: constraints.maxWidth - AppSpacing.lg * 2,
+                    ),
+                    child: DataTable(
+                      decoration: BoxDecoration(
+                        color: AppColors.paper,
+                        border: Border.all(color: AppColors.ink200, width: 2),
+                        borderRadius: BorderRadius.circular(
+                          AppSpacing.borderRadius,
                         ),
-                        DataCell(
-                          Text(
-                            viaje.idViaje.toString(),
-                            style: AppTypography.data,
+                      ),
+                      headingRowColor: const WidgetStatePropertyAll(
+                        AppColors.ink100,
+                      ),
+                      headingTextStyle: AppTypography.small.copyWith(
+                        color: AppColors.ink600,
+                        fontWeight: FontWeight.w600,
+                      ),
+                      dataTextStyle: AppTypography.small.copyWith(
+                        color: AppColors.ink900,
+                      ),
+                      columnSpacing: AppSpacing.xl,
+                      horizontalMargin: AppSpacing.lg,
+                      headingRowHeight: AppSpacing.adminRowHeight,
+                      dataRowMinHeight: AppSpacing.adminRowHeight,
+                      dataRowMaxHeight: AppSpacing.adminRowHeight,
+                      showCheckboxColumn: false,
+                      columns: const [
+                        DataColumn(label: Text('Hora')),
+                        DataColumn(label: Text('Viaje'), numeric: true),
+                        DataColumn(label: Text('Sentido')),
+                        DataColumn(label: Text('Estado')),
+                        DataColumn(label: Text('Servicio'), numeric: true),
+                        DataColumn(label: Text('Recorrido'), numeric: true),
+                        DataColumn(label: Text('Vehículo'), numeric: true),
+                        DataColumn(label: Text('Chofer'), numeric: true),
+                      ],
+                      rows: [
+                        for (final viaje in _viajes)
+                          DataRow(
+                            key: ValueKey('viaje-${viaje.idViaje}'),
+                            onSelectChanged: (_) => _seleccionarViaje(viaje),
+                            cells: [
+                              DataCell(
+                                Text(
+                                  viaje.horario ?? 'Sin horario',
+                                  style: AppTypography.data,
+                                ),
+                              ),
+                              DataCell(
+                                Text(
+                                  viaje.idViaje.toString(),
+                                  style: AppTypography.data,
+                                ),
+                              ),
+                              DataCell(Text(viaje.sentido.etiqueta)),
+                              DataCell(_EstadoViajeAdmin(viaje.estado)),
+                              DataCell(
+                                Text(
+                                  'ID ${viaje.idServicio}',
+                                  style: AppTypography.data,
+                                ),
+                              ),
+                              DataCell(
+                                Text(
+                                  'ID ${viaje.idRecorrido}',
+                                  style: AppTypography.data,
+                                ),
+                              ),
+                              DataCell(
+                                _asignacion(
+                                  tipo: 'Vehículo',
+                                  id: viaje.idVehiculo,
+                                  viaje: viaje.idViaje,
+                                ),
+                              ),
+                              DataCell(
+                                _asignacion(
+                                  tipo: 'Chofer',
+                                  id: viaje.idChofer,
+                                  viaje: viaje.idViaje,
+                                ),
+                              ),
+                            ],
                           ),
-                        ),
-                        DataCell(Text(viaje.sentido.etiqueta)),
-                        DataCell(_EstadoViajeAdmin(viaje.estado)),
-                        DataCell(
-                          Text(
-                            'ID ${viaje.idServicio}',
-                            style: AppTypography.data,
-                          ),
-                        ),
-                        DataCell(
-                          Text(
-                            'ID ${viaje.idRecorrido}',
-                            style: AppTypography.data,
-                          ),
-                        ),
-                        DataCell(
-                          _asignacion(
-                            tipo: 'Vehículo',
-                            id: viaje.idVehiculo,
-                            viaje: viaje.idViaje,
-                          ),
-                        ),
-                        DataCell(
-                          _asignacion(
-                            tipo: 'Chofer',
-                            id: viaje.idChofer,
-                            viaje: viaje.idViaje,
-                          ),
-                        ),
                       ],
                     ),
-                ],
+                  ),
+                ),
               ),
             ),
-          ),
-        ),
-      ),
     );
   }
+
+  Widget _listaCompacta() => ListView.separated(
+    padding: const EdgeInsets.all(AppSpacing.lg),
+    itemCount: _viajes.length,
+    separatorBuilder: (context, index) => const Divider(height: 1),
+    itemBuilder: (context, index) {
+      final viaje = _viajes[index];
+      return Material(
+        color: AppColors.paper,
+        child: ListTile(
+          key: ValueKey('viaje-${viaje.idViaje}'),
+          title: Text(
+            viaje.horario ?? 'Sin horario',
+            style: AppTypography.data,
+          ),
+          subtitle: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text('Viaje ${viaje.idViaje} · ${viaje.sentido.etiqueta}'),
+              _EstadoViajeAdmin(viaje.estado),
+            ],
+          ),
+          trailing: const Icon(Icons.chevron_right),
+          onTap: () => _seleccionarViaje(viaje),
+        ),
+      );
+    },
+  );
 
   Widget _asignacion({
     required String tipo,

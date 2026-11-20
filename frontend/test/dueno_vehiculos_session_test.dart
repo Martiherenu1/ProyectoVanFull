@@ -11,6 +11,8 @@ import 'package:http/testing.dart';
 import 'admin_vehiculos_session_test.dart' as base;
 import 'services/admin/vehiculos_admin_api_test.dart' as datos;
 
+import 'admin_menu_helpers.dart';
+
 http.Response fallo(int status) => http.Response(
   jsonEncode({
     'error': {'codigo': 'PRUEBA', 'mensaje': 'Error informado'},
@@ -59,7 +61,7 @@ void main() {
         });
         await montar(t, transporte);
         await base.login(t);
-        await t.tap(find.byKey(const Key('admin-vehiculos')));
+        await tocarMenuAdmin(t, const Key('admin-vehiculos'));
         await t.pumpAndSettle();
         if (status == 401) {
           expect(find.text('Ingresar'), findsOneWidget);
@@ -82,6 +84,7 @@ void main() {
           await t.pageBack();
           await t.pumpAndSettle();
           expect(find.byKey(const Key('admin-crear-viaje')), findsOneWidget);
+          await abrirMenuAdmin(t);
           expect(
             find.byKey(const Key('admin-administradores')),
             findsOneWidget,
@@ -119,7 +122,7 @@ void main() {
       });
       await montar(t, transporte);
       await base.login(t);
-      await t.tap(find.byKey(const Key('admin-vehiculos')));
+      await tocarMenuAdmin(t, const Key('admin-vehiculos'));
       await t.pumpAndSettle();
       await t.tap(find.byKey(const Key('registrar-vehiculo')));
       await t.pumpAndSettle();
@@ -167,7 +170,7 @@ void main() {
         await t.tap(find.text('Ingresar'));
         await t.pump();
         await t.pump(const Duration(milliseconds: 400));
-        await t.tap(find.byKey(const Key('admin-vehiculos')));
+        await tocarMenuAdmin(t, const Key('admin-vehiculos'));
         await t.pump();
         await t.pump(const Duration(milliseconds: 400));
         final cargar = t
@@ -175,7 +178,7 @@ void main() {
             .cargar;
         await t.pageBack();
         await t.pumpAndSettle();
-        await t.tap(find.byKey(const Key('admin-salir')));
+        await tocarMenuAdmin(t, const Key('admin-salir'));
         await t.pumpAndSettle();
         await base.login(t);
         pendiente.complete(
@@ -184,6 +187,7 @@ void main() {
               : fallo(status),
         );
         await t.pumpAndSettle();
+        await abrirMenuAdmin(t);
         expect(find.byKey(const Key('admin-vehiculos')), findsOneWidget);
         expect(find.text('VF022AA'), findsNothing);
         expect(find.text('Ingresar'), findsNothing);

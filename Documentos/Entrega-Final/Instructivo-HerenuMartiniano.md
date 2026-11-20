@@ -145,7 +145,7 @@ pantalla inicial.
 
 | Pantalla | Para qué sirve |
 |---|---|
-| Viajes del día | Elegir una fecha y ver sus viajes, con el vehículo y el chofer de cada uno |
+| Viajes del día | Elegir una fecha y ver sus viajes, con el vehículo y el chofer de cada uno. Al abrir un viaje se puede **editarlo** (incluye asignar o cambiar chofer y vehículo) o **cancelarlo** si está programado |
 | Crear viaje | Dar de alta un viaje: servicio, recorrido, fecha, sentido y, si se quiere, vehículo, chofer, horario y capacidad |
 | Recorridos | Crear recorridos y editar sus paradas |
 | Choferes y Vehículos | Registrar, listar, consultar y modificar |

@@ -25,15 +25,18 @@ class _DescensosViajeDialogState extends State<DescensosViajeDialog> {
   String? _error;
 
   Future<void> _guardar() async {
+    final ruta = ModalRoute.of(context);
     setState(() {
       _guardando = true;
       _error = null;
     });
     try {
       await widget.guardar(Set.unmodifiable(_elegidas));
-      if (mounted) Navigator.of(context).pop();
+      if (mounted && ruta != null && ruta.isActive && ruta.isCurrent) {
+        Navigator.of(context).pop();
+      }
     } catch (error) {
-      if (!mounted) return;
+      if (!mounted || ruta?.isActive != true) return;
       setState(() {
         _guardando = false;
         _error = error is ApiException ? error.mensaje : 'No se pudo guardar.';

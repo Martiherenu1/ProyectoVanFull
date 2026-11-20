@@ -70,7 +70,18 @@ def test_descenso_explicito_paso_y_fin(recorrido, monkeypatch):
     assert http.get(descensos, headers=pasajero).json() == {"ordenes": [3]}
 
     datos = {"id_viaje": viaje, "orden_parada": 2, "orden_descenso": 2}
-    assert http.post("/api/reservas", headers=pasajero, json=datos).status_code == 400
+    for ascenso, descenso in [(1, 2), (3, 3)]:
+        invalida = http.post(
+            "/api/reservas",
+            headers=pasajero,
+            json={**datos, "orden_parada": ascenso, "orden_descenso": descenso},
+        )
+        assert invalida.status_code == 400
+        assert invalida.json()["error"] == {
+            "codigo": "PARADA_NO_VALIDA",
+            "mensaje": "Elegí un descenso habilitado después del ascenso.",
+            "detalles": {"orden_descenso": descenso},
+        }
     reserva = http.post("/api/reservas", headers=pasajero, json={**datos, "orden_descenso": 3})
     assert reserva.status_code == 201, reserva.text
     assert reserva.json()["orden_descenso"] == 3
@@ -83,14 +94,21 @@ def test_descenso_explicito_paso_y_fin(recorrido, monkeypatch):
         "/api/reservas", headers=otro_pasajero, json={"id_viaje": viaje, "orden_parada": 2}
     )
     assert sin_descenso.status_code == 201, sin_descenso.text
-    assert (
-        http.post(
-            f"/api/reservas/{reserva.json()['id_reserva']}/cambio-parada",
-            headers=pasajero,
-            json={"orden_parada": 3},
-        ).status_code
-        == 400
+    ascenso_invalido = http.post(
+        f"/api/reservas/{reserva.json()['id_reserva']}/cambio-parada",
+        headers=pasajero,
+        json={"orden_parada": 3},
     )
+    assert ascenso_invalido.status_code == 400
+    assert ascenso_invalido.json()["error"] == {
+        "codigo": "PARADA_NO_VALIDA",
+        "mensaje": "Elegí un ascenso anterior al descenso de tu reserva.",
+        "detalles": {"orden_descenso": 3},
+    }
+    detalle_chofer = f"/api/choferes/me/viajes/{viaje}"
+    detalle = http.get(detalle_chofer, headers=chofer)
+    assert detalle.status_code == 200
+    assert detalle.json()["orden_ultimo_paso"] is None
     assert http.post(f"/api/viajes/{viaje}/inicio", headers=chofer).status_code == 200
     ubicacion = f"/api/viajes/{viaje}/ubicacion"
     assert (
@@ -140,6 +158,10 @@ def test_descenso_explicito_paso_y_fin(recorrido, monkeypatch):
         assert http.post(paso, headers=chofer, json={"orden_parada": 1}).json() == {
             "orden_parada": 2
         }
+
+        reabierto = http.get(detalle_chofer, headers=chofer)
+        assert reabierto.status_code == 200
+        assert reabierto.json()["orden_ultimo_paso"] == 2
 
         sin_posicion_nueva = http.get(ruta, headers=pasajero).json()
         assert sin_posicion_nueva["ascenso_pasado"]

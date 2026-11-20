@@ -2117,8 +2117,10 @@ paths:
                 $ref: '#/components/schemas/Reserva'
         '400':
           description: >-
-            Cuerpo inválido, o `orden_parada` que no pertenece al recorrido del viaje
-            (`PARADA_NO_VALIDA`).
+            Cuerpo inválido (`VALIDACION`). Si `orden_parada` no pertenece al recorrido,
+            devuelve `PARADA_NO_VALIDA`. Si el descenso no está habilitado para el viaje
+            o no es posterior al ascenso, devuelve `PARADA_NO_VALIDA` con
+            `error.detalles.orden_descenso` igual al descenso solicitado.
           content:
             application/json:
               schema:
@@ -2230,8 +2232,10 @@ paths:
                 $ref: '#/components/schemas/Reserva'
         '400':
           description: >-
-            Cuerpo inválido, o `orden_parada` que no pertenece al recorrido del viaje
-            (`PARADA_NO_VALIDA`).
+            Cuerpo inválido (`VALIDACION`). Si `orden_parada` no pertenece al recorrido,
+            devuelve `PARADA_NO_VALIDA`. Si el nuevo ascenso coincide con el descenso
+            elegido o es posterior, devuelve `PARADA_NO_VALIDA` con
+            `error.detalles.orden_descenso` igual al descenso elegido en la reserva.
           content:
             application/json:
               schema:
@@ -4735,6 +4739,11 @@ components:
           minimum: 0
           nullable: true
           description: Valor de viaje.capacidad_planificada; no es cupo disponible.
+        orden_ultimo_paso:
+          type: integer
+          minimum: 1
+          nullable: true
+          description: Orden de la última parada cuyo paso fue confirmado, o null al comienzo.
         paradas:
           type: array
           description: Paradas de viaje.id_recorrido, ordenadas por orden ascendente.

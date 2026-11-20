@@ -44,6 +44,7 @@ class PasajeroApi {
         codigo: e.codigo,
         mensaje: e.mensaje,
         listaEspera: e.detalles?['lista_espera'] == true,
+        ordenDescenso: e.detalles?['orden_descenso'] as int?,
       );
     }
     throw e;

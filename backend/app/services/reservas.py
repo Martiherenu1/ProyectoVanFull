@@ -181,7 +181,10 @@ async def crear_reserva(db: AsyncSession, usuario: UsuarioActual, datos: Reserva
         destino = await db.get(DescensoHabilitado, (viaje.id_viaje, datos.orden_descenso))
         if destino is None or datos.orden_descenso <= datos.orden_parada:
             raise ApiError(
-                400, "PARADA_NO_VALIDA", "Elegí un descenso habilitado después del ascenso."
+                400,
+                "PARADA_NO_VALIDA",
+                "Elegí un descenso habilitado después del ascenso.",
+                {"orden_descenso": datos.orden_descenso},
             )
 
     # RN-031 / A2: una sola reserva de ida y una de vuelta por día. Una cancelada no cuenta.
@@ -397,7 +400,12 @@ async def cambiar_parada(
         raise ApiError(409, "PARADA_SIN_CAMBIOS", "La reserva ya tiene esa parada.")
 
     if reserva.orden_descenso is not None and datos.orden_parada >= reserva.orden_descenso:
-        raise ApiError(400, "PARADA_NO_VALIDA", "El ascenso debe ser anterior al descenso elegido.")
+        raise ApiError(
+            400,
+            "PARADA_NO_VALIDA",
+            "Elegí un ascenso anterior al descenso de tu reserva.",
+            {"orden_descenso": reserva.orden_descenso},
+        )
 
     reserva.orden_parada = datos.orden_parada
     await db.flush()

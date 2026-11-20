@@ -40,6 +40,7 @@ class CantidadesOperacion(BaseModel):
 class OperacionAsignada(BaseModel):
     viaje: Viaje
     capacidad_planificada: int | None
+    orden_ultimo_paso: int | None = Field(default=None, ge=1)
     paradas: list[Parada]
     pasajeros_con_reserva: list[PasajeroOperacion]
     integrantes_nomina: list[IntegranteNominaOperacion]

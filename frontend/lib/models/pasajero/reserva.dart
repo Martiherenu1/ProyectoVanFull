@@ -82,6 +82,7 @@ class ReservaRechazada implements Exception {
     required this.codigo,
     required this.mensaje,
     this.listaEspera = false,
+    this.ordenDescenso,
   });
 
   factory ReservaRechazada.fromJson(Map<String, dynamic> json) {
@@ -91,6 +92,7 @@ class ReservaRechazada implements Exception {
       codigo: error['codigo'] as String,
       mensaje: error['mensaje'] as String,
       listaEspera: detalles?['lista_espera'] == true,
+      ordenDescenso: detalles?['orden_descenso'] as int?,
     );
   }
 
@@ -103,6 +105,9 @@ class ReservaRechazada implements Exception {
   /// `detalles.lista_espera` del 409 de cupo. La incorporación a la lista no
   /// tiene operación todavía (Issue #34).
   final bool listaEspera;
+
+  /// Descenso implicado en un PARADA_NO_VALIDA al crear o cambiar el ascenso.
+  final int? ordenDescenso;
 
   @override
   String toString() => 'ReservaRechazada($codigo)';

@@ -1,6 +1,6 @@
 # CONTEXTO VANFULL — Carga rápida de sesión
 
-> **CU-009 / ETA, 19/11/2026:** candidato #327 con descenso por reserva, paso confirmado por chofer y estimaciones separadas en «Ver ubicación». La revisión de Martiniano precisó el contrato y dos restricciones de integridad que incorpora la migración 0004. Quedan pendientes la confirmación de Facundo sobre #283, la política de vigencia y consultas a Routes, y la coordinación del despliegue. [Contexto de chofer y viaje en curso](PC2/CONTEXTO-chofer-y-viaje.md#eta-del-pasajero--19112026).
+> **CU-009 / ETA, 19/11/2026:** candidato #327 con descenso por reserva, paso confirmado por chofer y estimaciones separadas en «Ver ubicación». La revisión de Martiniano precisó el contrato y dos restricciones de integridad que incorpora la migración 0004. La revisión de Facundo sobre `a46a944` detectó tres regresiones Flutter y un desajuste de errores de reservas. La candidata corregida requiere revisión antes del merge y de acordar la ventana. También quedan pendientes los criterios funcionales de #283 y la política de vigencia y consultas a Routes. [Contexto de chofer y viaje en curso](PC2/CONTEXTO-chofer-y-viaje.md#eta-del-pasajero--19112026).
 
 > **P1 Administración / #323, 19/11/2026:** MarcoAdmin integrado en el piloto local sobre `00f58c2`, con navegación de administrador y dueño, Viajes del día y Crear viaje (CU-018). Detalle de la integración y evidencia en el [contexto de Administración](PC2/CONTEXTO-administracion-y-flutter.md).
 

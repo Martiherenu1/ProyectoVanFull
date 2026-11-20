@@ -881,16 +881,26 @@ class _EntradaAdministracionState extends State<_EntradaAdministracion> {
     );
   }
 
-  Future<void> _configurarDescensos(ViajeResumen viaje) async {
+  Future<void> _configurarDescensos(
+    BuildContext contextoDetalle,
+    ViajeResumen viaje,
+  ) async {
     final generacion = widget.controller.generacion;
-    bool vigente() => mounted && widget.controller.generacion == generacion && !_accesoDenegado;
+    final rutaDetalle = ModalRoute.of(contextoDetalle);
+    bool vigente() =>
+        mounted &&
+        contextoDetalle.mounted &&
+        widget.controller.generacion == generacion &&
+        !_accesoDenegado &&
+        rutaDetalle?.isActive == true;
+    bool detalleVisible() => vigente() && rutaDetalle?.isCurrent == true;
     try {
       final paradas = await widget.paradas.cargarParadas(viaje.idRecorrido);
-      if (!mounted || !vigente()) return;
+      if (!detalleVisible()) return;
       final ordenes = await widget.paradas.cargarDescensos(viaje.idViaje);
-      if (!mounted || !vigente()) return;
+      if (!contextoDetalle.mounted || !detalleVisible()) return;
       await showDialog<void>(
-        context: context,
+        context: contextoDetalle,
         builder: (_) => DescensosViajeDialog(
           paradas: paradas,
           iniciales: ordenes,
@@ -901,8 +911,8 @@ class _EntradaAdministracionState extends State<_EntradaAdministracion> {
         ),
       );
     } catch (_) {
-      if (mounted && vigente()) {
-        ScaffoldMessenger.of(context).showSnackBar(
+      if (contextoDetalle.mounted && detalleVisible()) {
+        ScaffoldMessenger.of(contextoDetalle).showSnackBar(
           const SnackBar(content: Text('No se pudieron cargar los descensos.')),
         );
       }

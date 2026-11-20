@@ -108,6 +108,9 @@ class _CambiarParadaScreenState extends State<CambiarParadaScreen> {
   _Aviso _avisoDe(Object error) {
     if (error is ReservaRechazada) {
       return switch (error.codigo) {
+        'PARADA_NO_VALIDA' when error.ordenDescenso != null => _Aviso(
+          error.mensaje,
+        ),
         'PARADA_NO_VALIDA' => const _Aviso(
           'Esa parada no pertenece al recorrido de tu viaje. '
           'Tu parada no cambió: elegí otra.',

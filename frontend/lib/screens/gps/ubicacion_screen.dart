@@ -223,9 +223,12 @@ class _UbicacionScreenState extends State<UbicacionScreen>
         try {
           eta = await estimar().timeout(const Duration(seconds: 5));
         } on ApiException catch (error) {
+          if (continuidad != _continuidad || !_activa || !_puedeAplicar(g)) {
+            return;
+          }
           if ([401, 403].contains(error.statusCode) ||
               (error.statusCode == 404 && error.codigo == 'ETA_NO_DISPONIBLE')) {
-            if (_puedeAplicar(g)) _retirar();
+            _retirar();
             return;
           }
         } catch (_) {

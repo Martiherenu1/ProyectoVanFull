@@ -142,6 +142,9 @@ class _ConfirmarReservaScreenState extends State<ConfirmarReservaScreen> {
           'Este viaje ya no admite reservas.',
           definitivo: true,
         ),
+        'PARADA_NO_VALIDA' when error.ordenDescenso != null => _Aviso(
+          error.mensaje,
+        ),
         'PARADA_NO_VALIDA' => const _Aviso(
           'Esa parada no pertenece a este viaje. Elegí otra.',
         ),

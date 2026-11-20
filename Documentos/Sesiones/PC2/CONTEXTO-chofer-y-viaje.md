@@ -2,6 +2,10 @@
 
 ## ETA del pasajero · 19/11/2026
 
+- Correcciones tras la revisión de Facundo sobre `a46a944`: el diálogo de descensos solo se abre desde el detalle visible que inició la carga. El detalle de chofer lee `orden_ultimo_paso` del viaje persistido. La consulta ETA de una continuidad anterior a la reanudación pierde vigencia.
+- Los rechazos 400 de alta y cambio de ascenso que involucran el descenso informan `error.detalles.orden_descenso`. OpenAPI y Flutter reflejan el motivo.
+- Verificación local de la candidata sobre `a46a944`: 1.127 pruebas Flutter y 1.182 pruebas de backend con PostgreSQL 16 aislado. Análisis Flutter, Ruff y equivalencia OpenAPI YAML/JSON aprobados.
+
 - CU-009, RF-022 y RN-030. Base de trabajo `289d2e8`. El piloto Python del viaje 16 probó GPS y Google Routes con VanFull → YPF Bella Vista → UADE, y Martín verificó en Chrome la reproducción de esos valores en Flutter. El retiro del ETA a YPF se ensayó con un cambio de etapa manual.
 - **Candidato para revisión del equipo.** Migración 0003: habilitación de descensos por viaje programado, referencia de descenso opcional por reserva y avance del vehículo con fecha. El pasajero elige una parada habilitada posterior al ascenso. Las reservas existentes mantienen descenso nulo y conservan el ETA de ascenso cuando corresponde. La elección y el cambio de ascenso se validan sin tocar tarifas, cupo ni checkout.
 - El chofer asignado confirma manualmente el paso en el detalle del viaje. Los reintentos conservan el avance; al avanzar se espera una posición GPS posterior al paso. Se retira cada ETA cuando el vehículo pasa por esa parada. Confirmar el paso no registra abordaje ni descenso de un pasajero.

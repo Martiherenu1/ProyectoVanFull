@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
@@ -24,6 +25,69 @@ import 'admin_menu_helpers.dart';
 import 'services/admin/viajes_dia_admin_api_test.dart' as datos;
 
 void main() {
+  testWidgets('cerrar el detalle descarta una carga tardía de descensos', (
+    t,
+  ) async {
+    await t.binding.setSurfaceSize(const Size(1440, 900));
+    addTearDown(() => t.binding.setSurfaceSize(null));
+    final descensos = Completer<http.Response>();
+    var consultasDescensos = 0;
+    final transporte = MockClient((r) async {
+      final ruta = r.url.path;
+      if (ruta.endsWith('/auth/login')) {
+        return http.Response(
+          '{"access_token":"token","token_type":"bearer","roles":["administrador"]}',
+          200,
+        );
+      }
+      if (ruta.endsWith('/viajes')) {
+        return http.Response(jsonEncode([datos.viaje(41)]), 200);
+      }
+      if (ruta.endsWith('/recorridos/3/paradas')) {
+        return http.Response('[]', 200);
+      }
+      if (ruta.endsWith('/viajes/41/descensos')) {
+        consultasDescensos++;
+        return descensos.future;
+      }
+      return http.Response('[]', 200);
+    });
+    await t.pumpWidget(
+      VanFullBootstrap(
+        apiBaseUrl: 'https://vanfull.test/api/',
+        crearTransporte: () => transporte,
+      ),
+    );
+    await t.enterText(find.byType(TextField).at(0), 'admin@vanfull.test');
+    await t.enterText(find.byType(TextField).at(1), 'sintetica');
+    await t.tap(find.text('Ingresar'));
+    await t.pumpAndSettle();
+    await t.tap(find.text('41'));
+    await t.pumpAndSettle();
+    await t.tap(find.text('Configurar descensos'));
+    await t.pump();
+    expect(consultasDescensos, 1);
+    await t.tap(find.text('Cerrar'));
+    await t.pumpAndSettle();
+    await tocarMenuAdmin(t, DestinoAdmin.reservas.clave);
+    await t.pumpAndSettle();
+    expect(find.byType(ConsultarReservasAdminScreen), findsOneWidget);
+
+    descensos.complete(http.Response('{"ordenes":[]}', 200));
+    await t.pumpAndSettle();
+
+    expect(find.text('Descensos habilitados'), findsNothing);
+    expect(find.byType(ConsultarReservasAdminScreen), findsOneWidget);
+    await tocarMenuAdmin(t, DestinoAdmin.viajes.clave);
+    await t.pumpAndSettle();
+    await t.tap(find.text('41'));
+    await t.pumpAndSettle();
+    await t.tap(find.text('Configurar descensos'));
+    await t.pumpAndSettle();
+    expect(consultasDescensos, 2);
+    expect(find.text('Descensos habilitados'), findsOneWidget);
+  });
+
   const pantallas = {
     DestinoAdmin.viajes: ViajesDiaAdminScreen,
     DestinoAdmin.historial: HistorialViajesScreen,

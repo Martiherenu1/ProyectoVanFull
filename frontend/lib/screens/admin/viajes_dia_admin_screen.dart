@@ -20,6 +20,11 @@ typedef ActualizarViaje = Future<ViajeResumen> Function(
   ViajeUpdate solicitud,
 );
 
+typedef ConfigurarDescensos = Future<void> Function(
+  BuildContext contextoDetalle,
+  ViajeResumen viaje,
+);
+
 class ViajesDiaAdminScreen extends StatefulWidget {
   const ViajesDiaAdminScreen({
     required this.fecha,
@@ -37,7 +42,7 @@ class ViajesDiaAdminScreen extends StatefulWidget {
   final ValueChanged<int> onViajeSeleccionado;
   final VoidCallback? onCrearViaje;
   final ActualizarViaje? actualizarViaje;
-  final ValueChanged<ViajeResumen>? configurarDescensos;
+  final ConfigurarDescensos? configurarDescensos;
   final Future<ViajeResumen> Function(int)? cancelarViaje;
 
   @override
@@ -413,7 +418,7 @@ class _DetalleViajeAdminDialog extends StatefulWidget {
 
   final ViajeResumen viaje;
   final ActualizarViaje? actualizarViaje;
-  final ValueChanged<ViajeResumen>? configurarDescensos;
+  final ConfigurarDescensos? configurarDescensos;
   final Future<void> Function(ViajeResumen viaje) onActualizado;
   final Future<ViajeResumen> Function(int)? cancelarViaje;
 
@@ -426,6 +431,17 @@ class _DetalleViajeAdminDialogState extends State<_DetalleViajeAdminDialog> {
   late ViajeResumen _viaje = widget.viaje;
   bool _cancelando = false;
   String? _errorCancelacion;
+  bool _configurandoDescensos = false;
+
+  Future<void> _configurarDescensos() async {
+    if (_configurandoDescensos || !_detalleVigente) return;
+    setState(() => _configurandoDescensos = true);
+    try {
+      await widget.configurarDescensos!(context, _viaje);
+    } finally {
+      if (mounted) setState(() => _configurandoDescensos = false);
+    }
+  }
 
   bool get _detalleVigente =>
       mounted && (ModalRoute.of(context)?.isCurrent ?? false);
@@ -542,7 +558,9 @@ class _DetalleViajeAdminDialogState extends State<_DetalleViajeAdminDialog> {
     actions: [
       if (_viaje.estado == EstadoViaje.programado && widget.configurarDescensos != null)
         TextButton(
-          onPressed: _cancelando ? null : () => widget.configurarDescensos!(_viaje),
+          onPressed: _cancelando || _configurandoDescensos
+              ? null
+              : _configurarDescensos,
           child: const Text('Configurar descensos'),
         ),
       if (_viaje.estado == EstadoViaje.programado &&

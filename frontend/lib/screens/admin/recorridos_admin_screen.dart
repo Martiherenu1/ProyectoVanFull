@@ -189,7 +189,7 @@ class _EditorRecorridoState extends State<_EditorRecorrido> {
     for (final p in widget.existente?.paradas ?? const <ParadaDeRecorrido>[])
       _ItemEditor(p.idParada, p.etiqueta, p.comprometida),
   ];
-  late final List<int> _original = _items.map((i) => i.idParada).toList();
+  late final List<int> _original;
   List<ParadaCatalogo> _catalogo = const [];
   bool _catalogoError = false;
   bool _enviando = false;
@@ -208,6 +208,7 @@ class _EditorRecorridoState extends State<_EditorRecorrido> {
   @override
   void initState() {
     super.initState();
+    _original = _items.map((i) => i.idParada).toList();
     _cargarCatalogo();
   }
 

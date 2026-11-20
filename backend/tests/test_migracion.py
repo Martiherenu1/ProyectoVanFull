@@ -61,12 +61,12 @@ def test_la_migracion_crea_lo_mismo_que_schema_sql(bases, que):
     )
 
 
-def test_la_migracion_tiene_35_tablas_y_55_fk(bases):
+def test_la_migracion_tiene_36_tablas_y_59_fk(bases):
     _, migrada = bases
     columnas = asyncio.run(consultar(migrada, CONSULTAS["columnas"]))
     constraints = asyncio.run(consultar(migrada, CONSULTAS["constraints"]))
-    assert len({fila[0] for fila in columnas}) == 35
-    assert len([fila for fila in constraints if fila[2] == "f"]) == 55
+    assert len({fila[0] for fila in columnas}) == 36
+    assert len([fila for fila in constraints if fila[2] == "f"]) == 59
 
 
 def test_los_modelos_y_la_base_migrada_coinciden(bases):

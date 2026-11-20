@@ -82,6 +82,7 @@ class Settings(BaseSettings):
     mercadopago_checkout_return_url: str = ""
     mercadopago_checkout_webhook_url: str = ""
     google_maps_api_key: str = ""
+    google_routes_api_key: SecretStr = SecretStr("")
     whatsapp_token: str = ""
     whatsapp_phone_number_id: str = ""
 

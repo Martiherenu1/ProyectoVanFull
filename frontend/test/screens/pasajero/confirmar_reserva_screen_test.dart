@@ -2,11 +2,15 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:frontend/core/api/api_error.dart';
+import 'package:frontend/core/api/pasajero_api.dart';
 import 'package:frontend/models/pasajero/disponibilidad_viaje.dart';
 import 'package:frontend/models/pasajero/parada.dart';
 import 'package:frontend/models/pasajero/reserva.dart';
 import 'package:frontend/screens/pasajero/buscar_servicio_screen.dart';
 import 'package:frontend/screens/pasajero/confirmar_reserva_screen.dart';
+
+import '../../core/api/pasajero_api_test.dart' show ClienteFalso;
 
 DisponibilidadViaje viaje({String? horario = '06:15'}) =>
     DisponibilidadViaje.fromJson({
@@ -69,6 +73,48 @@ ElevatedButton botonConfirmar(WidgetTester tester) => tester
     .widget<ElevatedButton>(find.byKey(const ValueKey('confirmar-reserva')));
 
 void main() {
+  testWidgets('un descenso rechazado muestra el motivo al reservar', (
+    tester,
+  ) async {
+    const mensaje = 'Elegí un descenso habilitado después del ascenso.';
+    final cliente = ClienteFalso({
+      'POST reservas': () => throw const ApiException(
+        statusCode: 400,
+        codigo: 'PARADA_NO_VALIDA',
+        mensaje: mensaje,
+        detalles: {'orden_descenso': 3},
+      ),
+    });
+    final api = PasajeroApi(cliente);
+    await tester.pumpWidget(
+      MaterialApp(
+        home: ConfirmarReservaScreen(
+          viaje: viaje(),
+          cargarParadas: (_) async => paradasDelRecorrido,
+          crearReserva: api.crearReserva,
+          cargarDescensos: (_) async => {3},
+          crearReservaConDescenso: api.crearReserva,
+          onTerminar: (_) => fail('La reserva está rechazada'),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const ValueKey('parada-1')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byType(DropdownButton<int>));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Terminal de Ómnibus').last);
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const ValueKey('confirmar-reserva')));
+    await tester.pumpAndSettle();
+    expect(cliente.ultimoCuerpo, {
+      'id_viaje': 12,
+      'orden_parada': 1,
+      'orden_descenso': 3,
+    });
+    expect(find.text(mensaje), findsOneWidget);
+  });
+
   testWidgets('muestra el viaje y pide las paradas de su recorrido', (
     tester,
   ) async {

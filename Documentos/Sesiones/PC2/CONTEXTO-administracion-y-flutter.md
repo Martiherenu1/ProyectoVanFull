@@ -1,5 +1,18 @@
 # Contexto vivo · Administración y Flutter (Facundo)
 
+## P2 del diálogo de descensos / #327 — revisión de `5e91152`
+
+- La confirmación del PATCH cierra el diálogo de descensos solo si la ruta sigue activa y es la actual. Si el administrador lo descarta tocando afuera, la respuesta del PATCH durante la animación deja visible el detalle del viaje. La regresión reproduce esa secuencia con el transporte HTTP simulado y verifica también el guardado con el diálogo abierto.
+
+## P1 Administración / #323 — integración local sobre main 00f58c2 (19/11/2026)
+
+- MarcoAdmin centraliza los accesos por rol en barra lateral y cajón móvil. Registrar pago y Pagos pendientes tienen entradas separadas. Se conservan Choferes, Vehículos, los módulos de dueño, la sesión y el retorno desde los detalles.
+- Viajes del día usa un único selector de fecha, tabla en escritorio y filas compactas en móvil. Crear viaje (CU-018) agrupa el formulario y usa una columna en móvil. Las validaciones, los IDs, el envío y los permisos siguen el contrato vigente.
+- Se empaquetaron Archivo e IBM Plex Mono con sus licencias OFL. Chrome reproduce el piloto con las tipografías de marca aunque el entorno bloquee las descargas de Google Fonts.
+- Flutter completo: 1120 pruebas aprobadas. La integración cubre todos los destinos de ambos roles a 390 y 1440 px. Las pruebas de sesión incluyen respuestas tardías 200, 401 y 403 de la cuenta anterior.
+- Chrome con una API local de datos sintéticos: administrador a 1440 px y dueño a 390 px. Se verificaron el listado, el detalle y retorno, el formulario, Choferes, Vehículos y el cierre de sesión. Las capturas acompañan el diff local.
+- El índice del merge local coincide con el árbol de `00f58c2`. El diff del piloto se obtiene contra ese árbol. La CI de la futura rama publicada queda pendiente.
+
 ## CU-021 / #279 — retomada después del merge de #277 (19/11/2026)
 
 - Referencias verificadas: main `55ee8b5f7e0127ab8d76bcd84d657367ab8556ae`, #277 mergeada (HEAD dc67e54), #279 abierta en `2cfe1ed5e0f5f9a1b508e94f553095059db7af1c`. El corte anterior que pedía esperar a #277 queda superado por este estado.

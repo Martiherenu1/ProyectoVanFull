@@ -26,6 +26,7 @@ class PasajeroShell extends StatefulWidget {
     required this.api,
     required this.onSalir,
     this.pantallaUbicacion,
+    this.pantallaUbicacionReserva,
     this.checkout,
     this.abrirCheckout,
     this.checkoutDemoInitPoint,
@@ -48,6 +49,7 @@ class PasajeroShell extends StatefulWidget {
   /// Arma la pantalla de ubicación de un viaje. La compone `main.dart`, que
   /// conoce la sesión y el mapa; sin ella Mis reservas no ofrece «Ver ubicación».
   final Widget Function(int idViaje)? pantallaUbicacion;
+  final Widget Function(Reserva)? pantallaUbicacionReserva;
 
   @override
   State<PasajeroShell> createState() => _PasajeroShellState();
@@ -99,6 +101,8 @@ class _PasajeroShellState extends State<PasajeroShell> {
           viaje: viaje,
           cargarParadas: widget.api.cargarParadas,
           crearReserva: widget.api.crearReserva,
+          cargarDescensos: widget.api.cargarDescensos,
+          crearReservaConDescenso: widget.api.crearReserva,
           onTerminar: (_) {
             Navigator.of(contexto).pop();
             _ir(_reservas);
@@ -109,7 +113,8 @@ class _PasajeroShellState extends State<PasajeroShell> {
   }
 
   void _verUbicacion(Reserva reserva) {
-    final pantalla = widget.pantallaUbicacion!(reserva.idViaje);
+    final pantalla = widget.pantallaUbicacionReserva?.call(reserva) ??
+        widget.pantallaUbicacion!(reserva.idViaje);
     _abrirRuta(MaterialPageRoute<void>(builder: (_) => pantalla));
   }
 
@@ -211,7 +216,7 @@ class _PasajeroShellState extends State<PasajeroShell> {
             onBuscarServicio: () => _ir(_buscar),
             onRegistrarPago: _registrarPago,
             onCambiarParada: _cambiarParada,
-            onVerUbicacion: widget.pantallaUbicacion == null
+            onVerUbicacion: widget.pantallaUbicacion == null && widget.pantallaUbicacionReserva == null
                 ? null
                 : _verUbicacion,
           ),

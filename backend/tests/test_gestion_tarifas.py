@@ -81,8 +81,15 @@ def test_alta_con_solo_lo_obligatorio_omite_tipo_y_vigencia(entorno):
         {"importe": -1},
         {"importe": 10.123},
         {"importe": "mucho"},
+        {"importe": "12.50"},
+        {"importe": 10_000_000_000},
         {"tipo": "t" * 41},
+        {"tipo": None},
         {"fecha_vigencia": "no-es-fecha"},
+        {"fecha_vigencia": "2026-02-30"},
+        {"fecha_vigencia": "2026-11-19T00:00:00"},
+        {"fecha_vigencia": 0},
+        {"fecha_vigencia": None},
         {"descuento": 15},
     ],
 )
@@ -156,6 +163,17 @@ def test_modificar_permite_vaciar_tipo_y_vigencia_pero_no_nombre_ni_importe(ento
     assert cliente.patch(url, json={"id_tarifa": 1}, headers=DUENO).status_code == 400
     # Nada de lo rechazado cambió la tarifa.
     assert cliente.get(url, headers=DUENO).json()["nombre"] == creada["nombre"]
+
+
+@pytest.mark.parametrize("cambio", [{"importe": "12.50"}, {"fecha_vigencia": 0}])
+def test_modificar_rechaza_tipos_ajenos_al_contrato(entorno, cambio):
+    _, cliente = entorno
+    creada = _alta(cliente).json()
+    url = f"{RUTA}/{creada['id_tarifa']}"
+    respuesta = cliente.patch(url, json=cambio, headers=DUENO)
+    assert respuesta.status_code == 400
+    assert respuesta.json()["error"]["codigo"] == "VALIDACION"
+    assert cliente.get(url, headers=DUENO).json() == creada
 
 
 def test_modificar_una_tarifa_no_toca_las_contrataciones(entorno):

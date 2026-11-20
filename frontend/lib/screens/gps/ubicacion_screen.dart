@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import '../../core/api/api_error.dart';
 import '../../core/maps/configuracion_mapa.dart';
 import '../../models/gps/ubicacion_viaje.dart';
+import '../../models/gps/eta_reserva.dart';
 import '../../models/gps/vigencia_ubicacion.dart';
 import '../../widgets/gps/mapa_ultima_posicion.dart';
 
@@ -13,6 +14,8 @@ class UbicacionScreen extends StatefulWidget {
     required this.idViaje,
     required this.consultar,
     this.alcance,
+    this.consultarEta,
+    this.tieneDescenso = false,
     this.invalidaciones,
     this.contextoVigente,
     this.configuracionMapa,
@@ -26,6 +29,8 @@ class UbicacionScreen extends StatefulWidget {
   final Duration Function()? relojMonotono;
   final int idViaje;
   final Future<UbicacionViaje> Function(int) consultar;
+  final Future<EtaReserva> Function()? consultarEta;
+  final bool tieneDescenso;
 
   /// La composición autenticada los inyecta; opcionales para usos aislados.
   /// Solo retiran UI/resultados anteriores, no reemplazan autenticación.
@@ -47,6 +52,8 @@ class _UbicacionScreenState extends State<UbicacionScreen>
   int _continuidad = 0;
   bool _activa = true;
   UbicacionViaje? _posicion;
+  EtaReserva? _eta;
+  Duration? _venceEta;
   bool _cargando = false, _bloqueada = false, _enVuelo = false;
   bool _consultarAlTerminar = false;
   int _generacion = 0;
@@ -70,6 +77,7 @@ class _UbicacionScreenState extends State<UbicacionScreen>
     }
     if (oldWidget.idViaje != widget.idViaje ||
         oldWidget.consultar != widget.consultar ||
+        oldWidget.consultarEta != widget.consultarEta ||
         oldWidget.alcance != widget.alcance ||
         oldWidget.invalidaciones != widget.invalidaciones ||
         oldWidget.contextoVigente != widget.contextoVigente ||
@@ -91,7 +99,11 @@ class _UbicacionScreenState extends State<UbicacionScreen>
     if (!mounted) return;
     _continuidad++;
     _activa = state == AppLifecycleState.resumed;
-    setState(_vigencia.invalidarAncla);
+    setState(() {
+      _vigencia.invalidarAncla();
+      _eta = null;
+      _venceEta = null;
+    });
     if (_activa) {
       _consultarAlTerminar = _enVuelo;
       if (!_enVuelo) unawaited(_consultar());
@@ -114,6 +126,8 @@ class _UbicacionScreenState extends State<UbicacionScreen>
     _generacion++;
     _alcanceMapa = Object();
     _posicion = null;
+    _eta = null;
+    _venceEta = null;
     _vigencia.limpiar();
     _continuidad++;
     _error = null;
@@ -148,6 +162,8 @@ class _UbicacionScreenState extends State<UbicacionScreen>
     _alcanceMapa = Object();
     setState(() {
       _posicion = null;
+      _eta = null;
+      _venceEta = null;
       _cargando = false;
       _bloqueada = true;
       _error = 'Ubicación no disponible para esta sesión o viaje.';
@@ -200,6 +216,30 @@ class _UbicacionScreenState extends State<UbicacionScreen>
         _posicion = p;
         _error = null;
       });
+      final estimar = widget.consultarEta;
+      if (estimar != null && _activa && continuidad == _continuidad) {
+        final inicioEta = _ahora();
+        EtaReserva? eta;
+        try {
+          eta = await estimar().timeout(const Duration(seconds: 5));
+        } on ApiException catch (error) {
+          if (continuidad != _continuidad || !_activa || !_puedeAplicar(g)) {
+            return;
+          }
+          if ([401, 403].contains(error.statusCode) ||
+              (error.statusCode == 404 && error.codigo == 'ETA_NO_DISPONIBLE')) {
+            _retirar();
+            return;
+          }
+        } catch (_) {
+          // Si falla el cálculo, la ubicación disponible sigue en pantalla.
+        }
+        if (!_puedeAplicar(g) || continuidad != _continuidad) return;
+        setState(() {
+          _eta = eta;
+          _venceEta = eta == null || inicioEta == null ? null : inicioEta + eta.vigencia;
+        });
+      }
     } on ApiException catch (e) {
       if (!_puedeAplicar(g)) return;
       if (e.statusCode == 404 && e.codigo == 'UBICACION_NO_DISPONIBLE') {
@@ -245,6 +285,22 @@ class _UbicacionScreenState extends State<UbicacionScreen>
     super.dispose();
   }
 
+  List<Widget> _estimaciones() {
+    final ahora = _ahora();
+    final vence = _venceEta;
+    final vigente = ahora != null && vence != null && ahora < vence;
+    final eta = _eta;
+    String leyenda(int? minutos) => !vigente || minutos == null
+        ? 'No disponible'
+        : minutos == 0 ? '0 min (llegada sin confirmar)' : '$minutos min';
+    return [
+      if (!(eta?.ascensoPasado ?? false))
+        Text('ETA a tu parada: ${leyenda(eta?.ascenso)}'),
+      if (widget.tieneDescenso && !(eta?.destinoPasado ?? false))
+        Text('ETA a tu destino: ${leyenda(eta?.destino)}'),
+    ];
+  }
+
   @override
   Widget build(BuildContext context) => Scaffold(
     appBar: AppBar(title: const Text('Ubicación del viaje')),
@@ -260,7 +316,10 @@ class _UbicacionScreenState extends State<UbicacionScreen>
             Text('Fecha informada: ${p.fecha.toLocal()}'),
             Text(_vigencia.texto(_ahora())),
             const Text('La antigüedad real de captura no está verificada.'),
-            Text(
+            if (widget.consultarEta != null)
+              ..._estimaciones()
+            else
+              Text(
               p.etaMinutos == null
                   ? 'ETA no disponible.'
                   : 'ETA informado por el servidor: ${p.etaMinutos} min.',

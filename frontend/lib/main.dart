@@ -1,7 +1,9 @@
+import 'widgets/admin/marco_admin.dart';
 import 'services/chofer/avisos_api.dart';
 import 'services/pasajero/ausencias_api.dart';
 import 'screens/pasajero/accion_informar_ausencia.dart';
 import 'models/gps/ubicacion_viaje.dart';
+import 'models/pasajero/reserva.dart';
 import 'core/maps/configuracion_mapa.dart';
 import 'widgets/gps/mapa_ultima_posicion.dart';
 import 'adapters/chofer/captura_gps_android.dart';
@@ -32,6 +34,7 @@ import 'models/admin/viaje_update.dart';
 import 'models/chofer/operacion_asignada.dart';
 import 'models/chofer/viaje_resumen.dart';
 import 'screens/admin/crear_viaje_admin_screen.dart';
+import 'screens/admin/descensos_viaje_dialog.dart';
 import 'screens/admin/viajes_dia_admin_screen.dart';
 import 'screens/chofer/chofer_shell.dart';
 import 'screens/pasajero/pasajero_shell.dart';
@@ -224,6 +227,7 @@ class _VanFullBootstrapState extends State<VanFullBootstrap> {
     SesionController controller, {
     bool dueno = false,
   }) => _EntradaAdministracion(
+    paradas: _pasajero,
     controller: controller,
     listar: _viajesDiaAdmin,
     crear: _viajesAdmin,
@@ -268,7 +272,7 @@ class _VanFullBootstrapState extends State<VanFullBootstrap> {
   /// Ubicación del viaje de una reserva consolidada (RN-030). A diferencia de
   /// Administración, un 403 acá no cierra la sesión: significa que esa reserva
   /// no da acceso, y la pantalla lo muestra como «ubicación no disponible».
-  Widget _pantallaUbicacionPasajero(SesionController controller, int idViaje) {
+  Widget _pantallaUbicacionPasajero(SesionController controller, Reserva reserva) {
     final sesion = controller.sesion;
     final generacion = controller.generacion;
     bool vigente() =>
@@ -276,7 +280,12 @@ class _VanFullBootstrapState extends State<VanFullBootstrap> {
         controller.generacion == generacion &&
         identical(controller.sesion, sesion);
     return UbicacionScreen(
-      idViaje: idViaje,
+      idViaje: reserva.idViaje,
+      tieneDescenso: reserva.ordenDescenso != null,
+      consultarEta: () async {
+        if (!vigente()) throw StateError('La sesión de esta vista ya no está vigente.');
+        return _gpsApi.consultarEta(reserva.idReserva);
+      },
       consultar: (viaje) {
         if (!vigente()) {
           throw StateError('La sesión de esta vista ya no está vigente.');
@@ -321,8 +330,8 @@ class _VanFullBootstrapState extends State<VanFullBootstrap> {
             controller.generacion == generacion &&
             identical(controller.sesion, sesion),
         onSalir: controller.salir,
-        pantallaUbicacion: (idViaje) =>
-            _pantallaUbicacionPasajero(controller, idViaje),
+        pantallaUbicacionReserva: (reserva) =>
+            _pantallaUbicacionPasajero(controller, reserva),
       );
     },
     entradaAdministrador: _entradaAdministracion,
@@ -344,6 +353,7 @@ class _VanFullBootstrapState extends State<VanFullBootstrap> {
 
 class _EntradaAdministracion extends StatefulWidget {
   const _EntradaAdministracion({
+    required this.paradas,
     required this.controller,
     required this.listar,
     required this.crear,
@@ -381,6 +391,7 @@ class _EntradaAdministracion extends StatefulWidget {
   final VoidCallback onSalir;
   final AdministradoresAdminApi? administradores;
   final TarifasAdminApi? tarifas;
+  final PasajeroApi paradas;
   final RecorridosAdminApi? recorridos;
   final AbonosAdminApi? abonos;
   final HistorialViajesAdminApi? historial;
@@ -398,107 +409,67 @@ class _EntradaAdministracionState extends State<_EntradaAdministracion> {
           key: const Key('admin-acceso-denegado'),
           onSalir: widget.onSalir,
         )
-      : Stack(
-          children: [
-            ViajesDiaAdminScreen(
-              fecha: DateTime.now(),
-              cargarViajes: _cargarViajes,
-              onViajeSeleccionado: _abrirUbicacion,
-              actualizarViaje: _actualizarViaje,
-              cancelarViaje: _cancelarViaje,
-            ),
-            Positioned(
-              left: AppSpacing.lg,
-              right: AppSpacing.lg,
-              bottom: AppSpacing.lg,
-              child: SafeArea(
-                child: Wrap(
-                  alignment: WrapAlignment.end,
-                  spacing: AppSpacing.sm,
-                  runSpacing: AppSpacing.sm,
-                  children: [
-                    OutlinedButton(
-                      key: const Key('admin-salir'),
-                      onPressed: widget.onSalir,
-                      child: const Text('Cerrar sesión'),
-                    ),
-                    OutlinedButton(
-                      key: const Key('admin-pagos-pendientes'),
-                      onPressed: _abrirPagos,
-                      child: const Text('Pagos pendientes'),
-                    ),
-                    OutlinedButton(
-                      key: const Key('admin-consultar-reservas'),
-                      onPressed: _abrirReservas,
-                      child: const Text('Consultar reservas'),
-                    ),
-                    OutlinedButton(
-                      key: const Key('admin-registrar-pago'),
-                      onPressed: _abrirRegistroPago,
-                      child: const Text('Registrar pago'),
-                    ),
-                    if (widget.administradores != null)
-                      OutlinedButton(
-                        key: const Key('admin-administradores'),
-                        onPressed: _abrirAdministradores,
-                        child: const Text('Administradores'),
-                      ),
-                    if (widget.tarifas != null)
-                      OutlinedButton(
-                        key: const Key('admin-tarifas'),
-                        onPressed: _abrirTarifas,
-                        child: const Text('Tarifas'),
-                      ),
-                    if (widget.recorridos != null)
-                      OutlinedButton(
-                        key: const Key('admin-recorridos'),
-                        onPressed: _abrirRecorridos,
-                        child: const Text('Recorridos'),
-                      ),
-                    if (widget.abonos != null)
-                      OutlinedButton(
-                        key: const Key('admin-abonos'),
-                        onPressed: _abrirAbonos,
-                        child: const Text('Abonos'),
-                      ),
-                    if (widget.historial != null)
-                      OutlinedButton(
-                        key: const Key('admin-historial-viajes'),
-                        onPressed: _abrirHistorial,
-                        child: const Text('Historial de viajes'),
-                      ),
-                    OutlinedButton(
-                      key: const Key('admin-consultar-deuda'),
-                      onPressed: _abrirDeuda,
-                      child: const Text('Consultar deuda'),
-                    ),
-                    OutlinedButton(
-                      key: const Key('admin-vehiculos'),
-                      onPressed: _abrirVehiculos,
-                      child: const Text('Vehículos'),
-                    ),
-                    OutlinedButton(
-                      key: const Key('admin-choferes'),
-                      onPressed: _abrirChoferes,
-                      child: const Text('Choferes'),
-                    ),
-                    ElevatedButton.icon(
-                      key: const Key('admin-crear-viaje'),
-                      onPressed: () => Navigator.of(context).push(
-                        MaterialPageRoute<void>(
-                          builder: (_) =>
-                              CrearViajeAdminScreen(crearViaje: _crearViaje),
-                        ),
-                      ),
-                      icon: const Icon(Icons.add),
-                      label: const Text('Crear viaje'),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          ],
+      : _marco(
+          DestinoAdmin.viajes,
+          ViajesDiaAdminScreen(
+            fecha: DateTime.now(),
+            cargarViajes: _cargarViajes,
+            onViajeSeleccionado: _abrirUbicacion,
+            actualizarViaje: _actualizarViaje,
+            configurarDescensos: _configurarDescensos,
+            cancelarViaje: _cancelarViaje,
+            onCrearViaje: _abrirCrearViaje,
+          ),
         );
+
+  Widget _marco(DestinoAdmin activo, Widget child) {
+    final generacion = widget.controller.generacion;
+    final token = widget.controller.token;
+    void ir(VoidCallback? abrir) {
+      if (!mounted ||
+          _accesoDenegado ||
+          token == null ||
+          widget.controller.token != token ||
+          widget.controller.generacion != generacion) {
+        return;
+      }
+      Navigator.of(context).popUntil((route) => route.isFirst);
+      abrir?.call();
+    }
+
+    return MarcoAdmin(
+      activo: activo,
+      acciones: {
+        DestinoAdmin.viajes: () => ir(null),
+        if (widget.historial != null)
+          DestinoAdmin.historial: () => ir(_abrirHistorial),
+        DestinoAdmin.reservas: () => ir(_abrirReservas),
+        if (widget.recorridos != null)
+          DestinoAdmin.recorridos: () => ir(_abrirRecorridos),
+        DestinoAdmin.vehiculos: () => ir(_abrirVehiculos),
+        DestinoAdmin.choferes: () => ir(_abrirChoferes),
+        if (widget.abonos != null) DestinoAdmin.abonos: () => ir(_abrirAbonos),
+        if (widget.tarifas != null)
+          DestinoAdmin.tarifas: () => ir(_abrirTarifas),
+        if (widget.administradores != null)
+          DestinoAdmin.administradores: () => ir(_abrirAdministradores),
+        DestinoAdmin.registrarPago: () => ir(_abrirRegistroPago),
+        DestinoAdmin.pagosPendientes: () => ir(_abrirPagos),
+        DestinoAdmin.deuda: () => ir(_abrirDeuda),
+      },
+      onSalir: widget.onSalir,
+      child: child,
+    );
+  }
+
+  void _abrirCrearViaje() => Navigator.of(context).push(
+    MaterialPageRoute<void>(
+      builder: (_) => _marco(
+        DestinoAdmin.viajes,
+        CrearViajeAdminScreen(crearViaje: _crearViaje),
+      ),
+    ),
+  );
 
   void _abrirHistorial() {
     final controller = widget.controller;
@@ -528,9 +499,12 @@ class _EntradaAdministracionState extends State<_EntradaAdministracion> {
 
     Navigator.of(context).push(
       MaterialPageRoute<void>(
-        builder: (_) => HistorialViajesScreen(
-          listar: (filtros) => protegida((a) => a.listar(filtros)),
-          detalle: (id) => protegida((a) => a.detalle(id)),
+        builder: (_) => _marco(
+          DestinoAdmin.historial,
+          HistorialViajesScreen(
+            listar: (filtros) => protegida((a) => a.listar(filtros)),
+            detalle: (id) => protegida((a) => a.detalle(id)),
+          ),
         ),
       ),
     );
@@ -562,15 +536,18 @@ class _EntradaAdministracionState extends State<_EntradaAdministracion> {
 
     Navigator.of(context).push(
       MaterialPageRoute<void>(
-        builder: (_) => AbonosAdminScreen(
-          listar: (idPasajero) =>
-              protegida((a) => a.listar(idPasajero: idPasajero)),
-          listarServicios: () => protegida((a) => a.listarServicios()),
-          crear: (datos) => protegida((a) => a.crear(datos)),
-          modificar: (id, cambios) =>
-              protegida((a) => a.modificar(id, cambios)),
-          agregarPeriodo: (id, periodo) =>
-              protegida((a) => a.agregarPeriodo(id, periodo)),
+        builder: (_) => _marco(
+          DestinoAdmin.abonos,
+          AbonosAdminScreen(
+            listar: (idPasajero) =>
+                protegida((a) => a.listar(idPasajero: idPasajero)),
+            listarServicios: () => protegida((a) => a.listarServicios()),
+            crear: (datos) => protegida((a) => a.crear(datos)),
+            modificar: (id, cambios) =>
+                protegida((a) => a.modificar(id, cambios)),
+            agregarPeriodo: (id, periodo) =>
+                protegida((a) => a.agregarPeriodo(id, periodo)),
+          ),
         ),
       ),
     );
@@ -602,13 +579,16 @@ class _EntradaAdministracionState extends State<_EntradaAdministracion> {
 
     Navigator.of(context).push(
       MaterialPageRoute<void>(
-        builder: (_) => RecorridosAdminScreen(
-          listar: () => protegida((a) => a.listarRecorridos()),
-          listarParadas: () => protegida((a) => a.listarParadas()),
-          crearParada: (datos) => protegida((a) => a.crearParada(datos)),
-          crear: (ids) => protegida((a) => a.crearRecorrido(ids)),
-          reemplazar: (id, ids) =>
-              protegida((a) => a.reemplazarParadas(id, ids)),
+        builder: (_) => _marco(
+          DestinoAdmin.recorridos,
+          RecorridosAdminScreen(
+            listar: () => protegida((a) => a.listarRecorridos()),
+            listarParadas: () => protegida((a) => a.listarParadas()),
+            crearParada: (datos) => protegida((a) => a.crearParada(datos)),
+            crear: (ids) => protegida((a) => a.crearRecorrido(ids)),
+            reemplazar: (id, ids) =>
+                protegida((a) => a.reemplazarParadas(id, ids)),
+          ),
         ),
       ),
     );
@@ -640,11 +620,14 @@ class _EntradaAdministracionState extends State<_EntradaAdministracion> {
 
     Navigator.of(context).push(
       MaterialPageRoute<void>(
-        builder: (_) => TarifasAdminScreen(
-          listar: () => protegida((a) => a.listar()),
-          crear: (datos) => protegida((a) => a.crear(datos)),
-          modificar: (id, cambios) =>
-              protegida((a) => a.modificar(id, cambios)),
+        builder: (_) => _marco(
+          DestinoAdmin.tarifas,
+          TarifasAdminScreen(
+            listar: () => protegida((a) => a.listar()),
+            crear: (datos) => protegida((a) => a.crear(datos)),
+            modificar: (id, cambios) =>
+                protegida((a) => a.modificar(id, cambios)),
+          ),
         ),
       ),
     );
@@ -678,12 +661,15 @@ class _EntradaAdministracionState extends State<_EntradaAdministracion> {
 
     Navigator.of(context).push(
       MaterialPageRoute<void>(
-        builder: (_) => AdministradoresAdminScreen(
-          listar: () => protegida((a) => a.listar()),
-          crear: (datos) => protegida((a) => a.crear(datos)),
-          modificar: (id, cambios) =>
-              protegida((a) => a.modificar(id, cambios)),
-          deshabilitar: (id) => protegida((a) => a.deshabilitar(id)),
+        builder: (_) => _marco(
+          DestinoAdmin.administradores,
+          AdministradoresAdminScreen(
+            listar: () => protegida((a) => a.listar()),
+            crear: (datos) => protegida((a) => a.crear(datos)),
+            modificar: (id, cambios) =>
+                protegida((a) => a.modificar(id, cambios)),
+            deshabilitar: (id) => protegida((a) => a.deshabilitar(id)),
+          ),
         ),
       ),
     );
@@ -718,8 +704,11 @@ class _EntradaAdministracionState extends State<_EntradaAdministracion> {
             return pago;
           },
     );
-    Navigator.of(context)
-        .push(MaterialPageRoute<void>(builder: (_) => pantalla));
+    Navigator.of(context).push(
+      MaterialPageRoute<void>(
+        builder: (_) => _marco(DestinoAdmin.registrarPago, pantalla),
+      ),
+    );
   }
 
   void _abrirReservas() {
@@ -748,8 +737,11 @@ class _EntradaAdministracionState extends State<_EntradaAdministracion> {
       consulta: consulta,
       alcance: Object(),
     );
-    Navigator.of(context)
-        .push(MaterialPageRoute<void>(builder: (_) => pantalla));
+    Navigator.of(context).push(
+      MaterialPageRoute<void>(
+        builder: (_) => _marco(DestinoAdmin.reservas, pantalla),
+      ),
+    );
   }
 
   void _abrirDeuda() {
@@ -778,8 +770,11 @@ class _EntradaAdministracionState extends State<_EntradaAdministracion> {
       consulta: consulta,
       alcance: Object(),
     );
-    Navigator.of(context)
-        .push(MaterialPageRoute<void>(builder: (_) => pantalla));
+    Navigator.of(context).push(
+      MaterialPageRoute<void>(
+        builder: (_) => _marco(DestinoAdmin.deuda, pantalla),
+      ),
+    );
   }
 
   void _abrirPagos() {
@@ -809,8 +804,11 @@ class _EntradaAdministracionState extends State<_EntradaAdministracion> {
       cargar: () => proteger<List<PagoAdmin>>(api.pendientes),
       decidir: (id, decision) => proteger(() => api.decidir(id, decision)),
     );
-    Navigator.of(context)
-        .push(MaterialPageRoute<void>(builder: (_) => pantalla));
+    Navigator.of(context).push(
+      MaterialPageRoute<void>(
+        builder: (_) => _marco(DestinoAdmin.pagosPendientes, pantalla),
+      ),
+    );
   }
 
   void _abrirVehiculos() {
@@ -841,8 +839,11 @@ class _EntradaAdministracionState extends State<_EntradaAdministracion> {
       crear: (datos) => proteger(() => api.crear(datos)),
       actualizar: (id, datos) => proteger(() => api.actualizar(id, datos)),
     );
-    Navigator.of(context)
-        .push(MaterialPageRoute<void>(builder: (_) => pantalla));
+    Navigator.of(context).push(
+      MaterialPageRoute<void>(
+        builder: (_) => _marco(DestinoAdmin.vehiculos, pantalla),
+      ),
+    );
   }
 
   void _abrirChoferes() {
@@ -873,8 +874,49 @@ class _EntradaAdministracionState extends State<_EntradaAdministracion> {
       crear: (datos) => proteger(() => api.crear(datos)),
       actualizar: (id, datos) => proteger(() => api.actualizar(id, datos)),
     );
-    Navigator.of(context)
-        .push(MaterialPageRoute<void>(builder: (_) => pantalla));
+    Navigator.of(context).push(
+      MaterialPageRoute<void>(
+        builder: (_) => _marco(DestinoAdmin.choferes, pantalla),
+      ),
+    );
+  }
+
+  Future<void> _configurarDescensos(
+    BuildContext contextoDetalle,
+    ViajeResumen viaje,
+  ) async {
+    final generacion = widget.controller.generacion;
+    final rutaDetalle = ModalRoute.of(contextoDetalle);
+    bool vigente() =>
+        mounted &&
+        contextoDetalle.mounted &&
+        widget.controller.generacion == generacion &&
+        !_accesoDenegado &&
+        rutaDetalle?.isActive == true;
+    bool detalleVisible() => vigente() && rutaDetalle?.isCurrent == true;
+    try {
+      final paradas = await widget.paradas.cargarParadas(viaje.idRecorrido);
+      if (!detalleVisible()) return;
+      final ordenes = await widget.paradas.cargarDescensos(viaje.idViaje);
+      if (!contextoDetalle.mounted || !detalleVisible()) return;
+      await showDialog<void>(
+        context: contextoDetalle,
+        builder: (_) => DescensosViajeDialog(
+          paradas: paradas,
+          iniciales: ordenes,
+          guardar: (elegidas) async {
+            if (!vigente()) throw StateError('La sesión ya no está vigente.');
+            await widget.gpsApi.configurarDescensos(viaje.idViaje, elegidas);
+          },
+        ),
+      );
+    } catch (_) {
+      if (contextoDetalle.mounted && detalleVisible()) {
+        ScaffoldMessenger.of(contextoDetalle).showSnackBar(
+          const SnackBar(content: Text('No se pudieron cargar los descensos.')),
+        );
+      }
+    }
   }
 
   void _abrirUbicacion(int id) {
@@ -912,8 +954,11 @@ class _EntradaAdministracionState extends State<_EntradaAdministracion> {
       prepararMapa: widget.prepararMapa,
       crearVisorMapa: widget.crearVisorMapa,
     );
-    Navigator.of(context)
-        .push(MaterialPageRoute<void>(builder: (_) => pantalla));
+    Navigator.of(context).push(
+      MaterialPageRoute<void>(
+        builder: (_) => _marco(DestinoAdmin.viajes, pantalla),
+      ),
+    );
   }
 
   Future<List<ViajeResumen>> _cargarViajes(DateTime fecha) async {
@@ -1120,6 +1165,16 @@ class _EntradaChoferState extends State<_EntradaChofer> {
             cargarViajes: _cargarViajes,
             cargarDetalle: _cargarDetalle,
             acciones: _acciones,
+            registrarPaso: (id, orden) async {
+              _exigirSesion();
+              final paso = await _protegerAcceso(
+                controller: widget.controller,
+                solicitud: () => widget.gpsApi.registrarPaso(id, orden, _token!),
+                onAccesoDenegado: _denegarAcceso,
+              );
+              _exigirSesion();
+              return paso;
+            },
             registrarAviso: (id, clave, clase, detalle) async {
               _exigirSesion();
               final r = await _protegerAcceso(

@@ -21,7 +21,14 @@ from sqlalchemy import exists, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.errors import ApiError
-from app.models.viajes import Abordaje, ParadaRecorrido, Recorrido, Reserva
+from app.models.viajes import (
+    Abordaje,
+    DescensoHabilitado,
+    ParadaRecorrido,
+    Recorrido,
+    Reserva,
+    Viaje,
+)
 from app.models.viajes import Parada as ParadaModelo
 from app.schemas.gestion_recorridos import (
     ParadaEnRecorrido,
@@ -218,13 +225,16 @@ async def _ordenes_con_reservas(
     if not ordenes:
         return []
     usados: set[int] = set()
-    for modelo in (Reserva, Abordaje):
+    for modelo, orden in (
+        (Reserva, Reserva.orden_parada),
+        (Abordaje, Abordaje.orden_parada),
+        (DescensoHabilitado, DescensoHabilitado.orden_parada),
+        (Viaje, Viaje.orden_ultimo_paso),
+    ):
         usados |= set(
             (
                 await db.execute(
-                    select(modelo.orden_parada).where(
-                        modelo.id_recorrido == id_recorrido, modelo.orden_parada.in_(ordenes)
-                    )
+                    select(orden).where(modelo.id_recorrido == id_recorrido, orden.in_(ordenes))
                 )
             ).scalars()
         )
@@ -273,7 +283,7 @@ async def reemplazar_paradas(
         raise ApiError(
             409,
             "PARADA_CON_RESERVAS",
-            "Hay reservas o abordajes en paradas que la modificación quita o cambia.",
+            "Hay referencias operativas a paradas que la modificación quita o cambia.",
             {"ordenes": con_reservas},
         )
 

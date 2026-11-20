@@ -44,6 +44,7 @@ class PasajeroApi {
         codigo: e.codigo,
         mensaje: e.mensaje,
         listaEspera: e.detalles?['lista_espera'] == true,
+        ordenDescenso: e.detalles?['orden_descenso'] as int?,
       );
     }
     throw e;
@@ -69,11 +70,25 @@ class PasajeroApi {
     return _lista(cuerpo).map(Parada.fromJson).toList();
   }
 
-  Future<Reserva> crearReserva(int idViaje, int ordenParada) async {
+  Future<Set<int>> cargarDescensos(int idViaje) async {
+    try {
+      final cuerpo = await _cliente.get('viajes/$idViaje/descensos');
+      return ((cuerpo as Map)['ordenes'] as List).cast<int>().toSet();
+    } on ApiException catch (e) {
+      if (e.statusCode == 404 && e.codigo != 'VIAJE_NO_ENCONTRADO') return {};
+      rethrow;
+    }
+  }
+
+  Future<Reserva> crearReserva(int idViaje, int ordenParada, [int? ordenDescenso]) async {
     try {
       final cuerpo = await _cliente.post(
         'reservas',
-        body: {'id_viaje': idViaje, 'orden_parada': ordenParada},
+        body: {
+          'id_viaje': idViaje,
+          'orden_parada': ordenParada,
+          'orden_descenso': ?ordenDescenso,
+        },
       );
       return Reserva.fromJson(cuerpo! as Map<String, dynamic>);
     } on ApiException catch (e) {

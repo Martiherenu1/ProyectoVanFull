@@ -10,6 +10,7 @@ class ReservaCreate(BaseModel):
     id_viaje: int
     # Parada de ascenso dentro del recorrido del viaje. Los órdenes empiezan en 1.
     orden_parada: int = Field(ge=1)
+    orden_descenso: int | None = Field(default=None, ge=1)
 
 
 class CambioParada(BaseModel):
@@ -31,6 +32,7 @@ class Reserva(BaseModel):
     id_viaje: int
     id_recorrido: int
     orden_parada: int
+    orden_descenso: int | None = None
     fecha: date
     # "HH:MM", como en `Disponibilidad`. Un viaje en planificación puede no tener horario.
     horario: str | None = None

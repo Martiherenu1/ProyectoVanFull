@@ -6,6 +6,7 @@ class OperacionAsignada {
   OperacionAsignada({
     required this.viaje,
     required this.capacidadPlanificada,
+    this.ordenUltimoPaso,
     required List<ParadaOperacion> paradas,
     required List<PasajeroOperacion> pasajerosConReserva,
     required List<IntegranteNominaOperacion> integrantesNomina,
@@ -21,6 +22,7 @@ class OperacionAsignada {
           json,
           'capacidad_planificada',
         ),
+        ordenUltimoPaso: json['orden_ultimo_paso'] as int?,
         paradas: (json['paradas'] as List<dynamic>)
             .map((p) => ParadaOperacion.fromJson(p as Map<String, dynamic>))
             .toList(),
@@ -40,6 +42,7 @@ class OperacionAsignada {
 
   final ViajeResumen viaje;
   final int? capacidadPlanificada;
+  final int? ordenUltimoPaso;
   final List<ParadaOperacion> paradas;
   final List<PasajeroOperacion> pasajerosConReserva;
   final List<IntegranteNominaOperacion> integrantesNomina;

@@ -3,10 +3,13 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:frontend/core/api/api_error.dart';
+import 'package:frontend/core/api/pasajero_api.dart';
 import 'package:frontend/models/pasajero/parada.dart';
 import 'package:frontend/models/pasajero/reserva.dart';
 import 'package:frontend/screens/pasajero/buscar_servicio_screen.dart';
 import 'package:frontend/screens/pasajero/cambiar_parada_screen.dart';
+
+import '../../core/api/pasajero_api_test.dart' show ClienteFalso;
 
 Parada parada(int orden, String nombre) => Parada.fromJson({
   'id_parada': orden * 10,
@@ -70,6 +73,25 @@ Future<void> elegirYConfirmar(WidgetTester tester, int orden) async {
 }
 
 void main() {
+  testWidgets('un ascenso que alcanza el descenso muestra el motivo', (
+    tester,
+  ) async {
+    const mensaje = 'Elegí un ascenso anterior al descenso de tu reserva.';
+    final cliente = ClienteFalso({
+      'POST reservas/41/cambio-parada': () => throw const ApiException(
+        statusCode: 400,
+        codigo: 'PARADA_NO_VALIDA',
+        mensaje: mensaje,
+        detalles: {'orden_descenso': 3},
+      ),
+    });
+    await mostrar(tester, cambiar: PasajeroApi(cliente).cambiarParada);
+    await tester.pumpAndSettle();
+    await elegirYConfirmar(tester, 3);
+    expect(aviso(tester), mensaje);
+    expect(cliente.ultimoCuerpo, {'orden_parada': 3});
+  });
+
   testWidgets('muestra la reserva y pide las paradas de su recorrido', (
     tester,
   ) async {

@@ -25,6 +25,7 @@ class Reserva {
     required this.sentido,
     required this.estado,
     this.horario,
+    this.ordenDescenso,
   });
 
   factory Reserva.fromJson(Map<String, dynamic> json) {
@@ -44,6 +45,7 @@ class Reserva {
       idViaje: json['id_viaje'] as int,
       idRecorrido: json['id_recorrido'] as int,
       ordenParada: json['orden_parada'] as int,
+      ordenDescenso: json['orden_descenso'] as int?,
       fecha: fecha,
       horario: json['horario'] as String?,
       sentido: SentidoViaje.values.firstWhere(
@@ -63,6 +65,7 @@ class Reserva {
 
   /// Parada de ascenso dentro del recorrido (GET /recorridos/{id}/paradas).
   final int ordenParada;
+  final int? ordenDescenso;
   final DateTime fecha;
 
   /// "HH:MM". Es `null` si el viaje todavía no tiene horario.
@@ -79,6 +82,7 @@ class ReservaRechazada implements Exception {
     required this.codigo,
     required this.mensaje,
     this.listaEspera = false,
+    this.ordenDescenso,
   });
 
   factory ReservaRechazada.fromJson(Map<String, dynamic> json) {
@@ -88,6 +92,7 @@ class ReservaRechazada implements Exception {
       codigo: error['codigo'] as String,
       mensaje: error['mensaje'] as String,
       listaEspera: detalles?['lista_espera'] == true,
+      ordenDescenso: detalles?['orden_descenso'] as int?,
     );
   }
 
@@ -100,6 +105,9 @@ class ReservaRechazada implements Exception {
   /// `detalles.lista_espera` del 409 de cupo. La incorporación a la lista no
   /// tiene operación todavía (Issue #34).
   final bool listaEspera;
+
+  /// Descenso implicado en un PARADA_NO_VALIDA al crear o cambiar el ascenso.
+  final int? ordenDescenso;
 
   @override
   String toString() => 'ReservaRechazada($codigo)';

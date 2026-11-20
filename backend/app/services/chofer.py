@@ -137,6 +137,7 @@ async def detalle_viaje_propio(
     return OperacionAsignada(
         viaje=_a_viaje(viaje),
         capacidad_planificada=viaje.capacidad_planificada,
+        orden_ultimo_paso=viaje.orden_ultimo_paso,
         paradas=paradas,
         pasajeros_con_reserva=pasajeros,
         integrantes_nomina=integrantes,

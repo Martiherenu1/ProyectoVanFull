@@ -183,7 +183,8 @@ class _DialogoTarifaState extends State<_DialogoTarifa> {
   static double? _leerImporte(String? texto) {
     final limpio = (texto ?? '').trim().replaceAll(',', '.');
     if (!RegExp(r'^\d+(\.\d{1,2})?$').hasMatch(limpio)) return null;
-    return double.parse(limpio);
+    final importe = double.parse(limpio);
+    return importe <= 9999999999.99 ? importe : null;
   }
 
   String? _validarImporte(String? v) =>
@@ -192,8 +193,11 @@ class _DialogoTarifaState extends State<_DialogoTarifa> {
   String? _validarVigencia(String? v) {
     final t = (v ?? '').trim();
     if (t.isEmpty) return null;
-    return RegExp(r'^\d{4}-\d{2}-\d{2}$').hasMatch(t) &&
-            DateTime.tryParse(t) != null
+    final fecha = DateTime.tryParse(t);
+    return fecha != null &&
+            fecha.year > 0 &&
+            t.length == 10 &&
+            fecha.toIso8601String().split('T').first == t
         ? null
         : 'Formato AAAA-MM-DD';
   }

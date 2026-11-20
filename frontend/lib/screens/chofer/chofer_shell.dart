@@ -24,6 +24,7 @@ class ChoferShell extends StatefulWidget {
     this.fechaInicial,
     this.acciones,
     this.registrarAviso,
+    this.registrarPaso,
     this.recuperarAviso,
     this.comprobarUbicacionInicio,
     this.asistenciaUbicacionInicio,
@@ -35,6 +36,7 @@ class ChoferShell extends StatefulWidget {
   final CargarDetalleViajeChofer cargarDetalle;
   final VoidCallback onSalir;
   final RegistrarAviso? registrarAviso;
+  final Future<int> Function(int, int)? registrarPaso;
   final RecuperarAviso? recuperarAviso;
   final DateTime? fechaInicial;
   final AccionesEjecucionViaje? acciones;
@@ -199,6 +201,7 @@ class _ChoferShellState extends State<ChoferShell> {
           builder: (_, _) => DetalleViajeChoferScreen(
             idViaje: idViaje,
             registrarAviso: widget.registrarAviso,
+            registrarPaso: widget.registrarPaso,
             recuperarAviso: widget.recuperarAviso,
             onAvisoIncierto: _conservarAviso,
             onAvisoConfirmado: _confirmarAviso,

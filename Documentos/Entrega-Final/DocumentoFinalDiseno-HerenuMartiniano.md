@@ -913,7 +913,7 @@ La consigna pide un informe con las propuestas, discusiones y conclusiones sobre
 | **ChatGPT Work** | Tres trabajos extensos: el análisis de la entrevista con VanFull, la explicación del MVC aplicado al proyecto y la actualización de los casos de uso y los artefactos de la Etapa 04 | AS-IS consolidado; Stack y referencias |
 | **Gemini** | Disponible en plan pago. Se comparó en la práctica con ChatGPT y no se adoptó | Declarado por el equipo |
 | **Claude** (familia Opus), en chat | No se usó durante el PC1 | Stack y referencias |
-| **Codex** | No se usó durante el PC1. **Desde el desarrollo (PC2) consta en el historial**: 158 commits llevan su firma (sección 6.6) | Notas de ingesta (§0); historial de git |
+| **Codex** | No se usó durante el PC1. **Desde el desarrollo (PC2) consta en el historial**: 159 commits llevan su firma (sección 6.6) | Notas de ingesta (§0); historial de git |
 
 ### Propuestas y elección de herramientas
 
@@ -1042,11 +1042,11 @@ Revisión humana obligatoria antes de incorporar cualquier salida de IA. Según 
 Esta sección actualiza el informe 6.5 con lo ocurrido desde el primer punto de control, cuando el trabajo pasó
 del diseño al código.
 
-**Lo que consta en el historial.** Al 19/11/2026 el repositorio tiene 428 commits propios (sin contar 287
-fusiones). **397 de ellos (93 %) llevan una firma `Co-Authored-By` de una herramienta de IA**: Claude en 239
-—todos los commits del autor de esta entrega— y Codex en 158, en commits de los otros dos integrantes. Las firmas
+**Lo que consta en el historial.** Al 19/11/2026 el repositorio tiene 432 commits propios (sin contar 293
+fusiones). **399 de ellos (92 %) llevan una firma `Co-Authored-By` de una herramienta de IA**: Claude en 240
+—todos los commits del autor de esta entrega— y Codex en 159, en commits de los otros dos integrantes. Las firmas
 de Claude registran los modelos usados (Sonnet 5.5, Opus 5.5, Opus 5 y Opus 4.8). La firma indica que hubo
-asistencia; **no mide qué proporción del código escribió la herramienta**, y los 31 commits restantes no
+asistencia; **no mide qué proporción del código escribió la herramienta**, y los 33 commits restantes no
 declaran su uso.
 
 **Cómo se trabajó con la IA.** Las reglas se escribieron en archivos del repositorio para que cada sesión no
@@ -1363,8 +1363,8 @@ repositorio donde se puede comprobar.
 
 | Rol | Cantidad |
 |---|---|
-| Commits propios (sin fusiones) | 239 de 428 en `main` |
-| Pull Requests abiertos | 107 de 187 (103 incorporados) |
+| Commits propios (sin fusiones) | 240 de 432 en `main` |
+| Pull Requests abiertos | 108 de 193 (104 incorporados) |
 
 Son cifras de volumen: **no miden la calidad ni el esfuerzo**, y los commits de cada integrante son de tamaño muy
 distinto. Los datos salen del historial de git y de GitHub al 19/11/2026.

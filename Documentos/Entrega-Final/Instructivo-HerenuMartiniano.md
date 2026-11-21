@@ -4,7 +4,7 @@
 
 Licenciatura en Sistemas | Ingeniería en Informática
 
-**Entrega individual: 20 de noviembre de 2026 · Versión 1.0 (corte del 19/11/2026)**
+**Entrega individual: 20 de noviembre de 2026 · Versión 1.1 (corte del 20/11/2026)**
 
 **Autor de esta entrega:** Martiniano Hereñú
 
@@ -13,8 +13,8 @@ Licenciatura en Sistemas | Ingeniería en Informática
 Repositorio del proyecto: https://github.com/Martiherenu1/ProyectoVanFull
 
 > **Para qué sirve este instructivo.** Explica cómo poner en marcha VanFull en una computadora, cómo se usa cada
-> pantalla según el tipo de usuario y cómo está desplegada la demostración pública. Es el anexo I del documento
-> final de diseño. Parte del `README.md` y de `DESPLIEGUE.md` del repositorio, corregidos con lo que se comprobó
+> pantalla según el tipo de usuario y cómo está desplegada la demostración pública. Es un entregable aparte del
+> documento final de diseño, que lo cita. Parte del `README.md` y de `DESPLIEGUE.md` del repositorio, corregidos con lo que se comprobó
 > al redactarlo.
 
 # 1. Qué es y qué se comprobó al escribir esto
@@ -28,7 +28,9 @@ artificial no toca la base: solo llama herramientas del servidor.
 
 | Comprobación | Resultado |
 |---|---|
-| Migraciones sobre una base **vacía**, con el código de `main` (commit `3af0173`) | `alembic upgrade head` termina sin errores y deja **35 tablas del modelo** en la revisión `0002` |
+| Migraciones sobre una base **vacía**, con el código de `main` del 19/11 (commit `3af0173`, antes de #327) | `alembic upgrade head` terminó sin errores y dejó **35 tablas del modelo** en la revisión `0002` |
+| Migraciones y seed con el código de `main` del 20/11 (commit `b95b76f`, con #327) | `alembic upgrade head` subió una base local de la revisión `0001` a la `0004` sin errores, el seed cargó y el servidor respondió `ok`. El modelo declara **36 tablas**; no se volvió a contarlas sobre una base vacía |
+| Circuito completo contra la API local con ese código | Crear viaje, reservar, cambiar de parada, pagar y confirmar el pago, iniciar, enviar posición, ver la ubicación, informar una demora, finalizar, historial y tarifas respondieron como se describe más abajo. **El aviso de demora solo se acepta con el viaje en curso.** Se probó el servidor, no las pantallas |
 | Carga de datos de prueba (seed) sobre esa base | Carga 6 personas, 5 cuentas, 2 servicios, 1 recorrido con 3 paradas, 2 vehículos y 3 viajes del 30/10/2026. Si se repite, avisa «No se cargó nada» y no duplica |
 | Servidor de `main` sobre esa base | `GET /api/health` responde `{"status":"ok","database":"up"}` |
 | Demostración pública | La API, el sitio de Render y el respaldo de GitHub Pages respondían con código 200 |
@@ -127,10 +129,10 @@ pantalla inicial.
 | Pantalla | Para qué sirve |
 |---|---|
 | Buscar servicio | Elegir una fecha, ver los viajes con lugar y las paradas del recorrido |
-| Confirmar reserva | Reservar el viaje elegido marcando la parada |
+| Confirmar reserva | Reservar el viaje elegido marcando la parada de ascenso y, si administración habilitó descensos para ese viaje, **«Elegí dónde bajás»** (una parada posterior al ascenso) |
 | Mis reservas | Ver las reservas y el saldo, cancelar, cambiar de parada e informar una ausencia |
 | Pago y comprobantes | Ver la deuda, pagar y consultar los comprobantes |
-| Ubicación | Ver la última posición del vehículo del viaje |
+| Ubicación | Con el viaje en curso, ver la última posición del vehículo y el **tiempo estimado de llegada** a la parada de ascenso y al descenso elegido, o «No disponible» |
 | Asistente | Preguntar en lenguaje natural, por ejemplo «¿Hay lugar para ir el viernes a la ida?» |
 | Perfil | Ver y editar correo, teléfono y dirección |
 
@@ -139,13 +141,13 @@ pantalla inicial.
 | Pantalla | Para qué sirve |
 |---|---|
 | Mis viajes | Elegir una fecha (por defecto, hoy) y ver los viajes que le asignaron |
-| Detalle del viaje | Ver los pasajeros con reserva, **iniciar** el viaje (con permiso de ubicación, para publicar su posición), **finalizarlo** e **informar una demora o un problema** |
+| Detalle del viaje | Ver los pasajeros con reserva, **iniciar** el viaje (con permiso de ubicación, para publicar su posición), **confirmar el paso por cada parada**, **finalizarlo** e **informar una demora o un problema** (solo con el viaje en curso) |
 
 ## 6.3 Administrador y dueño
 
 | Pantalla | Para qué sirve |
 |---|---|
-| Viajes del día | Elegir una fecha y ver sus viajes, con el vehículo y el chofer de cada uno. Al abrir un viaje se puede **editarlo** (incluye asignar o cambiar chofer y vehículo) o **cancelarlo** si está programado |
+| Viajes del día | Elegir una fecha y ver sus viajes, con el vehículo y el chofer de cada uno. Al abrir un viaje se puede **editarlo** (incluye asignar o cambiar chofer y vehículo) o **cancelarlo** si está programado. También **«Configurar descensos»**: marcar las paradas de bajada habilitadas para ese viaje |
 | Crear viaje | Dar de alta un viaje: servicio, recorrido, fecha, sentido y, si se quiere, vehículo, chofer, horario y capacidad |
 | Recorridos | Crear recorridos y editar sus paradas |
 | Choferes y Vehículos | Registrar, listar, consultar y modificar |
@@ -160,7 +162,9 @@ pantalla inicial.
 Los viajes que trae el seed son del **30/10/2026**, que ya pasó. Para probar hay que crear uno nuevo:
 
 1. Entrar como `admin1@vanfull.test` → **Crear viaje**. Con los datos del seed: servicio `1`, recorrido `1`,
-   vehículo `1` y chofer `3` (el chofer `chofer1` es la persona 3), una fecha futura y sentido de ida.
+   vehículo `1` y chofer `3` (el chofer `chofer1` es la persona 3), una fecha futura y sentido de ida. Opcional: abrir
+   el viaje en **Viajes del día** → **Configurar descensos** y marcar paradas de bajada; sin eso el pasajero no ve
+   «Elegí dónde bajás».
 2. Entrar como `pasajero1@vanfull.test` → **Buscar servicio**, elegir esa fecha, elegir el viaje y la parada, y
    **confirmar la reserva**.
 3. En **Mis reservas** aparece la reserva. Se puede cambiar la parada o cancelarla.
@@ -176,11 +180,11 @@ Para que nadie espere más de lo que hay:
 | Tema | Estado |
 |---|---|
 | **Abordaje por código QR** (CU-007) | No está implementado: la operación existe en el contrato pero no tiene ruta |
-| **Tiempo estimado de llegada** (CU-009) | El servidor devuelve siempre «sin dato». La propuesta completa está en revisión y no se integró |
+| **Tiempo estimado de llegada** (CU-009) | Integrado con #327. Lo calcula Google Routes y necesita la clave `GOOGLE_ROUTES_API_KEY` en el servidor y paradas con coordenadas: en una instalación local sin la clave, o con el seed (que no trae coordenadas), responde «sin dato». La aceptación integral de RNF-008 sigue pendiente |
 | **Notificaciones** (WhatsApp o aviso en el teléfono) | No se envían. Un aviso del chofer queda registrado, sin notificar a nadie |
 | **Tarifas y deuda** | La reserva no calcula la tarifa ni genera deuda, porque las reglas de cálculo no están cerradas |
 | **Mercado Pago** | Solo en entorno de pruebas y apagado por defecto. «Confirmar» no está disponible para pagos de Mercado Pago: los confirma el proveedor |
-| **Asistente** | Sin clave de OpenRouter deriva a una persona. No se midió con los modelos actuales |
+| **Asistente** | Sin clave de OpenRouter deriva a una persona (probado). Con clave, no se verificó para esta entrega ni se midió con los modelos actuales |
 
 Ninguna regla se inventó para completar estos casos: lo que no está aprobado figura como pendiente. El detalle de
 los 37 casos de uso está en la sección 10 del documento final.
@@ -207,6 +211,7 @@ tabla, *secreto* significa que no va al chat, ni a un commit, ni a un Issue.
 |---|---|---|
 | Render (panel) | `DATABASE_URL` | **Secreto.** La cadena **directa** de Neon, tal cual la da el panel |
 | Render (panel) | `OPENROUTER_API_KEY` | **Secreto**, opcional. Sin ella el asistente deriva a una persona |
+| Render (panel) | `GOOGLE_ROUTES_API_KEY` | **Secreto**, opcional. Clave de Google Cloud con Routes API habilitada. Sin ella el tiempo estimado queda «sin dato». **No figura en `render.yaml`: se carga a mano en el panel** |
 | Render (`render.yaml`) | `JWT_SECRET` | Lo genera Render; nadie lo ve ni lo copia |
 | Render (`render.yaml`) | `ENV`, `API_PREFIX`, `CORS_ORIGINS` | Públicos. `CORS_ORIGINS` lista los dos orígenes del sitio |
 | GitHub → Settings → Secrets and variables → Actions → **Variables** | `API_BASE_URL` | `https://<servicio>.onrender.com/api` (público: queda en el JavaScript) |
@@ -302,5 +307,7 @@ migración puede borrar datos registrados desde el despliegue. El script
 `Documentos/Entrega-Final/bajar-neon-a-0002.ps1` hace este paso con un volcado de seguridad previo y una
 confirmación escrita.
 
-Estado de la base al 19/11/2026: revisión **0002** (35 tablas del modelo). Una propuesta en revisión (#327)
-agregaría la revisión 0004 y una tabla más; no se integró.
+Estado de la base al 20/11/2026: **no se verificó**. #327 se integró a `main` el 19/11 a las 22:59 (revisiones 0003 y
+0004 y una tabla más: 36 tablas del modelo) y el servidor migra al arrancar, así que Neon probablemente está en la
+revisión **0004**. Para comprobarlo: `select version_num from alembic_version;`. Si está en `0004`, el script
+`bajar-neon-a-0002.ps1` sigue siendo la vuelta atrás; si ya estuviera en `0002`, avisa que no hay nada que bajar.

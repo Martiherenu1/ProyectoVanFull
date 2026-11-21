@@ -6,7 +6,7 @@ Licenciatura en Sistemas | Ingeniería en Informática
 
 **Entrega final — Diseño, desarrollo y estado de cobertura**
 
-Entrega individual: 20 de noviembre de 2026 · Versión 2.0 (corte del 19/11/2026)
+Entrega individual: 20 de noviembre de 2026 · Versión 2.1 (corte del 20/11/2026)
 
 **Autor de esta entrega:** Martiniano Hereñú
 
@@ -17,7 +17,7 @@ Repositorio del proyecto: https://github.com/Martiherenu1/ProyectoVanFull
 > **Siglas.** PC1 = primer punto de control (02/10/2026); PC2 = etapa de desarrollo desde el 13/10/2026.
 >
 > **Sobre este documento.** Parte del documento del primer punto de control (v1.1, 28/09/2026) y lo lleva
-> al estado del proyecto al 19/11/2026. Las secciones de análisis y diseño se conservan con los ajustes
+> al estado del proyecto al 20/11/2026 (`main` en `b95b76f`). Las secciones de análisis y diseño se conservan con los ajustes
 > que impuso el desarrollo; se agregan la **cobertura de los 37 casos de uso (sección 10)** y la sección
 > **«Mi aporte» (sección 11)**. Lo que no está implementado se declara como pendiente documentado: no se
 > afirma nada que el repositorio no respalde.
@@ -34,7 +34,7 @@ Repositorio del proyecto: https://github.com/Martiherenu1/ProyectoVanFull
 6. Modelos de IA y agentes
 7. Modelo de desarrollo
 8. Anexos
-9. Estado al 19/11, decisiones abiertas y límites
+9. Estado al 20/11, decisiones abiertas y límites
 10. Cobertura de los 37 casos de uso
 11. Mi aporte
 
@@ -55,14 +55,14 @@ primer punto de control y agrega las secciones nuevas.
 | Arquitectura de la solución | 2 |
 | Modelo Conceptual: Frontend, Backend, Base de Datos | 2.2 |
 | Gráficos: UML y C4 Model | 2.5 |
-| Trazo fino: especificación de los casos de uso | 2.5.1 y Anexo G |
+| Trazo fino: especificación de los casos de uso | 2.5.1 y Anexo B |
 | Diagramas de actividad (UML) | 2.7 |
 | Diagramas de componentes y de despliegue | 2.8 |
 | Modelo en mermaid.js | 2.4 |
 | Modelo de Datos y relaciones | 3 |
-| Modelo de datos SQL | 3.4 y Anexo A |
+| Modelo de datos SQL | 3.4 y Anexo D |
 | Interfaces gráficas | 4 |
-| Comunicación V-C: Open API en formato JSON | 5 y Anexo B |
+| Comunicación V-C: Open API en formato JSON | 5 y Anexo D |
 | Modelos de IA utilizados y justificación | 6.1 |
 | Agentes IA implementados | 6.2 |
 | Prompts | 6.3 |
@@ -181,10 +181,10 @@ Después, una **comparación general** por aspecto, con estrellas de 1 a 5:
 | Aspecto | En la propuesta | En el proyecto |
 |---|---|---|
 | **Backend** | Java + Spring Boot | **Python + FastAPI**. |
-| **Base de datos** | PostgreSQL + PostGIS | **PostgreSQL 16**: el modelo (35 tablas) no usa tipos geográficos; el recorrido y el tiempo estimado los calcula Google Maps (Routes API) |
+| **Base de datos** | PostgreSQL + PostGIS | **PostgreSQL 16**: el modelo (36 tablas) no usa tipos geográficos; el recorrido y el tiempo estimado los calcula Google Maps (Routes API) |
 | **Acceso a datos** | No se definía | SQLAlchemy 2.0 asíncrono y Alembic para las migraciones |
 | **Pagos** | Pago simulado | **Mercado Pago en modo de prueba**, con confirmación automática solo cuando el proveedor informa un pago aprobado o acreditado |
-| **Contrato entre capas** | OpenAPI / JSON | Igual, entregado en YAML y en JSON: **91 operaciones sobre 67 rutas y 89 esquemas** al 19/11 (en el primer punto de control eran 22 operaciones y 23 esquemas) |
+| **Contrato entre capas** | OpenAPI / JSON | Igual, entregado en YAML y en JSON: **95 operaciones sobre 70 rutas y 92 esquemas** al 20/11 (en el primer punto de control eran 22 operaciones y 23 esquemas) |
 | **IA** | Chatbot y agente de planificación, sin modelo definido | Agente AG-01 de 13 herramientas, sobre OpenRouter. En el primer punto de control: MiniMax M3 (principal) y Nemotron 3 Super (respaldo), elegidos con una prueba medida. **Desde el 28/10 el sistema usa dos modelos gratuitos de OpenRouter** (Nemotron 3 Ultra como principal y Nemotron 3.5 Lightning como respaldo); la prueba medida **no se repitió** con ellos |
 | **Mensajería** | No figuraba | WhatsApp como canal alternativo de atención **previsto**: sin proveedor definido y sin implementar (CU-037 pendiente documentado) |
 | **Alojamiento** | No se definía | **Desplegado**: base en Neon, servidor en Render y versión web en Render (sitio estático) con GitHub Pages como respaldo (sección 2.8) |
@@ -303,7 +303,7 @@ trabajo distinto:
 
 La ventaja de separarlo así es que si mañana cambia una regla, se cambia en un solo lugar.
 
-**Base de datos.** PostgreSQL, con 35 tablas. Todo lo que se puede prohibir desde la base misma se prohíbe
+**Base de datos.** PostgreSQL, con 36 tablas. Todo lo que se puede prohibir desde la base misma se prohíbe
 ahí, de modo que **un dato incorrecto no pueda guardarse aunque el programa tenga un error**. El detalle está
 en la sección 3.
 
@@ -348,7 +348,7 @@ flowchart TB
         CH[POST /chat<br/>orquestador]
     end
     subgraph Modelo
-        DB[(PostgreSQL<br/>35 tablas)]
+        DB[(PostgreSQL<br/>36 tablas)]
     end
     LLM[OpenRouter<br/>Nemotron gratuitos]
     MP[Mercado Pago]
@@ -407,7 +407,7 @@ Los casos de uso prioritarios tienen además un **diagrama de actividad** que mu
 | CU-028 · Gestionar abonos mensuales | ACT-05 — Administrador; ACT-06 — Dueño / Superadministrador | DA-CU028 (sección 2.7) |
 | CU-030 · Ejecutar viaje | ACT-04 — Chofer | DA-CU030 (sección 2.7) |
 
-La especificación completa de los 37 casos de uso, copiada sin modificar de la versión v1.3 aprobada por el equipo, está en el **Anexo G**, al final de este documento.
+La especificación completa de los 37 casos de uso, copiada sin modificar de la versión v1.3 aprobada por el equipo, está en el **Anexo B**, al final de este documento.
 
 ## 2.6 Requisitos que condicionaron la arquitectura
 
@@ -493,11 +493,11 @@ Estos dos diagramas completan la vista de la arquitectura de la sección 2.5: el
 
 ## 3.1 Panorama
 
-El modelo de datos tiene **35 tablas**, agrupadas en cinco bloques:
+El modelo de datos tiene **36 tablas**, agrupadas en cinco bloques:
 
 - **Personas, clientes y acceso:** personas, pasajeros, choferes, clientes y los permisos de cada cuenta.
 - **Servicios y contratación:** los servicios que ofrece la empresa, las tarifas, los abonos mensuales.
-- **Viajes, recorridos y operación:** recorridos, paradas, vehículos, viajes, reservas, abordajes y ausencias.
+- **Viajes, recorridos y operación:** recorridos, paradas, vehículos, viajes, reservas, abordajes y ausencias, y las paradas de bajada que administración habilita en cada viaje.
 - **Cuenta corriente y pagos:** la cuenta de cada cliente, los pagos y los comprobantes.
 - **Trazabilidad operativa y nóminas:** eventos operativos vinculados a reservas, pagos o viajes, y las nóminas de pasajeros cuando corresponda. Este registro brinda trazabilidad operativa y no constituye una auditoría general del sistema.
 
@@ -515,9 +515,9 @@ recibo; los pagos `PENDIENTE` o `RECHAZADO` no requieren recibo. **Esta correcci
 no modifica el Modelo Relacional aprobado ni `schema.sql`**, que ya eran compatibles.
 
 En el documento del Drive, la **Figura 4** muestra el DER completo, en una página horizontal propia.
-Son 35 entidades en cinco bloques: a tamaño de página funciona como mapa de la estructura, no como
-lectura de detalle. La versión legible está en la carpeta `05` del Drive (Anexo H) y, sobre todo, en el
-modelo SQL del **Anexo A**, que es la fuente autoritativa.
+Es la figura de PC1, con 35 entidades en cinco bloques (hoy son 36: #327 agregó `descenso_habilitado`): a tamaño de página funciona como mapa de la estructura, no como
+lectura de detalle. La versión legible está en la carpeta `05` del Drive (Anexo C) y, sobre todo, en el
+modelo SQL del **Anexo D**, que es la fuente autoritativa.
 
 ## 3.3 Decisiones de diseño
 
@@ -550,21 +550,25 @@ expresar con los permisos del motor.
 
 ## 3.4 El modelo de datos en SQL
 
-El modelo se tradujo a un archivo SQL que crea las 35 tablas, las **54 relaciones entre tablas** y todas las
+El modelo se tradujo a un archivo SQL que crea las 36 tablas, las **58 relaciones entre tablas** y todas las
 condiciones descritas arriba.
 
-**Y se probó de verdad:** el archivo se ejecutó contra una base PostgreSQL real. Se verificó que las 35
+**Y se probó de verdad:** el archivo se ejecutó contra una base PostgreSQL real. En su primera versión se verificó que las 35
 tablas y las 54 relaciones se crearan correctamente, y se comprobó que la base **rechaza los datos
 inválidos** — al intentar cargar un tipo de servicio que no existe, lo rechaza la base, no el programa.
 
-El archivo completo está en el **Anexo A**.
+Hoy son 36 tablas y 58 relaciones, y la integración continua crea el esquema con las migraciones en cada cambio.
+
+El archivo completo está en el **Anexo D**.
 
 ## 3.5 Cómo cambió el modelo durante el desarrollo
 
-El modelo se versiona con **Alembic**. Hay dos migraciones y el número de tablas no cambió (siguen siendo 35):
+El modelo se versiona con **Alembic**. Hay cuatro migraciones y el número de tablas pasó de 35 a 36:
 
 - **0001 · esquema inicial.** Crea las 35 tablas, con las condiciones descritas en 3.3.
 - **0002 · avisos operativos (CU-030).** Agrega a `evento_operativo` las columnas `id_cuenta_autora` y `clave_solicitud`, una clave foránea hacia la cuenta autora y dos restricciones: `uq_aviso_solicitud` (una misma solicitud de aviso, identificada por cuenta, viaje y clave, no se registra dos veces) y `ck_aviso_metadatos` (un aviso nuevo exige autor, clave, viaje y detalle y solo puede ser de demora o de problema; los eventos históricos quedan sin autor inferido). Además, la reversión de la migración se niega a borrar avisos ya registrados.
+- **0003 · descenso explícito y último paso (CU-009, #327).** Crea la tabla `descenso_habilitado` (las paradas de bajada que administración habilita en cada viaje), agrega `orden_descenso` a `reserva` (con una clave foránea que solo admite descensos habilitados para ese viaje) y `orden_ultimo_paso` y `fecha_ultimo_paso` a `viaje` (la última parada por la que el chofer confirmó el paso). La reversión borra esos datos sin aviso.
+- **0004 · integridad del seguimiento (CU-009, #327).** Agrega dos condiciones que la base misma impone: el último paso del viaje tiene siempre orden y fecha, o ninguno de los dos (`ck_viaje_ultimo_paso_completo`), y el descenso de una reserva es siempre posterior a su ascenso (`ck_reserva_orden_descenso_posterior`).
 
 **Una decisión del 13/10/2026.** `cuenta_acceso` no tenía dónde guardar la contraseña y el inicio de sesión (CU-012, RF-045) la necesita. Se agregó `hash_contrasena VARCHAR(255) NOT NULL` en `schema.sql`, en los modelos y en la migración inicial dentro del mismo cambio; el algoritmo de hash lo fijó la tarea del inicio de sesión. El cambio se avisó al integrante responsable del DER por ser un cambio sobre el diagrama aprobado. Es un ejemplo de cómo una decisión de diseño se corrigió al llegar a la implementación, y quedó escrita.
 
@@ -614,7 +618,7 @@ estándar de accesibilidad. La verificación encontró tres combinaciones que **
 prohibidas o corregidas: texto blanco sobre dorado, el dorado como texto sobre fondo claro, y los colores de
 estado, que necesitaron un valor distinto según el fondo sea claro u oscuro.
 
-El sistema de diseño completo —paleta con sus contrastes medidos, tipografías y componentes— está en el **Anexo F**.
+El sistema de diseño completo —paleta con sus contrastes medidos, tipografías y componentes— está en el **Anexo D**.
 
 ## 4.3 Las pantallas: diez diseñadas y 27 implementadas
 
@@ -671,7 +675,7 @@ consulta y se actualiza sola a medida que los pasajeros suben.
 ## 4.5 Las pantallas se pueden recorrer
 
 En el primer punto de control, **nueve de las diez pantallas diseñadas estaban enlazadas entre sí** y se
-podían recorrer como un prototipo (enlace en el **Anexo E**). Al 19/11 **la aplicación real se puede recorrer
+podían recorrer como un prototipo (enlace en el **Anexo D**). Al 19/11 **la aplicación real se puede recorrer
 desplegada** (`vanfull.onrender.com`) contra el servidor y la base de demostración, con los datos de prueba
 del repositorio; una pantalla que existe en el código **no prueba que se haya verificado en un celular**, y las
 limitaciones conocidas de cada caso de uso figuran en la sección 10.
@@ -689,12 +693,12 @@ La ventaja es práctica: con ese acuerdo cerrado, **quien hace las pantallas, qu
 hace el asistente pueden trabajar al mismo tiempo** sin esperarse y sin romperse entre ellos.
 
 El acuerdo está escrito en **OpenAPI**, que es el formato estándar para describir este tipo de comunicación:
-En el primer punto de control eran **22 operaciones y 23 esquemas**; al 19/11 el contrato tiene **91
-operaciones sobre 67 rutas y 89 esquemas**. Se entrega en los dos formatos, YAML y JSON (**Anexo B**), y la
+En el primer punto de control eran **22 operaciones y 23 esquemas**; al 20/11 el contrato tiene **95
+operaciones sobre 70 rutas y 92 esquemas**. Se entrega en los dos formatos, YAML y JSON (**Anexo D**), y la
 integración continua verifica que ambos sean equivalentes.
 
 Cada operación declara a qué caso de uso pertenece (`x-cu`) y, cuando cubre solo una parte del caso de uso,
-lo marca (`x-cobertura: parcial`): 87 de las 91 llevan `x-cu` y 50 están marcadas como parciales. Las cuatro
+lo marca (`x-cobertura: parcial`): 91 de las 95 llevan `x-cu` y 54 están marcadas como parciales. Las cuatro
 sin caso de uso son la consulta de tarifas (`GET /tarifas`, pendiente de rehacer) y las tres del pago con
 Mercado Pago (checkout, retorno y consulta de un pago).
 
@@ -702,7 +706,7 @@ Mercado Pago (checkout, retorno y consulta de un pago).
 el YAML sea válido y que coincida con el JSON, **pero no cruza el contrato con las rutas realmente registradas
 en el servidor**. Por eso una operación puede figurar en el contrato sin tener ruta: pasa con `POST /abordajes`
 (CU-007), que está declarada desde el primer punto de control y todavía no tiene implementación (sección 10).
-De las 91 operaciones, **90 tienen ruta**.
+De las 95 operaciones, **94 tienen ruta**.
 
 ## 5.2 Reglas que sigue toda la comunicación
 
@@ -723,7 +727,7 @@ es lo que le permite a la aplicación mostrar *"Se ocupó el último lugar"* en 
 ## 5.3 Las operaciones
 
 La tabla siguiente es la **primera versión del acuerdo (primer punto de control)**. Las operaciones que se
-agregaron durante el desarrollo, hasta llegar a 91, están en el **Anexo B** y, agrupadas por caso de uso, en la
+agregaron durante el desarrollo, hasta llegar a 95, están en el **Anexo D** y, agrupadas por caso de uso, en la
 sección 10.
 
 | Caso de uso | Operación |
@@ -1042,11 +1046,11 @@ Revisión humana obligatoria antes de incorporar cualquier salida de IA. Según 
 Esta sección actualiza el informe 6.5 con lo ocurrido desde el primer punto de control, cuando el trabajo pasó
 del diseño al código.
 
-**Lo que consta en el historial.** Al 19/11/2026 el repositorio tiene 432 commits propios (sin contar 293
-fusiones). **399 de ellos (92 %) llevan una firma `Co-Authored-By` de una herramienta de IA**: Claude en 240
+**Lo que consta en el historial.** Al 20/11/2026 el repositorio tiene 437 commits propios (sin contar 295
+fusiones). **399 de ellos (91 %) llevan una firma `Co-Authored-By` de una herramienta de IA**: Claude en 240
 —todos los commits del autor de esta entrega— y Codex en 159, en commits de los otros dos integrantes. Las firmas
 de Claude registran los modelos usados (Sonnet 5.5, Opus 5.5, Opus 5 y Opus 4.8). La firma indica que hubo
-asistencia; **no mide qué proporción del código escribió la herramienta**, y los 33 commits restantes no
+asistencia; **no mide qué proporción del código escribió la herramienta**, y los 38 commits restantes no
 declaran su uso.
 
 **Cómo se trabajó con la IA.** Las reglas se escribieron en archivos del repositorio para que cada sesión no
@@ -1148,8 +1152,8 @@ rama protegida exige en verde:
 - **Aplicación (`Flutter`):** `flutter analyze` y `flutter test`.
 - **Docker** levanta la base de datos y el servidor iguales en la computadora de cualquiera del equipo.
 
-**Cifras al corte del 19/11/2026:** 1.168 pruebas de backend y 1.122 de Flutter, según la integración continua
-del PR #331 (el último que entró a `main`). Son cifras de volumen: **no demuestran que se haya probado cada flujo en un
+**Cifras al corte del 20/11/2026:** 1.182 pruebas de backend y 1.128 de Flutter, según la integración continua
+de `main` en `b95b76f` (la integración de #327). Son cifras de volumen: **no demuestran que se haya probado cada flujo en un
 celular**, y las pruebas con dobles de Flutter no prueban integración real.
 
 Antes de dar una tarea por terminada se revisa que exista un requisito que la justifique, que las reglas se
@@ -1191,35 +1195,32 @@ estima de 20 a 35 horas la primera entrega solo en línea.
 
 # 8. Anexos
 
-| Anexo | Qué es | Dónde está |
+| Anexo | Qué es | Dónde está en el paquete de anexos |
 |---|---|---|
-| **A** | El modelo de datos en SQL, completo | En el repositorio (`schema.sql` y migraciones de Alembic) |
-| **B** | El acuerdo de comunicación, en YAML y en JSON | En el repositorio (`backend/openapi/`) |
-| **C** | IA y agentes, documento completo | En esta misma carpeta del Drive |
-| **D** | Modelo de desarrollo, documento completo | En esta misma carpeta del Drive |
-| **E** | Las diez pantallas diseñadas, para recorrer | Enlace |
-| **F** | Colores, tipografías y componentes | Enlace |
-| **G** | Trazo fino: las especificaciones de los 37 casos de uso | En el documento del Drive, a continuación del anexo H (fuente: v1.3, carpeta 03) |
-| **H** | Diagramas C4, UML y Entidad-Relación | Carpetas 04 y 05 del Drive |
-| **I** | Instructivo de instalación, uso y despliegue | Entregable aparte (base: `README.md` y `DESPLIEGUE.md`) |
-| **J** | Logros profesionales del proyecto | `Documentos/HITOS.md` |
+| **A** | Línea funcional: alcance y límites, 45 requisitos funcionales, 31 reglas de negocio, 14 requisitos no funcionales con sus métricas y los controles de cambio | `A-Linea-funcional` |
+| **B** | Actores y casos de uso: las especificaciones v1.3 de los 37 casos de uso (Word y Markdown) | `B-Actores-y-Casos-de-Uso` |
+| **C** | Modelos y arquitectura: C4 de contexto y de contenedores, diagramas UML y de actividad, DER, modelo relacional en texto y el documento MVC de PC1 con sus figuras | `C-Modelos-y-Arquitectura` |
+| **D** | Interfaces, datos y API: brief de diseño con los prototipos de interfaz, el modelo de datos en SQL (`schema.sql`) y el contrato OpenAPI en YAML y en JSON | `D-Interfaces-Datos-y-API` |
+| **E** | IA y validación: documento de IA y agentes (AG-01) y matriz de cobertura de los 37 casos de uso | `E-IA-y-Validacion` |
+
+El instructivo de instalación, uso y despliegue, la presentación y el video son entregables aparte. Los logros profesionales del proyecto están en el repositorio (`Documentos/HITOS.md`). Las copias técnicas del paquete (contrato, esquema SQL y cobertura) corresponden al corte `main` `b95b76f`; las figuras del Anexo C son las históricas de PC1: el DER muestra 35 entidades, y el modelo actual tiene 36.
 
 Repositorio: https://github.com/Martiherenu1/ProyectoVanFull
 
 ---
 
-# 9. Estado al 19/11, decisiones abiertas y límites
+# 9. Estado al 20/11, decisiones abiertas y límites
 
 Esta sección reúne, en un solo lugar, lo que **no está cerrado** al momento de la entrega y que conviene tener a
 la vista antes de leer la tabla de cobertura.
 
 ## 9.1 Qué se logró
 
-- **Modelo de datos físico** de 35 tablas, con migraciones, que la base misma defiende (sección 3).
-- **Contrato OpenAPI como fuente de verdad**: 91 operaciones, 89 esquemas, YAML y JSON verificados como equivalentes.
+- **Modelo de datos físico** de 36 tablas (35 en el diseño original), con migraciones, que la base misma defiende (sección 3).
+- **Contrato OpenAPI como fuente de verdad**: 95 operaciones, 92 esquemas, YAML y JSON verificados como equivalentes.
 - **Backend por capas** (`routers` → `schemas` → `services` → `models`), con las reglas de negocio en `services`.
 - **Aplicación Flutter** de 27 pantallas para pasajero, chofer, administración y dueño, desplegada.
-- **Asistente AG-01** con 13 herramientas, funcionando contra un modelo real y sin acceso a la base de datos.
+- **Asistente AG-01** con 13 herramientas y sin acceso a la base de datos. Sin clave de OpenRouter deriva a una persona, y eso está probado; que responda con un modelo real depende de la clave configurada en cada entorno y **no se verificó para esta entrega**.
 - **Despliegue público sin costo** (Neon, Render, GitHub Pages) con un modelo de desarrollo y una integración
   continua que protegen `main`.
 
@@ -1246,7 +1247,7 @@ la vista antes de leer la tabla de cobertura.
 | Definición de viaje «anterior» (CU-026, #317) | Resuelto con la respuesta de Martín (19/11): historial = finalizados y cancelados |
 | Viajes programados o en curso con fecha vencida | Sin vista propia: solo se encuentran en `GET /viajes` eligiendo su fecha exacta (#324) |
 | Tarifas y su convención de nombres (#307, #9) | El PR #307 se cerró el 19/11 como pendiente documentado, con la rama conservada, de acuerdo con Martín. La convención `OCASIONAL:<tipo_servicio>:<sentido>` queda como propuesta, no como decisión, y se retoma después de la entrega vinculada al issue #9 |
-| ETA de CU-009 (#327) | El circuito completo está en borrador (#327) y no se integra a `main` hasta después de la entrega y el video, cuando los tres cierren la revisión de contrato, modelo y reserva. **Revisión de Facundo sobre el commit `a46a944` (19/11):** la integración continua está en verde y no hay conflictos, pero reprodujo tres regresiones de Flutter que bloquean su aprobación (una respuesta tardía que abre el diálogo de descensos en Administración después de cerrar el detalle; el chofer al que se le vuelve a ofrecer confirmar una parada ya registrada; un error 404 de ETA de una consulta anterior que cancela el seguimiento del pasajero) y un desajuste entre los errores 400 de reservas, el contrato y los mensajes de la app. No aprueba la ventana ni la integración hasta corregirlos, agregar pruebas de regresión y revisar el nuevo commit. El ensayo de migraciones sobre una copia de Neon (0002 → 0003 → 0004 → 0002, con datos y esquema idénticos al volver) sigue siendo evidencia válida. El 19/11 también se verificó un respaldo de Neon (#304): se restauró en una copia local descartable y coincidieron las filas por tabla y la revisión de Alembic, con la salvedad de dos sentencias propias de Neon que PostgreSQL estándar no reconoce y que se omitieron al restaurar. Falta coordinar la ventana. **Agrega una tabla (`descenso_habilitado`): el modelo pasaría de 35 a 36 tablas** y el DER y los documentos que dicen 35 habría que actualizarlos. Sobre #283 (habilitación de ascensos y descensos por viaje): Facundo confirmó que quede acotado a los ascensos y aceptó `orden_descenso` y `descenso_habilitado` provisionalmente para #327; la definición final de los nombres y del modelo compartido queda para después de la entrega, antes de integrar ambos cambios |
+| ETA de CU-009 (#327) | **Integrado en `main` el 19/11 a las 22:59 (merge `b95b76f`, por Martín).** Facundo revisó tres veces: el 19/11 reprodujo tres regresiones de Flutter y un desajuste entre los errores 400 de reservas, el contrato y la app; Martín las corrigió (`5e91152`); Facundo halló un último defecto en Administración (cerrar el diálogo de descensos mientras el servidor respondía cerraba también el detalle del viaje), corregido en `fecc97b`, y a las 22:50 dio conformidad técnica a ese arreglo **condicionada** a la integración continua del nuevo commit, a las condiciones de #283 y al procedimiento de respaldo y reversión, y aclaró que todavía no había merge ni despliegue. La integración continua de `main` quedó en verde. **Este documento no registra si esas condiciones quedaron acordadas antes de las 22:59.** La API publicada ya expone las rutas nuevas (`/api/viajes/{id}/descensos`) y responde `ok`, pero **no se verificó la revisión de Alembic de Neon**: el servidor migra al arrancar, así que probablemente está en 0004, y el procedimiento de vuelta atrás (bajar Neon a 0002 antes de volver el servidor) y el respaldo de Neon del 19/11 (21:31, anterior a la integración) siguen disponibles. **El modelo pasó de 35 a 36 tablas** (`descenso_habilitado`); el DER histórico de PC1 sigue mostrando 35. Sobre #283 (habilitación de ascensos y descensos por viaje): Facundo confirmó que quede acotado a los ascensos y aceptó `orden_descenso` y `descenso_habilitado` provisionalmente; la definición final de los nombres y del modelo compartido queda para después de la entrega |
 | Alta automática del cliente individual en un abono (CU-028, #319) | Confirmada en lo funcional por Martín el 19/11; el diff no fue aprobado por él |
 | Retención y eliminación de datos del historial | Pendiente de validación legal; el historial no borra nada |
 
@@ -1261,13 +1262,13 @@ conservador.
 
 # 10. Cobertura de los 37 casos de uso
 
-Corte al **19/11/2026**. Para cada uno de los 37 casos de uso, esta sección dice si está **hecho, parcial o
+Corte al **20/11/2026** (`main` en `b95b76f`). Para cada uno de los 37 casos de uso, esta sección dice si está **hecho, parcial o
 pendiente documentado**, con la cantidad de operaciones del contrato, la pantalla de Flutter y lo que falta. La
 línea funcional está cerrada (45 requisitos funcionales, 14 no funcionales, 31 reglas de negocio, 37 casos de uso)
 y **no se inventó ninguna regla para completar un caso de uso**: lo que no está aprobado figura como pendiente.
 
 **Cómo se contó (reproducible).** Las operaciones salen de `backend/openapi/openapi.yaml`, que declara `x-cu` (a qué
-caso de uso pertenece) y `x-cobertura: parcial` en cada operación: 91 operaciones, de las cuales 90 tienen ruta en
+caso de uso pertenece) y `x-cobertura: parcial` en cada operación: 95 operaciones, de las cuales 94 tienen ruta en
 `backend/app/routers/` (la que falta es `POST /abordajes`, CU-007). Lo que falta de cada caso de uso sale de las
 secciones «Decisiones» y «Pendientes» de los contextos de cada área (`Documentos/Sesiones/PC2/CONTEXTO-*.md`). La
 pantalla se comprobó por la existencia del archivo; **que exista no prueba que se haya probado en un celular**.
@@ -1295,14 +1296,14 @@ pantalla se comprobó por la existencia del archivo; **que exista no prueba que 
 | CU | Nombre | Estado | Ops | Flutter | Qué falta (pendiente documentado) |
 |---|---|---|---|---|---|
 | 001 | Perfil del pasajero | Parcial | 2 | `perfil_screen` | Foto obligatoria, verificación de correo y teléfono con código y perfil «completo» (#25); hoy edita correo, teléfono y dirección sin verificar |
-| 002 | Consultar servicios y disponibilidad | Parcial | 3 | `buscar_servicio_screen` | Filtro de destino en texto (400 `FILTRO_NO_DISPONIBLE`) y parada de descenso por reserva (#8); reservar en viaje en curso y recuperar el lugar tras una ausencia (#28) |
-| 003 | Crear reserva | Parcial | 1 | `confirmar_reserva_screen` | No calcula tarifa ni genera deuda (RF-028, #9); ida y vuelta del mismo día en una contratación (#7); lista de espera FIFO sin operación (#34; el diseño de #284 se cerró como pendiente documentado, con la rama conservada); abono, especial y corporativo |
+| 002 | Consultar servicios y disponibilidad | Parcial | 3 | `buscar_servicio_screen` | Filtro de destino en texto (400 `FILTRO_NO_DISPONIBLE`) y reservar en viaje en curso y recuperar el lugar tras una ausencia (#28) |
+| 003 | Crear reserva | Parcial | 2 | `confirmar_reserva_screen` | No calcula tarifa ni genera deuda (RF-028, #9); ida y vuelta del mismo día en una contratación (#7); lista de espera FIFO sin operación (#34; el diseño de #284 se cerró como pendiente documentado, con la rama conservada); abono, especial y corporativo |
 | 004 | Cancelar reserva | Parcial | 1 | `mis_reservas_screen` | Crédito de RN-017, devolución (RN-018) y reintegro (RN-019) sin tabla (#75); cancelación del ocasional fuera de término no definida |
 | 005 | Cambiar parada | Parcial | 1 | `cambiar_parada_screen` | Habilitación de la parada **por viaje** (RN-020 aclarada el 15/11, coordinar con #283); la pantalla no se probó contra Render ni en celular |
 | 006 | Consultar deuda | **Hecho** | 1 | `pago_screen`, `mis_reservas_screen` | — (la deuda queda en 0 mientras CU-003 no genere el movimiento, #9) |
 | 007 | Abordaje por QR | Pendiente | 0 (contrato sí) | — | `POST /abordajes` está en el contrato desde el PC1, **sin ruta**. Offline y sin duplicados (RNF-011/012), preguntas funcionales abiertas. Análisis en `PC2/ANALISIS-CU007.md`. Martín (19/11) propone dejarlo **pendiente documentado para esta entrega**, conservando el diseño y los requisitos offline; una implementación posterior solo online sería explícitamente parcial y no permitiría afirmar que se validó el descenso sin su dato. Falta confirmarlo entre los tres. Estimación de la primera entrega online: 20–35 h |
 | 008 | Informar ausencia | **Hecho** | 1 | `ausencias_api.dart` (pantalla a confirmar) | Recuperar el lugar tras una ausencia (AC28-08) pertenece a la disponibilidad (#28), no a este CU |
-| 009 | Ubicación del vehículo y ETA | Parcial | 1 | `ubicacion_screen` | **La estimación no está implementada en `main`: `eta_minutos` es siempre null.** Propuesta vigente (Martín, 19/11, con conformidad en principio de Facundo y pendiente de la revisión del autor): el ETA saldría de `GET /reservas/{id_reserva}/eta` (`ascenso_minutos`, `destino_minutos`, con indicadores de parada ya pasada) y `eta_minutos` de la ubicación quedaría en null por compatibilidad; null cuando no hay estimación válida o el chofer ya confirmó el paso por la parada. El circuito completo (descenso elegido por el pasajero, paso confirmado por el chofer, migración 0003, 35 archivos) está en el [PR #327](https://github.com/Martiherenu1/ProyectoVanFull/pull/327), **en borrador y en revisión, no integrado en `main`**; se ensayó en local con Google Routes real. El seed no trae coordenadas de paradas; límite de consultas a Routes y vigencia del cálculo sin acordar; RNF-008 parcial (#39, #273) |
+| 009 | Ubicación del vehículo y ETA | Parcial | 2 | `ubicacion_screen` | ETA de ascenso y de destino **implementados en `main`** con el [PR #327](https://github.com/Martiherenu1/ProyectoVanFull/pull/327): `GET /reservas/{id_reserva}/eta` devuelve `ascenso_minutos` y `destino_minutos` con indicadores de parada ya pasada; el chofer registra el paso por cada parada y el pasajero puede elegir un descenso habilitado por administración. La integración continua de `main` en `b95b76f` está en verde (1.182 pruebas de backend y 1.128 de Flutter). Martín informó haber visto el ETA al destino como pasajero en la Web publicada el 20/11, sin captura ni valor en minutos registrado; el 19/11 había ensayado el cálculo con GPS y Google Routes real. Requiere paradas con coordenadas utilizables: **el seed no las trae**, y con el servidor local sin la clave de Routes el ETA queda «sin dato». Límite de consultas a Routes y vigencia del cálculo sin acordar; RNF-008 parcial (#39, #273) |
 | 010 | Consultar reservas | **Hecho** | 2 | `mis_reservas_screen` | Qué ve el pasajero si su viaje se cancela (sin definir) |
 | 011 | Asistente conversacional AG-01 | Parcial | 1 | `asistente_screen` | Conversaciones en memoria (#42); a qué persona se deriva (RF-032); PoC formal TC-01..10 con los modelos actuales (#156); identificación para datos sensibles |
 | 012 | Sesión (login y logout) | **Hecho** | 2 | `login_screen` | Pendientes técnicos del propio CU: intentos máximos, bloqueo, expiración y lista negra del token |
@@ -1311,7 +1312,7 @@ pantalla se comprobó por la existencia del archivo; **que exista no prueba que 
 | 015 | Gestionar deuda | Parcial | 1 | `consultar_deuda_admin_screen` | RN-004/005/006 sin implementar |
 | 016 | Confirmar o rechazar pago | **Hecho** | 2 | `pagos_pendientes_screen` | Bloqueo provisional del efectivo hasta definir el 15 % (#84): confirmar si entró. Desde el [PR #330](https://github.com/Martiherenu1/ProyectoVanFull/pull/330) (Facundo, 19/11) la pantalla oculta «Confirmar» en los pagos de Mercado Pago, en línea con el error 409 `PAGO_MP_REQUIERE_PROVEEDOR` del servidor; «Rechazar» y la confirmación manual de transferencia y billetera no cambian |
 | 017 | Créditos, devoluciones y reintegros | Pendiente | 0 | — | Depende de RN-017 sin definir (#75). Propuesto para el área de administración, sin iniciar |
-| 018 | Viajes y asignaciones | Parcial | 4 | `viajes_dia_admin_screen`, `crear_viaje_admin_screen` | Conflictos de asignación de chofer y vehículo (pendiente del CU); sobrecapacidad al asignar (PV28-02). El [PR #328](https://github.com/Martiherenu1/ProyectoVanFull/pull/328) (Facundo, 19/11) rehízo la navegación de Administración (barra lateral en escritorio, cajón en móvil) y el aspecto de «Viajes del día» y «Crear viaje», sin cambiar reglas ni contrato |
+| 018 | Viajes y asignaciones | Parcial | 5 | `viajes_dia_admin_screen`, `crear_viaje_admin_screen` | Conflictos de asignación de chofer y vehículo (pendiente del CU); sobrecapacidad al asignar (PV28-02). El [PR #328](https://github.com/Martiherenu1/ProyectoVanFull/pull/328) (Facundo, 19/11) rehízo la navegación de Administración (barra lateral en escritorio, cajón en móvil) y el aspecto de «Viajes del día» y «Crear viaje», sin cambiar reglas ni contrato |
 | 019 | Recorridos y paradas | Parcial | 8 | `recorridos_admin_screen` | Cómo una parada pasa a «comprometida»; sin baja; Martín (18 y 19/11) pide conservar la secuencia relativa con inserciones y no tratar una corrección de nombre como cambio físico; **el código exige hoy el mismo orden y bloquea cualquier cambio de una parada comprometida**. Para esta entrega se conserva la implementación actual y se declaran sus restricciones; no es una regla de negocio aprobada. Cambios de modelo o lógica, solo con acuerdo de los tres (#314). El [PR #329](https://github.com/Martiherenu1/ProyectoVanFull/pull/329) (Facundo, 19/11) corrigió un error de la pantalla que impedía dar de alta un recorrido con una sola parada |
 | 020 | Optimizar recorrido | Pendiente | 0 | — | Martín (18/11): ya hay una clave de Routes probada y seis coordenadas candidatas cargadas a mano, pero **la prueba de Routes no acredita el CU**. Faltan validación operativa y vial, configuración para esta integración, objetivo de optimización, restricciones de paradas comprometidas y aplicación/persistencia. Pendiente documentado para esta entrega |
 | 021 | Gestionar choferes | Parcial | 4 | `choferes_admin_screen` | En `main` por el [PR #279](https://github.com/Martiherenu1/ProyectoVanFull/pull/279) (Facundo, 19/11), declarado PARCIAL en el propio PR: registra, lista, consulta y modifica reutilizando persona y chofer. Sin cuentas ni roles, bajas, estados, alertas ni documentación habilitante. Incorporado sin la revisión solicitada |
@@ -1323,7 +1324,7 @@ pantalla se comprobó por la existencia del archivo; **que exista no prueba que 
 | 027 | Consultar reservas (administración) | Parcial | 1 | `consultar_reservas_admin_screen` | Marcado `parcial` en el contrato |
 | 028 | Abonos mensuales | Parcial | 5 | `abonos_admin_screen` | Catálogo de estados, advertencia/suspensión/pérdida de cupo (RN-004), habilitación de 5 días, reserva anual (A6); el alta crea el cliente individual si falta: **Martín confirmó la validación funcional del alta el 19/11 (#319)**, sin aprobar el diff ni dar el CU por completo; que el pasajero pida su abono desde la app es otro circuito, no implementado |
 | 029 | Consultar operación asignada | **Hecho** | 2 | `viajes_chofer_screen`, `detalle_viaje_chofer_screen` | El contexto del área aclara que «cierra la consulta, no declara el CU completo» |
-| 030 | Ejecutar viaje (GPS, demoras) | Parcial | 7 | `chofer_shell`, `reporte_aviso` | Aviso registrado sin notificar (CU-037); automatismo y horarios por parada sin definir; RNF-008 parcial |
+| 030 | Ejecutar viaje (GPS, demoras) | Parcial | 8 | `chofer_shell`, `reporte_aviso`, `detalle_viaje_chofer_screen` | Con #327 el chofer registra el paso por cada parada (`POST /viajes/{id}/paso-parada`) y la pantalla conserva el último paso al reabrir el viaje. Aviso registrado sin notificar (CU-037); automatismo y horarios por parada sin definir; RNF-008 parcial |
 | 031 | Tarifas y descuentos (dueño) | Parcial | 4 | `tarifas_admin_screen` | Descuentos especiales (sin tabla), parámetros, vigencias e historial, efecto sobre saldos (A2/RN-012); sin baja. El [PR #331](https://github.com/Martiherenu1/ProyectoVanFull/pull/331) (Facundo, 19/11) alineó la validación de alta y modificación con el contrato: el servidor rechaza importes en texto y fechas de vigencia con formato inválido, y la pantalla bloquea fechas imposibles e importes fuera de rango antes de enviar |
 | 032 | Administradores (dueño) | Parcial | 5 | `administradores_admin_screen` | Una operación `parcial` en el contrato; política de sesiones; **la cuenta `dueno1` no existe en Neon** |
 | 033 | Pasajeros de la organización | Parcial | 4 | **sin pantalla** | Baja (A2, la spec la deja sin precisar), datos permitidos (decisión de diseño, sin aprobación funcional), pasajero en dos empresas, cuenta del pasajero corporativo |
@@ -1346,10 +1347,10 @@ Operaciones con ruta que el contrato no atribuye a un CU: `GET /tarifas` (pendie
   inventó nada**.
 - **La clasificación es una propuesta del autor de esta entrega**, derivada del criterio de 10.1. En particular, los
   casos CU-016, CU-026 y CU-029 se clasificaron como «hecho» con el matiz que figura en cada fila.
-- La tabla refleja `main` al 19/11 (commit `3af0173`), que incluye los Pull Requests #325 (CU-026) y, de Facundo,
-  #328 (navegación de Administración), #329 (alta de recorrido con una parada), #330 (Pagos pendientes) y #331
-  (validación de tarifas). Ninguno de los cuatro cambió la clasificación de un caso de uso: #328, #329 y #330
-  no tocan el servidor (#328 suma además las tipografías de marca y sus licencias), y #331 ajusta la validación de entrada sin agregar operaciones.
+- La tabla refleja `main` al 20/11 (commit `b95b76f`), que suma a los Pull Requests #325 (CU-026) y #328 a #331 (de Facundo) el
+  #327 (de Martín: ETA de CU-009 y paso por parada de CU-030). #327 agrega 4 operaciones, la tabla `descenso_habilitado` y las
+  migraciones 0003 y 0004, y cambió las filas de CU-002, CU-003, CU-009, CU-018 y CU-030 (la lectura y la habilitación de los descensos), pero **no cambió la clasificación de ningún caso
+  de uso**: CU-009 y CU-030 siguen parciales y los totales siguen siendo 7 hechos, 23 parciales y 7 pendientes documentados.
 
 ---
 
@@ -1363,15 +1364,15 @@ repositorio donde se puede comprobar.
 
 | Rol | Cantidad |
 |---|---|
-| Commits propios (sin fusiones) | 240 de 432 en `main` |
+| Commits propios (sin fusiones) | 240 de 437 en `main` |
 | Pull Requests abiertos | 108 de 193 (104 incorporados) |
 
 Son cifras de volumen: **no miden la calidad ni el esfuerzo**, y los commits de cada integrante son de tamaño muy
-distinto. Los datos salen del historial de git y de GitHub al 19/11/2026.
+distinto. Los datos salen del historial de git y de GitHub al 20/11/2026 (`main` en `b95b76f`).
 
 ## 11.2 Diseño
 
-- **Modelo de datos físico.** Diseñé el modelo físico de las 35 tablas y su DDL, y lo ejecuté contra una base
+- **Modelo de datos físico.** Diseñé el modelo físico de las 35 tablas originales y su DDL (hoy son 36: Martín agregó `descenso_habilitado` con #327), y lo ejecuté contra una base
   PostgreSQL real para comprobar que rechaza datos inválidos (sección 3). Las condiciones que la base misma impone
   —la reserva ligada a la combinación viaje–parada, un solo respaldo por reserva, un abordaje por viaje— son decisiones
   de este diseño. Agregué `hash_contrasena` el 13/10 cuando el inicio de sesión lo exigió (sección 3.5).
